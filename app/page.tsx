@@ -42,41 +42,34 @@ function Page() {
   ]
 
   return (
-    <div className='relative w-screen overflow-x-hidden bg-black'>
-      {/* Subtle cursor follower */}
-      <div
-        className="fixed w-96 h-96 pointer-events-none z-50 transition-opacity duration-500"
-        style={{
-          left: mousePosition.x - 192,
-          top: mousePosition.y - 192,
-          background: 'radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%)',
-          filter: 'blur(50px)',
-        }}
-      />
+    <div className='relative w-full overflow-x-hidden '>
 
-      {/* Hero Section */}
+
+      {/* Hero Section with Threads Background */}
       <section className='relative min-h-screen w-full overflow-hidden flex items-center justify-center'>
+        {/* Background Threads Animation */}
         <div className='absolute inset-0 z-0'>
           <Threads
             amplitude={1.1}
             distance={0}
             enableMouseInteraction={true}
-            color={[0.3, 0.3, 0.3]}
+            color={[0.8, 0.8, 0.8]}
           />
         </div>
 
+        {/* Hero Content */}
         <div className='relative z-10 w-full max-w-7xl mx-auto px-8 py-32'>
           {/* Simple status indicator */}
-          <div className="flex items-center gap-3 mb-20">
+          <div className="flex justify-center items-center gap-3 mb-20">
             <div className="w-1.5 h-1.5 rounded-full bg-white/50" />
             <span className="text-xs text-white/40 uppercase tracking-widest">Available for work</span>
           </div>
 
-          {/* Main Title */}
-          <div className="mb-16">
+          {/* Main Title - Centered */}
+          <div className="relative z-10 flex h-full w-full items-center justify-center pointer-events-none">
             <SplitText
               text="xDigital"
-              className="text-[18vw] md:text-[15vw] lg:text-[12vw] font-light text-white/95 leading-[0.85] tracking-tight"
+              className="text-6xl md:text-7xl lg:text-8xl font-semibold text-white/85 text-center"
               delay={40}
               duration={1.2}
               ease="power4.out"
@@ -84,12 +77,12 @@ function Page() {
               from={{ opacity: 0, y: 100 }}
               to={{ opacity: 1, y: 0 }}
               threshold={0.1}
-              textAlign="left"
+              textAlign="center"
             />
           </div>
 
-          {/* Tagline */}
-          <div className="max-w-2xl mb-32">
+          {/* Tagline - Centered */}
+          <div className="max-w-2xl mb-20 mx-auto text-center">
             <div className="text-2xl md:text-3xl text-white/50 font-light leading-relaxed">
               <TextType
                 text={[
@@ -100,11 +93,27 @@ function Page() {
                 typingSpeed={60}
                 deletingSpeed={30}
                 pauseDuration={3000}
-                showCursor={false}
+                showCursor={true}
               />
             </div>
           </div>
 
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-32">
+            <button className="group inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-white/90 transition-all duration-300">
+              <span className="font-light">Start a project</span>
+              <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </button>
+            <button className="group inline-flex items-center gap-3 px-8 py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300">
+              <span className="font-light">View our work</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className='relative w-full bg-black'>
+        <div className='w-full max-w-7xl mx-auto px-8 py-32'>
           {/* Services Grid */}
           <div className="grid md:grid-cols-3 gap-px bg-white/5 border border-white/5">
             {services.map((service, idx) => (
