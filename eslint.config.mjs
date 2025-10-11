@@ -22,7 +22,8 @@ const eslintConfig = [
   },
   {
     "rules": {
-      "prefer-const": "off"
+      "prefer-const": "off",
+      "no-unescaped-entities": "off",
     }
   }
 ];

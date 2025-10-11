@@ -162,10 +162,10 @@ function Page() {
           <div className="mt-40 border-t border-white/5 pt-20">
             <div className="max-w-4xl">
               <h2 className="text-5xl md:text-7xl text-white/90 font-light mb-8 leading-tight">
-                Let&aposs work together
+                Let's work together
               </h2>
               <p className="text-xl text-white/40 mb-12 leading-relaxed max-w-2xl">
-                We&aposre currently accepting new projects. Get in touch to discuss your ideas.
+                We're currently accepting new projects. Get in touch to discuss your ideas.
               </p>
               <button className="group inline-flex items-center gap-4 text-white/90 text-lg hover:text-white transition-colors">
                 <span className="font-light">Get in touch</span>
