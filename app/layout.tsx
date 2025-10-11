@@ -2,7 +2,7 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Metadata } from "next";
-import Navbar from "./components/Navbar";
+import Navbar from "../components/Navbar";
 import { Nunito_Sans } from "next/font/google";
 const nunito = Nunito_Sans({ subsets: ["latin"] });
 export const metadata: Metadata = {
@@ -49,7 +49,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${nunito.className} bg-gray-800 text-gray-900`}>
+        <body className={`${nunito.className} bg-black/90 text-gray-900`}>
           <Navbar />
 
           <main>
