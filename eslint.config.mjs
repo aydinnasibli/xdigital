@@ -23,7 +23,7 @@ const eslintConfig = [
   {
     "rules": {
       "prefer-const": "off",
-      "no-unescaped-entities": "off",
+      "react/no-unescaped-entities": "off",
     }
   }
 ];
