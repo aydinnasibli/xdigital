@@ -49,7 +49,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${nunito.className} bg-gray-100 text-gray-900`}>
+        <body className={`${nunito.className} bg-gray-800 text-gray-900`}>
           <Navbar />
 
           <main>
