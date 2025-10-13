@@ -104,6 +104,14 @@ function Page() {
               <span className="font-light">View our work</span>
             </button>
           </div>
+
+        </div>
+        <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+          {/* Mouse Container */}
+          <div className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center pt-2 relative">
+            {/* Scroll Wheel */}
+            <div className="w-1 h-2 bg-white/60 rounded-full animate-[scroll_1.5s_ease-in-out_infinite]"></div>
+          </div>
         </div>
       </section>
 

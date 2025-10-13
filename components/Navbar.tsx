@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export default function Navbar() {
+
+
     return (
         <header className="fixed top-0 left-0 right-0 z-50 px-8 py-8">
             <nav className="max-w-7xl mx-auto grid grid-cols-3 items-center gap-8">
@@ -20,14 +22,14 @@ export default function Navbar() {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-1.5 text-[15px] text-gray-400 hover:text-white transition-colors outline-none">
+                            <button className="flex items-center gap-3 text-base text-gray-400 hover:text-white transition-colors outline-none">
                                 Services
                                 <ChevronDown className="w-4 h-4" />
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="center"
-                            className="w-56 bg-slate-900/95 border-gray-700/40 backdrop-blur-sm"
+                            className="w-56 bg-transparent backdrop-blur-sm"
                         >
                             <DropdownMenuItem className="text-gray-300 hover:text-white focus:text-white cursor-pointer">
                                 Web Development
