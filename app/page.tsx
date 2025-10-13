@@ -44,9 +44,10 @@ function Page() {
         <div className='fixed -top-30 inset-0 z-0'>
           <Threads
             amplitude={1.1}
-            distance={1}
+            distance={0.9}
             enableMouseInteraction={true}
-            color={[0.9, 0.9, 0.9]}
+            color={[1, 1, 1]}
+
           />
         </div>
 
