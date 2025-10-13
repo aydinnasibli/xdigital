@@ -41,14 +41,15 @@ function Page() {
       {/* Hero Section with Threads Background */}
       <section className='relative min-h-screen w-full overflow-hidden flex items-center justify-center'>
         {/* Background Threads Animation */}
-        <div className='absolute inset-0 z-0'>
+        <div className='fixed -top-30 inset-0 z-0'>
           <Threads
             amplitude={1.1}
-            distance={0}
+            distance={1}
             enableMouseInteraction={true}
-            color={[0.8, 0.8, 0.8]}
+            color={[0.9, 0.9, 0.9]}
           />
         </div>
+
 
         {/* Hero Content */}
         <div className='relative z-10 w-full max-w-7xl mx-auto px-8 py-32'>
