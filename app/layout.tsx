@@ -4,6 +4,7 @@ import "./globals.css";
 import { Metadata } from "next";
 import Navbar from "../components/Navbar";
 import { Epilogue, Nunito_Sans } from "next/font/google";
+import HorizontalScrollBar from "@/components/HorizontalScrollbar";
 const epilogue = Epilogue({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Your SaaS Name | Build Modern Websites",
@@ -48,14 +49,14 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html className="scrollbar-hide " lang="en">
         <body className={`${epilogue.className} tracking-widest bg-black  text-gray-900`}>
           <Navbar />
 
           <main>
             {children}
           </main>
-
+          <HorizontalScrollBar />
 
         </body>
       </html>
