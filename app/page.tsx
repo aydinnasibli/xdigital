@@ -78,7 +78,7 @@ function Page() {
           </div>
 
           {/* Tagline - Centered */}
-          <div className="max-w-2xl mt-4 mx-auto text-center">
+          <div className="max-w-2xl  mx-auto text-center">
             <div className="text-xl md:text-2xl text-white/50 font-light leading-relaxed">
               <TextType
                 text={[
@@ -95,7 +95,7 @@ function Page() {
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 ">
+          <div className="flex mt-8 flex-col sm:flex-row items-center justify-center gap-4 ">
             <button className="group inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-white/90 transition-all duration-300">
               <span className="font-light">Start a project</span>
               <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
