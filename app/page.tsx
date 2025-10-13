@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import Threads from '@/components/Threads'
+
 import SplitText from '@/components/SplitText'
 import TextType from '@/components/TextType'
 import { ArrowUpRight, Minus } from 'lucide-react'
@@ -58,7 +58,7 @@ function Page() {
 
 
         {/* Hero Content */}
-        <div className='relative z-10 w-full max-w-7xl mx-auto px-8 py-32'>
+        <div className='relative z-10 w-full max-w-7xl mx-auto px-8 '>
 
 
           {/* Main Title - Centered */}
@@ -78,7 +78,7 @@ function Page() {
           </div>
 
           {/* Tagline - Centered */}
-          <div className="max-w-2xl mb-20 mx-auto text-center">
+          <div className="max-w-2xl  mx-auto text-center">
             <div className="text-2xl md:text-3xl text-white/50 font-light leading-relaxed">
               <TextType
                 text={[
@@ -95,7 +95,7 @@ function Page() {
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-32">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 ">
             <button className="group inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-white/90 transition-all duration-300">
               <span className="font-light">Start a project</span>
               <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
