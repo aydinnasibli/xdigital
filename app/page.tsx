@@ -4,6 +4,7 @@ import Threads from '@/components/Threads'
 import SplitText from '@/components/SplitText'
 import TextType from '@/components/TextType'
 import { ArrowUpRight, Minus } from 'lucide-react'
+import Beams from '@/components/Beams'
 
 function Page() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
@@ -41,13 +42,17 @@ function Page() {
       {/* Hero Section with Threads Background */}
       <section className='relative min-h-screen w-full overflow-hidden flex items-center justify-center'>
         {/* Background Threads Animation */}
-        <div className='fixed -top-30 inset-0 z-0'>
-          <Threads
-            amplitude={1.1}
-            distance={0.9}
-            enableMouseInteraction={true}
-            color={[1, 1, 1]}
 
+        <div className='absolute inset-0'>
+          <Beams
+            beamWidth={2}
+            beamHeight={15}
+            beamNumber={12}
+            lightColor="#ffffff"
+            speed={2}
+            noiseIntensity={1.75}
+            scale={0.2}
+            rotation={0}
           />
         </div>
 

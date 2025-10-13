@@ -3,8 +3,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Metadata } from "next";
 import Navbar from "../components/Navbar";
-import { Nunito_Sans } from "next/font/google";
-const nunito = Nunito_Sans({ subsets: ["latin"] });
+import { Epilogue, Nunito_Sans } from "next/font/google";
+const epilogue = Epilogue({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Your SaaS Name | Build Modern Websites",
   description:
@@ -49,7 +49,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${nunito.className} bg-black  text-gray-900`}>
+        <body className={`${epilogue.className} tracking-widest bg-black  text-gray-900`}>
           <Navbar />
 
           <main>
