@@ -78,8 +78,8 @@ function Page() {
           </div>
 
           {/* Tagline - Centered */}
-          <div className="max-w-2xl  mx-auto text-center">
-            <div className="text-2xl md:text-3xl text-white/50 font-light leading-relaxed">
+          <div className="max-w-2xl mt-4 mx-auto text-center">
+            <div className="text-xl md:text-2xl text-white/50 font-light leading-relaxed">
               <TextType
                 text={[
                   "Digital agency focused on craft",
