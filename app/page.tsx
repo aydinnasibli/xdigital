@@ -6,16 +6,9 @@ import TextType from '@/components/TextType'
 import { ArrowUpRight, Minus } from 'lucide-react'
 
 function Page() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
+
 
   const services = [
     {
@@ -59,11 +52,7 @@ function Page() {
 
         {/* Hero Content */}
         <div className='relative z-10 w-full max-w-7xl mx-auto px-8 py-32'>
-          {/* Simple status indicator */}
-          <div className="flex justify-center items-center gap-3 mb-20">
-            <div className="w-1.5 h-1.5 rounded-full bg-white/50" />
-            <span className="text-xs text-white/40 uppercase tracking-widest">Available for work</span>
-          </div>
+
 
           {/* Main Title - Centered */}
           <div className="relative z-10 flex h-full w-full items-center justify-center pointer-events-none">
