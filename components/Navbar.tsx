@@ -45,20 +45,7 @@ export default function Navbar() {
             window.removeEventListener('scroll', handleScroll);
         };
     }, [lastScrollY]);
-    /**<div className="hidden lg:flex items-center space-x-6">
-                            <Link
-                                href="/sign-in"
-                                className="text-gray-700 hover:text-black transition-colors font-medium"
-                            >
-                                Log in
-                            </Link>
-                            <Link
-                                href="/sign-up"
-                                className=" text-black px-6 py-2 rounded-xl shadow-xl  hover:bg-black hover:text-gray-100 duration-400 transition-colors font-medium"
-                            >
-                                Sign up
-                            </Link>
-                        </div> */
+
 
 
 
@@ -71,20 +58,20 @@ export default function Navbar() {
             <nav className="max-w-7xl mx-auto grid grid-cols-3 items-center gap-8">
                 {/* Left Navigation */}
                 <div className="flex items-center gap-10 justify-end">
-                    <button className="text-[15px] text-gray-400 hover:text-white transition-colors duration-200">
+                    <Link href={"/about"} className="text-[15px] text-gray-400 hover:text-white transition-colors duration-200">
                         About
-                    </button>
+                    </Link>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-2 text-[15px] text-gray-400 hover:text-white transition-colors duration-200 outline-none">
+                            <button className="flex items-center gap-2 text-[15px] hover:cursor-pointer text-gray-400 hover:text-white transition-colors duration-200 outline-none">
                                 Services
                                 <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="center"
-                            className="w-64 bg-black/95 backdrop-blur-xl border border-gray-800/50 shadow-2xl mt-2"
+                            className="w-64 bg-black/30 rounded-xl backdrop-blur-sm border border-gray-800/50 shadow-2xl mt-2"
                         >
                             <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md">
                                 <div className="flex flex-col">
@@ -110,21 +97,16 @@ export default function Navbar() {
                                     <span className="text-xs text-gray-500">Strategic guidance</span>
                                 </div>
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md">
-                                <div className="flex flex-col">
-                                    <span className="font-medium">Brand Strategy</span>
-                                    <span className="text-xs text-gray-500">Identity & positioning</span>
-                                </div>
-                            </DropdownMenuItem>
+
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
 
                 {/* Center Logo */}
                 <div className="flex justify-center">
-                    <div className="w-14 h-14 bg-white/90 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                        <span className="text-2xl font-bold text-slate-900">X</span>
-                    </div>
+                    <Link href={"/"} className="w-15 h-15 bg-white/90 rounded-xl flex items-center  justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                        <span className="text-3xl font-bold  text-slate-900">X</span>
+                    </Link>
                 </div>
 
                 {/* Right Navigation */}
