@@ -104,7 +104,7 @@ export default function Navbar() {
 
                 {/* Center Logo */}
                 <div className="flex justify-center">
-                    <Link href={"/"} className="w-15 h-15 bg-white/90 rounded-xl flex items-center  justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <Link href={"/"} className="w-14 h-14 bg-white/90 rounded-xl flex items-center  justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                         <span className="text-3xl font-bold  text-slate-900">X</span>
                     </Link>
                 </div>
