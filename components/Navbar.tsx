@@ -123,7 +123,7 @@ export default function Navbar() {
                 {/* Center Logo */}
                 <div className="flex justify-center">
                     <div className="w-14 h-14 bg-white/90 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                        <span className="text-2xl font-bold text-slate-900">A</span>
+                        <span className="text-2xl font-bold text-slate-900">X</span>
                     </div>
                 </div>
 

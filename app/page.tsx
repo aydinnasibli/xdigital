@@ -1,15 +1,71 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 
 import SplitText from '@/components/SplitText'
 import TextType from '@/components/TextType'
 import { ArrowUpRight, Minus } from 'lucide-react'
 import Beams from '@/components/Beams'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 function Page() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const button1Ref = useRef<HTMLButtonElement>(null)
+  const button2Ref = useRef<HTMLButtonElement>(null)
 
+  useEffect(() => {
+    // Animate first button
+    if (button1Ref.current) {
+      gsap.set(button1Ref.current, {
+        opacity: 0,
+        y: 30,
+      })
 
+      gsap.to(button1Ref.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        delay: 1.5,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: button1Ref.current,
+          start: 'top 90%',
+          once: true,
+        },
+      })
+    }
+
+    // Animate second button
+    if (button2Ref.current) {
+      gsap.set(button2Ref.current, {
+        opacity: 0,
+        y: 30,
+      })
+
+      gsap.to(button2Ref.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        delay: 1.7,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: button2Ref.current,
+          start: 'top 90%',
+          once: true,
+        },
+      })
+    }
+
+    return () => {
+      ScrollTrigger.getAll().forEach(st => {
+        if (st.trigger === button1Ref.current || st.trigger === button2Ref.current) {
+          st.kill()
+        }
+      })
+    }
+  }, [])
 
   const services = [
     {
@@ -96,11 +152,17 @@ function Page() {
 
           {/* CTA Buttons */}
           <div className="flex mt-8 flex-col sm:flex-row items-center justify-center gap-4 ">
-            <button className="group inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-white/90 transition-all duration-300">
+            <button
+              ref={button1Ref}
+              className="group inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-white/90 transition-all duration-300"
+            >
               <span className="font-light">Start a project</span>
               <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </button>
-            <button className="group inline-flex items-center gap-3 px-8 py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300">
+            <button
+              ref={button2Ref}
+              className="group inline-flex items-center gap-3 px-8 py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300"
+            >
               <span className="font-light">View our work</span>
             </button>
           </div>
