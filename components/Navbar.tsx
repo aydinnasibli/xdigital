@@ -29,7 +29,7 @@ export default function Navbar() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="center"
-                            className="w-56 bg-transparent backdrop-blur-sm"
+                            className="w-56 bg-gray-300/20 backdrop-blur-sm"
                         >
                             <DropdownMenuItem className="text-gray-300 hover:text-white focus:text-white cursor-pointer">
                                 Web Development
