@@ -3,9 +3,11 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Metadata } from "next";
 import Navbar from "../components/Navbar";
-import { Epilogue, Nunito_Sans } from "next/font/google";
+import { Epilogue, Exo_2, Nunito_Sans } from "next/font/google";
 import HorizontalScrollBar from "@/components/HorizontalScrollbar";
+import Footer from "@/components/Footer";
 const epilogue = Epilogue({ subsets: ["latin"] });
+
 export const metadata: Metadata = {
   title: "Your SaaS Name | Build Modern Websites",
   description:
@@ -50,14 +52,14 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html className="scrollbar-hide " lang="en">
-        <body className={`${epilogue.className} tracking-widest bg-black  text-gray-900`}>
+        <body className={`${epilogue.className} tracking-widest bg-black text-gray-900`}>
           <Navbar />
 
           <main>
             {children}
           </main>
           <HorizontalScrollBar />
-
+          <Footer />
         </body>
       </html>
     </ClerkProvider>
