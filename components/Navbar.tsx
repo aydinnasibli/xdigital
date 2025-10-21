@@ -8,6 +8,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
+import Image from 'next/image';
+import Logo from '../public/assets/logo.png';
 
 export default function Navbar() {
     const [isVisible, setIsVisible] = useState(true);
@@ -51,7 +53,7 @@ export default function Navbar() {
 
     return (
         <header
-            className={`fixed top-0 left-0 right-0 z-50 px-8 py-6 transition-all duration-500 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
+            className={`fixed top-0 left-0 right-0 z-50 px-8 py-0.5 transition-all duration-500 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
                 } ${hasBackground ? 'bg-gray-800/10 backdrop-blur-xl shadow-lg' : ''
                 }`}
         >
@@ -105,7 +107,7 @@ export default function Navbar() {
                 {/* Center Logo */}
                 <div className="flex justify-center">
                     <Link href={"/"} className='text-3xl font-extrabold text-white ' >
-                        %
+                        <Image src={Logo} alt="Logo" className='w-18 h-18 ' />
                     </Link>
                 </div>
 
