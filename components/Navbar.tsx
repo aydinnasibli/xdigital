@@ -83,22 +83,17 @@ export default function Navbar() {
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md">
                                 <div className="flex flex-col">
-                                    <span className="font-medium">Mobile Apps</span>
-                                    <span className="text-xs text-gray-500">iOS & Android</span>
+                                    <span className="font-medium">Social Media Marketing</span>
+                                    <span className="text-xs text-gray-500">Strategic social media management</span>
                                 </div>
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md">
                                 <div className="flex flex-col">
-                                    <span className="font-medium">UI/UX Design</span>
-                                    <span className="text-xs text-gray-500">Beautiful interfaces</span>
+                                    <span className="font-medium">Digital Solutions</span>
+                                    <span className="text-xs text-gray-500">Comprehensive consulting</span>
                                 </div>
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md">
-                                <div className="flex flex-col">
-                                    <span className="font-medium">Consulting</span>
-                                    <span className="text-xs text-gray-500">Strategic guidance</span>
-                                </div>
-                            </DropdownMenuItem>
+
 
                         </DropdownMenuContent>
                     </DropdownMenu>
