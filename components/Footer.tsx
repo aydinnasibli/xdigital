@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { ArrowUpRight, Mail, MapPin } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Image from 'next/image';
-import Logo from '../public/assets/logo.png';
+import { motion } from 'framer-motion';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Footer() {
@@ -86,6 +85,12 @@ export default function Footer() {
             { name: 'Twitter', href: '#' },
             { name: 'Dribbble', href: '#' },
         ],
+    };
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth' // This creates the visible scroll animation
+        });
     };
 
     return (
@@ -218,10 +223,14 @@ export default function Footer() {
                 {/* Bottom Bar */}
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-white/5">
                     <div className="flex items-center justify-start gap-2">
-                        <Link href="/" className="text-xl  tracking-widest  text-white/70 duration-300 hover:text-white transition-colors">
-                            xDigital
+                        <motion.button
+                            onClick={scrollToTop}
+                            className=" text-white/70 tracking-widest hover:text-white hover:cursor-pointer  transition-all duration-300"
 
-                        </Link>
+                        >
+
+                            xDigital
+                        </motion.button>
                     </div>
 
                     <div className="flex flex-wrap items-center justify-center gap-6 text-white/30 text-xs">
