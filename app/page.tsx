@@ -161,14 +161,14 @@ function Page() {
   const testimonials = [
     {
       quote: "Working with xDigital transformed our online presence. Their attention to detail and commitment to excellence is unmatched.",
-      author: "Sarah Johnson",
+      author: "Bucurotto ",
       position: "CEO, TechStart Inc.",
       company: "TechStart",
       rating: 5
     },
     {
       quote: "The team delivered beyond our expectations. Our new platform has increased conversions by 150% in just three months.",
-      author: "Michael Chen",
+      author: "Necmo Arabito",
       position: "Marketing Director, GrowthLab",
       company: "GrowthLab",
       rating: 5
@@ -270,68 +270,126 @@ function Page() {
       {/* Services Section */}
       <section className='relative w-full bg-black'>
         <div className='w-full max-w-7xl mx-auto px-8 py-32'>
-          {/* Services Grid */}
-          <div className="grid md:grid-cols-3 gap-px bg-white/5 border border-white/5">
+          {/* Services Grid - Creative Modern Layout */}
+          <div className="grid md:grid-cols-3 gap-6">
             {services.map((service, idx) => (
               <div
                 key={idx}
-                className="bg-black p-12 hover:bg-white/[0.02] transition-colors duration-500 group cursor-pointer focus-within:bg-white/[0.02]"
+                className="group relative bg-black border border-white/5 hover:border-white/20 transition-all duration-700 cursor-pointer"
                 onMouseEnter={() => setHoveredIndex(idx)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 tabIndex={0}
                 role="article"
               >
-                <div className="flex items-start justify-between mb-12">
-                  <span className="text-sm text-white/30 font-mono">{service.number}</span>
-                  <Minus className={`w-5 h-5 text-white/30 transition-all duration-500 ${hoveredIndex === idx ? 'rotate-90' : ''}`} aria-hidden="true" />
+                {/* Animated Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                {/* Content Container */}
+                <div className="relative p-10 lg:p-12">
+
+                  {/* Header with Number and Icon */}
+                  <div className="flex items-start justify-between mb-10">
+                    <div className="relative">
+                      <span className="text-6xl text-white/[0.06] font-light absolute -top-4 -left-2 pointer-events-none group-hover:text-white/[0.12] transition-colors duration-700">
+                        {service.number}
+                      </span>
+
+                    </div>
+
+                    <div className="relative">
+                      <Minus
+                        className={`w-5 h-5 text-white/20 transition-all duration-700 group-hover:text-white/50 ${hoveredIndex === idx ? 'rotate-90 scale-125' : ''
+                          }`}
+                        aria-hidden="true"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-2xl lg:text-3xl text-white/85 font-light mb-4 group-hover:text-white transition-colors duration-500 leading-tight">
+                    {service.title}
+                  </h3>
+
+                  {/* Animated Divider */}
+                  <div className="relative mb-6 h-px overflow-hidden">
+                    <div className="absolute inset-0 bg-white/5" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/40 to-transparent w-0 group-hover:w-full transition-all duration-1000" />
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-white/45 text-sm lg:text-base leading-relaxed group-hover:text-white/65 transition-colors duration-500">
+                    {service.description}
+                  </p>
+
+                  {/* Bottom Corner Accent */}
+                  <div className="absolute bottom-0 right-0 w-16 h-16 border-b border-r border-white/5 group-hover:border-white/15 group-hover:w-20 group-hover:h-20 transition-all duration-700 pointer-events-none" />
+
+                  {/* Top Left Corner Dot */}
+                  <div className="absolute top-0 left-0 w-1.5 h-1.5 bg-white/20 group-hover:scale-[3] group-hover:bg-white/60 transition-all duration-500" />
                 </div>
-                <h3 className="text-2xl text-white/90 font-light mb-4 group-hover:text-white transition-colors">
-                  {service.title}
-                </h3>
-                <p className="text-white/40 text-sm leading-relaxed">
-                  {service.description}
-                </p>
+
+                {/* Hover Glow Effect */}
+                <div className="absolute -inset-px bg-gradient-to-br from-white/10 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl pointer-events-none" />
               </div>
             ))}
           </div>
 
-          {/* How We Work Section */}
+          {/* How We Work Section - Staggered Diagonal */}
           <div className="mt-40">
-            <div className="flex items-center justify-center gap-4 mb-16">
-              <Minus className="w-8 h-8 text-white/20" aria-hidden="true" />
-              <h2 className="text-sm text-white/40 uppercase tracking-widest">How We Work</h2>
-            </div>
+            <div className="max-w-7xl mx-auto px-6">
+              <div className="flex items-center gap-4 mb-20">
+                <Minus className="w-8 h-8 text-white/20" aria-hidden="true" />
+                <h2 className="text-sm text-white/40 uppercase tracking-widest">How We Work</h2>
+              </div>
 
-            <div className="space-y-12 max-w-3xl mx-auto">
-              {processSteps.map((step, idx) => (
-                <div key={idx} className="relative group flex flex-col items-center text-center">
-                  <div className="mb-6">
-                    <div className="relative inline-block">
-                      <span className="text-7xl text-white/5 font-light group-hover:text-white/10 transition-colors duration-500">
-                        {step.step}
-                      </span>
-                      {!step.required && (
-                        <span className="absolute -top-2 -right-10 text-[10px] text-white/30 font-mono px-2 py-0.5 border border-white/10 bg-black">
-                          OPT
+              <div className="space-y-20 lg:space-y-24">
+                {processSteps.map((step, idx) => (
+                  <div
+                    key={idx}
+                    className={`relative transition-all duration-500 ${idx % 2 === 0 ? 'lg:pr-20' : 'lg:pl-20'
+                      }`}
+                  >
+                    {/* Floating step number - smaller */}
+                    <div className={`absolute -top-4 pointer-events-none ${idx % 2 === 0 ? '-left-2 lg:-left-10' : '-left-2 lg:-right-10 lg:left-auto'
+                      } z-0`}>
+                      <div className="relative">
+                        <span className="text-7xl lg:text-[8rem] text-white/[0.04] font-light select-none leading-none block transition-colors duration-700">
+                          {step.step}
                         </span>
-                      )}
+                        {!step.required && (
+                          <div className="absolute top-3 -right-2 flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-white/30 rounded-full animate-pulse" />
+                            <span className="text-[9px] text-white/30 font-mono uppercase tracking-wider">Optional</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="pb-8">
-                    <h3 className="text-3xl text-white/90 font-light mb-3 group-hover:text-white transition-colors">
-                      {step.title}
-                    </h3>
-                    <p className="text-white/50 leading-relaxed">
-                      {step.description}
-                    </p>
-                  </div>
+                    {/* Content card  */}
+                    <div className="group relative z-10 bg-gradient-to-br from-white/[0.02] to-transparent border-l-2 border-white/10 pl-5 lg:pl-8 py-6 lg:py-8 hover:border-white/30 hover:from-white/[0.04] transition-all duration-700 cursor-pointer">
+                      {/* Animated line */}
+                      <div className="absolute left-0 top-0 w-0.5 h-0 bg-gradient-to-b from-white/60 via-white/30 to-transparent group-hover:h-full transition-all duration-1000 ease-out" />
 
-                  {idx < processSteps.length - 1 && (
-                    <div className="w-px h-12 bg-gradient-to-b from-white/5 to-transparent" />
-                  )}
-                </div>
-              ))}
+                      <div className="flex items-start gap-3 mb-3">
+                        <h3 className="text-2xl lg:text-3xl text-white/85 font-light group-hover:text-white transition-all duration-500">
+                          {step.title}
+                        </h3>
+                      </div>
+
+                      <p className="text-sm lg:text-base text-white/45 leading-relaxed max-w-2xl ml-0 lg:ml-5 group-hover:text-white/65 transition-colors duration-500">
+                        {step.description}
+                      </p>
+
+                    </div>
+
+                    {/* Connection line to next step */}
+                    {idx < processSteps.length - 1 && (
+                      <div className={`absolute -bottom-10 lg:-bottom-12 w-px h-10 lg:h-12 bg-gradient-to-b from-white/10 via-white/5 to-transparent pointer-events-none ${idx % 2 === 0 ? 'left-0' : 'right-0 lg:left-0'
+                        }`} />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

@@ -54,19 +54,19 @@ export default function Navbar() {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 px-8 py-0.5 transition-all duration-500 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
-                } ${hasBackground ? 'bg-gray-400/10 backdrop-blur-xl shadow-lg' : ''
+                } ${hasBackground ? 'bg-gray-500/10 backdrop-blur-xl shadow-lg' : ''
                 }`}
         >
             <nav className="max-w-7xl mx-auto grid grid-cols-3 items-center gap-8">
                 {/* Left Navigation */}
                 <div className="flex items-center gap-10 justify-end">
-                    <Link href={"/about"} className="text-[15px] text-gray-400 hover:text-white transition-colors duration-200">
+                    <Link href={"/about"} className="text-[15px] text-gray-300 hover:text-white transition-colors duration-200">
                         About
                     </Link>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-2 text-[15px] hover:cursor-pointer text-gray-400 hover:text-white transition-colors duration-200 outline-none">
+                            <button className="flex items-center gap-2 text-[15px] hover:cursor-pointer text-gray-300 hover:text-white transition-colors duration-200 outline-none">
                                 Services
                                 <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
                             </button>
@@ -108,10 +108,10 @@ export default function Navbar() {
 
                 {/* Right Navigation */}
                 <div className="flex items-center gap-10">
-                    <Link href={'sign-in'} className="text-[15px] text-gray-400 hover:text-white transition-colors duration-200">
+                    <Link href={'sign-in'} className="text-[15px] text-gray-300 hover:text-white transition-colors duration-200">
                         Sign In
                     </Link>
-                    <Link href={'sign-up'} className="text-[15px] text-gray-400 hover:text-white px-6 py-2.5 border border-gray-700/50 rounded-full hover:border-gray-400/80 hover:bg-white/5 transition-all duration-300">
+                    <Link href={'sign-up'} className="text-[15px] text-gray-300 hover:text-white px-6 py-2.5 border border-gray-700/50 rounded-full hover:border-gray-300/80 hover:bg-white/5 transition-all duration-300">
                         Log Up
                     </Link>
                 </div>
