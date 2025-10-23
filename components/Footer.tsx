@@ -49,19 +49,18 @@ export default function Footer() {
     const footerLinks = {
         services: [
             { name: 'Web Development', href: '#' },
-            { name: 'Mobile Apps', href: '#' },
-            { name: 'UI/UX Design', href: '#' },
-            { name: 'Consulting', href: '#' },
+            { name: 'Social Media Marketing', href: '#' },
+            { name: 'Digital Solutions', href: '#' },
         ],
         company: [
             { name: 'About', href: '/about' },
-            { name: 'Work', href: '#' },
             { name: 'Careers', href: '#' },
             { name: 'Contact', href: '#' },
         ],
         social: [
             { name: 'Instagram', href: '#' },
             { name: 'LinkedIn', href: '#' },
+            { name: 'Twitter', href: '#' },
         ],
     };
 
@@ -73,17 +72,17 @@ export default function Footer() {
     };
 
     return (
-        <footer ref={footerRef} className="relative w-full  bg-black border-t border-white/5">
+        <footer ref={footerRef} className="relative w-full bg-black border-t border-white/5">
             <div className="max-w-7xl mx-auto px-8 py-12">
                 <div ref={contentRef}>
-                    {/* Main Content - Single Row Layout */}
-                    <div className="grid lg:grid-cols-[,auto] gap-12 mb-10">
-                        {/* Left - CTA */}
-                        <div>
+                    {/* Main Content - Centered */}
+                    <div className="flex flex-col items-center text-center mb-10">
+                        {/* CTA */}
+                        <div className="mb-12">
                             <h2 className="text-4xl md:text-5xl text-white/90 font-light mb-3 leading-tight">
                                 Ready to start?
                             </h2>
-                            <p className="text-base text-white/40 mb-6 leading-relaxed max-w-xl">
+                            <p className="text-base text-white/40 mb-6 leading-relaxed max-w-xl mx-auto">
                                 Let's create something exceptional together.
                             </p>
                             <Link
@@ -97,9 +96,9 @@ export default function Footer() {
                             </Link>
                         </div>
 
-                        {/* Right - Compact Links */}
-                        <div className="grid grid-cols-3 gap-8 lg:gap-10">
-                            <div className=''>
+                        {/* Links */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 lg:gap-12 mb-8">
+                            <div>
                                 <h3 className="text-white/20 uppercase tracking-wider text-xs mb-4 font-medium">
                                     Services
                                 </h3>
@@ -158,21 +157,18 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    {/* Bottom Bar - Condensed */}
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pt-8 border-t border-white/5">
-                        {/* Contact Info - Inline */}
-                        <div className="flex flex-wrap items-center gap-6 text-sm">
-                            <div className="flex items-center gap-2">
-                                <Mail className="w-4 h-4 text-white/30" />
-                                <a href="mailto:hello@xdigital.com" className="text-white/50 hover:text-white transition-colors">
-                                    hello@xdigital.com
-                                </a>
-                            </div>
-
+                    {/* Bottom Bar - Centered */}
+                    <div className="flex flex-col items-center gap-4 pt-8 border-t border-white/5">
+                        {/* Contact Info */}
+                        <div className="flex items-center gap-2 text-sm">
+                            <Mail className="w-4 h-4 text-white/30" />
+                            <a href="mailto:hello@xdigital.com" className="text-white/50 hover:text-white transition-colors">
+                                hello@xdigital.com
+                            </a>
                         </div>
 
                         {/* Legal & Brand */}
-                        <div className="flex flex-wrap items-center gap-6 text-xs text-white/30">
+                        <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-white/30">
                             <motion.button
                                 onClick={scrollToTop}
                                 className="text-white/70 tracking-widest hover:text-white hover:cursor-pointer transition-all"
