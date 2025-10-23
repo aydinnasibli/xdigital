@@ -281,30 +281,7 @@ function Page() {
 
 
 
-          {/* Footer info */}
-          <footer className="mt-40 flex flex-wrap gap-12 text-sm text-white/30">
-            <div>
-              <div className="text-white/20 uppercase tracking-wider text-xs mb-2">Email</div>
-              <a href="mailto:hello@xdigital.com" className="hover:text-white/60 transition-colors focus:outline-none focus:text-white/60">
-                hello@xdigital.com
-              </a>
-            </div>
-            <div>
-              <div className="text-white/20 uppercase tracking-wider text-xs mb-2">Location</div>
-              <div>Istanbul, Turkey</div>
-            </div>
-            <div>
-              <div className="text-white/20 uppercase tracking-wider text-xs mb-2">Social</div>
-              <div className="flex gap-4">
-                <a href="#" className="hover:text-white/60 transition-colors focus:outline-none focus:text-white/60">
-                  Instagram
-                </a>
-                <a href="#" className="hover:text-white/60 transition-colors focus:outline-none focus:text-white/60">
-                  LinkedIn
-                </a>
-              </div>
-            </div>
-          </footer>
+
         </div>
       </section>
     </div>

@@ -62,8 +62,6 @@ export default function Footer() {
         social: [
             { name: 'Instagram', href: '#' },
             { name: 'LinkedIn', href: '#' },
-            { name: 'Twitter', href: '#' },
-            { name: 'Dribbble', href: '#' },
         ],
     };
 
@@ -75,11 +73,11 @@ export default function Footer() {
     };
 
     return (
-        <footer ref={footerRef} className="relative w-full bg-black border-t border-white/5">
+        <footer ref={footerRef} className="relative w-full  bg-black border-t border-white/5">
             <div className="max-w-7xl mx-auto px-8 py-12">
                 <div ref={contentRef}>
                     {/* Main Content - Single Row Layout */}
-                    <div className="grid lg:grid-cols-[1fr,auto] gap-12 mb-10">
+                    <div className="grid lg:grid-cols-[,auto] gap-12 mb-10">
                         {/* Left - CTA */}
                         <div>
                             <h2 className="text-4xl md:text-5xl text-white/90 font-light mb-3 leading-tight">
@@ -101,7 +99,7 @@ export default function Footer() {
 
                         {/* Right - Compact Links */}
                         <div className="grid grid-cols-3 gap-8 lg:gap-10">
-                            <div>
+                            <div className=''>
                                 <h3 className="text-white/20 uppercase tracking-wider text-xs mb-4 font-medium">
                                     Services
                                 </h3>
@@ -170,14 +168,7 @@ export default function Footer() {
                                     hello@xdigital.com
                                 </a>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4 text-white/30" />
-                                <span className="text-white/50">Istanbul, Turkey</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-green-500/60 animate-pulse" />
-                                <span className="text-white/50">Available</span>
-                            </div>
+
                         </div>
 
                         {/* Legal & Brand */}

@@ -54,7 +54,7 @@ export default function Navbar() {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 px-8 py-0.5 transition-all duration-500 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
-                } ${hasBackground ? 'bg-gray-800/10 backdrop-blur-xl shadow-lg' : ''
+                } ${hasBackground ? 'bg-gray-400/10 backdrop-blur-xl shadow-lg' : ''
                 }`}
         >
             <nav className="max-w-7xl mx-auto grid grid-cols-3 items-center gap-8">
