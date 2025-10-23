@@ -295,45 +295,40 @@ function Page() {
             ))}
           </div>
 
-          {/* How We Work Section - Timeline Style */}
+          {/* How We Work Section */}
           <div className="mt-40">
-            <div className="flex items-center gap-4 mb-16">
+            <div className="flex items-center justify-center gap-4 mb-16">
               <Minus className="w-8 h-8 text-white/20" aria-hidden="true" />
               <h2 className="text-sm text-white/40 uppercase tracking-widest">How We Work</h2>
             </div>
 
-            <div className="space-y-12">
+            <div className="space-y-12 max-w-3xl mx-auto">
               {processSteps.map((step, idx) => (
-                <div key={idx} className="relative group">
-                  <div className="grid md:grid-cols-12 gap-8 items-start">
-                    {/* Step Number */}
-                    <div className="md:col-span-2">
-                      <div className="relative">
-                        <span className="text-7xl text-white/5 font-light group-hover:text-white/10 transition-colors duration-500">
-                          {step.step}
+                <div key={idx} className="relative group flex flex-col items-center text-center">
+                  <div className="mb-6">
+                    <div className="relative inline-block">
+                      <span className="text-7xl text-white/5 font-light group-hover:text-white/10 transition-colors duration-500">
+                        {step.step}
+                      </span>
+                      {!step.required && (
+                        <span className="absolute -top-2 -right-10 text-[10px] text-white/30 font-mono px-2 py-0.5 border border-white/10 bg-black">
+                          OPT
                         </span>
-                        {!step.required && (
-                          <span className="absolute -top-2 -right-2 text-[10px] text-white/30 font-mono px-2 py-0.5 border border-white/10 bg-black">
-                            OPT
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="md:col-span-10 border-l border-white/5 pl-8 pb-8 group-hover:border-white/10 transition-colors duration-500">
-                      <h3 className="text-3xl text-white/90 font-light mb-3 group-hover:text-white transition-colors">
-                        {step.title}
-                      </h3>
-                      <p className="text-white/50 leading-relaxed max-w-2xl">
-                        {step.description}
-                      </p>
+                      )}
                     </div>
                   </div>
 
-                  {/* Connecting Line */}
+                  <div className="pb-8">
+                    <h3 className="text-3xl text-white/90 font-light mb-3 group-hover:text-white transition-colors">
+                      {step.title}
+                    </h3>
+                    <p className="text-white/50 leading-relaxed">
+                      {step.description}
+                    </p>
+                  </div>
+
                   {idx < processSteps.length - 1 && (
-                    <div className="absolute left-0 md:left-[8.333%] top-full h-12 w-px bg-gradient-to-b from-white/5 to-transparent" />
+                    <div className="w-px h-12 bg-gradient-to-b from-white/5 to-transparent" />
                   )}
                 </div>
               ))}
