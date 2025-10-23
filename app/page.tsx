@@ -279,26 +279,7 @@ function Page() {
             </div>
           </div>
 
-          {/* CTA Section */}
-          <div className="mt-40 border-t border-white/5 pt-20">
-            <div className="max-w-4xl">
-              <h2 className="text-5xl md:text-7xl text-white/90 font-light mb-8 leading-tight">
-                Let's work together
-              </h2>
-              <p className="text-xl text-white/40 mb-12 leading-relaxed max-w-2xl">
-                We're currently accepting new projects. Get in touch to discuss your ideas.
-              </p>
-              <a
-                href="#contact"
-                className="group inline-flex items-center gap-4 text-white/90 text-lg hover:text-white transition-colors focus:outline-none focus:text-white"
-              >
-                <span className="font-light">Get in touch</span>
-                <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/40 group-focus:border-white/40 transition-colors">
-                  <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true" />
-                </div>
-              </a>
-            </div>
-          </div>
+
 
           {/* Footer info */}
           <footer className="mt-40 flex flex-wrap gap-12 text-sm text-white/30">
