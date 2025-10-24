@@ -334,61 +334,86 @@ function Page() {
             ))}
           </div>
 
-          {/* How We Work Section - Staggered Diagonal */}
+          {/* How We Work Section - Production Ready */}
           <div className="mt-40">
             <div className="max-w-7xl mx-auto px-6">
+              {/* Section Header */}
               <div className="flex items-center gap-4 mb-20">
                 <Minus className="w-8 h-8 text-white/20" aria-hidden="true" />
-                <h2 className="text-sm text-white/40 uppercase tracking-widest">How We Work</h2>
+                <h2 id="how-we-work" className="text-sm text-white/40 uppercase tracking-widest">
+                  How We Work
+                </h2>
               </div>
 
-              <div className="space-y-20 lg:space-y-24">
-                {processSteps.map((step, idx) => (
-                  <div
-                    key={idx}
-                    className={`relative transition-all duration-500 ${idx % 2 === 0 ? 'lg:pr-20' : 'lg:pl-20'
-                      }`}
-                  >
-                    {/* Floating step number - smaller */}
-                    <div className={`absolute -top-4 pointer-events-none ${idx % 2 === 0 ? '-left-2 lg:-left-10' : '-left-2 lg:-right-10 lg:left-auto'
-                      } z-0`}>
-                      <div className="relative">
-                        <span className="text-7xl lg:text-[8rem] text-white/[0.04] font-light select-none leading-none block transition-colors duration-700">
-                          {step.step}
-                        </span>
-                        {!step.required && (
-                          <div className="absolute top-3 -right-2 flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-white/30 rounded-full animate-pulse" />
-                            <span className="text-[9px] text-white/30 font-mono uppercase tracking-wider">Optional</span>
+              {/* Process Timeline */}
+              <div className="relative">
+                {/* Vertical Line - Desktop Only */}
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-white/20 via-white/10 to-white/5 hidden lg:block"
+                  aria-hidden="true"
+                />
+
+                {/* Steps */}
+                <div className="space-y-16 lg:space-y-20">
+                  {processSteps.map((step) => (
+                    <article
+                      key={step.step}
+                      className="relative group"
+                      aria-labelledby={`step-${step.step}-title`}
+                    >
+                      {/* Step Indicator Dot - Desktop Only */}
+                      <div
+                        className="absolute left-0 top-6 w-3 h-3 bg-white/20 rounded-full border-4 border-black group-hover:bg-white/60 group-hover:scale-150 transition-all duration-500 hidden lg:block -translate-x-[5px]"
+                        aria-hidden="true"
+                      />
+
+                      {/* Content Container */}
+                      <div className="lg:pl-16">
+                        {/* Step Header - Number & Title */}
+                        <div className="flex flex-col sm:flex-row sm:items-baseline gap-4 sm:gap-6 mb-4">
+                          {/* Step Number */}
+                          <span
+                            className="text-5xl sm:text-6xl lg:text-7xl font-light text-white/[0.08] group-hover:text-white/[0.15] transition-colors duration-500 select-none leading-none"
+                            aria-hidden="true"
+                          >
+                            {step.step}
+                          </span>
+
+                          {/* Title & Badge Container */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-3 mb-3">
+                              <h3
+                                id={`step-${step.step}-title`}
+                                className="text-2xl sm:text-3xl lg:text-4xl font-light text-white/85 group-hover:text-white transition-colors duration-500"
+                              >
+                                {step.title}
+                              </h3>
+                              {!step.required && (
+                                <span
+                                  className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-white/30 border border-white/20 rounded-sm"
+                                  aria-label="This step is optional"
+                                >
+                                  Optional
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Animated underline */}
+                            <div
+                              className="h-px w-0 bg-gradient-to-r from-white/40 to-transparent group-hover:w-24 lg:group-hover:w-32 transition-all duration-700"
+                              aria-hidden="true"
+                            />
                           </div>
-                        )}
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-base lg:text-lg text-white/50 leading-relaxed max-w-3xl group-hover:text-white/70 transition-colors duration-500 sm:ml-0 lg:ml-[100px]">
+                          {step.description}
+                        </p>
                       </div>
-                    </div>
-
-                    {/* Content card  */}
-                    <div className="group relative z-10 bg-gradient-to-br from-white/[0.02] to-transparent border-l-2 border-white/10 pl-5 lg:pl-8 py-6 lg:py-8 hover:border-white/30 hover:from-white/[0.04] transition-all duration-700 cursor-pointer">
-                      {/* Animated line */}
-                      <div className="absolute left-0 top-0 w-0.5 h-0 bg-gradient-to-b from-white/60 via-white/30 to-transparent group-hover:h-full transition-all duration-1000 ease-out" />
-
-                      <div className="flex items-start gap-3 mb-3">
-                        <h3 className="text-2xl lg:text-3xl text-white/85 font-light group-hover:text-white transition-all duration-500">
-                          {step.title}
-                        </h3>
-                      </div>
-
-                      <p className="text-sm lg:text-base text-white/45 leading-relaxed max-w-2xl ml-0 lg:ml-5 group-hover:text-white/65 transition-colors duration-500">
-                        {step.description}
-                      </p>
-
-                    </div>
-
-                    {/* Connection line to next step */}
-                    {idx < processSteps.length - 1 && (
-                      <div className={`absolute -bottom-10 lg:-bottom-12 w-px h-10 lg:h-12 bg-gradient-to-b from-white/10 via-white/5 to-transparent pointer-events-none ${idx % 2 === 0 ? 'left-0' : 'right-0 lg:left-0'
-                        }`} />
-                    )}
-                  </div>
-                ))}
+                    </article>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
