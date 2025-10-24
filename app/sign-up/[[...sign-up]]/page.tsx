@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export default function SignUpPage() {
     return (
-        <div className="container max-w-md py-16 flex flex-col items-center">
+        <div className="container max-w-md mx-auto py-16 flex flex-col items-center">
             <Link href="/" className="mb-8 text-primary hover:underline flex items-center">
                 ← Back to home
             </Link>

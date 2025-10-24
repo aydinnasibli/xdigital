@@ -10,12 +10,13 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import Logo from '../public/assets/logo.png';
+import { useUser } from '@clerk/nextjs';
 
 export default function Navbar() {
     const [isVisible, setIsVisible] = useState(true);
     const [hasBackground, setHasBackground] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
-
+    const { isSignedIn } = useUser();
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
@@ -60,13 +61,13 @@ export default function Navbar() {
             <nav className="max-w-7xl mx-auto grid grid-cols-3 items-center gap-8">
                 {/* Left Navigation */}
                 <div className="flex items-center gap-10 justify-end">
-                    <Link href={"/about"} className="text-[15px] text-gray-300 hover:text-white transition-colors duration-200">
+                    <Link href={"/about"} className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
                         About
                     </Link>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-2 text-[15px] hover:cursor-pointer text-gray-300 hover:text-white transition-colors duration-200 outline-none">
+                            <button className="flex items-center gap-2 text-sm hover:cursor-pointer text-gray-300 hover:text-white transition-colors duration-200 outline-none">
                                 Services
                                 <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
                             </button>
@@ -107,15 +108,25 @@ export default function Navbar() {
                 </div>
 
                 {/* Right Navigation */}
-                <div className="flex items-center gap-10">
-                    <Link href={'sign-in'} className="text-[15px] text-gray-300 hover:text-white transition-colors duration-200">
+                {isSignedIn && (<div className='flex items-center gap-10'>
+                    <Link href={'/dashboard'} className='text-sm text-gray-300 hover:text-white transition-colors duration-200'>
+                        Dashboard
+                    </Link>
+                    <Link href="/profile" className="cursor-pointer text-sm flex w-full">
+                        Necmettin
+                        <span> Profile</span>
+                    </Link>
+
+                </div>)}
+                <div className='flex items-center gap-10'>
+                    <Link href={'sign-in'} className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
                         Sign In
                     </Link>
-                    <Link href={'sign-up'} className="text-[15px] text-gray-300 hover:text-white px-6 py-2.5 border border-gray-700/50 rounded-full hover:border-gray-300/80 hover:bg-white/5 transition-all duration-300">
+                    <Link href={'sign-up'} className="text-sm text-gray-300 hover:text-white px-6 py-2.5 border border-gray-700/50 rounded-full hover:border-gray-300/80 hover:bg-white/5 transition-all duration-300">
                         Log Up
                     </Link>
                 </div>
             </nav>
-        </header>
+        </header >
     );
 }
