@@ -325,7 +325,6 @@ function Page() {
                   <div className="absolute bottom-0 right-0 w-16 h-16 border-b border-r border-white/5 group-hover:border-white/15 group-hover:w-20 group-hover:h-20 transition-all duration-700 pointer-events-none" />
 
                   {/* Top Left Corner Dot */}
-                  <div className="absolute top-0 left-0 w-1.5 h-1.5 bg-white/20 group-hover:scale-[3] group-hover:bg-white/60 transition-all duration-500" />
                 </div>
 
                 {/* Hover Glow Effect */}
