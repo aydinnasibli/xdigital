@@ -10,13 +10,14 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import Logo from '../public/assets/logo.png';
-import { useUser } from '@clerk/nextjs';
+import { useUser, UserButton } from '@clerk/nextjs';
 
 export default function Navbar() {
     const [isVisible, setIsVisible] = useState(true);
     const [hasBackground, setHasBackground] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
-    const { isSignedIn } = useUser();
+    const { isSignedIn, user } = useUser();
+
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
@@ -49,19 +50,15 @@ export default function Navbar() {
         };
     }, [lastScrollY]);
 
-
-
-
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 px-8 py-0.5 transition-all duration-500 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
-                } ${hasBackground ? 'bg-gray-500/10 backdrop-blur-xl shadow-lg' : ''
-                }`}
+                } ${hasBackground ? 'bg-gray-500/10 backdrop-blur-xl shadow-lg' : ''}`}
         >
             <nav className="max-w-7xl mx-auto grid grid-cols-3 items-center gap-8">
                 {/* Left Navigation */}
                 <div className="flex items-center gap-10 justify-end">
-                    <Link href={"/about"} className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
+                    <Link href="/about" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
                         About
                     </Link>
 
@@ -94,39 +91,50 @@ export default function Navbar() {
                                     <span className="text-xs text-gray-500">Comprehensive consulting</span>
                                 </div>
                             </DropdownMenuItem>
-
-
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
 
                 {/* Center Logo */}
                 <div className="flex justify-center">
-                    <Link href={"/"} className='text-3xl font-extrabold text-white ' >
-                        <Image src={Logo} alt="Logo" className='w-18 h-18 ' />
+                    <Link href="/" className="text-3xl font-extrabold text-white">
+                        <Image src={Logo} alt="Logo" className="w-18 h-18" />
                     </Link>
                 </div>
 
                 {/* Right Navigation */}
-                {isSignedIn && (<div className='flex items-center gap-10'>
-                    <Link href={'/dashboard'} className='text-sm text-gray-300 hover:text-white transition-colors duration-200'>
-                        Dashboard
-                    </Link>
-                    <Link href="/profile" className="cursor-pointer text-sm flex w-full">
-                        Necmettin
-                        <span> Profile</span>
-                    </Link>
-
-                </div>)}
-                <div className='flex items-center gap-10'>
-                    <Link href={'sign-in'} className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
-                        Sign In
-                    </Link>
-                    <Link href={'sign-up'} className="text-sm text-gray-300 hover:text-white px-6 py-2.5 border border-gray-700/50 rounded-full hover:border-gray-300/80 hover:bg-white/5 transition-all duration-300">
-                        Log Up
-                    </Link>
+                <div className="flex items-center gap-10 justify-start">
+                    {isSignedIn ? (
+                        <>
+                            <Link href="/dashboard" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
+                                Dashboard
+                            </Link>
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm text-gray-300">
+                                    {user?.firstName || 'User'}
+                                </span>
+                                <UserButton
+                                    appearance={{
+                                        elements: {
+                                            avatarBox: "w-8 h-8"
+                                        }
+                                    }}
+                                    afterSignOutUrl="/"
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <Link href="/sign-in" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
+                                Sign In
+                            </Link>
+                            <Link href="/sign-up" className="text-sm text-gray-300 hover:text-white px-6 py-2.5 border border-gray-700/50 rounded-full hover:border-gray-300/80 hover:bg-white/5 transition-all duration-300">
+                                Sign Up
+                            </Link>
+                        </>
+                    )}
                 </div>
             </nav>
-        </header >
+        </header>
     );
 }
