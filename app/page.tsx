@@ -456,7 +456,7 @@ function Page() {
           <div className="mb-20">
             <h2 className="text-sm text-white/30 uppercase tracking-[0.3em] font-mono mb-12">Our Process</h2>
             <p className="text-3xl font-light text-white/70 max-w-3xl">
-              No bullshit. No bloat. Just pure execution from idea to launch.
+              No bloat. Just pure execution from idea to launch.
             </p>
           </div>
 
@@ -635,7 +635,7 @@ function Page() {
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.4 }} className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
-              <Link href="/contact" className="group inline-flex items-center gap-3 px-12 py-5 bg-white text-black hover:bg-white/90 transition-all duration-300">
+              <Link href="/contact" className="group inline-flex rounded-3xl items-center gap-3 px-12 py-5 bg-white text-black hover:bg-white/80 transition-all duration-300">
                 <span className="font-light text-lg">Let's Talk</span>
                 <ArrowUpRight className="w-6 h-6 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </Link>
