@@ -222,12 +222,12 @@ function Page() {
 
           {/* Tagline - Centered */}
           <div className="max-w-2xl mx-auto text-center">
-            <div className="text-xl select-none md:text-2xl text-white/50 font-light leading-relaxed">
+            <div className="text-xl mt-0.5 select-none md:text-2xl text-white/50 font-light leading-relaxed tracking-widest">
               <TextType
                 text={[
-                  "Digital agency focused on craft",
-                  "Building products that matter",
-                  "Design and development studio"
+                  "Web Development",
+                  "Digital Solutions",
+                  "Social Media Marketing",
                 ]}
                 typingSpeed={60}
                 deletingSpeed={30}
@@ -290,7 +290,7 @@ function Page() {
                   {/* Header with Number and Icon */}
                   <div className="flex items-start justify-between mb-10">
                     <div className="relative">
-                      <span className="text-6xl text-white/[0.06] font-light absolute -top-4 -left-2 pointer-events-none group-hover:text-white/[0.12] transition-colors duration-700">
+                      <span className="text-6xl text-white/[0.1] font-light absolute -top-4 -left-2 pointer-events-none group-hover:text-white/[0.12] transition-colors duration-700">
                         {service.number}
                       </span>
 

@@ -3,7 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Metadata } from "next";
 import Navbar from "../components/Navbar";
-import { Epilogue, Exo_2, Nunito_Sans } from "next/font/google";
+import { Epilogue } from "next/font/google";
 import HorizontalScrollBar from "@/components/HorizontalScrollbar";
 import Footer from "@/components/Footer";
 const epilogue = Epilogue({ subsets: ["latin"] });
