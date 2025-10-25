@@ -52,7 +52,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html className="scrollbar-hide " lang="en">
-        <body className={`${epilogue.className} tracking-widest bg-black text-gray-900`}>
+        <body className={`${epilogue.className} tracking-widest bg-black text-gray-300`}>
           <Navbar />
 
           <main>
