@@ -7,7 +7,9 @@ import Beams from '@/components/Beams'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowUpRight, Minus, CheckCircle2, Sparkles, Code, TrendingUp, Zap, Users, Award } from 'lucide-react'
-
+import { AnimatePresence } from 'motion/react'
+import { motion } from 'motion/react'
+import Link from 'next/link'
 gsap.registerPlugin(ScrollTrigger)
 
 function Page() {
@@ -194,7 +196,7 @@ function Page() {
       ],
       idealFor: "Small businesses, startups, and entrepreneurs",
       startingPrice: "From $29/month",
-      link: "/website"
+      link: "/web"
     },
     {
       id: 'smma',
@@ -213,13 +215,13 @@ function Page() {
       ],
       idealFor: "Brands looking to scale their social presence",
       startingPrice: "Custom pricing",
-      link: "/smma"
+      link: "/socialmedia"
     },
     {
       id: 'consulting',
       number: "03",
       icon: Sparkles,
-      title: "Digital Consulting",
+      title: "Digital Solutions",
       shortDescription: "Comprehensive digital transformation services",
       fullDescription: "Navigate the digital landscape with expert guidance. We help you develop winning strategies, optimize operations, and implement solutions that drive sustainable growth.",
       features: [
@@ -232,7 +234,7 @@ function Page() {
       ],
       idealFor: "Growing businesses ready to scale",
       startingPrice: "Custom packages",
-      link: "#contact"
+      link: "digitalsolutions"
     },
   ]
 
@@ -256,7 +258,7 @@ function Page() {
   return (
     <div className='relative w-full overflow-x-hidden'>
       {/* Hero Section with Threads Background */}
-      <section className='relative min-h-screen w-full overflow-hidden flex items-center justify-center'>
+      <section className='relative min-h-screen  w-full overflow-hidden flex items-center justify-center'>
         {/* Background Threads Animation */}
         <div className='absolute inset-0'>
           <Beams
@@ -266,7 +268,7 @@ function Page() {
             lightColor="#ffffff"
             speed={2}
             noiseIntensity={1.75}
-            scale={0.2}
+            scale={0.2} /* dont forget to adjust it properly*/
             rotation={0}
           />
         </div>
@@ -337,7 +339,7 @@ function Page() {
       </section>
 
       {/* Services Overview - Quick Cards */}
-      <section id="services-overview" className='relative w-full bg-black py-32'>
+      <section id="services-overview" className='relative w-full  py-32'>
         <div className='w-full max-w-7xl mx-auto px-8'>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light text-white/90 mb-4">
@@ -381,7 +383,9 @@ function Page() {
                     </p>
 
                     <button
-                      onClick={() => scrollToSection('services-detail')}
+                      onClick={() => scrollToSection('services-detail')
+
+                      }
                       className="text-white/60 hover:text-white text-sm inline-flex items-center gap-2 group/btn"
                     >
                       Learn more
@@ -393,10 +397,10 @@ function Page() {
             })}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Detailed Services Section */}
-      <section id="services-detail" className='relative w-full bg-gradient-to-b from-black to-zinc-950 py-32'>
+      < section id="services-detail" className='relative w-full  py-32' >
         <div className='w-full max-w-7xl mx-auto px-8'>
           <div className="flex items-center gap-4 mb-16">
             <Minus className="w-8 h-8 text-white/20" />
@@ -409,7 +413,7 @@ function Page() {
               <button
                 key={idx}
                 onClick={() => setActiveService(idx)}
-                className={`px-6 py-3 text-sm transition-all duration-300 ${activeService === idx
+                className={`px-6 py-3 hover:cursor-pointer text-sm transition-all duration-500 ${activeService === idx
                   ? 'text-white border-b-2 border-white'
                   : 'text-white/40 hover:text-white/70 border-b-2 border-transparent'
                   }`}
@@ -418,77 +422,86 @@ function Page() {
               </button>
             ))}
           </div>
-
           {/* Active Service Details */}
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            {/* Left: Description */}
-            <div>
-              <h3 className="text-4xl font-light text-white/90 mb-6">
-                {services[activeService].title}
-              </h3>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeService}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="grid lg:grid-cols-2 gap-12 items-start"
+            >
+              {/* Left: Description */}
+              <div>
+                <h3 className="text-3xl font-light text-white/90 mb-6">
+                  {services[activeService].title}
+                </h3>
 
-              <p className="text-lg text-white/60 leading-relaxed mb-8">
-                {services[activeService].fullDescription}
-              </p>
-
-              <div className="space-y-4 mb-8">
-                <p className="text-sm text-white/40 uppercase tracking-wider">What's Included</p>
-                <ul className="space-y-3">
-                  {services[activeService].features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
-                      <span className="text-white/70">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="border-t border-white/5 pt-6 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-white/40">Ideal for:</span>
-                  <span className="text-white/70">{services[activeService].idealFor}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-white/40">Starting at:</span>
-                  <span className="text-white font-light text-lg">{services[activeService].startingPrice}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: CTA Card */}
-            <div className="lg:sticky lg:top-24">
-              <div className="bg-zinc-900 border border-white/10 p-10">
-                <h4 className="text-2xl font-light text-white/90 mb-4">
-                  Ready to get started?
-                </h4>
-                <p className="text-white/50 mb-8">
-                  Let's discuss how {services[activeService].title.toLowerCase()} can help grow your business.
+                <p className="text-base text-white/60 leading-relaxed mb-8">
+                  {services[activeService].fullDescription}
                 </p>
 
-                <button className="w-full bg-white text-black py-4 hover:bg-white/90 transition-all duration-300 mb-4 inline-flex items-center justify-center gap-2">
-                  <span>Start Your Project</span>
-                  <ArrowUpRight className="w-5 h-5" />
-                </button>
+                <div className="space-y-4 mb-8">
+                  <p className="text-xs text-white/40 uppercase tracking-wider">What's Included</p>
+                  <ul className="space-y-3">
+                    {services[activeService].features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
+                        <span className="text-white/70">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-                <button
-                  onClick={() => scrollToSection('contact')}
-                  className="w-full border border-white/20 text-white py-4 hover:bg-white/5 transition-all duration-300"
-                >
-                  Schedule Consultation
-                </button>
-
-                <div className="mt-8 pt-8 border-t border-white/5">
-                  <p className="text-sm text-white/40 text-center">
-                    Questions? <a href="mailto:hello@xdigital.com" className="text-white/70 hover:text-white underline">Email us</a>
-                  </p>
+                <div className="border-t border-white/5 pt-6 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/40">Ideal for:</span>
+                    <span className="text-white/70">{services[activeService].idealFor}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/40">Starting at:</span>
+                    <span className="text-white font-light text-lg">{services[activeService].startingPrice}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+
+              {/* Right: CTA Card */}
+              <div className="lg:sticky lg:top-24">
+                <div className="bg-zinc-900 border rounded-2xl border-white/10 p-10">
+                  <h4 className="text-2xl font-light text-white/90 mb-4">
+                    Ready to get started?
+                  </h4>
+                  <p className="text-white/50 mb-8">
+                    Let's discuss how {services[activeService].title.toLowerCase()} can help grow your business.
+                  </p>
+
+                  <Link href={'/sign-up'} className="w-full bg-white text-black py-4 hover:bg-white/90 transition-all duration-300 mb-4 inline-flex items-center justify-center gap-2">
+                    <span>Start Your Project</span>
+                    <ArrowUpRight className="w-5 h-5" />
+                  </Link>
+
+                  <Link href={services[activeService].link}
+                    className="w-full bg-gray-200/20   text-white py-4 hover:bg-gray-300/30 transition-all duration-300 mb-4 inline-flex items-center justify-center gap-2">
+                    <span>More Detail</span>
+                  </Link>
+
+                  <div className="mt-8 pt-8 border-t border-white/5">
+                    <p className="text-sm text-white/40  text-center">
+                      Questions? <a href="mailto:hello@xdigital.com" className="text-white/70 hover:text-white  duration-300 transition-all">Email us</a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
         </div>
-      </section>
+      </section >
+
+
       {/* How We Work Section - Production Ready */}
-      <div className="mt-40">
+      < div className="mt-40" >
         <div className="max-w-7xl mx-auto px-6">
           {/* Section Header */}
           <div className="flex items-center gap-4 mb-20">
@@ -569,9 +582,9 @@ function Page() {
             </div>
           </div>
         </div>
-      </div>
+      </div >
       {/* Why Choose Us Section */}
-      <section className='relative w-full bg-zinc-950 py-32'>
+      < section className='relative w-full py-32' >
         <div className='w-full max-w-7xl mx-auto px-8'>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-light text-white/90 mb-4">
@@ -597,8 +610,9 @@ function Page() {
             })}
           </div>
         </div>
-      </section>
-    </div>
+      </section >
+
+    </div >
   )
 }
 
