@@ -96,24 +96,7 @@ export default function Footer() {
                 <div ref={contentRef}>
                     {/* Main Content - Single Row Layout */}
                     <div className="grid lg:grid-cols-[auto,auto] gap-12 mb-10">
-                        {/* Left - CTA */}
-                        <div>
-                            <h2 className="text-4xl md:text-5xl text-white/90 font-light mb-3 leading-tight">
-                                Ready to start?
-                            </h2>
-                            <p className="text-base text-white/40 mb-6 leading-relaxed max-w-xl">
-                                Let's create something exceptional together.
-                            </p>
-                            <Link
-                                href="#contact"
-                                className="group inline-flex items-center gap-3 text-white/90 hover:text-white transition-colors"
-                            >
-                                <span className="font-light">Get in touch</span>
-                                <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/40 group-hover:bg-white/5 transition-all">
-                                    <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                                </div>
-                            </Link>
-                        </div>
+
 
                         {/* Right - Compact Links */}
                         <div className="grid grid-cols-3 gap-8 lg:gap-10">
@@ -126,7 +109,7 @@ export default function Footer() {
                                         <li key={link.name}>
                                             <Link
                                                 href={link.href}
-                                                className="text-white/50 hover:text-white/90 transition-colors text-sm"
+                                                className="text-white/50 hover:text-white/90 transition-colors duration-200 text-sm"
                                             >
                                                 {link.name}
                                             </Link>
@@ -144,7 +127,7 @@ export default function Footer() {
                                         <li key={link.name}>
                                             <Link
                                                 href={link.href}
-                                                className="text-white/50 hover:text-white/90 transition-colors text-sm"
+                                                className="text-white/50 hover:text-white/90 transition-colors duration-200 text-sm"
                                             >
                                                 {link.name}
                                             </Link>
@@ -164,7 +147,7 @@ export default function Footer() {
                                                 href={link.href}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-white/50 hover:text-white/90 transition-colors text-sm inline-flex items-center gap-1 group"
+                                                className="text-white/50 hover:text-white/90 transition-colors duration-200 text-sm inline-flex items-center gap-1 group"
                                             >
                                                 {link.name}
                                                 <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -180,9 +163,9 @@ export default function Footer() {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pt-8 border-t border-white/5">
                         {/* Contact Info - Inline */}
                         <div className="flex flex-wrap items-center gap-6 text-sm">
-                            <div className="flex items-center gap-2">
-                                <Mail className="w-4 h-4 text-white/30" />
-                                <a href="mailto:hello@xdigital.com" className="text-white/50 hover:text-white transition-colors">
+                            <div className="flex  items-center gap-2">
+                                <Mail className="w-4 h-4  text-white/30" />
+                                <a href="mailto:hello@xdigital.com" className="text-white/50 hover:text-white transition-colors duration-300">
                                     hello@xdigital.com
                                 </a>
                             </div>
@@ -202,6 +185,9 @@ export default function Footer() {
                             </Link>
                             <Link href="#" className="hover:text-white/60 transition-colors">
                                 Terms
+                            </Link>
+                            <Link href="#" className="hover:text-white/60 transition-colors">
+                                Faq
                             </Link>
                         </div>
                     </div>
