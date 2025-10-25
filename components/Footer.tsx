@@ -1,16 +1,25 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, Mail, MapPin } from 'lucide-react';
+import { ArrowUpRight, Mail } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motion } from 'framer-motion';
+import { useUser } from '@clerk/nextjs';
+
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Footer() {
     const footerRef = useRef<HTMLElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+    const [mounted, setMounted] = useState(false);
+    const { isSignedIn } = useUser();
+
+    // Prevent hydration mismatch
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -42,15 +51,25 @@ export default function Footer() {
         }, footerRef);
 
         return () => ctx.revert();
-    }, []);
+    }, [mounted, isSignedIn]);
+
+    // Don't render footer until mounted to prevent hydration issues
+    if (!mounted) {
+        return null;
+    }
+
+    // Don't render footer for authenticated users
+    if (isSignedIn) {
+        return null;
+    }
 
     const currentYear = new Date().getFullYear();
 
     const footerLinks = {
         services: [
-            { name: 'Web Development', href: '#' },
-            { name: 'Social Media Marketing', href: '#' },
-            { name: 'Digital Solutions', href: '#' },
+            { name: 'Web Development', href: '/web' },
+            { name: 'Social Media Marketing', href: '/socialmedia' },
+            { name: 'Digital Solutions', href: '/digitalsolution' },
         ],
         company: [
             { name: 'About', href: '/about' },
@@ -72,11 +91,11 @@ export default function Footer() {
     };
 
     return (
-        <footer ref={footerRef} className="relative w-full  bg-black border-t border-white/5">
+        <footer ref={footerRef} className="relative w-full bg-black border-t border-white/5">
             <div className="max-w-7xl mx-auto px-8 py-12">
                 <div ref={contentRef}>
                     {/* Main Content - Single Row Layout */}
-                    <div className="grid lg:grid-cols-[,auto] gap-12 mb-10">
+                    <div className="grid lg:grid-cols-[auto,auto] gap-12 mb-10">
                         {/* Left - CTA */}
                         <div>
                             <h2 className="text-4xl md:text-5xl text-white/90 font-light mb-3 leading-tight">
@@ -98,7 +117,7 @@ export default function Footer() {
 
                         {/* Right - Compact Links */}
                         <div className="grid grid-cols-3 gap-8 lg:gap-10">
-                            <div className=''>
+                            <div>
                                 <h3 className="text-white/20 uppercase tracking-wider text-xs mb-4 font-medium">
                                     Services
                                 </h3>
@@ -167,7 +186,6 @@ export default function Footer() {
                                     hello@xdigital.com
                                 </a>
                             </div>
-
                         </div>
 
                         {/* Legal & Brand */}

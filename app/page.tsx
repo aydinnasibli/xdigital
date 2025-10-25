@@ -3,15 +3,16 @@ import React, { useState, useRef, useEffect } from 'react'
 
 import SplitText from '@/components/SplitText'
 import TextType from '@/components/TextType'
-import { ArrowUpRight, Minus, Quote } from 'lucide-react'
 import Beams from '@/components/Beams'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ArrowUpRight, Minus, CheckCircle2, Sparkles, Code, TrendingUp, Zap, Users, Award } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
 function Page() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const [activeService, setActiveService] = useState(0)
   const button1Ref = useRef<HTMLButtonElement>(null)
   const button2Ref = useRef<HTMLButtonElement>(null)
   const animation1Ref = useRef<gsap.core.Tween | null>(null)
@@ -113,23 +114,15 @@ function Page() {
     }
   }, [])
 
-  const services = [
-    {
-      number: "01",
-      title: "Web Development",
-      description: "Custom websites and web applications built with modern technologies",
-    },
-    {
-      number: "02",
-      title: "Social Media Marketing",
-      description: "Strategic social media management and growth solutions",
-    },
-    {
-      number: "03",
-      title: "Digital Solutions",
-      description: "Comprehensive digital transformation and consulting services",
-    },
-  ]
+
+  // Scroll to section helper
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
 
   const processSteps = [
     {
@@ -183,7 +176,83 @@ function Page() {
 
     }
   ]
+  const services = [
+    {
+      id: 'website',
+      number: "01",
+      icon: Code,
+      title: "Website Creation",
+      shortDescription: "Professional websites built with modern technology",
+      fullDescription: "Transform your business with a stunning, high-performance website. Our drag-and-drop builder and premium templates make it easy to launch your online presence in days, not months.",
+      features: [
+        "50+ Premium Templates",
+        "Drag & Drop Editor",
+        "Mobile Responsive",
+        "SEO Optimized",
+        "Custom Domain",
+        "Free SSL Certificate"
+      ],
+      idealFor: "Small businesses, startups, and entrepreneurs",
+      startingPrice: "From $29/month",
+      link: "/website"
+    },
+    {
+      id: 'smma',
+      number: "02",
+      icon: TrendingUp,
+      title: "Social Media Marketing",
+      shortDescription: "Strategic social media management and growth",
+      fullDescription: "Grow your brand and engage your audience across all major platforms. We create compelling content, manage your presence, and drive real business results through data-driven strategies.",
+      features: [
+        "Content Strategy",
+        "Post Scheduling",
+        "Community Management",
+        "Analytics & Reporting",
+        "Paid Advertising",
+        "Influencer Outreach"
+      ],
+      idealFor: "Brands looking to scale their social presence",
+      startingPrice: "Custom pricing",
+      link: "/smma"
+    },
+    {
+      id: 'consulting',
+      number: "03",
+      icon: Sparkles,
+      title: "Digital Consulting",
+      shortDescription: "Comprehensive digital transformation services",
+      fullDescription: "Navigate the digital landscape with expert guidance. We help you develop winning strategies, optimize operations, and implement solutions that drive sustainable growth.",
+      features: [
+        "Digital Strategy",
+        "Tech Stack Consulting",
+        "Process Optimization",
+        "Growth Planning",
+        "Market Analysis",
+        "Implementation Support"
+      ],
+      idealFor: "Growing businesses ready to scale",
+      startingPrice: "Custom packages",
+      link: "#contact"
+    },
+  ]
 
+  const whyChooseUs = [
+    {
+      icon: Zap,
+      title: "Fast Delivery",
+      description: "Launch your website in days, not months. Our streamlined process gets you online quickly."
+    },
+    {
+      icon: Users,
+      title: "Expert Team",
+      description: "Work with experienced designers and developers who understand your business needs."
+    },
+    {
+      icon: Award,
+      title: "Quality Guaranteed",
+      description: "Every project meets our high standards. Your satisfaction is our priority."
+    }
+  ]
   return (
     <div className='relative w-full overflow-x-hidden'>
       {/* Hero Section with Threads Background */}
@@ -267,213 +336,266 @@ function Page() {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className='relative w-full bg-black'>
-        <div className='w-full max-w-7xl mx-auto px-8 py-32'>
-          {/* Services Grid - Creative Modern Layout */}
+      {/* Services Overview - Quick Cards */}
+      <section id="services-overview" className='relative w-full bg-black py-32'>
+        <div className='w-full max-w-7xl mx-auto px-8'>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-light text-white/90 mb-4">
+              What We Offer
+            </h2>
+            <p className="text-lg text-white/50 max-w-2xl mx-auto">
+              Choose the service that fits your needs, or combine them for maximum impact
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-6">
-            {services.map((service, idx) => (
-              <div
-                key={idx}
-                className="group relative bg-black border border-white/5 hover:border-white/20 transition-all duration-700 cursor-pointer"
-                onMouseEnter={() => setHoveredIndex(idx)}
-                onMouseLeave={() => setHoveredIndex(null)}
-                tabIndex={0}
-                role="article"
-              >
-                {/* Animated Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            {services.map((service, idx) => {
+              const Icon = service.icon
+              return (
+                <div
+                  key={idx}
+                  className="group relative bg-black border border-white/5 hover:border-white/20 transition-all duration-700 cursor-pointer"
+                  onMouseEnter={() => setHoveredIndex(idx)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-                {/* Content Container */}
-                <div className="relative p-10 lg:p-12">
-
-                  {/* Header with Number and Icon */}
-                  <div className="flex items-start justify-between mb-10">
-                    <div className="relative">
-                      <span className="text-6xl text-white/[0.1] font-light absolute -top-4 -left-2 pointer-events-none group-hover:text-white/[0.12] transition-colors duration-700">
-                        {service.number}
-                      </span>
-
+                  <div className="relative p-10">
+                    <div className="flex items-start justify-between mb-8">
+                      <div className="w-12 h-12 border border-white/10 flex items-center justify-center group-hover:border-white/30 transition-colors">
+                        <Icon className="w-6 h-6 text-white/40 group-hover:text-white/70 transition-colors" />
+                      </div>
+                      <span className="text-sm text-white/20 font-mono">{service.number}</span>
                     </div>
 
-                    <div className="relative">
-                      <Minus
-                        className={`w-5 h-5 text-white/20 transition-all duration-700 group-hover:text-white/50 ${hoveredIndex === idx ? 'rotate-90 scale-125' : ''
-                          }`}
-                        aria-hidden="true"
-                      />
+                    <h3 className="text-2xl text-white/85 font-light mb-4 group-hover:text-white transition-colors">
+                      {service.title}
+                    </h3>
+
+                    <div className="h-px bg-white/5 mb-6 overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-white/40 to-transparent w-0 group-hover:w-full transition-all duration-1000" />
                     </div>
+
+                    <p className="text-white/45 text-sm leading-relaxed mb-6 group-hover:text-white/65 transition-colors">
+                      {service.shortDescription}
+                    </p>
+
+                    <button
+                      onClick={() => scrollToSection('services-detail')}
+                      className="text-white/60 hover:text-white text-sm inline-flex items-center gap-2 group/btn"
+                    >
+                      Learn more
+                      <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                    </button>
                   </div>
-
-                  {/* Title */}
-                  <h3 className="text-2xl lg:text-3xl text-white/85 font-light mb-4 group-hover:text-white transition-colors duration-500 leading-tight">
-                    {service.title}
-                  </h3>
-
-                  {/* Animated Divider */}
-                  <div className="relative mb-6 h-px overflow-hidden">
-                    <div className="absolute inset-0 bg-white/5" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/40 to-transparent w-0 group-hover:w-full transition-all duration-1000" />
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-white/45 text-sm lg:text-base leading-relaxed group-hover:text-white/65 transition-colors duration-500">
-                    {service.description}
-                  </p>
-
-                  {/* Bottom Corner Accent */}
-                  <div className="absolute bottom-0 right-0 w-16 h-16 border-b border-r border-white/5 group-hover:border-white/15 group-hover:w-20 group-hover:h-20 transition-all duration-700 pointer-events-none" />
-
                 </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
 
-                {/* Hover Glow Effect */}
-                <div className="absolute -inset-px bg-gradient-to-br from-white/10 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl pointer-events-none" />
-              </div>
+      {/* Detailed Services Section */}
+      <section id="services-detail" className='relative w-full bg-gradient-to-b from-black to-zinc-950 py-32'>
+        <div className='w-full max-w-7xl mx-auto px-8'>
+          <div className="flex items-center gap-4 mb-16">
+            <Minus className="w-8 h-8 text-white/20" />
+            <h2 className="text-sm text-white/40 uppercase tracking-widest">Services in Detail</h2>
+          </div>
+
+          {/* Service Tabs */}
+          <div className="flex flex-wrap gap-4 mb-12 border-b border-white/5 pb-6">
+            {services.map((service, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveService(idx)}
+                className={`px-6 py-3 text-sm transition-all duration-300 ${activeService === idx
+                  ? 'text-white border-b-2 border-white'
+                  : 'text-white/40 hover:text-white/70 border-b-2 border-transparent'
+                  }`}
+              >
+                {service.title}
+              </button>
             ))}
           </div>
 
-          {/* How We Work Section - Production Ready */}
-          <div className="mt-40">
-            <div className="max-w-7xl mx-auto px-6">
-              {/* Section Header */}
-              <div className="flex items-center gap-4 mb-20">
-                <Minus className="w-8 h-8 text-white/20" aria-hidden="true" />
-                <h2 id="how-we-work" className="text-sm text-white/40 uppercase tracking-widest">
-                  How We Work
-                </h2>
+          {/* Active Service Details */}
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* Left: Description */}
+            <div>
+              <h3 className="text-4xl font-light text-white/90 mb-6">
+                {services[activeService].title}
+              </h3>
+
+              <p className="text-lg text-white/60 leading-relaxed mb-8">
+                {services[activeService].fullDescription}
+              </p>
+
+              <div className="space-y-4 mb-8">
+                <p className="text-sm text-white/40 uppercase tracking-wider">What's Included</p>
+                <ul className="space-y-3">
+                  {services[activeService].features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
+                      <span className="text-white/70">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              {/* Process Timeline */}
-              <div className="relative">
-                {/* Vertical Line - Desktop Only */}
-                <div
-                  className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-white/20 via-white/10 to-white/5 hidden lg:block"
-                  aria-hidden="true"
-                />
+              <div className="border-t border-white/5 pt-6 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-white/40">Ideal for:</span>
+                  <span className="text-white/70">{services[activeService].idealFor}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/40">Starting at:</span>
+                  <span className="text-white font-light text-lg">{services[activeService].startingPrice}</span>
+                </div>
+              </div>
+            </div>
 
-                {/* Steps */}
-                <div className="space-y-16 lg:space-y-20">
-                  {processSteps.map((step) => (
-                    <article
-                      key={step.step}
-                      className="relative group"
-                      aria-labelledby={`step-${step.step}-title`}
-                    >
-                      {/* Step Indicator Dot - Desktop Only */}
-                      <div
-                        className="absolute left-0 top-6 w-3 h-3 bg-white/20 rounded-full border-4 border-black group-hover:bg-white/60 group-hover:scale-150 transition-all duration-500 hidden lg:block -translate-x-[5px]"
-                        aria-hidden="true"
-                      />
+            {/* Right: CTA Card */}
+            <div className="lg:sticky lg:top-24">
+              <div className="bg-zinc-900 border border-white/10 p-10">
+                <h4 className="text-2xl font-light text-white/90 mb-4">
+                  Ready to get started?
+                </h4>
+                <p className="text-white/50 mb-8">
+                  Let's discuss how {services[activeService].title.toLowerCase()} can help grow your business.
+                </p>
 
-                      {/* Content Container */}
-                      <div className="lg:pl-16">
-                        {/* Step Header - Number & Title */}
-                        <div className="flex flex-col sm:flex-row sm:items-baseline gap-4 sm:gap-6 mb-4">
-                          {/* Step Number */}
-                          <span
-                            className="text-5xl sm:text-6xl lg:text-7xl font-light text-white/[0.08] group-hover:text-white/[0.15] transition-colors duration-500 select-none leading-none"
-                            aria-hidden="true"
-                          >
-                            {step.step}
-                          </span>
+                <button className="w-full bg-white text-black py-4 hover:bg-white/90 transition-all duration-300 mb-4 inline-flex items-center justify-center gap-2">
+                  <span>Start Your Project</span>
+                  <ArrowUpRight className="w-5 h-5" />
+                </button>
 
-                          {/* Title & Badge Container */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-3 mb-3">
-                              <h3
-                                id={`step-${step.step}-title`}
-                                className="text-2xl sm:text-3xl lg:text-4xl font-light text-white/85 group-hover:text-white transition-colors duration-500"
-                              >
-                                {step.title}
-                              </h3>
-                              {!step.required && (
-                                <span
-                                  className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-white/30 border border-white/20 rounded-sm"
-                                  aria-label="This step is optional"
-                                >
-                                  Optional
-                                </span>
-                              )}
-                            </div>
+                <button
+                  onClick={() => scrollToSection('contact')}
+                  className="w-full border border-white/20 text-white py-4 hover:bg-white/5 transition-all duration-300"
+                >
+                  Schedule Consultation
+                </button>
 
-                            {/* Animated underline */}
-                            <div
-                              className="h-px w-0 bg-gradient-to-r from-white/40 to-transparent group-hover:w-24 lg:group-hover:w-32 transition-all duration-700"
-                              aria-hidden="true"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Description */}
-                        <p className="text-base lg:text-lg text-white/50 leading-relaxed max-w-3xl group-hover:text-white/70 transition-colors duration-500 sm:ml-0 lg:ml-[100px]">
-                          {step.description}
-                        </p>
-                      </div>
-                    </article>
-                  ))}
+                <div className="mt-8 pt-8 border-t border-white/5">
+                  <p className="text-sm text-white/40 text-center">
+                    Questions? <a href="mailto:hello@xdigital.com" className="text-white/70 hover:text-white underline">Email us</a>
+                  </p>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </section>
+      {/* How We Work Section - Production Ready */}
+      <div className="mt-40">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Section Header */}
+          <div className="flex items-center gap-4 mb-20">
+            <Minus className="w-8 h-8 text-white/20" aria-hidden="true" />
+            <h2 id="how-we-work" className="text-sm text-white/40 uppercase tracking-widest">
+              How We Work
+            </h2>
+          </div>
 
-          {/* Testimonials Section - Staggered Card Style */}
-          <div className="mt-40">
-            <div className="flex items-center gap-4 mb-16">
-              <Minus className="w-8 h-8 text-white/20" aria-hidden="true" />
-              <h2 className="text-sm text-white/40 uppercase tracking-widest">What Clients Say</h2>
-            </div>
+          {/* Process Timeline */}
+          <div className="relative">
+            {/* Vertical Line - Desktop Only */}
+            <div
+              className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-white/20 via-white/10 to-white/5 hidden lg:block"
+              aria-hidden="true"
+            />
 
-            <div className="grid lg:grid-cols-3 gap-8">
-              {testimonials.map((testimonial, idx) => (
-                <div
-                  key={idx}
-                  className="group relative"
+            {/* Steps */}
+            <div className="space-y-16 lg:space-y-20">
+              {processSteps.map((step) => (
+                <article
+                  key={step.step}
+                  className="relative group"
+                  aria-labelledby={`step-${step.step}-title`}
                 >
-                  {/* Glow Effect on Hover */}
-                  <div className="absolute -inset-px bg-gradient-to-br from-white/20 via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl" />
+                  {/* Step Indicator Dot - Desktop Only */}
+                  <div
+                    className="absolute left-0 top-6 w-3 h-3 bg-white/20 rounded-full border-4 border-black group-hover:bg-white/60 group-hover:scale-150 transition-all duration-500 hidden lg:block -translate-x-[5px]"
+                    aria-hidden="true"
+                  />
 
-                  {/* Card */}
-                  <div className="relative bg-black border border-white/10 group-hover:border-white/30 transition-all duration-500 p-10 h-full flex flex-col">
+                  {/* Content Container */}
+                  <div className="lg:pl-16">
+                    {/* Step Header - Number & Title */}
+                    <div className="flex flex-col sm:flex-row sm:items-baseline gap-4 sm:gap-6 mb-4">
+                      {/* Step Number */}
+                      <span
+                        className="text-5xl sm:text-6xl lg:text-7xl font-light text-white/[0.08] group-hover:text-white/[0.15] transition-colors duration-500 select-none leading-none"
+                        aria-hidden="true"
+                      >
+                        {step.step}
+                      </span>
 
-                    {/* Stars Rating */}
-                    <div className="flex gap-1 mb-6">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className="w-4 h-4 fill-white/60 group-hover:fill-white/80 transition-colors duration-300"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                        </svg>
-                      ))}
+                      {/* Title & Badge Container */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-3 mb-3">
+                          <h3
+                            id={`step-${step.step}-title`}
+                            className="text-2xl sm:text-3xl lg:text-4xl font-light text-white/85 group-hover:text-white transition-colors duration-500"
+                          >
+                            {step.title}
+                          </h3>
+                          {!step.required && (
+                            <span
+                              className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-white/30 border border-white/20 rounded-sm"
+                              aria-label="This step is optional"
+                            >
+                              Optional
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Animated underline */}
+                        <div
+                          className="h-px w-0 bg-gradient-to-r from-white/40 to-transparent group-hover:w-24 lg:group-hover:w-32 transition-all duration-700"
+                          aria-hidden="true"
+                        />
+                      </div>
                     </div>
 
-                    {/* Quote */}
-                    <p className="text-white/70 group-hover:text-white/90 text-base leading-relaxed mb-8 flex-grow transition-colors duration-300">
-                      {testimonial.quote}
+                    {/* Description */}
+                    <p className="text-base lg:text-lg text-white/50 leading-relaxed max-w-3xl group-hover:text-white/70 transition-colors duration-500 sm:ml-0 lg:ml-[100px]">
+                      {step.description}
                     </p>
-
-                    {/* Divider */}
-                    <div className="w-12 h-px bg-gradient-to-r from-white/40 to-transparent mb-6 group-hover:w-24 transition-all duration-500" />
-
-                    {/* Author */}
-                    <div>
-                      <p className="text-white font-light text-lg mb-1 group-hover:text-white transition-colors">
-                        {testimonial.author}
-                      </p>
-                      <p className="text-white/40 text-sm">
-                        {testimonial.position}
-                      </p>
-                    </div>
-
-                    {/* Corner Accent */}
-                    <div className="absolute top-0 right-0 w-20 h-20 border-t border-r border-white/5 group-hover:border-white/20 transition-colors duration-500" />
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           </div>
+        </div>
+      </div>
+      {/* Why Choose Us Section */}
+      <section className='relative w-full bg-zinc-950 py-32'>
+        <div className='w-full max-w-7xl mx-auto px-8'>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-light text-white/90 mb-4">
+              Why Choose xDigital?
+            </h2>
+            <p className="text-lg text-white/50 max-w-2xl mx-auto">
+              We combine creativity, technology, and strategy to deliver exceptional results
+            </p>
+          </div>
 
+          <div className="grid md:grid-cols-3 gap-8">
+            {whyChooseUs.map((item, idx) => {
+              const Icon = item.icon
+              return (
+                <div key={idx} className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-6 border border-white/10 flex items-center justify-center">
+                    <Icon className="w-8 h-8 text-white/40" />
+                  </div>
+                  <h3 className="text-xl text-white/90 font-light mb-3">{item.title}</h3>
+                  <p className="text-white/50 leading-relaxed">{item.description}</p>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </section>
     </div>
