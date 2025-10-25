@@ -117,7 +117,7 @@ export default function Navbar() {
                         About
                     </Link>
 
-                    <DropdownMenu>
+                    <DropdownMenu >
                         <DropdownMenuTrigger asChild>
                             <button className="flex items-center gap-2 text-sm hover:cursor-pointer text-gray-300 hover:text-white transition-colors duration-200 outline-none">
                                 Services

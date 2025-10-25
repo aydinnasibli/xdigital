@@ -52,7 +52,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html className="scrollbar-hide " lang="en">
-        <body className={`${epilogue.className} max-w-7xl mx-auto tracking-widest bg-gradient-to-b from-black to-zinc-950 text-gray-300`}> {/* Choose bg colur if this or */}
+        <body className={`${epilogue.className} max-w-7xl mx-auto tracking-widest bg-gradient-to-b from-black to-zinc-950 text-gray-300`}> {/* Choose bg colur if this or bg-zinc-950 */}
           <Navbar />
 
           <main>

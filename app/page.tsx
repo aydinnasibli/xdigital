@@ -476,13 +476,13 @@ function Page() {
                     Let's discuss how {services[activeService].title.toLowerCase()} can help grow your business.
                   </p>
 
-                  <Link href={'/sign-up'} className="w-full bg-white text-black py-4 hover:bg-white/90 transition-all duration-300 mb-4 inline-flex items-center justify-center gap-2">
+                  <Link href={'/sign-up'} className="w-full rounded-xl bg-white text-black py-4 hover:bg-white/90 transition-all duration-300 mb-4 inline-flex items-center justify-center gap-2">
                     <span>Start Your Project</span>
                     <ArrowUpRight className="w-5 h-5" />
                   </Link>
 
                   <Link href={services[activeService].link}
-                    className="w-full bg-gray-200/20   text-white py-4 hover:bg-gray-300/30 transition-all duration-300 mb-4 inline-flex items-center justify-center gap-2">
+                    className="w-full bg-gray-200/20 rounded-xl text-white py-4 hover:bg-gray-300/30 transition-all duration-300 mb-4 inline-flex items-center justify-center gap-2">
                     <span>More Detail</span>
                   </Link>
 
