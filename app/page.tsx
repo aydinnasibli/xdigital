@@ -1,6 +1,5 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
-
 import SplitText from '@/components/SplitText'
 import TextType from '@/components/TextType'
 import Beams from '@/components/Beams'
@@ -10,12 +9,14 @@ import { ArrowUpRight, Mail, Star, ArrowRight, Minus, CheckCircle2, Sparkles, Co
 import { AnimatePresence } from 'motion/react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 gsap.registerPlugin(ScrollTrigger)
 
 function Page() {
   const [activeTestimonial, setActiveTestimonial] = useState(0)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [activeService, setActiveService] = useState(0)
+  const router = useRouter()
   const button1Ref = useRef<HTMLButtonElement>(null)
   const button2Ref = useRef<HTMLButtonElement>(null)
   const animation1Ref = useRef<gsap.core.Tween | null>(null)
@@ -286,7 +287,7 @@ function Page() {
           <div className="relative z-10 select-none flex h-full w-full items-center justify-center ">
             <SplitText
               text="xDigital"
-              className="text-6xl md:text-7xl lg:text-8xl font-semibold text-white/85 text-center"
+              className="text-6xl md:text-7xl lg:text-8xl font-semibold text-gray-300 text-center"
               delay={40}
               duration={1.2}
               ease="power4.out"
@@ -320,7 +321,8 @@ function Page() {
           <div className="flex mt-8 flex-col sm:flex-row items-center justify-center gap-4">
             <button
               ref={button1Ref}
-              className="group hover:cursor-pointer inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-white/90 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
+              onClick={() => router.push('/sign-up')}
+              className="group hover:cursor-pointer  rounded-2xl inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-white/90 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
               aria-label="Start a new project"
             >
               <span className="font-light">Start a project</span>
@@ -328,7 +330,8 @@ function Page() {
             </button>
             <button
               ref={button2Ref}
-              className="group hover:cursor-pointer inline-flex items-center gap-3 px-8 py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
+              onClick={() => scrollToSection('services-detail')}
+              className="group hover:cursor-pointer rounded-xl inline-flex items-center gap-3 px-8 py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
               aria-label="View our services"
             >
               <span className="font-light">Our services</span>
@@ -641,11 +644,7 @@ function Page() {
               </Link>
             </motion.div>
 
-            <div className="">
-              <a href="mailto:hello@xdigital.com" className="text-white/50 hover:text-white transition-colors duration-300">
-                hello@xdigital.com
-              </a>
-            </div>
+
           </div>
         </div>
       </section>
