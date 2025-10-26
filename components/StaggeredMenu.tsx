@@ -558,7 +558,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 @media (max-width: 1024px) { 
   .sm-scope .staggered-menu-panel { width: 100vw; max-width: 100vw; left: 0; right: 0; } 
   .sm-scope .sm-prelayers { width: 100vw; max-width: 100vw; left: 0; right: 0; }
-  .sm-scope .staggered-menu-wrapper[data-open] .sm-logo-img { filter: invert(100%); } 
+  .sm-scope .staggered-menu-wrapper[data-open] } 
   .sm-scope .sm-panel-item { font-size: 3rem; }
 }
 
