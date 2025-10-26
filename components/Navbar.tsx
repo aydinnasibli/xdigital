@@ -117,6 +117,7 @@ export default function Navbar() {
                     accentColor="#ffffff"
                     isFixed={false}
                     changeMenuColorOnOpen={true}
+
                 />
             </div>
         );
