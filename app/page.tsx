@@ -339,7 +339,7 @@ function Page() {
           </div>
         </div>
 
-        <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+        <div className="absolute hidden md:flex lg:flex  bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2  flex-col items-center">
           {/* Mouse Container */}
           <div className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center pt-2 relative" aria-hidden="true">
             {/* Scroll Wheel */}

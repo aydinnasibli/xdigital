@@ -115,7 +115,7 @@ export default function Navbar() {
                     logoUrl={Logo.src}
                     menuButtonColor="#ffffff"
                     openMenuButtonColor="#000000"
-                    accentColor="#6366f1"
+                    accentColor="#6E6D6D"
                     isFixed={true}
                     changeMenuColorOnOpen={true}
                 />
