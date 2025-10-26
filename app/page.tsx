@@ -287,7 +287,7 @@ function Page() {
           <div className="relative z-10 select-none flex h-full w-full items-center justify-center ">
             <SplitText
               text="xDigital"
-              className="text-6xl md:text-7xl lg:text-8xl font-semibold text-gray-300 text-center"
+              className="text-6xl md:text-7xl lg:text-9xl font-semibold text-gray-300 text-center"
               delay={40}
               duration={1.2}
               ease="power4.out"
