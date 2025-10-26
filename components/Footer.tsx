@@ -91,25 +91,45 @@ export default function Footer() {
     };
 
     return (
-        <footer ref={footerRef} className="relative w-full bg-transparent ">
-            <div className="max-w-7xl mx-auto px-8 py-12">
+        <footer ref={footerRef} className="relative w-full ">
+            <div className="max-w-7xl mx-auto px-8 py-16">
                 <div ref={contentRef}>
-                    {/* Main Content - Single Row Layout */}
-                    <div className="grid lg:grid-cols-[auto,auto] gap-12 mb-10">
+                    {/* Main Grid */}
+                    <div className="grid md:grid-cols-2 lg:grid-cols-[1fr,auto] gap-12 lg:gap-20 mb-12">
+                        {/* Left - Brand & Contact */}
+                        <div className="space-y-6">
+                            <motion.button
+                                onClick={scrollToTop}
+                                className="text-2xl font-light text-white/80 hover:text-white hover:cursor-pointer transition-colors duration-300 tracking-tight"
+                            >
+                                xDigital
+                            </motion.button>
+                            <p className="text-sm text-white/40 max-w-xs leading-relaxed">
+                                Digital agency focused on craft. Building products that matter.
+                            </p>
+                            <div className="flex items-center gap-2 pt-2">
+                                <Mail className="w-4 h-4 text-white/30" />
+                                <a
+                                    href="mailto:hello@xdigital.com"
+                                    className="text-sm text-white/50 hover:text-white/90 transition-colors duration-300"
+                                >
+                                    hello@xdigital.com
+                                </a>
+                            </div>
+                        </div>
 
-
-                        {/* Right - Compact Links */}
-                        <div className="grid grid-cols-3 gap-8 lg:gap-10">
+                        {/* Right - Links Grid */}
+                        <div className="grid grid-cols-3 gap-8">
                             <div>
-                                <h3 className="text-white/20 uppercase tracking-wider text-xs mb-4 font-medium">
+                                <h3 className="text-white/30 uppercase tracking-[0.2em] text-[10px] mb-4 font-mono">
                                     Services
                                 </h3>
-                                <ul className="space-y-2">
+                                <ul className="space-y-2.5">
                                     {footerLinks.services.map((link) => (
                                         <li key={link.name}>
                                             <Link
                                                 href={link.href}
-                                                className="text-white/50 hover:text-white/90 transition-colors duration-200 text-sm"
+                                                className="text-sm text-white/50 hover:text-white/90 transition-colors duration-300 font-light"
                                             >
                                                 {link.name}
                                             </Link>
@@ -119,15 +139,15 @@ export default function Footer() {
                             </div>
 
                             <div>
-                                <h3 className="text-white/20 uppercase tracking-wider text-xs mb-4 font-medium">
+                                <h3 className="text-white/30 uppercase tracking-[0.2em] text-[10px] mb-4 font-mono">
                                     Company
                                 </h3>
-                                <ul className="space-y-2">
+                                <ul className="space-y-2.5">
                                     {footerLinks.company.map((link) => (
                                         <li key={link.name}>
                                             <Link
                                                 href={link.href}
-                                                className="text-white/50 hover:text-white/90 transition-colors duration-200 text-sm"
+                                                className="text-sm text-white/50 hover:text-white/90 transition-colors duration-300 font-light"
                                             >
                                                 {link.name}
                                             </Link>
@@ -137,20 +157,20 @@ export default function Footer() {
                             </div>
 
                             <div>
-                                <h3 className="text-white/20 uppercase tracking-wider text-xs mb-4 font-medium">
+                                <h3 className="text-white/30 uppercase tracking-[0.2em] text-[10px] mb-4 font-mono">
                                     Social
                                 </h3>
-                                <ul className="space-y-2">
+                                <ul className="space-y-2.5">
                                     {footerLinks.social.map((link) => (
                                         <li key={link.name}>
                                             <a
                                                 href={link.href}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-white/50 hover:text-white/90 transition-colors duration-200 text-sm inline-flex items-center gap-1 group"
+                                                className="text-sm text-white/50 hover:text-white/90 transition-colors duration-300 font-light inline-flex items-center gap-1 group"
                                             >
                                                 {link.name}
-                                                <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300" />
                                             </a>
                                         </li>
                                     ))}
@@ -159,43 +179,26 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    {/* Bottom Bar - Condensed */}
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pt-8 border-t border-white/5">
-                        {/* Contact Info - Inline */}
-                        <div className="flex flex-wrap items-center gap-6 text-sm">
-                            <div className="flex  items-center gap-2">
-                                <Mail className="w-4 h-4  text-white/30" />
-                                <a href="mailto:hello@xdigital.com" className="text-white/50 hover:text-white transition-colors duration-300">
-                                    hello@xdigital.com
-                                </a>
-                            </div>
+                    {/* Bottom Bar */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-8 border-t border-white/5">
+                        <div className="text-[11px] text-white/30 font-mono">
+                            © {currentYear} xDigital. All rights reserved.
                         </div>
 
-                        {/* Legal & Brand */}
-                        <div className="flex flex-wrap items-center gap-6 text-xs text-white/30">
-                            <motion.button
-                                onClick={scrollToTop}
-                                className="text-white/70 tracking-widest hover:text-white hover:cursor-pointer transition-all"
-                            >
-                                xDigital
-                            </motion.button>
-                            <span>© {currentYear}</span>
-                            <Link href="#" className="hover:text-white/60 transition-colors">
+                        <div className="flex items-center gap-6 text-[11px] text-white/30 font-mono">
+                            <Link href="#" className="hover:text-white/60 transition-colors duration-300">
                                 Privacy
                             </Link>
-                            <Link href="#" className="hover:text-white/60 transition-colors">
+                            <Link href="#" className="hover:text-white/60 transition-colors duration-300">
                                 Terms
                             </Link>
-                            <Link href="#" className="hover:text-white/60 transition-colors">
-                                Faq
+                            <Link href="#" className="hover:text-white/60 transition-colors duration-300">
+                                FAQ
                             </Link>
                         </div>
                     </div>
                 </div>
             </div>
-
-            {/* Decorative gradient */}
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </footer>
     );
 }
