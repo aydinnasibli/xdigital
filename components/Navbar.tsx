@@ -166,7 +166,7 @@ export default function Navbar() {
                     <Link href="/sign-in" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
                         Sign In
                     </Link>
-                    <Link href="/sign-up" className="text-sm text-gray-300 hover:text-white px-6 py-2.5 border border-gray-700/50 rounded-full hover:border-gray-300/80 hover:bg-white/5 transition-all duration-300">
+                    <Link href="/sign-up" className="text-sm text-gray-300 hover:text-white px-6 py-2.5 border border-gray-300/50 rounded-full hover:border-gray-300/80 hover:bg-white/5 transition-all duration-300">
                         Sign Up
                     </Link>
                 </div>

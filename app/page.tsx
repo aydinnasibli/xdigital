@@ -580,7 +580,7 @@ function Page() {
           <div className="mt-12 text-center">
             <button
               onClick={() => scrollToSection('services-detail')}
-              className="group inline-flex items-center gap-3 px-8 py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300"
+              className="group inline-flex rounded-xl items-center gap-3 px-8 py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300"
             >
               <span className="font-light">See our services in action</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
