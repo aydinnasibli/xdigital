@@ -584,7 +584,7 @@ function Page() {
           <div className="mt-8 sm:mt-12 text-center">
             <button
               onClick={() => scrollToSection('services-detail')}
-              className="group inline-flex rounded-xl items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300 text-sm sm:text-base"
+              className="group inline-flex rounded-xl hover:cursor-pointer items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300 text-sm sm:text-base"
             >
               <span className="font-light">See our services in action</span>
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
