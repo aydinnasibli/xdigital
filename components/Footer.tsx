@@ -121,7 +121,7 @@ export default function Footer() {
                         {/* Right - Links Grid */}
                         <div className="grid grid-cols-3 gap-8">
                             <div>
-                                <h3 className="text-white/30 uppercase tracking-[0.2em] text-[10px] mb-4 font-mono">
+                                <h3 className="text-white/30 uppercase tracking-widest text-[10px] mb-4 font-mono">
                                     Services
                                 </h3>
                                 <ul className="space-y-2.5">
@@ -139,7 +139,7 @@ export default function Footer() {
                             </div>
 
                             <div>
-                                <h3 className="text-white/30 uppercase tracking-[0.2em] text-[10px] mb-4 font-mono">
+                                <h3 className="text-white/30 uppercase tracking-widest text-[10px] mb-4 font-mono">
                                     Company
                                 </h3>
                                 <ul className="space-y-2.5">
@@ -157,7 +157,7 @@ export default function Footer() {
                             </div>
 
                             <div>
-                                <h3 className="text-white/30 uppercase tracking-[0.2em] text-[10px] mb-4 font-mono">
+                                <h3 className="text-white/30 uppercase tracking-widest text-[10px] mb-4 font-mono">
                                     Social
                                 </h3>
                                 <ul className="space-y-2.5">

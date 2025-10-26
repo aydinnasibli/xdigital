@@ -266,7 +266,7 @@ function Page() {
   return (
     <div className='relative w-full overflow-x-hidden'>
       {/* Hero Section with Threads Background */}
-      <section className='relative min-h-screen  w-full overflow-hidden flex items-center justify-center'>
+      <section className='relative min-h-screen w-full overflow-hidden flex items-center justify-center px-4'>
         {/* Background Threads Animation */}
         <div className='absolute inset-0'>
           <Beams
@@ -276,18 +276,18 @@ function Page() {
             lightColor="#ffffff"
             speed={2}
             noiseIntensity={1.75}
-            scale={0.2} /* dont forget to adjust it properly*/
+            scale={0.2}
             rotation={0}
           />
         </div>
 
         {/* Hero Content */}
-        <div className='relative z-10 w-full max-w-7xl mx-auto px-8'>
+        <div className='relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           {/* Main Title - Centered */}
-          <div className="relative z-10 select-none flex h-full w-full items-center justify-center ">
+          <div className="relative z-10 select-none flex h-full w-full items-center justify-center">
             <SplitText
               text="xDigital"
-              className="text-7xl md:text-8xl lg:text-9xl font-semibold text-gray-300 text-center"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-semibold text-gray-300 text-center"
               delay={40}
               duration={1.2}
               ease="power4.out"
@@ -300,8 +300,8 @@ function Page() {
           </div>
 
           {/* Tagline - Centered */}
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="text-xl select-none md:text-2xl text-white/50 font-light leading-relaxed">
+          <div className="max-w-2xl mx-auto text-center mt-6 sm:mt-8 px-4">
+            <div className="text-base sm:text-lg md:text-xl lg:text-2xl select-none text-white/50 font-light leading-relaxed">
               <TextType
                 text={[
                   "Digital agency focused on craft",
@@ -318,23 +318,23 @@ function Page() {
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex mt-8 flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex mt-8 sm:mt-10 flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">
             <button
               ref={button1Ref}
               onClick={() => router.push('/sign-up')}
-              className="group hover:cursor-pointer  rounded-2xl inline-flex items-center gap-3 px-8 py-4 bg-white text-black hover:bg-white/90 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
+              className="group hover:cursor-pointer w-full sm:w-auto rounded-2xl inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-black hover:bg-white/90 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
               aria-label="Start a new project"
             >
-              <span className="font-light">Start a project</span>
-              <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true" />
+              <span className="font-light text-sm sm:text-base">Start a project</span>
+              <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true" />
             </button>
             <button
               ref={button2Ref}
               onClick={() => scrollToSection('services-detail')}
-              className="group hover:cursor-pointer rounded-xl inline-flex items-center gap-3 px-8 py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
+              className="group hover:cursor-pointer w-full sm:w-auto rounded-xl inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
               aria-label="View our services"
             >
-              <span className="font-light">Our services</span>
+              <span className="font-light text-sm sm:text-base">Our services</span>
             </button>
           </div>
         </div>
@@ -349,29 +349,30 @@ function Page() {
       </section>
 
       {/* Detailed Services Section */}
-      < section id="services-detail" className='relative w-full  py-20' >
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-light text-white/90 mb-4">
+      <section id="services-detail" className='relative w-full py-12 sm:py-16 md:py-20'>
+        <div className="text-center mb-12 sm:mb-16 md:mb-20 px-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-white/90 mb-3 sm:mb-4">
             What We Offer
           </h2>
-          <p className="text-lg text-white/50 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-white/50 max-w-2xl mx-auto px-4">
             Choose the service that fits your needs, or combine them for maximum impact
           </p>
         </div>
-        <div className='w-full max-w-7xl mx-auto px-8'>
+        <div className='w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
 
           {/* Service Tabs */}
-          <div className="grid grid-cols-3 mb-12 border-b border-white/5 pb-3">
+          <div className="grid grid-cols-3 mb-8 sm:mb-12 border-b border-white/5 pb-2 sm:pb-3 gap-1 sm:gap-2">
             {services.map((service, idx) => (
               <button
                 key={idx}
                 onClick={() => setActiveService(idx)}
-                className={`px-6 py-3 hover:cursor-pointer text-base transition-all duration-500 ${activeService === idx
+                className={`px-2 sm:px-4 md:px-6 py-2 sm:py-3 hover:cursor-pointer text-xs sm:text-sm md:text-base transition-all duration-500 ${activeService === idx
                   ? 'text-white border-b-2 border-white'
                   : 'text-white/40 hover:text-white/70 border-b-2 border-transparent'
                   }`}
               >
-                {service.title}
+                <span className="hidden sm:inline">{service.title}</span>
+                <span className="sm:hidden">{service.title.split(' ')[0]}</span>
               </button>
             ))}
           </div>
@@ -383,65 +384,65 @@ function Page() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="grid lg:grid-cols-2 gap-12 items-start"
+              className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-start"
             >
               {/* Left: Description */}
               <div>
-                <h3 className="text-3xl font-light text-white/90 mb-6">
+                <h3 className="text-2xl sm:text-3xl font-light text-white/90 mb-4 sm:mb-6">
                   {services[activeService].title}
                 </h3>
 
-                <p className="text-base text-white/60 leading-relaxed mb-8">
+                <p className="text-sm sm:text-base text-white/60 leading-relaxed mb-6 sm:mb-8">
                   {services[activeService].fullDescription}
                 </p>
 
-                <div className="space-y-4 mb-8">
+                <div className="space-y-4 mb-6 sm:mb-8">
                   <p className="text-xs text-white/40 uppercase tracking-wider">What's Included</p>
-                  <ul className="space-y-3">
+                  <ul className="space-y-2 sm:space-y-3">
                     {services[activeService].features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
-                        <span className="text-white/70">{feature}</span>
+                      <li key={idx} className="flex items-start gap-2 sm:gap-3">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-white/40 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm sm:text-base text-white/70">{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="border-t border-white/5 pt-6 space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/40">Ideal for:</span>
-                    <span className="text-white/70">{services[activeService].idealFor}</span>
+                <div className="border-t border-white/5 pt-4 sm:pt-6 space-y-2 sm:space-y-3">
+                  <div className="flex justify-between items-center gap-4">
+                    <span className="text-sm sm:text-base text-white/40">Ideal for:</span>
+                    <span className="text-sm sm:text-base text-white/70 text-right">{services[activeService].idealFor}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/40">Starting at:</span>
-                    <span className="text-white font-light text-lg">{services[activeService].startingPrice}</span>
+                  <div className="flex justify-between items-center gap-4">
+                    <span className="text-sm sm:text-base text-white/40">Starting at:</span>
+                    <span className="text-white font-light text-base sm:text-lg">{services[activeService].startingPrice}</span>
                   </div>
                 </div>
               </div>
 
               {/* Right: CTA Card */}
               <div className="lg:sticky lg:top-24">
-                <div className="bg-zinc-900 border rounded-2xl border-white/10 p-10">
-                  <h4 className="text-2xl font-light text-white/90 mb-4">
+                <div className="bg-zinc-900 border rounded-2xl border-white/10 p-6 sm:p-8 lg:p-10">
+                  <h4 className="text-xl sm:text-2xl font-light text-white/90 mb-3 sm:mb-4">
                     Ready to get started?
                   </h4>
-                  <p className="text-white/50 mb-8">
+                  <p className="text-sm sm:text-base text-white/50 mb-6 sm:mb-8">
                     Let's discuss how {services[activeService].title.toLowerCase()} can help grow your business.
                   </p>
 
-                  <Link href={'/sign-up'} className="w-full rounded-xl bg-white text-black py-4 hover:bg-white/90 transition-all duration-300 mb-4 inline-flex items-center justify-center gap-2">
+                  <Link href={'/sign-up'} className="w-full rounded-xl bg-white text-black py-3 sm:py-4 hover:bg-white/90 transition-all duration-300 mb-3 sm:mb-4 inline-flex items-center justify-center gap-2 text-sm sm:text-base">
                     <span>Start Your Project</span>
-                    <ArrowUpRight className="w-5 h-5" />
+                    <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
                   </Link>
 
                   <Link href={services[activeService].link}
-                    className="w-full bg-gray-200/20 rounded-xl text-white py-4 hover:bg-gray-300/30 transition-all duration-300 mb-4 inline-flex items-center justify-center gap-2">
+                    className="w-full bg-gray-200/20 rounded-xl text-white py-3 sm:py-4 hover:bg-gray-300/30 transition-all duration-300 mb-3 sm:mb-4 inline-flex items-center justify-center gap-2 text-sm sm:text-base">
                     <span>More Detail</span>
                   </Link>
 
-                  <div className="mt-8 pt-8 border-t border-white/5">
-                    <p className="text-sm text-white/40  text-center">
-                      Questions? <a href="mailto:hello@xdigital.com" className="text-white/70 hover:text-white  duration-300 transition-all">Email us</a>
+                  <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/5">
+                    <p className="text-xs sm:text-sm text-white/40 text-center">
+                      Questions? <a href="mailto:hello@xdigital.com" className="text-white/70 hover:text-white duration-300 transition-all">Email us</a>
                     </p>
                   </div>
                 </div>
@@ -450,41 +451,41 @@ function Page() {
           </AnimatePresence>
 
         </div>
-      </section >
+      </section>
 
 
       {/* Process - Minimal & Elegant */}
-      <section className="relative w-full py-32 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="mb-20">
-            <h2 className="text-base text-white/30 uppercase tracking-[0.3em] font-mono mb-12">Our Process</h2>
-            <p className="text-3xl font-light text-white/70 max-w-3xl">
+      <section className="relative w-full py-16 sm:py-24 md:py-32 border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 sm:mb-16 md:mb-20">
+            <h2 className="text-xs sm:text-sm md:text-base text-white/30 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-mono mb-8 sm:mb-12">Our Process</h2>
+            <p className="text-xl sm:text-2xl md:text-3xl font-light text-white/70 max-w-3xl">
               No bloat. Just pure execution from idea to launch.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-16">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 md:gap-16">
             {processSteps.map((step, idx) => (
               <motion.div key={idx} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.6, delay: idx * 0.1 }} className="relative group">
                 <div className="absolute -left-4 top-0 bottom-0 w-px bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-                <div className="space-y-4">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-6xl font-light text-white/[0.08] group-hover:text-white/20 transition-colors duration-500">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-baseline gap-2 sm:gap-3">
+                    <span className="text-4xl sm:text-5xl md:text-6xl font-light text-white/[0.08] group-hover:text-white/20 transition-colors duration-500">
                       {step.step}
                     </span>
                     {!step.required && (
-                      <span className="text-[9px] text-white/20 uppercase tracking-wider font-mono">opt</span>
+                      <span className="text-[8px] sm:text-[9px] text-white/20 uppercase tracking-wider font-mono">opt</span>
                     )}
                   </div>
 
-                  <h3 className="text-2xl font-light text-white/80 group-hover:text-white transition-colors duration-500">
+                  <h3 className="text-xl sm:text-2xl font-light text-white/80 group-hover:text-white transition-colors duration-500">
                     {step.title}
                   </h3>
 
                   <div className="h-px bg-white/5 group-hover:bg-white/20 transition-colors duration-500" />
 
-                  <p className="text-sm text-white/40 leading-relaxed group-hover:text-white/60 transition-colors duration-500">
+                  <p className="text-xs sm:text-sm text-white/40 leading-relaxed group-hover:text-white/60 transition-colors duration-500">
                     {step.description}
                   </p>
                 </div>
@@ -493,123 +494,127 @@ function Page() {
           </div>
         </div>
       </section>
+
       {/* What Sets Us Apart */}
-      <section className='relative w-full py-32'>
-        <div className='w-full max-w-7xl mx-auto px-8'>
-          <div className="flex items-center gap-4 mb-20">
-            <Minus className="w-8 h-8 text-white/20" />
-            <h2 className="text-sm text-white/40 uppercase tracking-widest">What Sets Us Apart</h2>
+      <section className='relative w-full py-16 sm:py-24 md:py-32'>
+        <div className='w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className="flex items-center gap-3 sm:gap-4 mb-12 sm:mb-16 md:mb-20">
+            <Minus className="w-6 h-6 sm:w-8 sm:h-8 text-white/20" />
+            <h2 className="text-xs sm:text-sm text-white/40 uppercase tracking-wider sm:tracking-widest">What Sets Us Apart</h2>
           </div>
 
           {/* Comparison Table */}
-          <div className="border border-white/10">
-            {/* Header */}
-            <div className="grid grid-cols-3 border-b border-white/10">
-              <div className="p-6"></div>
-              <div className="p-6 border-l border-white/10">
-                <h3 className="text-lg font-light text-white/40">Typical Agencies</h3>
-              </div>
-              <div className="p-6 border-l border-white/10 bg-white/[0.02]">
-                <h3 className="text-lg font-light text-white">xDigital</h3>
-              </div>
-            </div>
-
-            {/* Comparison Rows */}
-            {[
-              {
-                category: "Delivery Time",
-                them: "3-6 months minimum",
-                us: "Launch in 2-4 weeks"
-              },
-              {
-                category: "Communication",
-                them: "Weekly email updates",
-                us: "Real-time collaboration & daily updates"
-              },
-              {
-                category: "Pricing",
-                them: "Hidden fees, scope creep",
-                us: "Transparent, fixed pricing upfront"
-              },
-              {
-                category: "Technology",
-                them: "Outdated legacy systems",
-                us: "Modern, cutting-edge stack"
-              },
-              {
-                category: "Support",
-                them: "Ends after launch",
-                us: "Ongoing optimization & support"
-              },
-              {
-                category: "Results",
-                them: "Vague promises",
-                us: "Measurable KPIs & guaranteed outcomes"
-              }
-            ].map((row, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="grid grid-cols-3 border-b border-white/10 last:border-b-0 hover:bg-white/[0.01] transition-colors duration-300"
-              >
-                {/* Category */}
-                <div className="p-6 flex items-center">
-                  <span className="text-white/70 font-light">{row.category}</span>
+          <div className="border border-white/10 overflow-x-auto">
+            <div className="min-w-[600px]">
+              {/* Header */}
+              <div className="grid grid-cols-3 border-b border-white/10">
+                <div className="p-3 sm:p-4 md:p-6"></div>
+                <div className="p-3 sm:p-4 md:p-6 border-l border-white/10">
+                  <h3 className="text-sm sm:text-base md:text-lg font-light text-white/40">Typical Agencies</h3>
                 </div>
-
-                {/* Them */}
-                <div className="p-6 border-l border-white/10 flex items-center">
-                  <span className="text-white/40 text-sm">{row.them}</span>
+                <div className="p-3 sm:p-4 md:p-6 border-l border-white/10 bg-white/[0.02]">
+                  <h3 className="text-sm sm:text-base md:text-lg font-light text-white">xDigital</h3>
                 </div>
+              </div>
 
-                {/* Us */}
-                <div className="p-6 border-l border-white/10 bg-white/[0.02] flex items-center">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-white/60 flex-shrink-0" />
-                    <span className="text-white/80 text-sm">{row.us}</span>
+              {/* Comparison Rows */}
+              {[
+                {
+                  category: "Delivery Time",
+                  them: "3-6 months minimum",
+                  us: "Launch in 2-4 weeks"
+                },
+                {
+                  category: "Communication",
+                  them: "Weekly email updates",
+                  us: "Real-time collaboration & daily updates"
+                },
+                {
+                  category: "Pricing",
+                  them: "Hidden fees, scope creep",
+                  us: "Transparent, fixed pricing upfront"
+                },
+                {
+                  category: "Technology",
+                  them: "Outdated legacy systems",
+                  us: "Modern, cutting-edge stack"
+                },
+                {
+                  category: "Support",
+                  them: "Ends after launch",
+                  us: "Ongoing optimization & support"
+                },
+                {
+                  category: "Results",
+                  them: "Vague promises",
+                  us: "Measurable KPIs & guaranteed outcomes"
+                }
+              ].map((row, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  className="grid grid-cols-3 border-b border-white/10 last:border-b-0 hover:bg-white/[0.01] transition-colors duration-300"
+                >
+                  {/* Category */}
+                  <div className="p-3 sm:p-4 md:p-6 flex items-center">
+                    <span className="text-xs sm:text-sm md:text-base text-white/70 font-light">{row.category}</span>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+
+                  {/* Them */}
+                  <div className="p-3 sm:p-4 md:p-6 border-l border-white/10 flex items-center">
+                    <span className="text-xs sm:text-sm text-white/40">{row.them}</span>
+                  </div>
+
+                  {/* Us */}
+                  <div className="p-3 sm:p-4 md:p-6 border-l border-white/10 bg-white/[0.02] flex items-center">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-white/60 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-white/80">{row.us}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
           {/* Bottom CTA */}
-          <div className="mt-12 text-center">
+          <div className="mt-8 sm:mt-12 text-center">
             <button
               onClick={() => scrollToSection('services-detail')}
-              className="group inline-flex rounded-xl items-center gap-3 px-8 py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300"
+              className="group inline-flex rounded-xl items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300 text-sm sm:text-base"
             >
               <span className="font-light">See our services in action</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>
       </section>
+
       {/* Testimonials - Rotating Showcase */}
-      <section className='relative w-full py-32'>
-        <div className='w-full max-w-4xl mx-auto px-8'>
-          <div className="relative min-h-[400px] flex items-center">
+      <section className='relative w-full py-16 sm:py-24 md:py-32'>
+        <div className='w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className="relative min-h-[350px] sm:min-h-[400px] flex items-center">
             {testimonials.map((testimonial, idx) => (
               <motion.div key={idx} initial={false} animate={{ opacity: activeTestimonial === idx ? 1 : 0, scale: activeTestimonial === idx ? 1 : 0.95, y: activeTestimonial === idx ? 0 : 20 }} transition={{ duration: 0.7, ease: "easeOut" }} className="absolute inset-0" style={{ pointerEvents: activeTestimonial === idx ? 'auto' : 'none' }}>
-                <div className="space-y-8">
+                <div className="space-y-6 sm:space-y-8">
                   <div className="flex gap-1">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-white/60 text-white/60" />
+                      <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-white/60 text-white/60" />
                     ))}
                   </div>
 
-                  <blockquote className="text-3xl md:text-4xl font-light text-white/80 leading-relaxed">
+                  <blockquote className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light text-white/80 leading-relaxed">
                     "{testimonial.quote}"
                   </blockquote>
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     <div className="h-px flex-grow bg-white/10" />
                     <div className="text-right">
-                      <div className="text-white/90 font-light">{testimonial.author}</div>
-                      <div className="text-white/30 text-sm">{testimonial.position}</div>
+                      <div className="text-sm sm:text-base text-white/90 font-light">{testimonial.author}</div>
+                      <div className="text-white/30 text-xs sm:text-sm">{testimonial.position}</div>
                     </div>
                   </div>
                 </div>
@@ -618,37 +623,36 @@ function Page() {
           </div>
 
           {/* Testimonial Navigation */}
-          <div className="flex justify-center gap-3 mt-12">
+          <div className="flex justify-center gap-2 sm:gap-3 mt-8 sm:mt-12">
             {testimonials.map((_, idx) => (
-              <button key={idx} onClick={() => setActiveTestimonial(idx)} className={`h-1 transition-all duration-500 ${activeTestimonial === idx ? 'w-12 bg-white/80' : 'w-8 bg-white/20 hover:bg-white/40'}`} aria-label={`View testimonial ${idx + 1}`} />
+              <button key={idx} onClick={() => setActiveTestimonial(idx)} className={`h-1 transition-all duration-500 ${activeTestimonial === idx ? 'w-10 sm:w-12 bg-white/80' : 'w-6 sm:w-8 bg-white/20 hover:bg-white/40'}`} aria-label={`View testimonial ${idx + 1}`} />
             ))}
           </div>
         </div>
       </section>
+
       {/* Final CTA - Bold Statement */}
-      <section className='relative w-full py-40 border-t border-white/5'>
-        <div className='w-full max-w-6xl mx-auto px-8'>
-          <div className="text-center space-y-12">
-            <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-4xl md:text-6xl font-light text-white/90 leading-tight">
+      <section className='relative w-full py-20 sm:py-32 md:py-40 border-t border-white/5'>
+        <div className='w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className="text-center space-y-8 sm:space-y-10 md:space-y-12">
+            <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light text-white/90 leading-tight px-4">
               Ready to build something that matters?
             </motion.h2>
 
-            <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 }} className="text-lg text-white/40 max-w-2xl mx-auto">
+            <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 }} className="text-base sm:text-lg text-white/40 max-w-2xl mx-auto px-4">
               No sales calls. No pitches. Just a real conversation about your vision.
             </motion.p>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.4 }} className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
-              <Link href="/contact" className="group inline-flex rounded-3xl items-center gap-3 px-12 py-5 bg-white text-black hover:bg-white/80 transition-all duration-300">
-                <span className="font-light text-base">Let's Talk</span>
-                <ArrowUpRight className="w-6 h-6 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.4 }} className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-6 sm:pt-8 px-4">
+              <Link href="/contact" className="group inline-flex w-full sm:w-auto rounded-3xl items-center justify-center gap-2 sm:gap-3 px-8 sm:px-10 md:px-12 py-4 sm:py-5 bg-white text-black hover:bg-white/80 transition-all duration-300">
+                <span className="font-light text-sm sm:text-base">Let's Talk</span>
+                <ArrowUpRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </Link>
             </motion.div>
-
-
           </div>
         </div>
       </section>
-    </div >
+    </div>
   )
 }
 
