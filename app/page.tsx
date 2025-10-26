@@ -442,7 +442,7 @@ function Page() {
 
                   <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/5">
                     <p className="text-xs sm:text-sm text-white/40 text-center">
-                      Questions? <a href="mailto:hello@xdigital.com" className="text-white/70 hover:text-white duration-300 transition-all">Email us</a>
+                      Questions? <a href="mailto:hello@xdigital.com" className="text-white/70 hover:text-white underline-offset-2  underline duration-300 transition-all">Email us</a>
                     </p>
                   </div>
                 </div>
@@ -458,7 +458,7 @@ function Page() {
       <section className="relative w-full py-16 sm:py-24 md:py-32 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 sm:mb-16 md:mb-20">
-            <h2 className="text-sm sm:text-base md:text-lg text-white/30 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-mono mb-8 sm:mb-12">Our Process</h2>
+            <h2 className="text-sm sm:text-base md:text-lg text-white/40 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-mono mb-8 sm:mb-12">Our Process</h2>
             <p className="text-xl sm:text-2xl md:text-3xl font-light text-white/70 max-w-3xl">
               No bloat. Just pure execution from idea to launch.
             </p>
@@ -471,7 +471,7 @@ function Page() {
 
                 <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-baseline gap-2 sm:gap-3">
-                    <span className="text-4xl sm:text-5xl md:text-6xl font-light text-white/[0.08] group-hover:text-white/20 transition-colors duration-500">
+                    <span className="text-4xl sm:text-5xl md:text-6xl font-light text-white/[0.10] group-hover:text-white/30 transition-colors duration-500">
                       {step.step}
                     </span>
                     {!step.required && (
@@ -504,15 +504,15 @@ function Page() {
           </div>
 
           {/* Comparison Table */}
-          <div className="border border-white/10 overflow-x-auto">
+          <div className="border border-white/20 overflow-x-auto">
             <div className="min-w-[600px]">
               {/* Header */}
-              <div className="grid grid-cols-3 border-b border-white/10">
+              <div className="grid grid-cols-3 border-b border-white/20">
                 <div className="p-3 sm:p-4 md:p-6"></div>
-                <div className="p-3 sm:p-4 md:p-6 border-l border-white/10">
+                <div className="p-3 sm:p-4 md:p-6 border-l border-white/20">
                   <h3 className="text-sm sm:text-base md:text-lg font-light text-white/40">Typical Agencies</h3>
                 </div>
-                <div className="p-3 sm:p-4 md:p-6 border-l border-white/10 bg-white/[0.02]">
+                <div className="p-3 sm:p-4 md:p-6 border-l border-white/20 bg-white/[0.02]">
                   <h3 className="text-sm sm:text-base md:text-lg font-light text-white">xDigital</h3>
                 </div>
               </div>
@@ -598,7 +598,10 @@ function Page() {
         <div className='w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className="relative min-h-[350px] sm:min-h-[400px] flex items-center">
             {testimonials.map((testimonial, idx) => (
-              <motion.div key={idx} initial={false} animate={{ opacity: activeTestimonial === idx ? 1 : 0, scale: activeTestimonial === idx ? 1 : 0.95, y: activeTestimonial === idx ? 0 : 20 }} transition={{ duration: 0.7, ease: "easeOut" }} className="absolute inset-0" style={{ pointerEvents: activeTestimonial === idx ? 'auto' : 'none' }}>
+              <motion.div key={idx} initial={false} animate={{ opacity: activeTestimonial === idx ? 1 : 0, scale: activeTestimonial === idx ? 1 : 0.95, y: activeTestimonial === idx ? 0 : 20 }} transition={{ duration: 0.7, ease: "backInOut" }} className="absolute inset-0" style={{
+                pointerEvents: activeTestimonial === idx ? 'auto' : 'none',
+                visibility: activeTestimonial === idx ? 'visible' : 'hidden' // ADD THIS
+              }}>
                 <div className="space-y-6 sm:space-y-8">
                   <div className="flex gap-1">
                     {[...Array(testimonial.rating)].map((_, i) => (
