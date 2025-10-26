@@ -1,371 +1,337 @@
 'use client'
-import React, { useEffect, useRef, useState } from 'react'
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
-import * as THREE from 'three'
+import React, { useRef } from 'react'
+import { motion, useScroll } from 'framer-motion'
+import { ArrowUpRight, Minus, Plus } from 'lucide-react'
 
-export default function page() {
+export default function AboutPage() {
     const containerRef = useRef<HTMLDivElement>(null)
-    const canvasRef = useRef<HTMLCanvasElement>(null)
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-    const { scrollYProgress } = useScroll()
-    const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
+    const { scrollYProgress } = useScroll({ target: containerRef })
 
-    // Three.js Scene
-    useEffect(() => {
-        if (!canvasRef.current) return
-
-        const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-        const renderer = new THREE.WebGLRenderer({
-            canvas: canvasRef.current,
-            alpha: true,
-            antialias: true
-        })
-
-        renderer.setSize(window.innerWidth, window.innerHeight)
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-        camera.position.z = 5
-
-        // Create fluid geometric shapes
-        const geometry = new THREE.IcosahedronGeometry(1, 1)
-        const material = new THREE.MeshPhongMaterial({
-            color: 0xffffff,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.15,
-            emissive: 0x444444,
-        })
-
-        const shapes: THREE.Mesh[] = []
-        for (let i = 0; i < 15; i++) {
-            const mesh = new THREE.Mesh(geometry, material.clone())
-            mesh.position.x = (Math.random() - 0.5) * 15
-            mesh.position.y = (Math.random() - 0.5) * 15
-            mesh.position.z = (Math.random() - 0.5) * 10
-            mesh.rotation.x = Math.random() * Math.PI
-            mesh.rotation.y = Math.random() * Math.PI
-            const scale = Math.random() * 0.5 + 0.3
-            mesh.scale.set(scale, scale, scale)
-            shapes.push(mesh)
-            scene.add(mesh)
-        }
-
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-        scene.add(ambientLight)
-
-        const pointLight = new THREE.PointLight(0xffffff, 1)
-        pointLight.position.set(5, 5, 5)
-        scene.add(pointLight)
-
-        // Animation
-        let animationId: number
-        const animate = () => {
-            animationId = requestAnimationFrame(animate)
-
-            shapes.forEach((shape, i) => {
-                shape.rotation.x += 0.001 + i * 0.0001
-                shape.rotation.y += 0.001 + i * 0.0001
-
-                // Floating effect
-                shape.position.y += Math.sin(Date.now() * 0.001 + i) * 0.001
-            })
-
-            // Mouse interaction
-            camera.position.x += (mousePosition.x * 0.5 - camera.position.x) * 0.05
-            camera.position.y += (-mousePosition.y * 0.5 - camera.position.y) * 0.05
-            camera.lookAt(scene.position)
-
-            renderer.render(scene, camera)
-        }
-        animate()
-
-        // Handle resize
-        const handleResize = () => {
-            camera.aspect = window.innerWidth / window.innerHeight
-            camera.updateProjectionMatrix()
-            renderer.setSize(window.innerWidth, window.innerHeight)
-        }
-        window.addEventListener('resize', handleResize)
-
-        return () => {
-            cancelAnimationFrame(animationId)
-            window.removeEventListener('resize', handleResize)
-            renderer.dispose()
-        }
-    }, [mousePosition])
-
-    // Mouse tracking
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            setMousePosition({
-                x: (e.clientX / window.innerWidth) * 2 - 1,
-                y: (e.clientY / window.innerHeight) * 2 - 1
-            })
-        }
-        window.addEventListener('mousemove', handleMouseMove)
-        return () => window.removeEventListener('mousemove', handleMouseMove)
-    }, [])
-
-    const team = [
-        { name: "Alex Morgan", role: "Creative Director", exp: "12 years", focus: "Vision & Strategy" },
-        { name: "Jordan Chen", role: "Technical Lead", exp: "9 years", focus: "Architecture" },
-        { name: "Sam Rivera", role: "Growth Lead", exp: "8 years", focus: "Market Expansion" },
+    const philosophy = [
+        {
+            num: "01",
+            title: "Craft Over Speed",
+            desc: "We believe great work takes time. Every detail matters, every interaction counts."
+        },
+        {
+            num: "02",
+            title: "Human-Centered",
+            desc: "Technology serves people, not the other way around. We design for real humans."
+        },
+        {
+            num: "03",
+            title: "Radical Honesty",
+            desc: "No corporate speak. No empty promises. Just straight talk about what works."
+        },
+        {
+            num: "04",
+            title: "Continuous Growth",
+            desc: "We're students first, experts second. Always learning, always evolving."
+        },
     ]
 
-    const principles = [
-        { num: "01", title: "Craft Over Speed", desc: "We believe in taking time to perfect details that others overlook" },
-        { num: "02", title: "Honest Communication", desc: "No jargon, no fluff—just transparent dialogue about what works" },
-        { num: "03", title: "Long-term Thinking", desc: "Building relationships and products that stand the test of time" },
-        { num: "04", title: "Continuous Evolution", desc: "Always learning, always improving, never settling for good enough" },
+    const journey = [
+        { year: "2019", event: "Founded in a garage", detail: "Three friends, one vision" },
+        { year: "2020", event: "First enterprise client", detail: "Fortune 500 partnership" },
+        { year: "2021", event: "Expanded team", detail: "From 3 to 10 people" },
+        { year: "2022", event: "International reach", detail: "Clients across 5 continents" },
+        { year: "2023", event: "Industry recognition", detail: "Multiple design awards" },
+        { year: "2024", event: "New chapter", detail: "25 people, infinite possibilities" },
     ]
 
     return (
-        <div ref={containerRef} className="relative min-h-screen bg-black text-white overflow-hidden">
-            {/* Three.js Canvas Background */}
-            <canvas
-                ref={canvasRef}
-                className="fixed inset-0 w-full h-full -z-10"
-                style={{ background: 'linear-gradient(180deg, #000000 0%, #0a0a0a 100%)' }}
-            />
-
+        <div ref={containerRef} className="relative text-white">
             {/* Noise Texture Overlay */}
-            <div className="fixed inset-0 opacity-[0.03] pointer-events-none -z-5"
+            <div
+                className="fixed inset-0 opacity-[0.03] pointer-events-none -z-5"
                 style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
                 }}
             />
 
-            {/* Hero Section */}
-            <section className="relative min-h-screen flex items-center justify-center px-6 pt-20">
-                <div className="max-w-6xl w-full">
+            {/* Hero - Different approach with side-by-side layout */}
+            <section className="relative min-h-screen flex items-center px-6 lg:px-12">
+                <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-16 lg:gap-24 items-center py-20">
+                    {/* Left - Text */}
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1.5 }}
-                        className="space-y-12"
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="space-y-8"
                     >
-                        {/* Intro Line */}
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: "100%" }}
-                            transition={{ duration: 1.2, delay: 0.3 }}
-                            className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                        />
-
-                        {/* Main Title */}
-                        <div className="space-y-6">
-                            <motion.p
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.8, delay: 0.5 }}
-                                className="text-white/40 text-sm tracking-[0.3em] uppercase font-mono"
-                            >
-                                About xDigital
-                            </motion.p>
-
-                            <motion.h1
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 1, delay: 0.7 }}
-                                className="text-5xl md:text-7xl lg:text-8xl font-light leading-[1.1] tracking-tight"
-                            >
-                                We don't build<br />
-                                <span className="text-white/30">websites.</span><br />
-                                We craft<br />
-                                <span className="italic font-serif">experiences.</span>
-                            </motion.h1>
+                        <div className="space-y-4">
+                            <div className="inline-block px-4 py-1 border border-white/20 text-white/60 text-xs uppercase tracking-widest">
+                                About Us
+                            </div>
+                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-light leading-tight">
+                                We don&apos;t follow
+                                <br />
+                                <span className="font-normal">trends.</span>
+                                <br />
+                                We set them.
+                            </h1>
                         </div>
 
-                        {/* Philosophy Statement */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 1, delay: 1.2 }}
-                            className="max-w-2xl ml-auto"
-                        >
-                            <p className="text-xl md:text-2xl text-white/50 leading-relaxed font-light">
-                                In a world drowning in mediocre digital products, we exist to create
-                                work that makes people pause, think, and feel something real.
-                            </p>
-                        </motion.div>
+                        <p className="text-lg text-white/60 leading-relaxed max-w-xl">
+                            xDigital is a collective of designers, developers, and strategists
+                            obsessed with creating digital experiences that actually matter.
+                        </p>
+                    </motion.div>
+
+                    {/* Right - Large Year Display with better design */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                        className="relative flex items-center justify-center"
+                    >
+                        <div className="relative">
+                            {/* Outer ring */}
+                            <svg className="w-80 h-80 md:w-96 md:h-96" viewBox="0 0 200 200">
+                                <defs>
+                                    <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="rgba(255,255,255,0.2)" />
+                                        <stop offset="100%" stopColor="rgba(255,255,255,0.05)" />
+                                    </linearGradient>
+                                </defs>
+
+                                {/* Outer circle */}
+                                <circle
+                                    cx="100"
+                                    cy="100"
+                                    r="95"
+                                    fill="none"
+                                    stroke="url(#ringGradient)"
+                                    strokeWidth="0.5"
+                                />
+
+                                {/* Middle circles */}
+                                <circle
+                                    cx="100"
+                                    cy="100"
+                                    r="75"
+                                    fill="none"
+                                    stroke="rgba(255,255,255,0.1)"
+                                    strokeWidth="0.3"
+                                    strokeDasharray="2 4"
+                                />
+
+                                <circle
+                                    cx="100"
+                                    cy="100"
+                                    r="55"
+                                    fill="none"
+                                    stroke="rgba(255,255,255,0.05)"
+                                    strokeWidth="0.3"
+                                />
+                            </svg>
+
+                            {/* Center content */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <div className="text-7xl md:text-8xl font-light text-white/90 mb-2">2019</div>
+                                <div className="text-xs text-white/40 uppercase tracking-[0.3em]">Founded</div>
+                            </div>
+                        </div>
                     </motion.div>
                 </div>
             </section>
 
-            {/* Philosophy Grid */}
-            <section className="relative py-32 px-6">
+            {/* What We Do - Replace stats with actual content */}
+            <section className="relative py-32 px-6 border-t border-white/5">
                 <div className="max-w-7xl mx-auto">
-                    <motion.h2
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        className="text-white/30 text-sm tracking-[0.3em] uppercase font-mono mb-20"
-                    >
-                        Our Principles
-                    </motion.h2>
+                    <div className="grid lg:grid-cols-2 gap-20 items-start">
+                        {/* Left - Title */}
+                        <div className="space-y-6">
+                            <h2 className="text-4xl md:text-5xl font-light leading-tight">
+                                We build products
+                                <br />
+                                <span className="text-white/40">people love to use</span>
+                            </h2>
+                            <p className="text-white/50 text-lg leading-relaxed">
+                                From concept to launch, we handle everything. Strategy, design,
+                                development, and growth. One team, complete ownership.
+                            </p>
+                        </div>
 
-                    <div className="grid md:grid-cols-2 gap-16">
-                        {principles.map((principle, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 40 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-100px" }}
-                                transition={{ duration: 0.8, delay: idx * 0.1 }}
-                                className="group relative"
-                            >
-                                <div className="space-y-6 pb-8 border-b border-white/10 group-hover:border-white/30 transition-colors duration-500">
-                                    <div className="text-6xl md:text-7xl font-light text-white/10 group-hover:text-white/20 transition-colors duration-500">
-                                        {principle.num}
+                        {/* Right - Capabilities */}
+                        <div className="space-y-8">
+                            {[
+                                {
+                                    title: "Strategy & Research",
+                                    items: ["User Research", "Market Analysis", "Product Strategy", "Brand Positioning"]
+                                },
+                                {
+                                    title: "Design & Experience",
+                                    items: ["UI/UX Design", "Design Systems", "Prototyping", "Motion Design"]
+                                },
+                                {
+                                    title: "Development & Tech",
+                                    items: ["Web Development", "Mobile Apps", "Custom Solutions", "API Integration"]
+                                },
+                                {
+                                    title: "Growth & Marketing",
+                                    items: ["Digital Marketing", "SEO Strategy", "Content Creation", "Analytics"]
+                                }
+                            ].map((category, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.6, delay: idx * 0.1 }}
+                                    className="group"
+                                >
+                                    <h3 className="text-xl font-light mb-4 text-white/90">{category.title}</h3>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {category.items.map((item, i) => (
+                                            <div
+                                                key={i}
+                                                className="text-sm text-white/40 py-2 px-4 border border-white/5 hover:border-white/20 hover:bg-white/5 transition-all duration-300 cursor-default"
+                                            >
+                                                {item}
+                                            </div>
+                                        ))}
                                     </div>
-                                    <h3 className="text-2xl md:text-3xl font-light tracking-tight">
-                                        {principle.title}
-                                    </h3>
-                                    <p className="text-white/40 text-lg leading-relaxed">
-                                        {principle.desc}
-                                    </p>
-                                </div>
-                            </motion.div>
-                        ))}
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Story Section - Horizontal Scroll Effect */}
+            {/* Our Approach - Better than philosophy */}
             <section className="relative py-32 px-6 border-t border-white/5">
-                <div className="max-w-4xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1 }}
-                        className="space-y-12"
-                    >
-                        <h2 className="text-white/30 text-sm tracking-[0.3em] uppercase font-mono">
-                            Genesis
-                        </h2>
-
-                        <div className="space-y-8 text-xl md:text-2xl leading-relaxed text-white/50 font-light">
-                            <motion.p
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.8 }}
-                            >
-                                Founded in 2019 by three designers who were tired of seeing
-                                beautiful ideas crushed by poor execution.
-                            </motion.p>
-
-                            <motion.p
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.8, delay: 0.2 }}
-                                className="text-white/70"
-                            >
-                                We started small—working nights and weekends, obsessing over
-                                every pixel, every interaction, every moment of delight.
-                            </motion.p>
-
-                            <motion.p
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.8, delay: 0.4 }}
-                            >
-                                Today, we're a team of 15, but we've kept that same obsessive
-                                attention to detail. Every project gets our full focus.
-                            </motion.p>
-                        </div>
-                    </motion.div>
-                </div>
-            </section>
-
-            {/* Team - Minimal Cards */}
-            <section className="relative py-32 px-6">
                 <div className="max-w-7xl mx-auto">
-                    <motion.h2
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        className="text-white/30 text-sm tracking-[0.3em] uppercase font-mono mb-20"
-                    >
-                        Leadership
-                    </motion.h2>
+                    <div className="max-w-3xl mb-20">
+                        <Minus className="w-8 h-8 text-white/20 mb-6" />
+                        <h2 className="text-4xl md:text-5xl font-light leading-tight mb-6">
+                            How we work
+                        </h2>
+                        <p className="text-white/50 text-lg">
+                            Every project is different, but our process stays consistent.
+                            Clarity, collaboration, and execution.
+                        </p>
+                    </div>
 
-                    <div className="grid md:grid-cols-3 gap-12">
-                        {team.map((member, idx) => (
+                    <div className="grid lg:grid-cols-3 gap-16">
+                        {[
+                            {
+                                phase: "Discovery",
+                                duration: "1-2 weeks",
+                                desc: "We dive deep into your business, users, and goals. No assumptions, just data and insights.",
+                                steps: ["Stakeholder interviews", "User research", "Competitive analysis", "Technical audit"]
+                            },
+                            {
+                                phase: "Design & Build",
+                                duration: "4-12 weeks",
+                                desc: "Iterative design sprints. Weekly reviews. Continuous feedback. We build in the open.",
+                                steps: ["Wireframes & prototypes", "Visual design", "Development", "Testing & QA"]
+                            },
+                            {
+                                phase: "Launch & Grow",
+                                duration: "Ongoing",
+                                desc: "A successful launch is just the beginning. We monitor, optimize, and scale with you.",
+                                steps: ["Deployment", "Performance monitoring", "User analytics", "Continuous improvement"]
+                            }
+                        ].map((phase, idx) => (
                             <motion.div
                                 key={idx}
-                                initial={{ opacity: 0, y: 40 }}
+                                initial={{ opacity: 0, y: 50 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.8, delay: idx * 0.15 }}
-                                className="group"
+                                transition={{ duration: 0.6, delay: idx * 0.2 }}
+                                className="relative group"
                             >
                                 <div className="space-y-6">
-                                    {/* Abstract Avatar */}
-                                    <div className="relative aspect-[3/4] overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 
-                                            group-hover:from-white/10 group-hover:to-white/5 transition-all duration-700" />
-                                        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black to-transparent" />
-
-                                        {/* Geometric Pattern */}
-                                        <svg className="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 100 100">
-                                            <pattern id={`pattern-${idx}`} x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                                                <circle cx="10" cy="10" r="1" fill="white" opacity="0.3" />
-                                            </pattern>
-                                            <rect width="100" height="100" fill={`url(#pattern-${idx})`} />
-                                        </svg>
+                                    {/* Phase header */}
+                                    <div className="space-y-2">
+                                        <div className="inline-block px-3 py-1 border border-white/10 text-white/40 text-xs font-mono">
+                                            {phase.duration}
+                                        </div>
+                                        <h3 className="text-3xl font-light group-hover:text-white transition-colors">
+                                            {phase.phase}
+                                        </h3>
                                     </div>
 
-                                    <div className="space-y-3">
-                                        <div>
-                                            <h3 className="text-2xl font-light tracking-tight mb-1">
-                                                {member.name}
-                                            </h3>
-                                            <p className="text-white/40 text-sm tracking-wider uppercase">
-                                                {member.role}
-                                            </p>
-                                        </div>
+                                    <p className="text-white/50 leading-relaxed">
+                                        {phase.desc}
+                                    </p>
 
-                                        <div className="flex gap-4 text-sm text-white/30">
-                                            <span>{member.exp}</span>
-                                            <span>·</span>
-                                            <span>{member.focus}</span>
-                                        </div>
+                                    {/* Steps */}
+                                    <div className="space-y-2 pt-4">
+                                        {phase.steps.map((step, i) => (
+                                            <div
+                                                key={i}
+                                                className="flex items-center gap-3 text-sm text-white/40 group-hover:text-white/60 transition-colors"
+                                            >
+                                                <div className="w-1 h-1 rounded-full bg-white/20" />
+                                                {step}
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
+
+                                {/* Connecting line */}
+                                {idx < 2 && (
+                                    <div className="hidden lg:block absolute top-12 -right-8 w-16 h-px bg-white/10" />
+                                )}
                             </motion.div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Stats with Scroll Animation */}
-            <section className="relative py-32 px-6 border-y border-white/5">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
+            {/* Team - Different layout with overlapping cards */}
+            <section className="relative py-32 px-6 border-t border-white/5">
+                <div className="max-w-6xl mx-auto">
+                    <div className="mb-20">
+                        <h2 className="text-3xl md:text-4xl font-light mb-4">Leadership</h2>
+                        <p className="text-white/50 text-lg">The people behind the pixels</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8">
                         {[
-                            { value: "50+", label: "Projects Delivered" },
-                            { value: "98%", label: "Client Retention" },
-                            { value: "6", label: "Years Running" },
-                            { value: "15", label: "Team Members" },
-                        ].map((stat, idx) => (
+                            { name: "Alex Morgan", role: "Founder & Creative Director", quote: "Design is intelligence made visible" },
+                            { name: "Jordan Chen", role: "Co-founder & CTO", quote: "Code is poetry in motion" },
+                            { name: "Sam Rivera", role: "Head of Growth", quote: "Strategy without execution is just a daydream" },
+                        ].map((member, idx) => (
                             <motion.div
                                 key={idx}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
+                                initial={{ opacity: 0, y: 50 }}
+                                whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                                className="text-center space-y-3"
+                                transition={{ duration: 0.6, delay: idx * 0.15 }}
+                                className="group"
                             >
-                                <div className="text-5xl md:text-6xl font-light tracking-tighter">
-                                    {stat.value}
-                                </div>
-                                <div className="text-white/30 text-sm tracking-wider uppercase">
-                                    {stat.label}
+                                <div className="relative">
+                                    {/* Image placeholder with gradient */}
+                                    <div className="aspect-[3/4] bg-gradient-to-br from-white/5 to-white/[0.02] rounded-lg mb-6 overflow-hidden relative">
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                                        {/* Grid overlay */}
+                                        <div className="absolute inset-0">
+                                            <svg className="w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                                <defs>
+                                                    <pattern id={`pattern-${idx}`} x="0" y="0" width="5" height="5" patternUnits="userSpaceOnUse">
+                                                        <line x1="0" y1="0" x2="0" y2="5" stroke="white" strokeWidth="0.1" />
+                                                        <line x1="0" y1="0" x2="5" y2="0" stroke="white" strokeWidth="0.1" />
+                                                    </pattern>
+                                                </defs>
+                                                <rect width="100" height="100" fill={`url(#pattern-${idx})`} />
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    {/* Info */}
+                                    <div className="space-y-3">
+                                        <div>
+                                            <h3 className="text-xl font-light">{member.name}</h3>
+                                            <p className="text-white/40 text-sm">{member.role}</p>
+                                        </div>
+                                        <p className="text-white/60 text-sm italic leading-relaxed border-l-2 border-white/10 pl-4">
+                                            &quot;{member.quote}&quot;
+                                        </p>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
@@ -373,64 +339,30 @@ export default function page() {
                 </div>
             </section>
 
-            {/* Final CTA */}
+            {/* CTA - Minimal and direct */}
             <section className="relative py-40 px-6">
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 1 }}
-                    className="max-w-5xl mx-auto text-center space-y-12"
+                    className="max-w-4xl mx-auto text-center space-y-12"
                 >
-                    <h2 className="text-4xl md:text-6xl lg:text-7xl font-light leading-tight tracking-tight">
-                        Let's create something<br />
-                        <span className="italic font-serif text-white/60">unforgettable together</span>
+                    <h2 className="text-4xl md:text-6xl font-light leading-tight">
+                        Let&apos;s create something
+                        <br />
+                        worth talking about
                     </h2>
 
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="group relative px-12 py-5 overflow-hidden"
+                        className="group inline-flex items-center gap-3 px-10 py-4 border border-white/20 hover:border-white/40 hover:bg-white/5 transition-all duration-300"
                     >
-                        <div className="absolute inset-0 border border-white/20 group-hover:border-white/40 transition-colors duration-300" />
-                        <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300" />
-                        <span className="relative text-lg tracking-wider uppercase font-mono">
-                            Start a Project
-                        </span>
+                        <span className="text-lg font-light">Get in Touch</span>
+                        <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                     </motion.button>
                 </motion.div>
             </section>
-
-            {/* Scroll Progress Indicator */}
-            <motion.div
-                className="fixed bottom-8 left-8 w-16 h-16 pointer-events-none z-50 hidden lg:block"
-                style={{ opacity: useTransform(smoothProgress, [0, 0.1, 0.9, 1], [0, 1, 1, 0]) }}
-            >
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                    <circle
-                        cx="50"
-                        cy="50"
-                        r="45"
-                        stroke="white"
-                        strokeWidth="1"
-                        fill="none"
-                        opacity="0.1"
-                    />
-                    <motion.circle
-                        cx="50"
-                        cy="50"
-                        r="45"
-                        stroke="white"
-                        strokeWidth="1"
-                        fill="none"
-                        opacity="0.4"
-                        strokeDasharray="283"
-                        style={{
-                            strokeDashoffset: useTransform(smoothProgress, [0, 1], [283, 0])
-                        }}
-                    />
-                </svg>
-            </motion.div>
         </div>
     )
 }

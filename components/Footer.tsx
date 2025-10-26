@@ -108,7 +108,6 @@ export default function Footer() {
                                 Digital agency focused on craft. Building products that matter.
                             </p>
                             <div className="flex items-center gap-2 pt-2">
-                                <Mail className="w-4 h-4 text-white/30" />
                                 <a
                                     href="mailto:hello@xdigital.com"
                                     className="text-sm text-white/50 hover:text-white/90 transition-colors duration-300"
