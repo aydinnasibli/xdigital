@@ -242,7 +242,7 @@ function Page() {
       ],
       idealFor: "Growing businesses ready to scale",
       startingPrice: "Custom packages",
-      link: "digitalsolutions"
+      link: "/digitalsolutions"
     },
   ]
 
@@ -287,7 +287,7 @@ function Page() {
           <div className="relative z-10 select-none flex h-full w-full items-center justify-center ">
             <SplitText
               text="xDigital"
-              className="text-6xl md:text-7xl lg:text-9xl font-semibold text-gray-300 text-center"
+              className="text-7xl md:text-8xl lg:text-9xl font-semibold text-gray-300 text-center"
               delay={40}
               duration={1.2}
               ease="power4.out"
@@ -366,7 +366,7 @@ function Page() {
               <button
                 key={idx}
                 onClick={() => setActiveService(idx)}
-                className={`px-6 py-3 hover:cursor-pointer text-sm transition-all duration-500 ${activeService === idx
+                className={`px-6 py-3 hover:cursor-pointer text-base transition-all duration-500 ${activeService === idx
                   ? 'text-white border-b-2 border-white'
                   : 'text-white/40 hover:text-white/70 border-b-2 border-transparent'
                   }`}
@@ -457,7 +457,7 @@ function Page() {
       <section className="relative w-full py-32 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-8">
           <div className="mb-20">
-            <h2 className="text-sm text-white/30 uppercase tracking-[0.3em] font-mono mb-12">Our Process</h2>
+            <h2 className="text-base text-white/30 uppercase tracking-[0.3em] font-mono mb-12">Our Process</h2>
             <p className="text-3xl font-light text-white/70 max-w-3xl">
               No bloat. Just pure execution from idea to launch.
             </p>
@@ -629,17 +629,17 @@ function Page() {
       <section className='relative w-full py-40 border-t border-white/5'>
         <div className='w-full max-w-6xl mx-auto px-8'>
           <div className="text-center space-y-12">
-            <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-5xl md:text-7xl font-light text-white/90 leading-tight">
+            <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="text-4xl md:text-6xl font-light text-white/90 leading-tight">
               Ready to build something that matters?
             </motion.h2>
 
-            <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 }} className="text-xl text-white/40 max-w-2xl mx-auto">
+            <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 }} className="text-lg text-white/40 max-w-2xl mx-auto">
               No sales calls. No pitches. Just a real conversation about your vision.
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.4 }} className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
               <Link href="/contact" className="group inline-flex rounded-3xl items-center gap-3 px-12 py-5 bg-white text-black hover:bg-white/80 transition-all duration-300">
-                <span className="font-light text-lg">Let's Talk</span>
+                <span className="font-light text-base">Let's Talk</span>
                 <ArrowUpRight className="w-6 h-6 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </Link>
             </motion.div>
