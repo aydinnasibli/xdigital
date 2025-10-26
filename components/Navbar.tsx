@@ -104,7 +104,7 @@ export default function Navbar() {
     // Mobile view with StaggeredMenu
     if (isMobile) {
         return (
-            <div className="absolute inset-0 z-50 pointer-events-none">
+            <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
                 <StaggeredMenu
                     position="right"
                     items={isSignedIn ? authenticatedMenuItems : publicMenuItems}
@@ -115,9 +115,8 @@ export default function Navbar() {
                     menuButtonColor="#ffffff"
                     openMenuButtonColor="#000000"
                     accentColor="#ffffff"
-                    isFixed={false}
+                    isFixed={true}
                     changeMenuColorOnOpen={true}
-
                 />
             </div>
         );
