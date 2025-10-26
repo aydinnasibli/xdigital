@@ -81,15 +81,12 @@ export default function Navbar() {
         { label: 'Web Dev', ariaLabel: 'Web Development Services', link: '/web' },
         { label: 'Social Media', ariaLabel: 'Social Media Marketing', link: '/socialmedia' },
         { label: 'Digital Solutions', ariaLabel: 'Digital Solutions', link: '/digitalsolution' },
-        { label: 'Sign In', ariaLabel: 'Sign in to your account', link: '/sign-in' },
-        { label: 'Sign Up', ariaLabel: 'Create an account', link: '/sign-up' },
     ];
 
     // Social media links (optional)
     const socialItems: StaggeredMenuSocialItem[] = [
-        { label: 'Twitter', link: 'https://twitter.com' },
-        { label: 'LinkedIn', link: 'https://linkedin.com' },
-        { label: 'Instagram', link: 'https://instagram.com' },
+        { label: 'Sign In', link: '/sign-in' },
+        { label: 'Sign Up', link: '/sign-up' },
     ];
 
     // Don't render auth-dependent content until mounted
@@ -107,19 +104,18 @@ export default function Navbar() {
     // Mobile view with StaggeredMenu
     if (isMobile) {
         return (
-            <div className="fixed inset-0 z-50 pointer-events-none">
+            <div className="absolute inset-0 z-50 pointer-events-none">
                 <StaggeredMenu
                     position="right"
-                    colors={['#1a1a1a', '#2d2d2d', '#1f1f1f']}
                     items={isSignedIn ? authenticatedMenuItems : publicMenuItems}
                     socialItems={socialItems}
                     displaySocials={true}
                     displayItemNumbering={true}
                     logoUrl={Logo.src}
-                    menuButtonColor="#e9e9ef"
+                    menuButtonColor="#ffffff"
                     openMenuButtonColor="#000000"
-                    accentColor="#5227FF"
-                    isFixed={true}
+                    accentColor="#ffffff"
+                    isFixed={false}
                     changeMenuColorOnOpen={true}
                 />
             </div>
