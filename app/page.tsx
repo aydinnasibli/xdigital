@@ -458,7 +458,7 @@ function Page() {
       <section className="relative w-full py-16 sm:py-24 md:py-32 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 sm:mb-16 md:mb-20">
-            <h2 className="text-xs sm:text-sm md:text-base text-white/30 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-mono mb-8 sm:mb-12">Our Process</h2>
+            <h2 className="text-sm sm:text-base md:text-lg text-white/30 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-mono mb-8 sm:mb-12">Our Process</h2>
             <p className="text-xl sm:text-2xl md:text-3xl font-light text-white/70 max-w-3xl">
               No bloat. Just pure execution from idea to launch.
             </p>

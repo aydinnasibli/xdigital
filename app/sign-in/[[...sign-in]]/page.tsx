@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export default function SignInPage() {
     return (
-        <div className="container max-w-md mt-20 mx-auto py-16 flex justify-between flex-col items-center">
+        <div className=" container max-w-md mt-20 mx-auto py-16 px-4 flex justify-between flex-col items-center">
 
 
             <div className="w-full">

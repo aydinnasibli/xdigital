@@ -1,12 +1,10 @@
 import { SignUp } from '@clerk/nextjs'
 import Link from 'next/link'
 
-export default function SignUpPage() {
+export default function SignInPage() {
     return (
-        <div className="container max-w-md mx-auto py-16 flex flex-col items-center">
-            <Link href="/" className="mb-8 text-primary hover:underline flex items-center">
-                ← Back to home
-            </Link>
+        <div className=" container max-w-md mt-20 mx-auto py-16 px-4 flex justify-between flex-col items-center">
+
 
             <div className="w-full">
                 <SignUp
@@ -18,10 +16,6 @@ export default function SignUpPage() {
                             headerSubtitle: "text-muted-foreground",
                         }
                     }}
-                    signInUrl="/sign-in"
-                    redirectUrl="/dashboard"
-                    routing="path"
-                    path="/sign-up"
                 />
             </div>
         </div>

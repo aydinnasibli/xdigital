@@ -77,14 +77,15 @@ export default function Navbar() {
 
     // Menu items for public users
     const publicMenuItems: StaggeredMenuItem[] = [
+        { label: 'Home', ariaLabel: 'Home Page', link: '/' },
         { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
         { label: 'Web Dev', ariaLabel: 'Web Development Services', link: '/web' },
         { label: 'Social Media', ariaLabel: 'Social Media Marketing', link: '/socialmedia' },
         { label: 'Digital Solutions', ariaLabel: 'Digital Solutions', link: '/digitalsolution' },
     ];
 
-    // Social media links (optional)
-    const socialItems: StaggeredMenuSocialItem[] = [
+    // Auth links for non-authenticated users
+    const authLinks: StaggeredMenuSocialItem[] = [
         { label: 'Sign In', link: '/sign-in' },
         { label: 'Sign Up', link: '/sign-up' },
     ];
@@ -104,17 +105,17 @@ export default function Navbar() {
     // Mobile view with StaggeredMenu
     if (isMobile) {
         return (
-            <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
+            <div className="fixed inset-0 z-50 pointer-events-none">
                 <StaggeredMenu
                     position="right"
                     items={isSignedIn ? authenticatedMenuItems : publicMenuItems}
-                    socialItems={socialItems}
-                    displaySocials={true}
-                    displayItemNumbering={true}
+                    socialItems={isSignedIn ? [] : authLinks}
+                    displaySocials={!isSignedIn}
+                    displayItemNumbering={false}
                     logoUrl={Logo.src}
                     menuButtonColor="#ffffff"
                     openMenuButtonColor="#000000"
-                    accentColor="#ffffff"
+                    accentColor="#6366f1"
                     isFixed={true}
                     changeMenuColorOnOpen={true}
                 />
@@ -125,30 +126,42 @@ export default function Navbar() {
     // Desktop view - Authenticated user navbar
     if (isSignedIn) {
         return (
-            <header className='relative py-6 px-4'>
+            <header className="relative py-6 px-4">
                 <nav className="max-w-6xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-10 justify-between">
-                        <Link href="/dashboard" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
+                    <div className="flex items-center gap-10">
+                        <Link
+                            href="/dashboard"
+                            className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
+                        >
                             Dashboard
                         </Link>
-                        <Link href="/dashboard/projects" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
+                        <Link
+                            href="/dashboard/projects"
+                            className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
+                        >
                             Projects
                         </Link>
-                        <Link href="/dashboard/analytics" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
+                        <Link
+                            href="/dashboard/analytics"
+                            className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
+                        >
                             Analytics
                         </Link>
                     </div>
 
-                    <div className="flex items-center gap-10 justify-end">
-                        <Link href="/dashboard/settings" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
+                    <div className="flex items-center gap-10">
+                        <Link
+                            href="/dashboard/settings"
+                            className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
+                        >
                             Settings
                         </Link>
                         <UserButton
-                            afterSignOutUrl='/'
+                            afterSignOutUrl="/"
                             appearance={{
                                 elements: {
-                                    avatarBox: "w-10 h-10",
-                                }
+                                    avatarBox: 'w-10 h-10',
+                                },
                             }}
                         />
                     </div>
@@ -165,7 +178,10 @@ export default function Navbar() {
         >
             <nav className="max-w-7xl mx-auto grid grid-cols-3 items-center gap-8">
                 <div className="flex items-center gap-10 justify-end">
-                    <Link href="/about" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
+                    <Link
+                        href="/about"
+                        className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
+                    >
                         About
                     </Link>
 
@@ -180,7 +196,10 @@ export default function Navbar() {
                             align="center"
                             className="w-64 bg-black/30 rounded-xl backdrop-blur-sm border border-gray-800/50 shadow-2xl mt-2"
                         >
-                            <DropdownMenuItem asChild className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md">
+                            <DropdownMenuItem
+                                asChild
+                                className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md"
+                            >
                                 <Link href="/web">
                                     <div className="flex flex-col">
                                         <span className="font-medium">Web Development</span>
@@ -188,15 +207,23 @@ export default function Navbar() {
                                     </div>
                                 </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem asChild className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md">
+                            <DropdownMenuItem
+                                asChild
+                                className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md"
+                            >
                                 <Link href="/socialmedia">
                                     <div className="flex flex-col">
                                         <span className="font-medium">Social Media Marketing</span>
-                                        <span className="text-xs text-gray-500">Strategic social media management</span>
+                                        <span className="text-xs text-gray-500">
+                                            Strategic social media management
+                                        </span>
                                     </div>
                                 </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem asChild className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md">
+                            <DropdownMenuItem
+                                asChild
+                                className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md"
+                            >
                                 <Link href="/digitalsolution">
                                     <div className="flex flex-col">
                                         <span className="font-medium">Digital Solutions</span>
@@ -215,10 +242,16 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex items-center gap-10">
-                    <Link href="/sign-in" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
+                    <Link
+                        href="/sign-in"
+                        className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
+                    >
                         Sign In
                     </Link>
-                    <Link href="/sign-up" className="text-sm text-gray-300 hover:text-white px-6 py-2.5 border border-gray-300/50 rounded-full hover:border-gray-300/80 hover:bg-white/5 transition-all duration-300">
+                    <Link
+                        href="/sign-up"
+                        className="text-sm text-gray-300 hover:text-white px-6 py-2.5 border border-gray-300/50 rounded-full hover:border-gray-300/80 hover:bg-white/5 transition-all duration-300"
+                    >
                         Sign Up
                     </Link>
                 </div>
