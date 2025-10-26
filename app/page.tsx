@@ -191,7 +191,7 @@ function Page() {
       id: 'website',
       number: "01",
       icon: Code,
-      title: "Website Creation",
+      title: "Website Development",
       shortDescription: "Professional websites built with modern technology",
       fullDescription: "Transform your business with a stunning, high-performance website. Our drag-and-drop builder and premium templates make it easy to launch your online presence in days, not months.",
       features: [
