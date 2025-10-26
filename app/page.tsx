@@ -600,7 +600,7 @@ function Page() {
             {testimonials.map((testimonial, idx) => (
               <motion.div key={idx} initial={false} animate={{ opacity: activeTestimonial === idx ? 1 : 0, scale: activeTestimonial === idx ? 1 : 0.95, y: activeTestimonial === idx ? 0 : 20 }} transition={{ duration: 0.7, ease: "backInOut" }} className="absolute inset-0" style={{
                 pointerEvents: activeTestimonial === idx ? 'auto' : 'none',
-                visibility: activeTestimonial === idx ? 'visible' : 'hidden' // ADD THIS
+                visibility: activeTestimonial === idx ? 'visible' : 'hidden'
               }}>
                 <div className="space-y-6 sm:space-y-8">
                   <div className="flex gap-1">
@@ -647,7 +647,7 @@ function Page() {
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.4 }} className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-6 sm:pt-8 px-4">
-              <Link href="/contact" className="group inline-flex w-full sm:w-auto rounded-3xl items-center justify-center gap-2 sm:gap-3 px-8 sm:px-10 md:px-12 py-4 sm:py-5 bg-white text-black hover:bg-white/80 transition-all duration-300">
+              <Link href="/contact" className="group inline-flex w-full sm:w-auto rounded-3xl items-center justify-center gap-2 sm:gap-3 px-8 sm:px-10 md:px-12 py-4 sm:py-5 bg-white text-black hover:scale-110 transition-all duration-300">
                 <span className="font-light text-sm sm:text-base">Let's Talk</span>
                 <ArrowUpRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </Link>
