@@ -12,6 +12,8 @@ import Image from 'next/image';
 import Logo from '../public/assets/logo.png';
 import { useUser, UserButton } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
+import { StaggeredMenu } from '@/components/StaggeredMenu';
+import type { StaggeredMenuItem, StaggeredMenuSocialItem } from '@/components/StaggeredMenu';
 
 export default function Navbar() {
     const pathname = usePathname();
@@ -19,11 +21,22 @@ export default function Navbar() {
     const [hasBackground, setHasBackground] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
     const [mounted, setMounted] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const { isSignedIn, user } = useUser();
 
     // Prevent hydration mismatch
     useEffect(() => {
         setMounted(true);
+
+        // Check if mobile
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     useEffect(() => {
@@ -54,6 +67,31 @@ export default function Navbar() {
         };
     }, [lastScrollY]);
 
+    // Menu items for authenticated users
+    const authenticatedMenuItems: StaggeredMenuItem[] = [
+        { label: 'Dashboard', ariaLabel: 'Go to Dashboard', link: '/dashboard' },
+        { label: 'Projects', ariaLabel: 'View Projects', link: '/dashboard/projects' },
+        { label: 'Analytics', ariaLabel: 'View Analytics', link: '/dashboard/analytics' },
+        { label: 'Settings', ariaLabel: 'Go to Settings', link: '/dashboard/settings' },
+    ];
+
+    // Menu items for public users
+    const publicMenuItems: StaggeredMenuItem[] = [
+        { label: 'About', ariaLabel: 'Learn about us', link: '/about' },
+        { label: 'Web Dev', ariaLabel: 'Web Development Services', link: '/web' },
+        { label: 'Social Media', ariaLabel: 'Social Media Marketing', link: '/socialmedia' },
+        { label: 'Digital Solutions', ariaLabel: 'Digital Solutions', link: '/digitalsolution' },
+        { label: 'Sign In', ariaLabel: 'Sign in to your account', link: '/sign-in' },
+        { label: 'Sign Up', ariaLabel: 'Create an account', link: '/sign-up' },
+    ];
+
+    // Social media links (optional)
+    const socialItems: StaggeredMenuSocialItem[] = [
+        { label: 'Twitter', link: 'https://twitter.com' },
+        { label: 'LinkedIn', link: 'https://linkedin.com' },
+        { label: 'Instagram', link: 'https://instagram.com' },
+    ];
+
     // Don't render auth-dependent content until mounted
     if (!mounted) {
         return (
@@ -66,7 +104,29 @@ export default function Navbar() {
         );
     }
 
-    // Authenticated user navbar
+    // Mobile view with StaggeredMenu
+    if (isMobile) {
+        return (
+            <div className="fixed inset-0 z-50 pointer-events-none">
+                <StaggeredMenu
+                    position="right"
+                    colors={['#1a1a1a', '#2d2d2d', '#1f1f1f']}
+                    items={isSignedIn ? authenticatedMenuItems : publicMenuItems}
+                    socialItems={socialItems}
+                    displaySocials={true}
+                    displayItemNumbering={true}
+                    logoUrl={Logo.src}
+                    menuButtonColor="#e9e9ef"
+                    openMenuButtonColor="#000000"
+                    accentColor="#5227FF"
+                    isFixed={true}
+                    changeMenuColorOnOpen={true}
+                />
+            </div>
+        );
+    }
+
+    // Desktop view - Authenticated user navbar
     if (isSignedIn) {
         return (
             <header className='relative py-6 px-4'>
@@ -83,19 +143,15 @@ export default function Navbar() {
                         </Link>
                     </div>
 
-
-
                     <div className="flex items-center gap-10 justify-end">
                         <Link href="/dashboard/settings" className="text-sm text-gray-300 hover:text-white transition-colors duration-200">
                             Settings
                         </Link>
                         <UserButton
-
                             afterSignOutUrl='/'
                             appearance={{
                                 elements: {
                                     avatarBox: "w-10 h-10",
-
                                 }
                             }}
                         />
@@ -105,7 +161,7 @@ export default function Navbar() {
         );
     }
 
-    // Public/Unauthenticated user navbar
+    // Desktop view - Public/Unauthenticated user navbar
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 px-8 py-0.5 transition-all duration-500 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'
@@ -117,7 +173,7 @@ export default function Navbar() {
                         About
                     </Link>
 
-                    <DropdownMenu >
+                    <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="flex items-center gap-2 text-sm hover:cursor-pointer text-gray-300 hover:text-white transition-colors duration-200 outline-none">
                                 Services

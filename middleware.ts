@@ -26,7 +26,7 @@ export default clerkMiddleware(async (auth, req) => {
     // If user is not authenticated and tries to access protected routes, redirect to sign-in
     if (!userId && isProtectedRoute(req)) {
         const signInUrl = new URL('/sign-in', req.url);
-        signInUrl.searchParams.set('redirect_url', req.url);
+        signInUrl.searchParams.set('/', req.url);
         return Response.redirect(signInUrl);
     }
 });
