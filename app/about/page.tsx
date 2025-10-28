@@ -287,7 +287,7 @@ export default function AboutPage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.1, duration: 0.6 }}
-                                className="group relative p-10 md:p-12  hover:bg-white/[0.02] transition-colors duration-300"
+                                className="group relative p-10 md:p-12 rounded-2xl  hover:bg-white/[0.02] transition-colors duration-300"
                             >
                                 {/* Number */}
                                 <div className="absolute top-8 right-8 text-7xl font-light text-white/[0.03] group-hover:text-white/[0.06] transition-colors duration-300">
@@ -346,7 +346,7 @@ export default function AboutPage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.1, duration: 0.6 }}
-                                className="group  p-8 md:p-10 hover:bg-white/[0.02] transition-colors duration-300"
+                                className="group rounded-2xl  p-8 md:p-10 hover:bg-white/[0.02] transition-colors duration-300"
                             >
                                 <div className="mb-8 pb-4 border-b border-white/[0.08]">
                                     <h3 className="text-lg md:text-xl font-light">{category.title}</h3>

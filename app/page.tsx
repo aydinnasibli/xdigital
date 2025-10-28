@@ -326,7 +326,7 @@ function Page() {
               aria-label="Start a new project"
             >
               <span className="font-light text-sm sm:text-base">Start a project</span>
-              <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true" />
+              <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 duration-300 transition-transform" aria-hidden="true" />
             </button>
             <button
               ref={button2Ref}
