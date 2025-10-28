@@ -246,23 +246,6 @@ function Page() {
     },
   ]
 
-  const whyChooseUs = [
-    {
-      icon: Zap,
-      title: "Fast Delivery",
-      description: "Launch your website in days, not months. Our streamlined process gets you online quickly."
-    },
-    {
-      icon: Users,
-      title: "Expert Team",
-      description: "Work with experienced designers and developers who understand your business needs."
-    },
-    {
-      icon: Award,
-      title: "Quality Guaranteed",
-      description: "Every project meets our high standards. Your satisfaction is our priority."
-    }
-  ]
   return (
     <div className='relative w-full overflow-x-hidden'>
       {/* Hero Section with Threads Background */}

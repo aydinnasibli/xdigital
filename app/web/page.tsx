@@ -10,12 +10,12 @@ export default function DigitalAgency() {
     const [isBeforeView, setIsBeforeView] = useState(true)
 
     const technologies = [
-        { name: 'React & Next.js', description: 'Lightning-fast React apps', icon: '⚛️' },
-        { name: 'TypeScript', description: 'Type-safe, scalable code', icon: '📘' },
-        { name: 'Tailwind CSS', description: 'Beautiful, responsive design', icon: '🎨' },
-        { name: 'Node.js', description: 'Powerful backend solutions', icon: '🟢' },
-        { name: 'PostgreSQL', description: 'Robust data management', icon: '🐘' },
-        { name: 'AWS/Vercel', description: 'Enterprise-grade hosting', icon: '☁️' }
+        { name: 'React & Next.js', description: 'Lightning-fast React apps', },
+        { name: 'TypeScript', description: 'Type-safe, scalable code' },
+        { name: 'Tailwind CSS', description: 'Beautiful, responsive design' },
+        { name: 'Node.js', description: 'Powerful backend solutions' },
+        { name: 'PostgreSQL', description: 'Robust data management' },
+        { name: 'AWS/Vercel', description: 'Enterprise-grade hosting' }
     ]
 
     const packages = [
@@ -199,36 +199,12 @@ export default function DigitalAgency() {
     ]
 
     return (
-        <div className="relative w-full overflow-x-hidden bg-black">
-            {/* Navigation */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <div className="flex items-center gap-2">
-                            <Code2 className="w-6 h-6 text-white" />
-                            <span className="text-xl font-light text-white">Digital Studio</span>
-                        </div>
-                        <div className="hidden md:flex items-center gap-8">
-                            <a href="#services" className="text-sm text-white/60 hover:text-white transition-colors">Services</a>
-                            <a href="#work" className="text-sm text-white/60 hover:text-white transition-colors">Work</a>
-                            <a href="#pricing" className="text-sm text-white/60 hover:text-white transition-colors">Pricing</a>
-                            <button className="px-6 py-2 bg-white text-black rounded-full text-sm hover:bg-white/90 transition-all">
-                                Start Project
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <div className='relative w-full overflow-x-hidden'>
 
             {/* Hero Section */}
             <section className="relative min-h-screen w-full flex items-center justify-center px-4 py-32">
-                {/* Animated background gradient */}
-                <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-                    <div className="absolute bottom-1/4 -right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-                </div>
 
-                <div className="relative w-full max-w-7xl mx-auto">
+                <div className="relative w-full max-w-7xl mt-20 mx-auto">
                     {/* Main Statement */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -236,18 +212,10 @@ export default function DigitalAgency() {
                         transition={{ duration: 0.8 }}
                         className="text-center mb-16"
                     >
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-8"
-                        >
-                            <Sparkles className="w-4 h-4 text-white/60" />
-                            <span className="text-sm text-white/60">Building the future of web</span>
-                        </motion.div>
+
 
                         <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-white mb-8 leading-tight">
-                            We build <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">digital</span><br />
+                            We build <span className="bg-gradient-to-r from-gray-300 to-gray-700 bg-clip-text text-transparent">digital</span><br />
                             <span className="italic">experiences</span> that scale
                         </h1>
                         <p className="text-xl sm:text-2xl text-white/50 max-w-3xl mx-auto mb-12 leading-relaxed">
@@ -260,21 +228,26 @@ export default function DigitalAgency() {
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.3 }}
-                        className="relative max-w-5xl mx-auto mb-12"
+                        className="relative max-w-5xl mx-auto mb-16"
                     >
-                        <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-zinc-900/30 backdrop-blur-xl shadow-2xl">
+                        <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-zinc-900/40 backdrop-blur-xl shadow-[0_0_60px_-15px_rgba(0,0,0,0.6)]">
+
                             {/* Toggle Buttons */}
-                            <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex gap-2 bg-black/60 backdrop-blur-md rounded-full p-1.5 border border-white/10">
+                            <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex gap-2 bg-black/60 backdrop-blur-md rounded-full p-1.5 border border-white/10 shadow-lg">
                                 <button
                                     onClick={() => setIsBeforeView(true)}
-                                    className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${isBeforeView ? 'bg-white text-black shadow-lg' : 'text-white/60 hover:text-white'
+                                    className={`px-8 py-2.5 rounded-full hover:cursor-pointer text-sm font-medium transition-all duration-300 focus:outline-none ${isBeforeView
+                                        ? "bg-white text-black shadow-md scale-105"
+                                        : "text-white/70 hover:text-white hover:bg-white/10"
                                         }`}
                                 >
                                     Before
                                 </button>
                                 <button
                                     onClick={() => setIsBeforeView(false)}
-                                    className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${!isBeforeView ? 'bg-white text-black shadow-lg' : 'text-white/60 hover:text-white'
+                                    className={`px-8 py-2.5 rounded-full text-sm hover:cursor-pointer  font-medium transition-all duration-300 focus:outline-none ${!isBeforeView
+                                        ? "bg-white text-black shadow-md scale-105"
+                                        : "text-white/70 hover:text-white hover:bg-white/10"
                                         }`}
                                 >
                                     After
@@ -285,60 +258,86 @@ export default function DigitalAgency() {
                                 {isBeforeView ? (
                                     <motion.div
                                         key="before"
-                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        initial={{ opacity: 0, scale: 0.97 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 1.05 }}
-                                        transition={{ duration: 0.4 }}
-                                        className="aspect-video bg-gradient-to-br from-gray-700 to-gray-900 p-12 flex flex-col items-center justify-center"
+                                        exit={{ opacity: 0, scale: 1.03 }}
+                                        transition={{ duration: 0.5 }}
+                                        className="aspect-video bg-gradient-to-br from-zinc-800 to-zinc-900 p-12 flex flex-col items-center justify-center"
                                     >
-                                        <div className="text-center space-y-6 max-w-lg">
-                                            <div className="text-red-400/60 text-xs font-mono uppercase tracking-wider">Outdated Design</div>
+                                        <div className="text-center space-y-8 max-w-lg">
+                                            <div className="text-red-400/70 text-xs font-mono uppercase tracking-widest">
+                                                Outdated Design
+                                            </div>
+
+                                            {/* Mock UI elements */}
                                             <div className="space-y-3">
-                                                <div className="h-10 bg-white/5 rounded-lg w-3/4 mx-auto"></div>
-                                                <div className="h-5 bg-white/5 rounded w-full"></div>
-                                                <div className="h-5 bg-white/5 rounded w-5/6 mx-auto"></div>
+                                                <div className="relative h-10 bg-white/10 rounded-lg w-3/4 mx-auto overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ x: "-100%" }}
+                                                        animate={{ x: "100%" }}
+                                                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                                                    />
+                                                </div>
+                                                <div className="h-5 bg-white/10 rounded w-full"></div>
+                                                <div className="h-5 bg-white/10 rounded w-5/6 mx-auto"></div>
                                             </div>
+
                                             <div className="flex gap-3 justify-center">
-                                                <div className="h-12 bg-white/5 rounded-lg w-32"></div>
-                                                <div className="h-12 bg-white/5 rounded-lg w-32"></div>
+                                                <div className="h-12 bg-white/10 rounded-lg w-32"></div>
+                                                <div className="h-12 bg-white/10 rounded-lg w-32"></div>
                                             </div>
-                                            <div className="text-white/30 text-sm mt-8 flex items-center justify-center gap-4">
+
+                                            <div className="text-white/40 text-sm mt-8 flex items-center justify-center gap-4">
                                                 <span>⚠️ Slow</span>
                                                 <span>•</span>
                                                 <span>📉 Low Conversions</span>
                                                 <span>•</span>
-                                                <span>📱 Not Mobile-Ready</span>
+                                                <span>📱 Not Responsive</span>
                                             </div>
                                         </div>
                                     </motion.div>
                                 ) : (
                                     <motion.div
                                         key="after"
-                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        initial={{ opacity: 0, scale: 0.97 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 1.05 }}
-                                        transition={{ duration: 0.4 }}
-                                        className="aspect-video bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-12 flex flex-col items-center justify-center relative overflow-hidden"
+                                        exit={{ opacity: 0, scale: 1.03 }}
+                                        transition={{ duration: 0.5 }}
+                                        className="aspect-video relative overflow-hidden flex items-center justify-center p-12 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900"
                                     >
-                                        {/* Subtle animated background */}
-                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
+                                        {/* Subtle animated glow */}
+                                        <motion.div
+                                            animate={{
+                                                background: [
+                                                    "radial-gradient(circle at 20% 30%, rgba(59,130,246,0.08), transparent 60%)",
+                                                    "radial-gradient(circle at 80% 70%, rgba(168,85,247,0.08), transparent 60%)",
+                                                ],
+                                            }}
+                                            transition={{ duration: 6, repeat: Infinity, repeatType: "mirror" }}
+                                            className="absolute inset-0"
+                                        />
 
                                         <div className="relative text-center space-y-8 max-w-lg">
-                                            <div className="text-green-400/80 text-xs font-mono uppercase tracking-wider">Modern Design</div>
-                                            <h3 className="text-4xl font-light text-white leading-tight">
+                                            <div className="text-green-400/80 text-xs font-mono uppercase tracking-widest">
+                                                Modern Design
+                                            </div>
+                                            <h3 className="text-4xl font-light text-white leading-tight drop-shadow-md">
                                                 Transform Your<br />Digital Presence
                                             </h3>
-                                            <p className="text-white/60 text-base leading-relaxed">
-                                                Lightning-fast, conversion-optimized experiences that your customers will love
+                                            <p className="text-white/70 text-base leading-relaxed">
+                                                Lightning-fast, conversion-optimized experiences that your customers will love.
                                             </p>
+
                                             <div className="flex gap-4 justify-center">
-                                                <button className="px-8 py-3.5 bg-white text-black rounded-xl text-sm font-medium hover:scale-105 transition-transform shadow-xl">
+                                                <button className="px-8 py-3.5 bg-white text-black rounded-xl text-sm font-medium hover:scale-105 transition-transform shadow-lg">
                                                     Get Started →
                                                 </button>
-                                                <button className="px-8 py-3.5 border border-white/20 text-white rounded-xl text-sm hover:bg-white/5 transition-all">
+                                                <button className="px-8 py-3.5 border border-white/20 text-white rounded-xl text-sm hover:bg-white/10 transition-all">
                                                     View Work
                                                 </button>
                                             </div>
+
                                             <div className="text-white/50 text-sm mt-8 flex items-center justify-center gap-4">
                                                 <span>⚡ 0.8s Load</span>
                                                 <span>•</span>
@@ -353,21 +352,9 @@ export default function DigitalAgency() {
                         </div>
                     </motion.div>
 
-                    {/* CTAs */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.5 }}
-                        className="flex flex-col sm:flex-row items-center justify-center gap-4"
-                    >
-                        <button className="group w-full sm:w-auto rounded-2xl inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-black hover:bg-white/90 transition-all duration-300 shadow-2xl hover:shadow-white/20 hover:scale-105">
-                            <span className="font-medium">Start Your Project</span>
-                            <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                        </button>
-                        <button className="group w-full sm:w-auto rounded-2xl inline-flex items-center justify-center gap-3 px-10 py-5 border border-white/20 text-white/90 hover:border-white/40 hover:bg-white/5 transition-all duration-300">
-                            <span className="font-light">View Our Work</span>
-                        </button>
-                    </motion.div>
+
+
+
 
                     {/* Stats */}
                     <motion.div
@@ -436,58 +423,64 @@ export default function DigitalAgency() {
                 </div>
             </section>
 
-            {/* Process Timeline */}
-            <section className="relative w-full py-32 border-t border-white/5">
+            {/* Our Process Section - Agency Style */}
+            <section className="relative w-full py-32 border-t border-white/10 ">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="mb-20">
-                        <div className="flex items-center gap-4 mb-6">
-                            <Minus className="w-8 h-8 text-white/20" />
-                            <h2 className="text-sm text-white/40 uppercase tracking-widest">Our Process</h2>
+                    {/* Header */}
+                    <div className="mb-24 text-center">
+                        <div className="flex justify-center items-center gap-3 mb-6">
+                            <div className="w-8 h-[2px] bg-white/20" />
+                            <h2 className="text-sm uppercase tracking-[0.25em] text-white/40">Our Process</h2>
+                            <div className="w-8 h-[2px] bg-white/20" />
                         </div>
-                        <h3 className="text-4xl sm:text-5xl font-light text-white/90 mb-4">
-                            From idea to launch in weeks
+                        <h3 className="text-5xl md:text-6xl font-light text-white mb-6">
+                            From Idea to Launch in Weeks
                         </h3>
-                        <p className="text-xl text-white/50 max-w-2xl">
-                            A proven process that delivers results every time
+                        <p className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto">
+                            A proven process that delivers results every time.
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {/* Timeline */}
+                    <div className="relative flex flex-col lg:flex-row justify-between items-stretch gap-16 lg:gap-8">
                         {processSteps.map((step, idx) => (
                             <motion.div
                                 key={idx}
-                                initial={{ opacity: 0, y: 30 }}
+                                initial={{ opacity: 0, y: 40 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-50px" }}
-                                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                                className="relative group"
+                                viewport={{ once: true, margin: "-100px" }}
+                                transition={{ duration: 0.7, delay: idx * 0.1 }}
+                                className="relative flex-1 group"
                             >
                                 {/* Connector Line */}
                                 {idx < processSteps.length - 1 && (
-                                    <div className="hidden lg:block absolute top-12 left-full w-full h-px bg-gradient-to-r from-white/20 to-transparent" />
+                                    <div className="hidden lg:block absolute top-[60px] right-[-4rem] w-[calc(100%+4rem)] h-[1px] bg-gradient-to-r from-white/10 via-white/20 to-transparent" />
                                 )}
 
-                                <div className="space-y-6">
-                                    <div className="flex items-center gap-4">
-                                        <span className="text-6xl font-light text-white/10 group-hover:text-white/30 transition-colors duration-500">
+                                {/* Card */}
+                                <div className="relative z-10 h-full flex flex-col justify-between p-10 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm hover:border-white/20 hover:bg-white/[0.06] transition-all duration-500">
+                                    {/* Step Number */}
+                                    <div className="flex items-center gap-3 mb-8">
+                                        <span className="text-7xl font-light text-white/10 group-hover:text-white/30 transition-colors duration-500">
                                             {step.number}
                                         </span>
-                                        <div className="flex-1 h-px bg-white/10 group-hover:bg-white/30 transition-colors duration-500" />
+                                        <div className="flex-1 h-[1px] bg-white/10 group-hover:bg-white/30 transition-colors duration-500" />
                                     </div>
 
+                                    {/* Step Info */}
                                     <div>
-                                        <h4 className="text-2xl font-light text-white mb-3">{step.title}</h4>
-                                        <p className="text-sm text-white/50 mb-6 leading-relaxed">{step.description}</p>
+                                        <h4 className="text-2xl font-light text-white mb-4">{step.title}</h4>
+                                        <p className="text-sm text-white/60 mb-6 leading-relaxed">{step.description}</p>
 
+                                        {/* Meta */}
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 text-xs text-white/40">
                                                 <Clock className="w-4 h-4" />
                                                 <span>{step.duration}</span>
                                             </div>
-
                                             <div className="space-y-2">
                                                 {step.deliverables.map((item, i) => (
-                                                    <div key={i} className="flex items-center gap-2 text-xs text-white/50">
+                                                    <div key={i} className="flex items-center gap-2 text-xs text-white/60">
                                                         <CheckCircle2 className="w-4 h-4" />
                                                         <span>{item}</span>
                                                     </div>
@@ -501,6 +494,7 @@ export default function DigitalAgency() {
                     </div>
                 </div>
             </section>
+
 
             {/* Technology Stack */}
             <section className="relative w-full py-32 border-t border-white/5">
