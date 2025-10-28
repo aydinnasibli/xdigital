@@ -1,10 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-const isProtectedRoute = createRouteMatcher([
-    '/dashboard(.*)',
-]);
-
+const isProtectedRoute = createRouteMatcher(['/dashboard(.*)']);
 const isPublicRoute = createRouteMatcher([
     '/',
     '/sign-in(.*)',
@@ -18,13 +15,12 @@ const isPublicRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
     const { userId } = await auth();
 
-    // If user is authenticated and tries to access public routes (except home), redirect to dashboard
+    // Authenticated user going to public routes
     if (userId && isPublicRoute(req) && req.nextUrl.pathname !== '/') {
-        const dashboardUrl = new URL('/dashboard', req.url);
-        return NextResponse.redirect(dashboardUrl);
+        return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
-    // If user is not authenticated and tries to access protected routes, redirect to sign-in
+    // Non-authenticated user going to protected routes
     if (!userId && isProtectedRoute(req)) {
         const signInUrl = new URL('/sign-in', req.url);
         signInUrl.searchParams.set('redirect_url', req.nextUrl.pathname);
@@ -32,11 +28,11 @@ export default clerkMiddleware(async (auth, req) => {
     }
 });
 
+// Ensure middleware runs as Edge Function
 export const config = {
+    runtime: 'edge',
     matcher: [
-        // Skip Next.js internals and all static files, unless found in search params
         '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-        // Always run for API routes
         '/(api|trpc)(.*)',
     ],
 };
