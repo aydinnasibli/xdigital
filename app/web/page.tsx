@@ -518,7 +518,6 @@ export default function DigitalAgency() {
                                 transition={{ duration: 0.5, delay: idx * 0.1 }}
                                 className="group relative bg-zinc-900/30 border border-white/10 rounded-2xl p-8 hover:border-white/30 hover:bg-white/5 transition-all duration-300"
                             >
-                                <div className="text-5xl mb-6">{tech.icon}</div>
                                 <h4 className="text-lg font-light text-white mb-2">{tech.name}</h4>
                                 <p className="text-sm text-white/40 group-hover:text-white/60 transition-colors">
                                     {tech.description}
