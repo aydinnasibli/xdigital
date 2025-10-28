@@ -185,7 +185,7 @@ export default function Navbar() {
                         About
                     </Link>
 
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
                             <button className="flex items-center gap-2 text-sm hover:cursor-pointer text-gray-300 hover:text-white transition-colors duration-200 outline-none">
                                 Services
@@ -195,6 +195,7 @@ export default function Navbar() {
                         <DropdownMenuContent
                             align="center"
                             className="w-64 bg-black/30 rounded-xl backdrop-blur-sm border border-gray-800/50 shadow-2xl mt-2"
+                            sideOffset={8}
                         >
                             <DropdownMenuItem
                                 asChild
