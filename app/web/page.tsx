@@ -392,18 +392,18 @@ export default function DigitalAgency() {
 
 
             {/* Pricing Packages */}
-            <section id="pricing" className="relative w-full py-32 border-t border-white/5">
+            <section id="pricing" className="relative w-full py-24 border-t border-white/5">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-20">
-                        <h2 className="text-4xl sm:text-5xl font-light text-white mb-6">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl sm:text-5xl font-light text-white mb-4">
                             Transparent pricing
                         </h2>
-                        <p className="text-xl text-white/50 max-w-2xl mx-auto">
+                        <p className="text-lg text-white/50 max-w-2xl mx-auto">
                             Choose the package that fits your needs. No hidden fees.
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
                         {packages.map((pkg, idx) => (
                             <motion.div
                                 key={idx}
@@ -413,50 +413,50 @@ export default function DigitalAgency() {
                                 transition={{ duration: 0.6, delay: idx * 0.1 }}
                                 onMouseEnter={() => setHoveredPackage(idx)}
                                 onMouseLeave={() => setHoveredPackage(null)}
-                                className={`relative rounded-3xl border p-10 transition-all duration-300 ${pkg.popular
-                                    ? 'bg-white/3 border-white/30 scale-105 shadow-2xl'
-                                    : 'bg-zinc-900/30 border-white/10 hover:border-white/20 hover:bg-white/5'
-                                    } ${hoveredPackage === idx ? 'scale-105' : ''}`}
+                                className={`relative rounded-2xl border p-8 transition-all duration-300 ${pkg.popular
+                                    ? 'bg-white/5 border-white/20 shadow-xl'
+                                    : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
+                                    } ${hoveredPackage === idx ? 'scale-[1.02]' : ''}`}
                             >
                                 {pkg.popular && (
-                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-linear-to-r from-blue-500 to-purple-500 text-white text-xs font-medium rounded-full shadow-xl">
+                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-white text-black text-xs font-medium rounded-full">
                                         Most Popular
                                     </div>
                                 )}
 
-                                <div className="space-y-8">
+                                <div className="space-y-6">
                                     <div>
-                                        <h3 className="text-3xl font-light text-white mb-3">{pkg.name}</h3>
-                                        <p className="text-sm text-white/50 mb-6 leading-relaxed">{pkg.description}</p>
-                                        <div className="text-5xl font-light text-white mb-2">{pkg.price}</div>
+                                        <h3 className="text-2xl font-light text-white mb-2">{pkg.name}</h3>
+                                        <p className="text-sm text-white/50 mb-4 leading-relaxed">{pkg.description}</p>
+                                        <div className="text-4xl font-light text-white mb-1">{pkg.price}</div>
                                         {pkg.price !== 'Custom' && <p className="text-xs text-white/40">One-time payment</p>}
                                     </div>
 
-                                    <div className="space-y-3 py-6 border-y border-white/10">
+                                    <div className="space-y-2 py-4 border-y border-white/10">
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-white/50">Pages:</span>
-                                            <span className="text-white font-medium">{pkg.pages}</span>
+                                            <span className="text-white">{pkg.pages}</span>
                                         </div>
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-white/50">Timeline:</span>
-                                            <span className="text-white font-medium">{pkg.timeline}</span>
+                                            <span className="text-white">{pkg.timeline}</span>
                                         </div>
                                     </div>
 
-                                    <ul className="space-y-4">
+                                    <ul className="space-y-2.5">
                                         {pkg.features.map((feature, i) => (
-                                            <li key={i} className="flex items-start gap-3">
-                                                <CheckCircle2 className="w-5 h-5 text-green-400/60 shrink-0 mt-0.5" />
-                                                <span className="text-sm text-white/70">{feature}</span>
+                                            <li key={i} className="flex items-start gap-2.5">
+                                                <CheckCircle2 className="w-4 h-4 text-white/40 shrink-0 mt-0.5" />
+                                                <span className="text-sm text-white/60">{feature}</span>
                                             </li>
                                         ))}
                                     </ul>
 
-                                    <div className="pt-6 space-y-4">
+                                    <div className="pt-4 space-y-3">
                                         <p className="text-xs text-white/40">
-                                            <span className="text-white/60 font-medium">Ideal for:</span> {pkg.idealFor}
+                                            <span className="text-white/50">Ideal for:</span> {pkg.idealFor}
                                         </p>
-                                        <button className="w-full rounded-xl bg-white text-black py-4 hover:bg-white/90 transition-all duration-300 font-medium hover:scale-105">
+                                        <button className="w-full rounded-xl bg-white text-black py-3 hover:bg-white/90 transition-all duration-300 font-medium text-sm">
                                             {pkg.price === 'Custom' ? 'Contact Us' : 'Get Started'}
                                         </button>
                                     </div>
@@ -471,90 +471,141 @@ export default function DigitalAgency() {
             <section id="work" className="relative w-full py-32 border-t border-white/5">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="mb-20">
-                        <div className="flex items-center gap-4 mb-6">
-                            <Minus className="w-8 h-8 text-white/20" />
-                            <h2 className="text-sm text-white/40 uppercase tracking-widest">Case Studies</h2>
-                        </div>
-                        <h3 className="text-4xl sm:text-5xl font-light text-white/90 mb-4">
-                            Real results for real businesses
-                        </h3>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-6"
+                        >
+                            <Sparkles className="w-4 h-4 text-white/60" />
+                            <span className="text-sm text-white/60">Our Work</span>
+                        </motion.div>
+                        <h2 className="text-4xl sm:text-5xl font-light text-white mb-4">
+                            Projects that drive growth
+                        </h2>
                         <p className="text-xl text-white/50 max-w-2xl">
-                            See how we've helped companies grow with strategic web development
+                            From struggling startups to thriving businesses — real transformations, real revenue impact
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6 mb-10">
+                    <div className="space-y-8">
                         {caseStudies.map((study, idx) => (
-                            <button
+                            <motion.div
                                 key={idx}
-                                onClick={() => setActiveCase(idx)}
-                                className={`text-left p-8 rounded-2xl border transition-all duration-300 ${activeCase === idx
-                                    ? 'bg-white/3 border-white/30 scale-105'
-                                    : 'bg-zinc-900/30 border-white/10 hover:border-white/20 hover:bg-white/5'
-                                    }`}
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.6, delay: idx * 0.15 }}
+                                className="group relative"
                             >
-                                <h4 className="text-xl font-light text-white mb-2">{study.client}</h4>
-                                <p className="text-sm text-white/40">{study.industry}</p>
-                            </button>
+                                <div className="grid md:grid-cols-5 gap-8 bg-zinc-900/40 border border-white/10 rounded-2xl p-8 md:p-10 hover:border-white/20 hover:bg-white/5 transition-all duration-500">
+
+                                    {/* Left: Client Info & Problem */}
+                                    <div className="md:col-span-2 space-y-6">
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                                                    <span className="text-xl font-light text-white">
+                                                        {study.client.charAt(0)}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-2xl font-light text-white">{study.client}</h3>
+                                                    <p className="text-sm text-white/40">{study.industry}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 className="text-xs text-white/40 uppercase tracking-wider mb-2 font-medium">The Problem</h4>
+                                            <p className="text-white/70 leading-relaxed">{study.challenge}</p>
+                                        </div>
+
+                                        <div>
+                                            <h4 className="text-xs text-white/40 uppercase tracking-wider mb-2 font-medium">Our Solution</h4>
+                                            <p className="text-white/70 leading-relaxed">{study.solution}</p>
+                                        </div>
+
+                                        <button className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors group/btn">
+                                            <span>View full case study</span>
+                                            <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                                        </button>
+                                    </div>
+
+                                    {/* Right: Results Grid */}
+                                    <div className="md:col-span-3">
+                                        <h4 className="text-xs text-white/40 uppercase tracking-wider mb-6 font-medium">Business Impact</h4>
+
+                                        <div className="grid grid-cols-2 gap-4 mb-6">
+                                            {/* Main Metric - Full Width */}
+                                            <div className="col-span-2 bg-zinc-900/60 rounded-xl p-6 border border-white/10">
+                                                <div className="flex items-start justify-between mb-3">
+                                                    <div>
+                                                        <p className="text-sm text-white/50 mb-1">Conversion Rate Increase</p>
+                                                        <div className="flex items-baseline gap-2">
+                                                            <span className="text-5xl font-light text-white">
+                                                                {study.results.conversion}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                                                        <TrendingUp className="w-6 h-6 text-green-400/80" />
+                                                    </div>
+                                                </div>
+                                                <p className="text-xs text-white/40">Compared to previous quarter</p>
+                                            </div>
+
+                                            {/* Secondary Metrics */}
+                                            <div className="bg-zinc-900/60 rounded-xl p-5 border border-white/10">
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                                                        <Zap className="w-5 h-5 text-yellow-400/80" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-white/50">Load Time</p>
+                                                        <p className="text-2xl font-light text-white">{study.results.loadTime}</p>
+                                                    </div>
+                                                </div>
+                                                <p className="text-xs text-white/40">98% faster than before</p>
+                                            </div>
+
+                                            <div className="bg-zinc-900/60 rounded-xl p-5 border border-white/10">
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                                        <Users className="w-5 h-5 text-blue-400/80" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-white/50">Active Users</p>
+                                                        <p className="text-2xl font-light text-white">{study.results.users}</p>
+                                                    </div>
+                                                </div>
+                                                <p className="text-xs text-white/40">Monthly active users</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Tech Stack Tags */}
+                                        <div className="flex flex-wrap gap-2">
+                                            <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
+                                                React
+                                            </span>
+                                            <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
+                                                Next.js
+                                            </span>
+                                            <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
+                                                TypeScript
+                                            </span>
+                                            <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
+                                                {idx === 0 ? 'PostgreSQL' : idx === 1 ? 'Stripe API' : 'AWS'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
                         ))}
                     </div>
 
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeCase}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.5 }}
-                            className={`rounded-3xl bg-linear-to-br ${caseStudies[activeCase].color} border border-white/10 p-10 md:p-16`}
-                        >
-                            <div className="grid md:grid-cols-2 gap-12">
-                                <div className="space-y-8">
-                                    <div>
-                                        <h4 className="text-sm text-white/50 uppercase tracking-wider mb-3 font-medium">Challenge</h4>
-                                        <p className="text-white/90 text-lg leading-relaxed">{caseStudies[activeCase].challenge}</p>
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm text-white/50 uppercase tracking-wider mb-3 font-medium">Solution</h4>
-                                        <p className="text-white/90 text-lg leading-relaxed">{caseStudies[activeCase].solution}</p>
-                                    </div>
-                                </div>
+                    {/* Bottom CTA */}
 
-                                <div>
-                                    <h4 className="text-sm text-white/50 uppercase tracking-wider mb-8 font-medium">Impact</h4>
-                                    <div className="space-y-6">
-                                        <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <TrendingUp className="w-6 h-6 text-green-400" />
-                                                <span className="text-sm text-white/60 font-medium">Conversion Rate</span>
-                                            </div>
-                                            <div className="text-4xl font-light text-white">
-                                                {caseStudies[activeCase].results.conversion}
-                                            </div>
-                                        </div>
-                                        <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <Zap className="w-6 h-6 text-yellow-400" />
-                                                <span className="text-sm text-white/60 font-medium">Page Load Time</span>
-                                            </div>
-                                            <div className="text-4xl font-light text-white">
-                                                {caseStudies[activeCase].results.loadTime}
-                                            </div>
-                                        </div>
-                                        <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <Users className="w-6 h-6 text-blue-400" />
-                                                <span className="text-sm text-white/60 font-medium">Active Users</span>
-                                            </div>
-                                            <div className="text-4xl font-light text-white">
-                                                {caseStudies[activeCase].results.users}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
                 </div>
             </section>
 
