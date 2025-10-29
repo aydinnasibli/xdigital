@@ -1,75 +1,55 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowUpRight, Code2, Sparkles, Rocket, CheckCircle2, Zap, Shield, TrendingUp, ChevronDown, ChevronUp, Minus, Clock, Users, DollarSign, Monitor, Smartphone, Search, Globe } from 'lucide-react'
-
+import { getFaqWeb, type FaqWeb } from '@/lib/sanityQueries'
+import { getPricingPackages } from '@/lib/sanityQueries'
+import { PricingPackage } from '@/lib/sanityQueries'
 export default function DigitalAgency() {
     const [hoveredPackage, setHoveredPackage] = useState<number | null>(null)
-    const [activeCase, setActiveCase] = useState(0)
     const [openFaq, setOpenFaq] = useState<number | null>(null)
     const [isBeforeView, setIsBeforeView] = useState(true)
+    const [faqs, setFaqs] = useState<FaqWeb[]>([])
+    const [isLoadingFaqs, setIsLoadingFaqs] = useState(true)
+    // Add state for packages
+    const [packages, setPackages] = useState<PricingPackage[]>([])
+    const [isLoadingPackages, setIsLoadingPackages] = useState(true)
 
-
-
-    const packages = [
-        {
-            name: 'Launch',
-            description: 'Perfect for startups and small businesses',
-            price: '$3,500',
-            pages: '3-5 pages',
-            timeline: '2-3 weeks',
-            features: [
-                'Custom responsive design',
-                'Mobile-optimized experience',
-                'Contact forms & integrations',
-                'Basic SEO setup',
-                'Analytics integration',
-                'SSL & security setup',
-                '2 rounds of revisions',
-                '30 days support'
-            ],
-            idealFor: 'Startups, personal brands, local businesses'
-        },
-        {
-            name: 'Growth',
-            description: 'Comprehensive solution for growing companies',
-            price: '$7,500',
-            pages: '8-12 pages',
-            timeline: '4-6 weeks',
-            features: [
-                'Advanced custom design',
-                'CMS integration (Strapi/Sanity)',
-                'Blog & content management',
-                'E-commerce functionality',
-                'Advanced SEO optimization',
-                'Email marketing setup',
-                'Performance optimization',
-                'Unlimited revisions',
-                '90 days priority support'
-            ],
-            idealFor: 'Growing businesses, e-commerce, content creators',
-            popular: true
-        },
-        {
-            name: 'Enterprise',
-            description: 'Custom web applications for scale',
-            price: 'Custom',
-            pages: 'Unlimited',
-            timeline: '8-16 weeks',
-            features: [
-                'Full-stack web application',
-                'Custom API development',
-                'Advanced database architecture',
-                'User authentication & roles',
-                'Admin dashboard & CMS',
-                'Third-party integrations',
-                'Load balancing & scaling',
-                'Dedicated project manager',
-                '6 months maintenance included'
-            ],
-            idealFor: 'Enterprises, SaaS platforms, complex systems'
+    // Fetch packages on mount
+    useEffect(() => {
+        async function fetchPackages() {
+            try {
+                setIsLoadingPackages(true)
+                const data = await getPricingPackages()
+                setPackages(data)
+            } catch (error) {
+                console.error('Error fetching pricing packages:', error)
+                // Optionally set fallback/default packages here
+            } finally {
+                setIsLoadingPackages(false)
+            }
         }
-    ]
+
+        fetchPackages()
+    }, [])
+    // Add this useEffect:
+    useEffect(() => {
+        const loadFaqs = async () => {
+            setIsLoadingFaqs(true)
+            try {
+                const data = await getFaqWeb()
+                setFaqs(data)
+            } catch (error) {
+                console.error('Failed to load FAQs:', error)
+            } finally {
+                setIsLoadingFaqs(false)
+            }
+        }
+
+        loadFaqs()
+    }, [])
+
+
 
     const caseStudies = [
         {
@@ -111,32 +91,7 @@ export default function DigitalAgency() {
     ]
 
 
-    const faqs = [
-        {
-            question: 'What makes your agency different from others?',
-            answer: 'We focus on results, not just deliverables. Every project includes performance optimization, conversion tracking, and ongoing consultation. We use modern tech stacks (React, Next.js, TypeScript) that ensure your site is fast, scalable, and future-proof. Plus, we provide transparent communication and fixed pricing - no surprises.'
-        },
-        {
-            question: 'How long does a typical project take?',
-            answer: 'It depends on the package: Launch (2-3 weeks), Growth (4-6 weeks), Enterprise (8-16 weeks). We provide detailed timelines during discovery and send weekly progress updates. Most clients are live within 4-6 weeks from kickoff.'
-        },
-        {
-            question: 'Do you provide ongoing support and maintenance?',
-            answer: 'Yes! All packages include post-launch support (30-90 days depending on package). After that, we offer maintenance plans starting at $399/month including updates, security patches, content changes, and monitoring. Many clients prefer our retainer model for continuous improvements.'
-        },
-        {
-            question: 'Can you integrate with our existing tools and systems?',
-            answer: 'Absolutely. We specialize in integrations - CRM (Salesforce, HubSpot), payment processors (Stripe, PayPal), email marketing (Mailchimp, SendGrid), analytics (Google Analytics, Mixpanel), and more. We can also build custom APIs to connect your systems.'
-        },
-        {
-            question: 'What if we need changes or additions after launch?',
-            answer: 'No problem! During the support period, minor changes are included. For larger features or pages, we offer flexible pricing: additional pages ($500-$1200), new features (quoted individually), or monthly retainers ($399-$2500) for ongoing development.'
-        },
-        {
-            question: 'Do we own the code and can we host it ourselves?',
-            answer: 'Yes, 100%. Once the final payment is made, you own all code, designs, and assets. We provide full documentation and can help you migrate to any hosting provider. We recommend Vercel or AWS, but the choice is yours.'
-        }
-    ]
+
 
     const services = [
         {
@@ -403,67 +358,98 @@ export default function DigitalAgency() {
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                        {packages.map((pkg, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                                onMouseEnter={() => setHoveredPackage(idx)}
-                                onMouseLeave={() => setHoveredPackage(null)}
-                                className={`relative rounded-2xl border p-8 transition-all duration-300 ${pkg.popular
-                                    ? 'bg-white/5 border-white/20 shadow-xl'
-                                    : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
-                                    } ${hoveredPackage === idx ? 'scale-[1.02]' : ''}`}
-                            >
-                                {pkg.popular && (
-                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-white text-black text-xs font-medium rounded-full">
-                                        Most Popular
-                                    </div>
-                                )}
-
-                                <div className="space-y-6">
-                                    <div>
-                                        <h3 className="text-2xl font-light text-white mb-2">{pkg.name}</h3>
-                                        <p className="text-sm text-white/50 mb-4 leading-relaxed">{pkg.description}</p>
-                                        <div className="text-4xl font-light text-white mb-1">{pkg.price}</div>
-                                        {pkg.price !== 'Custom' && <p className="text-xs text-white/40">One-time payment</p>}
-                                    </div>
-
-                                    <div className="space-y-2 py-4 border-y border-white/10">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-white/50">Pages:</span>
-                                            <span className="text-white">{pkg.pages}</span>
+                    {isLoadingPackages ? (
+                        // Loading skeleton
+                        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                            {[1, 2, 3].map((i) => (
+                                <div
+                                    key={i}
+                                    className="relative rounded-2xl border border-white/10 bg-zinc-900/40 p-8 animate-pulse"
+                                >
+                                    <div className="space-y-6">
+                                        <div className="h-8 bg-white/10 rounded w-1/2"></div>
+                                        <div className="h-4 bg-white/10 rounded w-3/4"></div>
+                                        <div className="h-10 bg-white/10 rounded w-1/3"></div>
+                                        <div className="space-y-2 py-4 border-y border-white/10">
+                                            <div className="h-4 bg-white/10 rounded"></div>
+                                            <div className="h-4 bg-white/10 rounded"></div>
                                         </div>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-white/50">Timeline:</span>
-                                            <span className="text-white">{pkg.timeline}</span>
+                                        <div className="space-y-2">
+                                            {[1, 2, 3, 4, 5, 6].map((j) => (
+                                                <div key={j} className="h-4 bg-white/10 rounded"></div>
+                                            ))}
                                         </div>
-                                    </div>
-
-                                    <ul className="space-y-2.5">
-                                        {pkg.features.map((feature, i) => (
-                                            <li key={i} className="flex items-start gap-2.5">
-                                                <CheckCircle2 className="w-4 h-4 text-white/40 shrink-0 mt-0.5" />
-                                                <span className="text-sm text-white/60">{feature}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-
-                                    <div className="pt-4 space-y-3">
-                                        <p className="text-xs text-white/40">
-                                            <span className="text-white/50">Ideal for:</span> {pkg.idealFor}
-                                        </p>
-                                        <button className="w-full rounded-xl bg-white text-black py-3 hover:bg-white/90 transition-all duration-300 font-medium text-sm">
-                                            {pkg.price === 'Custom' ? 'Contact Us' : 'Get Started'}
-                                        </button>
+                                        <div className="h-12 bg-white/10 rounded"></div>
                                     </div>
                                 </div>
-                            </motion.div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : packages.length > 0 ? (
+                        // Actual packages
+                        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                            {packages.map((pkg, idx) => (
+                                <motion.div
+                                    key={pkg._id}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.6, delay: idx * 0.1 }}
+                                    onMouseEnter={() => setHoveredPackage(idx)}
+                                    onMouseLeave={() => setHoveredPackage(null)}
+                                    className={`relative rounded-2xl border p-8 transition-all duration-300 ${pkg.popular
+                                        ? 'bg-white/5 border-white/20 shadow-xl'
+                                        : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
+                                        } ${hoveredPackage === idx ? 'scale-[1.02]' : ''}`}
+                                >
+                                    {pkg.popular && (
+                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-white text-black text-xs font-medium rounded-full">
+                                            Most Popular
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-6">
+                                        <div>
+                                            <h3 className="text-2xl font-light text-white mb-2">{pkg.name}</h3>
+                                            <p className="text-sm text-white/50 mb-4 leading-relaxed">{pkg.description}</p>
+                                            <div className="text-4xl font-light text-white mb-1">{pkg.price}</div>
+                                            {pkg.price !== 'Custom' && <p className="text-xs text-white/40">One-time payment</p>}
+                                        </div>
+
+                                        <div className="space-y-2 py-4 border-y border-white/10">
+
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-white/50">Timeline:</span>
+                                                <span className="text-white">{pkg.timeline}</span>
+                                            </div>
+                                        </div>
+
+                                        <ul className="space-y-2.5">
+                                            {pkg.features.map((feature, i) => (
+                                                <li key={i} className="flex items-start gap-2.5">
+                                                    <CheckCircle2 className="w-4 h-4 text-white/40 shrink-0 mt-0.5" />
+                                                    <span className="text-sm text-white/60">{feature}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+
+                                        <div className="pt-4 space-y-3">
+                                            <p className="text-xs text-white/40">
+                                                <span className="text-white/50">Ideal for:</span> {pkg.idealFor}
+                                            </p>
+                                            <button className="w-full rounded-xl bg-white text-black py-3 hover:bg-white/90 transition-all duration-300 font-medium text-sm">
+                                                {pkg.price === 'Custom' ? 'Contact Us' : 'Get Started'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    ) : (
+                        // Empty state
+                        <div className="text-center py-12">
+                            <p className="text-white/40">No pricing packages available at the moment.</p>
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -621,154 +607,67 @@ export default function DigitalAgency() {
                         </p>
                     </div>
 
-                    <div className="space-y-4">
-                        {faqs.map((faq, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.5, delay: idx * 0.05 }}
-                                className="border border-white/10 rounded-2xl overflow-hidden bg-zinc-900/30"
-                            >
-                                <button
-                                    onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                                    className="w-full p-8 flex items-center justify-between text-left hover:bg-white/2 transition-colors"
-                                >
-                                    <span className="text-lg font-light text-white pr-6">{faq.question}</span>
-                                    {openFaq === idx ? (
-                                        <ChevronUp className="w-6 h-6 text-white/40 shrink-0" />
-                                    ) : (
-                                        <ChevronDown className="w-6 h-6 text-white/40 shrink-0" />
-                                    )}
-                                </button>
-                                <AnimatePresence>
-                                    {openFaq === idx && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            transition={{ duration: 0.3 }}
-                                            className="overflow-hidden"
-                                        >
-                                            <div className="px-8 pb-8 text-white/60 leading-relaxed text-base">
-                                                {faq.answer}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Final CTA */}
-            <section className="relative w-full py-40 border-t border-white/5">
-                <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-                </div>
-
-                <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                        className="space-y-10"
-                    >
-                        <div className="space-y-6">
-                            <h2 className="text-5xl sm:text-6xl font-light text-white leading-tight">
-                                Ready to build something<br />
-                                <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">amazing</span>?
-                            </h2>
-                            <p className="text-xl text-white/50 max-w-2xl mx-auto">
-                                Let's discuss your project and create a digital experience that drives real results
-                            </p>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            <button className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-12 py-6 bg-white text-black rounded-2xl hover:scale-105 transition-all duration-300 shadow-2xl font-medium">
-                                <span>Start Your Project</span>
-                                <ArrowUpRight className="w-6 h-6 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                            </button>
-                            <button className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-12 py-6 border-2 border-white/20 text-white rounded-2xl hover:border-white/40 hover:bg-white/5 transition-all duration-300">
-                                <span className="font-light">Schedule a Call</span>
-                            </button>
-                        </div>
-
-                        <div className="pt-12 flex items-center justify-center gap-8 text-sm text-white/40">
-                            <div className="flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4" />
-                                <span>Free consultation</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4" />
-                                <span>No obligation quote</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4" />
-                                <span>Quick response</span>
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
-            </section>
-
-            {/* Footer */}
-            <footer className="relative w-full border-t border-white/5 py-16">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-4 gap-12 mb-12">
+                    {isLoadingFaqs ? (
                         <div className="space-y-4">
-                            <div className="flex items-center gap-2">
-                                <Code2 className="w-6 h-6 text-white" />
-                                <span className="text-xl font-light text-white">Digital Studio</span>
-                            </div>
-                            <p className="text-sm text-white/40 leading-relaxed">
-                                Building digital experiences that convert and scale.
-                            </p>
+                            {[1, 2, 3].map((i) => (
+                                <div
+                                    key={i}
+                                    className="border border-white/10 rounded-2xl p-8 bg-zinc-900/30 animate-pulse"
+                                >
+                                    <div className="h-6 bg-white/5 rounded w-3/4 mb-4"></div>
+                                    <div className="h-4 bg-white/5 rounded w-1/2"></div>
+                                </div>
+                            ))}
                         </div>
-
-                        <div>
-                            <h4 className="text-white font-medium mb-4">Services</h4>
-                            <ul className="space-y-3 text-sm text-white/40">
-                                <li className="hover:text-white transition-colors cursor-pointer">Web Development</li>
-                                <li className="hover:text-white transition-colors cursor-pointer">Mobile Apps</li>
-                                <li className="hover:text-white transition-colors cursor-pointer">UI/UX Design</li>
-                                <li className="hover:text-white transition-colors cursor-pointer">SEO & Marketing</li>
-                            </ul>
+                    ) : faqs.length === 0 ? (
+                        <div className="text-center py-12">
+                            <p className="text-white/40">No FAQs available at the moment.</p>
                         </div>
-
-                        <div>
-                            <h4 className="text-white font-medium mb-4">Company</h4>
-                            <ul className="space-y-3 text-sm text-white/40">
-                                <li className="hover:text-white transition-colors cursor-pointer">About Us</li>
-                                <li className="hover:text-white transition-colors cursor-pointer">Our Work</li>
-                                <li className="hover:text-white transition-colors cursor-pointer">Careers</li>
-                                <li className="hover:text-white transition-colors cursor-pointer">Contact</li>
-                            </ul>
+                    ) : (
+                        <div className="space-y-4">
+                            {faqs.map((faq, idx) => (
+                                <motion.div
+                                    key={faq._id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: idx * 0.05 }}
+                                    className="border border-white/20 rounded-2xl overflow-hidden bg-zinc-900/30"
+                                >
+                                    <button
+                                        onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                                        className="w-full p-8 flex items-center hover:cursor-pointer justify-between text-left hover:bg-white/2 transition-colors"
+                                    >
+                                        <span className="text-lg font-light text-white pr-6">{faq.question}</span>
+                                        {openFaq === idx ? (
+                                            <ChevronUp className="w-6 h-6 text-white/40 shrink-0" />
+                                        ) : (
+                                            <ChevronDown className="w-6 h-6 text-white/40 shrink-0" />
+                                        )}
+                                    </button>
+                                    <AnimatePresence>
+                                        {openFaq === idx && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="px-8 p-8 text-white/60 leading-relaxed text-base whitespace-pre-line">
+                                                    {faq.answer}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            ))}
                         </div>
-
-                        <div>
-                            <h4 className="text-white font-medium mb-4">Connect</h4>
-                            <ul className="space-y-3 text-sm text-white/40">
-                                <li className="hover:text-white transition-colors cursor-pointer">Twitter</li>
-                                <li className="hover:text-white transition-colors cursor-pointer">LinkedIn</li>
-                                <li className="hover:text-white transition-colors cursor-pointer">Instagram</li>
-                                <li className="hover:text-white transition-colors cursor-pointer">GitHub</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/40">
-                        <p>© 2024 Digital Studio. All rights reserved.</p>
-                        <div className="flex gap-6">
-                            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-                        </div>
-                    </div>
+                    )}
                 </div>
-            </footer>
+            </section>
+
+
         </div>
     )
 }
