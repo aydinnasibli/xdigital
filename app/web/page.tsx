@@ -9,14 +9,7 @@ export default function DigitalAgency() {
     const [openFaq, setOpenFaq] = useState<number | null>(null)
     const [isBeforeView, setIsBeforeView] = useState(true)
 
-    const technologies = [
-        { name: 'React & Next.js', description: 'Lightning-fast React apps', },
-        { name: 'TypeScript', description: 'Type-safe, scalable code' },
-        { name: 'Tailwind CSS', description: 'Beautiful, responsive design' },
-        { name: 'Node.js', description: 'Powerful backend solutions' },
-        { name: 'PostgreSQL', description: 'Robust data management' },
-        { name: 'AWS/Vercel', description: 'Enterprise-grade hosting' }
-    ]
+
 
     const packages = [
         {
@@ -117,36 +110,6 @@ export default function DigitalAgency() {
         }
     ]
 
-    const processSteps = [
-        {
-            number: '01',
-            title: 'Discovery & Strategy',
-            description: 'Deep dive into your business goals, target audience, and competitive landscape to build a winning strategy.',
-            duration: '3-5 days',
-            deliverables: ['Strategy document', 'Sitemap & wireframes', 'Technical architecture']
-        },
-        {
-            number: '02',
-            title: 'Design & Prototype',
-            description: 'Creating stunning, user-centric designs with interactive prototypes for your approval.',
-            duration: '1-2 weeks',
-            deliverables: ['UI/UX design', 'Design system', 'Interactive prototype']
-        },
-        {
-            number: '03',
-            title: 'Development',
-            description: 'Building your solution with clean, scalable code following best practices and modern standards.',
-            duration: '2-6 weeks',
-            deliverables: ['Functional website/app', 'Admin panel', 'API documentation']
-        },
-        {
-            number: '04',
-            title: 'Launch & Optimize',
-            description: 'Deploying to production with monitoring, testing, and continuous optimization.',
-            duration: '3-5 days',
-            deliverables: ['Live deployment', 'Training materials', 'Optimization report']
-        }
-    ]
 
     const faqs = [
         {
@@ -262,7 +225,7 @@ export default function DigitalAgency() {
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 1.03 }}
                                         transition={{ duration: 0.5 }}
-                                        className="aspect-video bg-gradient-to-br from-zinc-800 to-zinc-900 p-12 flex flex-col items-center justify-center"
+                                        className="aspect-video bg-linear-to-br from-zinc-800 to-zinc-900 p-12 flex flex-col items-center justify-center"
                                     >
                                         <div className="text-center space-y-8 max-w-lg">
                                             <div className="text-red-400/70 text-xs font-mono uppercase tracking-widest">
@@ -276,7 +239,7 @@ export default function DigitalAgency() {
                                                         initial={{ x: "-100%" }}
                                                         animate={{ x: "100%" }}
                                                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                                                        className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent"
                                                     />
                                                 </div>
                                                 <div className="h-5 bg-white/10 rounded w-full"></div>
@@ -304,7 +267,7 @@ export default function DigitalAgency() {
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 1.03 }}
                                         transition={{ duration: 0.5 }}
-                                        className="aspect-video relative overflow-hidden flex items-center justify-center p-12 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900"
+                                        className="aspect-video relative overflow-hidden flex items-center justify-center p-12 bg-linear-to-br from-zinc-900 via-zinc-800 to-zinc-900"
                                     >
                                         {/* Subtle animated glow */}
                                         <motion.div
@@ -426,37 +389,7 @@ export default function DigitalAgency() {
 
 
 
-            {/* Technology Stack */}
-            <section className="relative w-full py-32 border-t border-white/5">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-20">
-                        <h2 className="text-4xl sm:text-5xl font-light text-white mb-6">
-                            Built with cutting-edge technology
-                        </h2>
-                        <p className="text-xl text-white/50 max-w-2xl mx-auto">
-                            We use the best tools to create fast, secure, and scalable solutions
-                        </p>
-                    </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                        {technologies.map((tech, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                                className="group relative bg-zinc-900/30 border border-white/10 rounded-2xl p-8 hover:border-white/30 hover:bg-white/5 transition-all duration-300"
-                            >
-                                <h4 className="text-lg font-light text-white mb-2">{tech.name}</h4>
-                                <p className="text-sm text-white/40 group-hover:text-white/60 transition-colors">
-                                    {tech.description}
-                                </p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
             {/* Pricing Packages */}
             <section id="pricing" className="relative w-full py-32 border-t border-white/5">
@@ -481,12 +414,12 @@ export default function DigitalAgency() {
                                 onMouseEnter={() => setHoveredPackage(idx)}
                                 onMouseLeave={() => setHoveredPackage(null)}
                                 className={`relative rounded-3xl border p-10 transition-all duration-300 ${pkg.popular
-                                    ? 'bg-white/[0.03] border-white/30 scale-105 shadow-2xl'
+                                    ? 'bg-white/3 border-white/30 scale-105 shadow-2xl'
                                     : 'bg-zinc-900/30 border-white/10 hover:border-white/20 hover:bg-white/5'
                                     } ${hoveredPackage === idx ? 'scale-105' : ''}`}
                             >
                                 {pkg.popular && (
-                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-medium rounded-full shadow-xl">
+                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-linear-to-r from-blue-500 to-purple-500 text-white text-xs font-medium rounded-full shadow-xl">
                                         Most Popular
                                     </div>
                                 )}
@@ -513,7 +446,7 @@ export default function DigitalAgency() {
                                     <ul className="space-y-4">
                                         {pkg.features.map((feature, i) => (
                                             <li key={i} className="flex items-start gap-3">
-                                                <CheckCircle2 className="w-5 h-5 text-green-400/60 flex-shrink-0 mt-0.5" />
+                                                <CheckCircle2 className="w-5 h-5 text-green-400/60 shrink-0 mt-0.5" />
                                                 <span className="text-sm text-white/70">{feature}</span>
                                             </li>
                                         ))}
@@ -556,7 +489,7 @@ export default function DigitalAgency() {
                                 key={idx}
                                 onClick={() => setActiveCase(idx)}
                                 className={`text-left p-8 rounded-2xl border transition-all duration-300 ${activeCase === idx
-                                    ? 'bg-white/[0.03] border-white/30 scale-105'
+                                    ? 'bg-white/3 border-white/30 scale-105'
                                     : 'bg-zinc-900/30 border-white/10 hover:border-white/20 hover:bg-white/5'
                                     }`}
                             >
@@ -573,7 +506,7 @@ export default function DigitalAgency() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.5 }}
-                            className={`rounded-3xl bg-gradient-to-br ${caseStudies[activeCase].color} border border-white/10 p-10 md:p-16`}
+                            className={`rounded-3xl bg-linear-to-br ${caseStudies[activeCase].color} border border-white/10 p-10 md:p-16`}
                         >
                             <div className="grid md:grid-cols-2 gap-12">
                                 <div className="space-y-8">
@@ -649,13 +582,13 @@ export default function DigitalAgency() {
                             >
                                 <button
                                     onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                                    className="w-full p-8 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
+                                    className="w-full p-8 flex items-center justify-between text-left hover:bg-white/2 transition-colors"
                                 >
                                     <span className="text-lg font-light text-white pr-6">{faq.question}</span>
                                     {openFaq === idx ? (
-                                        <ChevronUp className="w-6 h-6 text-white/40 flex-shrink-0" />
+                                        <ChevronUp className="w-6 h-6 text-white/40 shrink-0" />
                                     ) : (
-                                        <ChevronDown className="w-6 h-6 text-white/40 flex-shrink-0" />
+                                        <ChevronDown className="w-6 h-6 text-white/40 shrink-0" />
                                     )}
                                 </button>
                                 <AnimatePresence>
@@ -696,7 +629,7 @@ export default function DigitalAgency() {
                         <div className="space-y-6">
                             <h2 className="text-5xl sm:text-6xl font-light text-white leading-tight">
                                 Ready to build something<br />
-                                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">amazing</span>?
+                                <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">amazing</span>?
                             </h2>
                             <p className="text-xl text-white/50 max-w-2xl mx-auto">
                                 Let's discuss your project and create a digital experience that drives real results
