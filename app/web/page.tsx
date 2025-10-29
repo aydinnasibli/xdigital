@@ -214,9 +214,9 @@ export default function DigitalAgency() {
                     >
 
 
-                        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-white mb-8 leading-tight">
-                            We build <span className="bg-gradient-to-r from-gray-300 to-gray-700 bg-clip-text text-transparent">digital</span><br />
-                            <span className="italic">experiences</span> that scale
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-white mb-8 leading-tight">
+                            We build digital <br />
+                            <span className="font-medium">experiences</span> that scale
                         </h1>
                         <p className="text-xl sm:text-2xl text-white/50 max-w-3xl mx-auto mb-12 leading-relaxed">
                             Custom web development for startups and enterprises. Fast, beautiful, and built to convert.
@@ -423,77 +423,7 @@ export default function DigitalAgency() {
                 </div>
             </section>
 
-            {/* Our Process Section - Agency Style */}
-            <section className="relative w-full py-32 border-t border-white/10 ">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Header */}
-                    <div className="mb-24 text-center">
-                        <div className="flex justify-center items-center gap-3 mb-6">
-                            <div className="w-8 h-[2px] bg-white/20" />
-                            <h2 className="text-sm uppercase tracking-[0.25em] text-white/40">Our Process</h2>
-                            <div className="w-8 h-[2px] bg-white/20" />
-                        </div>
-                        <h3 className="text-5xl md:text-6xl font-light text-white mb-6">
-                            From Idea to Launch in Weeks
-                        </h3>
-                        <p className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto">
-                            A proven process that delivers results every time.
-                        </p>
-                    </div>
 
-                    {/* Timeline */}
-                    <div className="relative flex flex-col lg:flex-row justify-between items-stretch gap-16 lg:gap-8">
-                        {processSteps.map((step, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 40 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-100px" }}
-                                transition={{ duration: 0.7, delay: idx * 0.1 }}
-                                className="relative flex-1 group"
-                            >
-                                {/* Connector Line */}
-                                {idx < processSteps.length - 1 && (
-                                    <div className="hidden lg:block absolute top-[60px] right-[-4rem] w-[calc(100%+4rem)] h-[1px] bg-gradient-to-r from-white/10 via-white/20 to-transparent" />
-                                )}
-
-                                {/* Card */}
-                                <div className="relative z-10 h-full flex flex-col justify-between p-10 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm hover:border-white/20 hover:bg-white/[0.06] transition-all duration-500">
-                                    {/* Step Number */}
-                                    <div className="flex items-center gap-3 mb-8">
-                                        <span className="text-7xl font-light text-white/10 group-hover:text-white/30 transition-colors duration-500">
-                                            {step.number}
-                                        </span>
-                                        <div className="flex-1 h-[1px] bg-white/10 group-hover:bg-white/30 transition-colors duration-500" />
-                                    </div>
-
-                                    {/* Step Info */}
-                                    <div>
-                                        <h4 className="text-2xl font-light text-white mb-4">{step.title}</h4>
-                                        <p className="text-sm text-white/60 mb-6 leading-relaxed">{step.description}</p>
-
-                                        {/* Meta */}
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-2 text-xs text-white/40">
-                                                <Clock className="w-4 h-4" />
-                                                <span>{step.duration}</span>
-                                            </div>
-                                            <div className="space-y-2">
-                                                {step.deliverables.map((item, i) => (
-                                                    <div key={i} className="flex items-center gap-2 text-xs text-white/60">
-                                                        <CheckCircle2 className="w-4 h-4" />
-                                                        <span>{item}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
 
             {/* Technology Stack */}
