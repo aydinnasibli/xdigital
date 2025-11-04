@@ -18,18 +18,18 @@ export default function WebPageClient({ initialFaqs, initialPackages }: WebPageC
     // Add state for packages
     const faqs = initialFaqs
     const packages = initialPackages
-    const [hasScrolled, setHasScrolled] = useState(false)
 
     // All logic in one hook - clean and professional!
     useTimeOnPage({
-        threshold: 5000, // 5 seconds for testing (change to 180000 for production)
+        threshold: 180000, // 3 minutes
         onThresholdReached: () => setShowPopup(true),
-        trackActiveTime: true, // Pause when tab is hidden
-        requireScroll: true, // User must scroll first
-        scrollThreshold: 500, // Must scroll 500px down
-        sessionKey: 'webPageEngagementPopup' // Unique key for this page
+        trackActiveTime: true,
+        requireScroll: true,
+        scrollThreshold: 500,
+        storageKey: 'webPageEngagementPopup',
+        storageType: 'cookie', // Cookie - shows once for 30 days
+        cookieExpiryDays: 30 // Won't show again for 30 days
     })
-
 
     const caseStudies = [
         {
