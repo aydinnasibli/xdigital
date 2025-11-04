@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowUpRight, Sparkles, Rocket, CheckCircle2, Zap, TrendingUp, ChevronDown, ChevronUp, Users, Globe, Smartphone, Search, Calendar, X, Check, Minus } from 'lucide-react'
-
+import { useTimeOnPage } from '@/hooks/useTimeOnPage'
 interface FaqWeb {
     _id: string
     question: string
@@ -33,17 +33,6 @@ export default function WebPageClient({ initialFaqs, initialPackages }: WebPageC
     const faqs = initialFaqs
     const packages = initialPackages
 
-    // Mock hook for demonstration
-    const useTimeOnPage = (config: any) => {
-        useEffect(() => {
-            const timer = setTimeout(() => {
-                if (config.onThresholdReached) {
-                    config.onThresholdReached()
-                }
-            }, config.threshold)
-            return () => clearTimeout(timer)
-        }, [])
-    }
 
     useTimeOnPage({
         threshold: 18000,
@@ -438,8 +427,8 @@ export default function WebPageClient({ initialFaqs, initialPackages }: WebPageC
                                         onMouseEnter={() => setHoveredPackage(idx)}
                                         onMouseLeave={() => setHoveredPackage(null)}
                                         className={`relative rounded-2xl border transition-all duration-300 flex flex-col ${pkg.popular
-                                                ? 'bg-white/5 border-white/20 shadow-xl ring-2 ring-white/10'
-                                                : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
+                                            ? 'bg-white/5 border-white/20 shadow-xl ring-2 ring-white/10'
+                                            : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
                                             } ${hoveredPackage === idx ? 'scale-[1.02] shadow-2xl' : ''}`}
                                     >
                                         {pkg.popular && (
