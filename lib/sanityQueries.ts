@@ -13,7 +13,20 @@ export interface PricingPackage {
   order: number
   comparisonValues?: Record<string, string | boolean>
 }
-
+export interface PortfolioShowcase {
+  _id: string;
+  client: string;
+  industry: string;
+  challenge: string;
+  solution: string;
+  results: {
+    conversion: string;
+    loadTime: string;
+    users: string;
+  };
+  color: string;
+  order: number;
+}
 export interface FaqWeb {
   _id: string;
   question: string;
@@ -97,6 +110,31 @@ export const getFaqWeb = async (): Promise<FaqWeb[]> => {
     `);
   } catch (error) {
     console.error("Error fetching FAQs:", error);
+    return [];
+  }
+};
+
+
+export const getPortfolioShowcases = async (): Promise<PortfolioShowcase[]> => {
+  try {
+    return await client.fetch(`
+      *[_type == "PortfolioShowcase"] | order(order asc) {
+        _id,
+        client,
+        industry,
+        challenge,
+        solution,
+        results {
+          conversion,
+          loadTime,
+          users
+        },
+        color,
+        order
+      }
+    `);
+  } catch (error) {
+    console.error("Error fetching Portfolio Showcases:", error);
     return [];
   }
 };

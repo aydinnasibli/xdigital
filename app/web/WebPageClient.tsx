@@ -3,19 +3,8 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowUpRight, Sparkles, Rocket, CheckCircle2, Zap, TrendingUp, ChevronDown, ChevronUp, Users, Globe, Smartphone, Search, Calendar, X, Check, Minus } from 'lucide-react'
 import { useTimeOnPage } from '@/hooks/useTimeOnPage'
-import { PricingPackage } from '@/lib/sanityQueries'
-interface FaqWeb {
-    _id: string
-    question: string
-    answer: string
-}
-interface ComparisonFeature {
-    _id: string
-    name: string
-    key: string
-    order: number
-    description?: string
-}
+import { PortfolioShowcase, PricingPackage, FaqWeb, ComparisonFeature } from '@/lib/sanityQueries'
+import Link from 'next/link'
 
 
 // UPDATE THE PROPS INTERFACE
@@ -23,8 +12,9 @@ interface WebPageClientProps {
     initialFaqs: FaqWeb[]
     initialPackages: PricingPackage[]
     initialComparisonFeatures: ComparisonFeature[]  // ADD THIS
+    initialPortfolioShowcase: PortfolioShowcase[]  // ADD THIS
 }
-export default function WebPageClient({ initialFaqs, initialPackages, initialComparisonFeatures }: WebPageClientProps) {
+export default function WebPageClient({ initialFaqs, initialPackages, initialComparisonFeatures, initialPortfolioShowcase }: WebPageClientProps) {
     const [hoveredPackage, setHoveredPackage] = useState<number | null>(null)
     const [openFaq, setOpenFaq] = useState<number | null>(null)
     const [isBeforeView, setIsBeforeView] = useState(true)
@@ -32,6 +22,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
     const faqs = initialFaqs
     const packages = initialPackages
     const comparisonFeatures = initialComparisonFeatures
+    const portfolioShowcase = initialPortfolioShowcase
 
     useTimeOnPage({
         threshold: 18000,
@@ -44,44 +35,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
         cookieExpiryDays: 7
     })
 
-    const caseStudies = [
-        {
-            client: 'FinTech Innovators',
-            industry: 'Financial Technology',
-            challenge: 'Complex dashboard needed for 10k+ daily users',
-            solution: 'Built scalable React dashboard with real-time data',
-            results: {
-                conversion: '+240%',
-                loadTime: '0.6s',
-                users: '15k+'
-            },
-            color: 'from-blue-500/20 to-cyan-500/20'
-        },
-        {
-            client: 'EcoMarket',
-            industry: 'E-commerce',
-            challenge: 'High cart abandonment, slow checkout process',
-            solution: 'Rebuilt checkout flow with Next.js & Stripe',
-            results: {
-                conversion: '+185%',
-                loadTime: '0.9s',
-                users: '8k+'
-            },
-            color: 'from-emerald-500/20 to-green-500/20'
-        },
-        {
-            client: 'LearnHub',
-            industry: 'EdTech',
-            challenge: 'Needed interactive learning platform',
-            solution: 'Custom LMS with video streaming & progress tracking',
-            results: {
-                conversion: '+310%',
-                loadTime: '1.1s',
-                users: '22k+'
-            },
-            color: 'from-purple-500/20 to-pink-500/20'
-        }
-    ]
+
 
     const services = [
         {
@@ -465,7 +419,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                         {comparisonFeatures.map((feature, idx) => (
                                             <div
                                                 key={feature.key}
-                                                className={`grid grid-cols-5 gap-4 p-6 ${idx % 2 === 0 ? 'bg-white/[0.02]' : ''
+                                                className={`grid grid-cols-5 gap-4 p-6 ${idx % 2 === 0 ? 'bg-white/2' : ''
                                                     } hover:bg-white/5 transition-colors`}
                                             >
                                                 <div className="text-sm text-white/70 flex items-center">
@@ -482,7 +436,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                                                 value ? (
                                                                     <Check className="w-5 h-5 text-green-400" />
                                                                 ) : (
-                                                                    <Minus className="w-5 h-5 text-white/20" />
+                                                                    <Minus className="w-5 h-5 text-white/30" />
                                                                 )
                                                             ) : (
                                                                 <span className="text-sm text-white/80 text-center">
@@ -530,113 +484,119 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                     </div>
 
                     <div className="space-y-8">
-                        {caseStudies.map((study, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 40 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.6, delay: idx * 0.15 }}
-                                className="group relative"
-                            >
-                                <div className="grid md:grid-cols-5 gap-8 bg-zinc-900/40 border border-white/10 rounded-2xl p-8 md:p-10 hover:border-white/20 hover:bg-white/5 transition-all duration-500">
-                                    <div className="md:col-span-2 space-y-6">
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                                                    <span className="text-xl font-light text-white">
-                                                        {study.client.charAt(0)}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-2xl font-light text-white">{study.client}</h3>
-                                                    <p className="text-sm text-white/40">{study.industry}</p>
+                        {portfolioShowcase.length === 0 ? (
+                            <div className="text-center py-12">
+                                <p className="text-white/40">No Portfolio Showcase available at the moment.</p>
+                            </div>
+                        ) : (
+                            portfolioShowcase.map((study, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 40 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.6, delay: idx * 0.15 }}
+                                    className="group relative"
+                                >
+                                    <div className="grid md:grid-cols-5 gap-8 bg-zinc-900/40 border border-white/10 rounded-2xl p-8 md:p-10 hover:border-white/20 hover:bg-white/5 transition-all duration-500">
+                                        <div className="md:col-span-2 space-y-6">
+                                            <div>
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                                                        <span className="text-xl font-light text-white">
+                                                            {study.client.charAt(0)}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-2xl font-light text-white">{study.client}</h3>
+                                                        <p className="text-sm text-white/40">{study.industry}</p>
+                                                    </div>
                                                 </div>
                                             </div>
+
+                                            <div>
+                                                <h4 className="text-xs text-white/40 uppercase tracking-wider mb-2 font-medium">The Problem</h4>
+                                                <p className="text-white/70 leading-relaxed">{study.challenge}</p>
+                                            </div>
+
+                                            <div>
+                                                <h4 className="text-xs text-white/40 uppercase tracking-wider mb-2 font-medium">Our Solution</h4>
+                                                <p className="text-white/70 leading-relaxed">{study.solution}</p>
+                                            </div>
+
+                                            <Link href={''} className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors group/btn">
+                                                <span>View full case study</span>
+                                                <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                                            </Link>
                                         </div>
 
-                                        <div>
-                                            <h4 className="text-xs text-white/40 uppercase tracking-wider mb-2 font-medium">The Problem</h4>
-                                            <p className="text-white/70 leading-relaxed">{study.challenge}</p>
-                                        </div>
+                                        <div className="md:col-span-3">
+                                            <h4 className="text-xs text-white/40 uppercase tracking-wider mb-6 font-medium">Business Impact</h4>
 
-                                        <div>
-                                            <h4 className="text-xs text-white/40 uppercase tracking-wider mb-2 font-medium">Our Solution</h4>
-                                            <p className="text-white/70 leading-relaxed">{study.solution}</p>
-                                        </div>
-
-                                        <button className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors group/btn">
-                                            <span>View full case study</span>
-                                            <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-                                        </button>
-                                    </div>
-
-                                    <div className="md:col-span-3">
-                                        <h4 className="text-xs text-white/40 uppercase tracking-wider mb-6 font-medium">Business Impact</h4>
-
-                                        <div className="grid grid-cols-2 gap-4 mb-6">
-                                            <div className="col-span-2 bg-zinc-900/60 rounded-xl p-6 border border-white/10">
-                                                <div className="flex items-start justify-between mb-3">
-                                                    <div>
-                                                        <p className="text-sm text-white/50 mb-1">Conversion Rate Increase</p>
-                                                        <div className="flex items-baseline gap-2">
-                                                            <span className="text-5xl font-light text-white">
-                                                                {study.results.conversion}
-                                                            </span>
+                                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                                <div className="col-span-2 bg-zinc-900/60 rounded-xl p-6 border border-white/10">
+                                                    <div className="flex items-start justify-between mb-3">
+                                                        <div>
+                                                            <p className="text-sm text-white/50 mb-1">Conversion Rate Increase</p>
+                                                            <div className="flex items-baseline gap-2">
+                                                                <span className="text-5xl font-light text-white">
+                                                                    {study.results.conversion}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                                                            <TrendingUp className="w-6 h-6 text-green-400/80" />
                                                         </div>
                                                     </div>
-                                                    <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
-                                                        <TrendingUp className="w-6 h-6 text-green-400/80" />
-                                                    </div>
+                                                    <p className="text-xs text-white/40">Compared to previous quarter</p>
                                                 </div>
-                                                <p className="text-xs text-white/40">Compared to previous quarter</p>
+
+                                                <div className="bg-zinc-900/60 rounded-xl p-5 border border-white/10">
+                                                    <div className="flex items-center gap-3 mb-3">
+                                                        <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                                                            <Zap className="w-5 h-5 text-yellow-400/80" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs text-white/50">Load Time</p>
+                                                            <p className="text-2xl font-light text-white">{study.results.loadTime}</p>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-xs text-white/40">98% faster than before</p>
+                                                </div>
+
+                                                <div className="bg-zinc-900/60 rounded-xl p-5 border border-white/10">
+                                                    <div className="flex items-center gap-3 mb-3">
+                                                        <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                                            <Users className="w-5 h-5 text-blue-400/80" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs text-white/50">Active Users</p>
+                                                            <p className="text-2xl font-light text-white">{study.results.users}</p>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-xs text-white/40">Monthly active users</p>
+                                                </div>
                                             </div>
 
-                                            <div className="bg-zinc-900/60 rounded-xl p-5 border border-white/10">
-                                                <div className="flex items-center gap-3 mb-3">
-                                                    <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                                                        <Zap className="w-5 h-5 text-yellow-400/80" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-xs text-white/50">Load Time</p>
-                                                        <p className="text-2xl font-light text-white">{study.results.loadTime}</p>
-                                                    </div>
-                                                </div>
-                                                <p className="text-xs text-white/40">98% faster than before</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
+                                                    React
+                                                </span>
+                                                <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
+                                                    Next.js
+                                                </span>
+                                                <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
+                                                    TypeScript
+                                                </span>
+                                                <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
+                                                    {idx === 0 ? 'PostgreSQL' : idx === 1 ? 'Stripe API' : 'AWS'}
+                                                </span>
                                             </div>
-
-                                            <div className="bg-zinc-900/60 rounded-xl p-5 border border-white/10">
-                                                <div className="flex items-center gap-3 mb-3">
-                                                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                                        <Users className="w-5 h-5 text-blue-400/80" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-xs text-white/50">Active Users</p>
-                                                        <p className="text-2xl font-light text-white">{study.results.users}</p>
-                                                    </div>
-                                                </div>
-                                                <p className="text-xs text-white/40">Monthly active users</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-wrap gap-2">
-                                            <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
-                                                React
-                                            </span>
-                                            <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
-                                                Next.js
-                                            </span>
-                                            <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
-                                                TypeScript
-                                            </span>
-                                            <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60">
-                                                {idx === 0 ? 'PostgreSQL' : idx === 1 ? 'Stripe API' : 'AWS'}
-                                            </span>
                                         </div>
                                     </div>
-                                </div>
-                            </motion.div>
-                        ))}
+                                </motion.div>
+                            ))
+                        )}
                     </div>
                 </div>
             </section>
