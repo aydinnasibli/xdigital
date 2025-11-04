@@ -11,20 +11,7 @@ export interface PricingPackage {
   idealFor: string
   popular: boolean
   order: number
-  comparisonValues?: {
-    pages?: string
-    customDesign?: boolean
-    responsive?: boolean
-    seo?: boolean
-    cms?: boolean
-    forms?: boolean
-    analytics?: boolean
-    ecommerce?: boolean
-    integrations?: boolean
-    support?: boolean
-    updates?: boolean
-    training?: string
-  }
+  comparisonValues?: Record<string, string | boolean>
 }
 
 export interface FaqWeb {
@@ -54,10 +41,31 @@ export async function getPricingPackages(): Promise<PricingPackage[]> {
     idealFor,
     popular,
     order,
-    comparisonValues
+    comparisonValues[] {
+      "key": feature->key,
+      value
+    }
   }`
 
-  return await client.fetch(query)
+  const packages = await client.fetch(query)
+
+  // Transform comparisonValues array to object with feature keys
+  return packages.map((pkg: any) => ({
+    ...pkg,
+    comparisonValues: pkg.comparisonValues?.reduce((acc: Record<string, string | boolean>, item: any) => {
+      if (item.key && item.value !== undefined) {
+        // Convert "true"/"false" strings to booleans
+        if (item.value.toLowerCase() === 'true') {
+          acc[item.key] = true;
+        } else if (item.value.toLowerCase() === 'false') {
+          acc[item.key] = false;
+        } else {
+          acc[item.key] = item.value;
+        }
+      }
+      return acc;
+    }, {}) || {}
+  }))
 }
 
 export async function getComparisonFeatures(): Promise<ComparisonFeature[]> {

@@ -496,17 +496,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                         ))}
                                     </div>
 
-                                    {/* Table Footer */}
-                                    <div className="grid grid-cols-5 gap-4 p-6 border-t border-white/10 bg-white/5">
-                                        <div></div>
-                                        {packages.map((pkg) => (
-                                            <div key={pkg._id} className="flex justify-center">
-                                                <button className="px-6 py-2 rounded-lg bg-white text-black hover:bg-white/90 transition-all duration-300 font-medium text-sm hover:shadow-lg whitespace-nowrap">
-                                                    {pkg.price === 'Custom' ? 'Contact' : 'Select'}
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
+
                                 </div>
                             </motion.div>
                         </>
