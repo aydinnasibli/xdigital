@@ -1,9 +1,9 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowUpRight, Sparkles, Rocket, CheckCircle2, Zap, TrendingUp, ChevronDown, ChevronUp, Users, Globe, Smartphone, Search } from 'lucide-react'
+import { ArrowUpRight, Sparkles, Rocket, CheckCircle2, Zap, TrendingUp, ChevronDown, ChevronUp, Users, Globe, Smartphone, Search, Calendar, X } from 'lucide-react'
 import { FaqWeb, PricingPackage } from '@/lib/sanityQueries'
-
+import { useTimeOnPage } from '@/hooks/useTimeOnPage'
 
 interface WebPageClientProps {
     initialFaqs: FaqWeb[]
@@ -14,11 +14,21 @@ export default function WebPageClient({ initialFaqs, initialPackages }: WebPageC
     const [hoveredPackage, setHoveredPackage] = useState<number | null>(null)
     const [openFaq, setOpenFaq] = useState<number | null>(null)
     const [isBeforeView, setIsBeforeView] = useState(true)
-
+    const [showPopup, setShowPopup] = useState(false)
     // Add state for packages
     const faqs = initialFaqs
     const packages = initialPackages
+    const [hasScrolled, setHasScrolled] = useState(false)
 
+    // All logic in one hook - clean and professional!
+    useTimeOnPage({
+        threshold: 5000, // 5 seconds for testing (change to 180000 for production)
+        onThresholdReached: () => setShowPopup(true),
+        trackActiveTime: true, // Pause when tab is hidden
+        requireScroll: true, // User must scroll first
+        scrollThreshold: 500, // Must scroll 500px down
+        sessionKey: 'webPageEngagementPopup' // Unique key for this page
+    })
 
 
     const caseStudies = [
@@ -597,6 +607,75 @@ export default function WebPageClient({ initialFaqs, initialPackages }: WebPageC
                     )}
                 </div>
             </section>
+            <AnimatePresence>
+                {showPopup && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowPopup(false)}
+                            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+                        />
+
+                        {/* Modal */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            transition={{ duration: 0.3 }}
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="relative bg-zinc-900 border border-white/20 rounded-2xl max-w-md w-full p-8 shadow-2xl">
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => setShowPopup(false)}
+                                    className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+
+                                {/* Content */}
+                                <div className="space-y-6">
+                                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4">
+                                        <Calendar className="w-6 h-6 text-white/60" />
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-2xl font-light text-white mb-2">
+                                            Having troubles? Let's talk!
+                                        </h3>
+                                        <p className="text-white/60 leading-relaxed">
+                                            You've been exploring our work for a while.
+                                            Get a free consultation with our team.
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-col gap-3">
+                                        <button className="w-full px-6 py-3 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-all">
+                                            Mail Us
+                                        </button>
+                                        <button className="w-full px-6 py-3 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-all">
+                                            Schedule Free Call
+                                        </button>
+
+                                        <button
+                                            onClick={() => setShowPopup(false)}
+                                            className="w-full px-6 py-3 border border-white/20 text-white rounded-xl hover:bg-white/10 transition-all"
+                                        >
+                                            Continue Browsing
+                                        </button>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     )
 }
