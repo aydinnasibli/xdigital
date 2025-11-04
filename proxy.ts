@@ -30,7 +30,6 @@ export default clerkMiddleware(async (auth, req) => {
 
 // Ensure middleware runs as Edge Function
 export const config = {
-    runtime: 'experimental-edge',
     matcher: [
         '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
         '/(api|trpc)(.*)',
