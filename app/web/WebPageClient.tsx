@@ -21,14 +21,14 @@ export default function WebPageClient({ initialFaqs, initialPackages }: WebPageC
 
     // All logic in one hook - clean and professional!
     useTimeOnPage({
-        threshold: 180000, // 3 minutes
+        threshold: 18000, // 3 minutes
         onThresholdReached: () => setShowPopup(true),
         trackActiveTime: true,
         requireScroll: true,
         scrollThreshold: 500,
         storageKey: 'webPageEngagementPopup',
         storageType: 'cookie', // Cookie - shows once for 30 days
-        cookieExpiryDays: 30 // Won't show again for 30 days
+        cookieExpiryDays: 7 // Won't show again for 30 days
     })
 
     const caseStudies = [
@@ -607,6 +607,7 @@ export default function WebPageClient({ initialFaqs, initialPackages }: WebPageC
                     )}
                 </div>
             </section>
+
             <AnimatePresence>
                 {showPopup && (
                     <>
@@ -654,22 +655,28 @@ export default function WebPageClient({ initialFaqs, initialPackages }: WebPageC
                                     </div>
 
                                     <div className="flex flex-col gap-3">
-                                        <button className="w-full px-6 py-3 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-all">
+                                        <a
+                                            href="mailto:xdigitalaz@proton.me?subject=Project Inquiry&body=Hi, I'd like to discuss a project with you."
+                                            className="w-full px-6 py-3 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-all text-center"
+                                        >
                                             Mail Us
-                                        </button>
-                                        <button className="w-full px-6 py-3 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-all">
+                                        </a>
+                                        <a
+                                            href="https://cal.com/xdigital"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full px-6 py-3 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-all text-center"
+                                        >
                                             Schedule Free Call
-                                        </button>
+                                        </a>
 
                                         <button
                                             onClick={() => setShowPopup(false)}
-                                            className="w-full px-6 py-3 border border-white/20 text-white rounded-xl hover:bg-white/10 transition-all"
+                                            className="w-full hover:cursor-pointer px-6 py-3 border border-white/20 text-white rounded-xl hover:bg-white/10 transition-all"
                                         >
                                             Continue Browsing
                                         </button>
                                     </div>
-
-
                                 </div>
                             </div>
                         </motion.div>

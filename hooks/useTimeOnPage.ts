@@ -36,11 +36,11 @@ export function useTimeOnPage({
     threshold,
     onThresholdReached,
     trackActiveTime = true,
-    requireScroll = true,
+    requireScroll = false,
     scrollThreshold = 500,
     storageKey = 'timeOnPageTriggered',
     storageType = 'cookie', // Default to cookie
-    cookieExpiryDays = 0.000001 // 30 days default
+    cookieExpiryDays = 30 // 30 days default
 }: UseTimeOnPageOptions) {
     const [timeSpent, setTimeSpent] = useState(0)
     const [isActive, setIsActive] = useState(true)
