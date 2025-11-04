@@ -3,36 +3,35 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowUpRight, Sparkles, Rocket, CheckCircle2, Zap, TrendingUp, ChevronDown, ChevronUp, Users, Globe, Smartphone, Search, Calendar, X, Check, Minus } from 'lucide-react'
 import { useTimeOnPage } from '@/hooks/useTimeOnPage'
+import { PricingPackage } from '@/lib/sanityQueries'
 interface FaqWeb {
     _id: string
     question: string
     answer: string
 }
-
-interface PricingPackage {
+interface ComparisonFeature {
     _id: string
     name: string
-    description: string
-    price: string
-    timeline: string
-    features: string[]
-    popular: boolean
-    idealFor: string
+    key: string
+    order: number
+    description?: string
 }
 
+
+// UPDATE THE PROPS INTERFACE
 interface WebPageClientProps {
     initialFaqs: FaqWeb[]
     initialPackages: PricingPackage[]
+    initialComparisonFeatures: ComparisonFeature[]  // ADD THIS
 }
-
-export default function WebPageClient({ initialFaqs, initialPackages }: WebPageClientProps) {
+export default function WebPageClient({ initialFaqs, initialPackages, initialComparisonFeatures }: WebPageClientProps) {
     const [hoveredPackage, setHoveredPackage] = useState<number | null>(null)
     const [openFaq, setOpenFaq] = useState<number | null>(null)
     const [isBeforeView, setIsBeforeView] = useState(true)
     const [showPopup, setShowPopup] = useState(false)
     const faqs = initialFaqs
     const packages = initialPackages
-
+    const comparisonFeatures = initialComparisonFeatures
 
     useTimeOnPage({
         threshold: 18000,
@@ -107,85 +106,14 @@ export default function WebPageClient({ initialFaqs, initialPackages }: WebPageC
         }
     ]
 
-    // Comparison table features - customize based on your actual features
-    const comparisonFeatures = [
-        { name: 'Pages Included', key: 'pages' },
-        { name: 'Custom Design', key: 'customDesign' },
-        { name: 'Responsive Design', key: 'responsive' },
-        { name: 'SEO Optimization', key: 'seo' },
-        { name: 'Content Management', key: 'cms' },
-        { name: 'Contact Forms', key: 'forms' },
-        { name: 'Analytics Integration', key: 'analytics' },
-        { name: 'E-commerce Features', key: 'ecommerce' },
-        { name: 'Custom Integrations', key: 'integrations' },
-        { name: 'Priority Support', key: 'support' },
-        { name: 'Monthly Updates', key: 'updates' },
-        { name: 'Training Sessions', key: 'training' }
-    ]
 
-    // Mock comparison data - you'd get this from Sanity CMS
-    const getFeatureValue = (packageName: string, featureKey: string) => {
-        // This is mock data - replace with actual data from your CMS
-        const mockData: Record<string, Record<string, any>> = {
-            'Starter': {
-                pages: '3-5',
-                customDesign: true,
-                responsive: true,
-                seo: true,
-                cms: false,
-                forms: true,
-                analytics: true,
-                ecommerce: false,
-                integrations: false,
-                support: false,
-                updates: false,
-                training: false
-            },
-            'Professional': {
-                pages: '5-10',
-                customDesign: true,
-                responsive: true,
-                seo: true,
-                cms: true,
-                forms: true,
-                analytics: true,
-                ecommerce: true,
-                integrations: true,
-                support: true,
-                updates: false,
-                training: '1 session'
-            },
-            'Enterprise': {
-                pages: 'Unlimited',
-                customDesign: true,
-                responsive: true,
-                seo: true,
-                cms: true,
-                forms: true,
-                analytics: true,
-                ecommerce: true,
-                integrations: true,
-                support: true,
-                updates: true,
-                training: 'Unlimited'
-            },
-            'Custom': {
-                pages: 'Custom',
-                customDesign: true,
-                responsive: true,
-                seo: true,
-                cms: true,
-                forms: true,
-                analytics: true,
-                ecommerce: true,
-                integrations: true,
-                support: true,
-                updates: true,
-                training: 'Custom'
-            }
+
+    const getFeatureValue = (packageData: PricingPackage, featureKey: string) => {
+        // Get value from the package's comparisonValues
+        if (packageData.comparisonValues) {
+            return packageData.comparisonValues[featureKey as keyof typeof packageData.comparisonValues]
         }
-
-        return mockData[packageName]?.[featureKey]
+        return undefined
     }
 
     return (
@@ -544,7 +472,7 @@ export default function WebPageClient({ initialFaqs, initialPackages }: WebPageC
                                                     {feature.name}
                                                 </div>
                                                 {packages.map((pkg) => {
-                                                    const value = getFeatureValue(pkg.name, feature.key);
+                                                    const value = getFeatureValue(pkg, feature.key);
                                                     return (
                                                         <div
                                                             key={pkg._id}

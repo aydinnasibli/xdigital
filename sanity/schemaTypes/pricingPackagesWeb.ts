@@ -59,6 +59,46 @@ export const pricingPackage = defineType({
             description: 'Order in which packages appear (lower numbers first)',
             validation: (Rule) => Rule.required().min(0),
         }),
+        // DYNAMIC COMPARISON VALUES - References the comparison features you create
+        defineField({
+            name: 'comparisonValues',
+            title: 'Comparison Table Values',
+            type: 'array',
+            description: 'Set values for each comparison feature',
+            of: [
+                {
+                    type: 'object',
+                    fields: [
+                        {
+                            name: 'feature',
+                            title: 'Feature',
+                            type: 'reference',
+                            to: [{ type: 'comparisonFeature' }],
+                            validation: (Rule) => Rule.required(),
+                        },
+                        {
+                            name: 'value',
+                            title: 'Value',
+                            type: 'string',
+                            description: 'Enter value: for boolean use "true"/"false", for text use any string (e.g., "5-10 pages", "Unlimited")',
+                            validation: (Rule) => Rule.required(),
+                        },
+                    ],
+                    preview: {
+                        select: {
+                            featureName: 'feature.name',
+                            value: 'value',
+                        },
+                        prepare({ featureName, value }) {
+                            return {
+                                title: featureName || 'Unknown Feature',
+                                subtitle: value,
+                            }
+                        },
+                    },
+                },
+            ],
+        }),
     ],
     orderings: [
         {

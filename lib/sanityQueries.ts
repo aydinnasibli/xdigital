@@ -1,9 +1,5 @@
 import { client } from "@/sanity/lib/client";
 
-
-
-
-
 export interface PricingPackage {
   _id: string
   _createdAt: string
@@ -15,15 +11,35 @@ export interface PricingPackage {
   idealFor: string
   popular: boolean
   order: number
+  comparisonValues?: {
+    pages?: string
+    customDesign?: boolean
+    responsive?: boolean
+    seo?: boolean
+    cms?: boolean
+    forms?: boolean
+    analytics?: boolean
+    ecommerce?: boolean
+    integrations?: boolean
+    support?: boolean
+    updates?: boolean
+    training?: string
+  }
 }
-
-
 
 export interface FaqWeb {
   _id: string;
   question: string;
   answer: string;
   order: number;
+}
+
+export interface ComparisonFeature {
+  _id: string;
+  name: string;
+  key: string;
+  order: number;
+  description?: string;
 }
 
 export async function getPricingPackages(): Promise<PricingPackage[]> {
@@ -37,10 +53,28 @@ export async function getPricingPackages(): Promise<PricingPackage[]> {
     features,
     idealFor,
     popular,
-    order
+    order,
+    comparisonValues
   }`
 
   return await client.fetch(query)
+}
+
+export async function getComparisonFeatures(): Promise<ComparisonFeature[]> {
+  const query = `*[_type == "comparisonFeature"] | order(order asc) {
+    _id,
+    name,
+    key,
+    order,
+    description
+  }`
+
+  try {
+    return await client.fetch(query)
+  } catch (error) {
+    console.error("Error fetching comparison features:", error);
+    return [];
+  }
 }
 
 export const getFaqWeb = async (): Promise<FaqWeb[]> => {
