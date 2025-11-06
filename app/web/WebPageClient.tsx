@@ -446,6 +446,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                 </div>
             </section>
 
+
             {/* Portfolio Showcase */}
             <section id="work" className="relative w-full py-32 border-t border-white/5">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
