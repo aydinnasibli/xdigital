@@ -242,6 +242,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                         >
                             <Rocket className="w-4 h-4 text-white/60" />
                             <span className="text-sm text-white/60">What We Do</span>
+
                         </motion.div>
                         <h2 className="text-4xl sm:text-5xl font-light text-white mb-6">
                             Full-stack web development<br />for modern businesses
