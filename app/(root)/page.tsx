@@ -384,7 +384,7 @@ function Page() {
                   <ul className="space-y-2 sm:space-y-3">
                     {services[activeService].features.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-2 sm:gap-3">
-                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-white/40 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-white/40 shrink-0 mt-0.5" />
                         <span className="text-sm sm:text-base text-white/70">{feature}</span>
                       </li>
                     ))}
@@ -450,11 +450,11 @@ function Page() {
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 md:gap-16">
             {processSteps.map((step, idx) => (
               <motion.div key={idx} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.6, delay: idx * 0.1 }} className="relative group">
-                <div className="absolute -left-4 top-0 bottom-0 w-px bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="absolute -left-4 top-0 bottom-0 w-px bg-linear-to-b from-white/30 via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
                 <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-baseline gap-2 sm:gap-3">
-                    <span className="text-4xl sm:text-5xl md:text-6xl font-light text-white/[0.10] group-hover:text-white/30 transition-colors duration-500">
+                    <span className="text-4xl sm:text-5xl md:text-6xl font-light text-white/10 group-hover:text-white/30 transition-colors duration-500">
                       {step.step}
                     </span>
                     {!step.required && (
@@ -495,7 +495,7 @@ function Page() {
                 <div className="p-3 sm:p-4 md:p-6 border-l border-white/20">
                   <h3 className="text-sm sm:text-base md:text-lg font-light text-white/40">Typical Agencies</h3>
                 </div>
-                <div className="p-3 sm:p-4 md:p-6 border-l border-white/20 bg-white/[0.02]">
+                <div className="p-3 sm:p-4 md:p-6 border-l border-white/20 bg-white/2">
                   <h3 className="text-sm sm:text-base md:text-lg font-light text-white">xDigital</h3>
                 </div>
               </div>
@@ -539,7 +539,7 @@ function Page() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="grid grid-cols-3 border-b border-white/10 last:border-b-0 hover:bg-white/[0.01] transition-colors duration-300"
+                  className="grid grid-cols-3 border-b border-white/10 last:border-b-0 hover:bg-white/1 transition-colors duration-300"
                 >
                   {/* Category */}
                   <div className="p-3 sm:p-4 md:p-6 flex items-center">
@@ -552,9 +552,9 @@ function Page() {
                   </div>
 
                   {/* Us */}
-                  <div className="p-3 sm:p-4 md:p-6 border-l border-white/10 bg-white/[0.02] flex items-center">
+                  <div className="p-3 sm:p-4 md:p-6 border-l border-white/10 bg-white/2 flex items-center">
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-white/60 flex-shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-white/60 shrink-0" />
                       <span className="text-xs sm:text-sm text-white/80">{row.us}</span>
                     </div>
                   </div>
@@ -597,7 +597,7 @@ function Page() {
                   </blockquote>
 
                   <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="h-px flex-grow bg-white/10" />
+                    <div className="h-px grow bg-white/10" />
                     <div className="text-right">
                       <div className="text-sm sm:text-base text-white/90 font-light">{testimonial.author}</div>
                       <div className="text-white/30 text-xs sm:text-sm">{testimonial.position}</div>
