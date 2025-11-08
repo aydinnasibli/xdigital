@@ -19,16 +19,22 @@ export const pricingPackage = defineType({
         }),
         defineField({
             name: 'price',
-            title: 'Price',
+            title: 'Monthly Price',
             type: 'string',
-            description: 'e.g., $3,500 or Custom',
+            description: 'e.g., $299/mo or Custom',
             validation: (Rule) => Rule.required(),
         }),
         defineField({
-            name: 'timeline',
-            title: 'Timeline',
+            name: 'setupFee',
+            title: 'Setup Fee (Optional)',
             type: 'string',
-            description: 'e.g., 2-3 weeks',
+            description: 'One-time setup cost, e.g., $500',
+        }),
+        defineField({
+            name: 'timeline',
+            title: 'Initial Setup Timeline',
+            type: 'string',
+            description: 'e.g., 2-3 weeks for first delivery',
             validation: (Rule) => Rule.required(),
         }),
         defineField({
@@ -37,6 +43,18 @@ export const pricingPackage = defineType({
             type: 'array',
             of: [{ type: 'string' }],
             validation: (Rule) => Rule.required().min(1),
+        }),
+        defineField({
+            name: 'templatesIncluded',
+            title: 'Number of Templates Included',
+            type: 'string',
+            description: 'e.g., "5 templates" or "All templates from lower tiers + 10 exclusive"',
+        }),
+        defineField({
+            name: 'customizationRequests',
+            title: 'Monthly Customization Requests',
+            type: 'string',
+            description: 'e.g., "2 requests/month" or "Unlimited"',
         }),
         defineField({
             name: 'idealFor',
@@ -59,7 +77,6 @@ export const pricingPackage = defineType({
             description: 'Order in which packages appear (lower numbers first)',
             validation: (Rule) => Rule.required().min(0),
         }),
-        // DYNAMIC COMPARISON VALUES - References the comparison features you create
         defineField({
             name: 'comparisonValues',
             title: 'Comparison Table Values',
@@ -80,7 +97,7 @@ export const pricingPackage = defineType({
                             name: 'value',
                             title: 'Value',
                             type: 'string',
-                            description: 'Enter value: for boolean use "true"/"false", for text use any string (e.g., "5-10 pages", "Unlimited")',
+                            description: 'Enter value: for boolean use "true"/"false", for text use any string',
                             validation: (Rule) => Rule.required(),
                         },
                     ],

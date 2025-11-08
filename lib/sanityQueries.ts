@@ -6,13 +6,17 @@ export interface PricingPackage {
   name: string
   description: string
   price: string
+  setupFee?: string  // ADD THIS
   timeline: string
   features: string[]
+  templatesIncluded?: string  // ADD THIS
+  customizationRequests?: string  // ADD THIS
   idealFor: string
   popular: boolean
   order: number
   comparisonValues?: Record<string, string | boolean>
 }
+
 export interface PortfolioShowcase {
   _id: string;
   client: string;
@@ -49,8 +53,11 @@ export async function getPricingPackages(): Promise<PricingPackage[]> {
     name,
     description,
     price,
+    setupFee,
     timeline,
     features,
+    templatesIncluded,
+    customizationRequests,
     idealFor,
     popular,
     order,
@@ -62,12 +69,10 @@ export async function getPricingPackages(): Promise<PricingPackage[]> {
 
   const packages = await client.fetch(query)
 
-  // Transform comparisonValues array to object with feature keys
   return packages.map((pkg: any) => ({
     ...pkg,
     comparisonValues: pkg.comparisonValues?.reduce((acc: Record<string, string | boolean>, item: any) => {
       if (item.key && item.value !== undefined) {
-        // Convert "true"/"false" strings to booleans
         if (item.value.toLowerCase() === 'true') {
           acc[item.key] = true;
         } else if (item.value.toLowerCase() === 'false') {

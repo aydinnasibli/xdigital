@@ -303,11 +303,10 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                             </div>
                                         )}
 
-                                        {/* Card Content - Flexible height with consistent spacing */}
                                         <div className="p-6 flex flex-col flex-1">
-                                            {/* Header Section - Fixed height */}
+                                            {/* Header */}
                                             <div className="mb-5">
-                                                <h3 className="text-xl font-medium text-white mb-2 min-h-[28px]">
+                                                <h3 className="text-xl font-medium text-white mb-2 min-h-7">
                                                     {pkg.name}
                                                 </h3>
                                                 <p className="text-xs text-white/50 leading-relaxed h-8 overflow-hidden">
@@ -315,25 +314,42 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                                 </p>
                                             </div>
 
-                                            {/* Price Section - Fixed height */}
+                                            {/* Price - NOW MONTHLY */}
                                             <div className="mb-5">
-                                                <div className="text-3xl font-light text-white mb-1 min-h-[36px] flex items-baseline">
+                                                <div className="text-3xl font-light text-white mb-1 min-h-9 flex items-baseline">
                                                     {pkg.price}
+                                                    {pkg.price !== 'Custom' && (
+                                                        <span className="text-sm text-white/40 ml-2 font-normal">/month</span>
+                                                    )}
                                                 </div>
-                                                <p className="text-xs text-white/40 h-4">
-                                                    {pkg.price !== 'Custom' && 'One-time payment'}
-                                                </p>
+                                                {pkg.setupFee && (
+                                                    <p className="text-xs text-white/40">
+                                                        + {pkg.setupFee} setup fee
+                                                    </p>
+                                                )}
                                             </div>
 
-                                            {/* Timeline Section - Fixed height */}
-                                            <div className="py-3 mb-5 border-y border-white/10">
+                                            {/* Timeline & Templates Info */}
+                                            <div className="py-3 mb-5 border-y border-white/10 space-y-2">
                                                 <div className="flex items-center justify-between text-xs">
-                                                    <span className="text-white/50">Timeline:</span>
+                                                    <span className="text-white/50">Initial Setup:</span>
                                                     <span className="text-white font-medium">{pkg.timeline}</span>
                                                 </div>
+                                                {pkg.templatesIncluded && (
+                                                    <div className="flex items-center justify-between text-xs">
+                                                        <span className="text-white/50">Templates:</span>
+                                                        <span className="text-white font-medium">{pkg.templatesIncluded}</span>
+                                                    </div>
+                                                )}
+                                                {pkg.customizationRequests && (
+                                                    <div className="flex items-center justify-between text-xs">
+                                                        <span className="text-white/50">Customizations:</span>
+                                                        <span className="text-white font-medium">{pkg.customizationRequests}</span>
+                                                    </div>
+                                                )}
                                             </div>
 
-                                            {/* Features List - Flexible height */}
+                                            {/* Features List */}
                                             <ul className="space-y-2 flex-1 mb-5">
                                                 {pkg.features.slice(0, 5).map((feature, i) => (
                                                     <li key={i} className="flex items-start gap-2">
@@ -350,14 +366,14 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                                 )}
                                             </ul>
 
-                                            {/* Footer Section - Always at bottom */}
+                                            {/* Footer */}
                                             <div className="mt-auto space-y-3">
-                                                <p className="text-xs text-white/40 min-h-[32px]">
+                                                <p className="text-xs text-white/40 min-h-8">
                                                     <span className="text-white/50">Perfect for:</span>{' '}
                                                     {pkg.idealFor}
                                                 </p>
-                                                <button className="w-full rounded-xl bg-white text-black py-2.5 hover:bg-white/90 transition-all duration-300 font-medium text-sm hover:shadow-lg">
-                                                    {pkg.price === 'Custom' ? 'Contact Us' : 'Get Started'}
+                                                <button className="w-full hover:cursor-pointer rounded-xl bg-white text-black py-2.5 hover:bg-white/90 transition-all duration-300 font-medium text-sm hover:shadow-lg">
+                                                    {pkg.price === 'Custom' ? 'Contact Us' : 'Start Subscription'}
                                                 </button>
                                             </div>
                                         </div>
