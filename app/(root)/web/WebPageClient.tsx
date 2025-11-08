@@ -270,7 +270,6 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
             <section id="pricing" className="relative w-full py-32 border-t border-white/5">
                 <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-
                         <h2 className="text-4xl sm:text-5xl font-light text-white mb-4">
                             Choose your perfect plan
                         </h2>
@@ -293,8 +292,8 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                         onMouseEnter={() => setHoveredPackage(idx)}
                                         onMouseLeave={() => setHoveredPackage(null)}
                                         className={`relative rounded-2xl border transition-all duration-300 flex flex-col ${pkg.popular
-                                            ? 'bg-white/5 border-white/20 shadow-xl ring-2 ring-white/10'
-                                            : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
+                                                ? 'bg-white/5 border-white/20 shadow-xl ring-2 ring-white/10'
+                                                : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
                                             } ${hoveredPackage === idx ? 'scale-[1.02] shadow-2xl' : ''}`}
                                     >
                                         {pkg.popular && (
@@ -306,7 +305,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                         <div className="p-6 flex flex-col flex-1">
                                             {/* Header */}
                                             <div className="mb-5">
-                                                <h3 className="text-xl font-medium text-white mb-2 min-h-7">
+                                                <h3 className="text-xl font-medium text-white mb-2 min-h-[28px]">
                                                     {pkg.name}
                                                 </h3>
                                                 <p className="text-xs text-white/50 leading-relaxed h-8 overflow-hidden">
@@ -316,7 +315,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
 
                                             {/* Price - NOW MONTHLY */}
                                             <div className="mb-5">
-                                                <div className="text-3xl font-light text-white mb-1 min-h-9 flex items-baseline">
+                                                <div className="text-3xl font-light text-white mb-1 min-h-[36px] flex items-baseline">
                                                     {pkg.price}
                                                     {pkg.price !== 'Custom' && (
                                                         <span className="text-sm text-white/40 ml-2 font-normal">/month</span>
@@ -368,7 +367,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
 
                                             {/* Footer */}
                                             <div className="mt-auto space-y-3">
-                                                <p className="text-xs text-white/40 min-h-8">
+                                                <p className="text-xs text-white/40 min-h-[32px]">
                                                     <span className="text-white/50">Perfect for:</span>{' '}
                                                     {pkg.idealFor}
                                                 </p>
@@ -419,7 +418,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                         {comparisonFeatures.map((feature, idx) => (
                                             <div
                                                 key={feature.key}
-                                                className={`grid grid-cols-5 gap-4 p-6 ${idx % 2 === 0 ? 'bg-white/2' : ''
+                                                className={`grid grid-cols-5 gap-4 p-6 ${idx % 2 === 0 ? 'bg-white/[0.02]' : ''
                                                     } hover:bg-white/5 transition-colors`}
                                             >
                                                 <div className="text-sm text-white/70 flex items-center">
@@ -449,8 +448,6 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                             </div>
                                         ))}
                                     </div>
-
-
                                 </div>
                             </motion.div>
                         </>

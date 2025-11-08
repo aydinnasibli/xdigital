@@ -11,7 +11,7 @@ export default function GenLayout({
         <div>
             <Navbar />
 
-            <main className="max-w-7xl mx-auto tracking-widest">
+            <main >
                 {children}
             </main>
 
