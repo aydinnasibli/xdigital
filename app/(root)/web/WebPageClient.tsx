@@ -25,7 +25,7 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
     const portfolioShowcase = initialPortfolioShowcase
 
     useTimeOnPage({
-        threshold: 18000,
+        threshold: 36000,
         onThresholdReached: () => setShowPopup(true),
         trackActiveTime: true,
         requireScroll: true,
@@ -292,8 +292,8 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                         onMouseEnter={() => setHoveredPackage(idx)}
                                         onMouseLeave={() => setHoveredPackage(null)}
                                         className={`relative rounded-2xl border transition-all duration-300 flex flex-col ${pkg.popular
-                                                ? 'bg-white/5 border-white/20 shadow-xl ring-2 ring-white/10'
-                                                : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
+                                            ? 'bg-white/5 border-white/20 shadow-xl ring-2 ring-white/10'
+                                            : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
                                             } ${hoveredPackage === idx ? 'scale-[1.02] shadow-2xl' : ''}`}
                                     >
                                         {pkg.popular && (
