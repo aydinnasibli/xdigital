@@ -234,7 +234,6 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
             <section id="services" className="relative w-full py-32 border-t border-white/5">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-20">
-
                         <h2 className="text-4xl sm:text-5xl font-light text-white mb-6">
                             Full-stack web development<br />for modern businesses
                         </h2>
@@ -242,20 +241,24 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                             From concept to deployment, we handle everything
                         </p>
                     </div>
-
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {services.map((service, idx) => (
                             <motion.div
                                 key={idx}
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                                className="group relative bg-zinc-900/30 border border-white/10 rounded-2xl p-8 hover:border-white/30 hover:bg-white/5 transition-all duration-300"
+                                viewport={{ once: true, margin: "-100px" }}
+                                transition={{ duration: 0.6, delay: idx * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                                whileHover={{ y: -8, scale: 1.02 }}
+                                className="group relative bg-zinc-900/30 border border-white/10 rounded-2xl p-8 hover:border-white/30 hover:bg-white/5 transition-all duration-300 cursor-pointer"
                             >
-                                <div className="text-white/60 mb-6 group-hover:text-white transition-colors">
+                                <motion.div
+                                    className="text-white/60 mb-6 group-hover:text-white transition-colors"
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                    transition={{ duration: 0.3 }}
+                                >
                                     {service.icon}
-                                </div>
+                                </motion.div>
                                 <h3 className="text-xl font-light text-white mb-3">{service.title}</h3>
                                 <p className="text-sm text-white/50 leading-relaxed">
                                     {service.description}
@@ -292,8 +295,8 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                                         onMouseEnter={() => setHoveredPackage(idx)}
                                         onMouseLeave={() => setHoveredPackage(null)}
                                         className={`relative rounded-2xl border transition-all duration-300 flex flex-col ${pkg.popular
-                                            ? 'bg-white/5 border-white/20 shadow-xl ring-2 ring-white/10'
-                                            : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
+                                                ? 'bg-white/5 border-white/20 shadow-xl ring-2 ring-white/10'
+                                                : 'bg-zinc-900/40 border-white/10 hover:border-white/20 hover:bg-white/5'
                                             } ${hoveredPackage === idx ? 'scale-[1.02] shadow-2xl' : ''}`}
                                     >
                                         {pkg.popular && (
