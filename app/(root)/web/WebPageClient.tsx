@@ -330,20 +330,20 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
 
                                             {/* Timeline & Templates Info */}
                                             <div className="py-3 mb-5 border-y border-white/10 space-y-2">
-                                                <div className="flex items-center justify-between text-xs">
-                                                    <span className="text-white/50">Initial Setup:</span>
-                                                    <span className="text-white font-medium">{pkg.timeline}</span>
+                                                <div className="flex items-center justify-between text-xs gap-2">
+                                                    <span className="text-white/50 shrink-0">Initial Setup:</span>
+                                                    <span className="text-white font-medium text-right">{pkg.timeline}</span>
                                                 </div>
                                                 {pkg.templatesIncluded && (
-                                                    <div className="flex items-center justify-between text-xs">
-                                                        <span className="text-white/50">Templates:</span>
-                                                        <span className="text-white font-medium">{pkg.templatesIncluded}</span>
+                                                    <div className="flex items-center justify-between text-xs gap-2">
+                                                        <span className="text-white/50 shrink-0">Templates:</span>
+                                                        <span className="text-white font-medium text-right">{pkg.templatesIncluded}</span>
                                                     </div>
                                                 )}
                                                 {pkg.customizationRequests && (
-                                                    <div className="flex items-center justify-between text-xs">
-                                                        <span className="text-white/50">Customizations:</span>
-                                                        <span className="text-white font-medium">{pkg.customizationRequests}</span>
+                                                    <div className="flex items-center justify-between text-xs gap-2">
+                                                        <span className="text-white/50 shrink-0">Customizations:</span>
+                                                        <span className="text-white font-medium text-right break-words">{pkg.customizationRequests}</span>
                                                     </div>
                                                 )}
                                             </div>

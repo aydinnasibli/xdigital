@@ -19,6 +19,37 @@ export default function Navbar() {
     const pathname = usePathname();
     const [isVisible, setIsVisible] = useState(true);
     const [hasBackground, setHasBackground] = useState(false);
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    useEffect(() => {
+        const controlNavbar = () => {
+            const currentScrollY = window.scrollY;
+
+            // Show/hide navbar based on scroll direction
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                // Scrolling down & past 100px
+                setIsVisible(false);
+            } else {
+                // Scrolling up
+                setIsVisible(true);
+            }
+
+            // Add background after scrolling past 50px
+            if (currentScrollY > 50) {
+                setHasBackground(true);
+            } else {
+                setHasBackground(false);
+            }
+
+            setLastScrollY(currentScrollY);
+        };
+
+        window.addEventListener('scroll', controlNavbar);
+
+        return () => {
+            window.removeEventListener('scroll', controlNavbar);
+        };
+    }, [lastScrollY]);
 
     // Desktop view - Public/Unauthenticated user navbar
     return (
