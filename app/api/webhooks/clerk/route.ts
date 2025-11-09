@@ -86,7 +86,7 @@ export async function POST(req: Request) {
             const newUser = await User.create({
                 clerkId: id,
                 email: email_addresses[0].email_address,
-                username: username || '',
+                userName: username || '',
                 firstName: first_name || '',
                 lastName: last_name || '',
                 imageUrl: image_url || profile_image_url || '',
@@ -128,7 +128,7 @@ export async function POST(req: Request) {
                 { clerkId: id },
                 {
                     email: email_addresses[0].email_address,
-                    username: username || '',
+                    userName: username || '',
                     firstName: first_name || '',
                     lastName: last_name || '',
                     imageUrl: image_url || profile_image_url || '',
