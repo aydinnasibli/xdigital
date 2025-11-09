@@ -1,3 +1,4 @@
+// app/api/webhooks/clerk/route.ts
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
@@ -57,16 +58,38 @@ export async function POST(req: Request) {
     const eventType = evt.type;
 
     if (eventType === 'user.created') {
-        const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+        const data = evt.data as any;
+        const {
+            id,
+            email_addresses,
+            username,
+            first_name,
+            last_name,
+            image_url,
+            profile_image_url
+        } = data;
 
         try {
+            // Check if user already exists
+            const existingUser = await User.findOne({ clerkId: id });
+            if (existingUser) {
+                return NextResponse.json(
+                    {
+                        message: 'User already exists',
+                        userId: existingUser._id,
+                    },
+                    { status: 200 }
+                );
+            }
+
             // Create user in MongoDB
             const newUser = await User.create({
                 clerkId: id,
                 email: email_addresses[0].email_address,
+                username: username || '',
                 firstName: first_name || '',
                 lastName: last_name || '',
-                imageUrl: image_url || '',
+                imageUrl: image_url || profile_image_url || '',
             });
 
             console.log('User created in MongoDB:', newUser._id);
@@ -88,7 +111,16 @@ export async function POST(req: Request) {
     }
 
     if (eventType === 'user.updated') {
-        const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+        const data = evt.data as any;
+        const {
+            id,
+            email_addresses,
+            username,
+            first_name,
+            last_name,
+            image_url,
+            profile_image_url
+        } = data;
 
         try {
             // Update user in MongoDB
@@ -96,9 +128,10 @@ export async function POST(req: Request) {
                 { clerkId: id },
                 {
                     email: email_addresses[0].email_address,
+                    username: username || '',
                     firstName: first_name || '',
                     lastName: last_name || '',
-                    imageUrl: image_url || '',
+                    imageUrl: image_url || profile_image_url || '',
                 },
                 { new: true }
             );

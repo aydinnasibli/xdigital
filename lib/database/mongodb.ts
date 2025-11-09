@@ -25,6 +25,7 @@ if (!global.mongooseCache) {
 async function dbConnect(): Promise<typeof mongoose> {
     if (cached.conn) {
         return cached.conn;
+
     }
 
     if (!cached.promise) {
