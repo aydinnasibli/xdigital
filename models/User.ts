@@ -6,6 +6,7 @@ export interface IUser extends Document {
     email: string;
     firstName?: string;
     lastName?: string;
+    userName?: string;
     imageUrl?: string;
     createdAt: Date;
     updatedAt: Date;
@@ -31,6 +32,10 @@ const UserSchema = new Schema<IUser>(
             trim: true,
         },
         lastName: {
+            type: String,
+            trim: true,
+        },
+        userName: {
             type: String,
             trim: true,
         },
