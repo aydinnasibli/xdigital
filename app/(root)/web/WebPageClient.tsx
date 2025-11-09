@@ -208,25 +208,6 @@ export default function WebPageClient({ initialFaqs, initialPackages, initialCom
                         </div>
                     </motion.div>
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.7 }}
-                        className="grid grid-cols-3 gap-8 max-w-3xl mx-auto mt-24"
-                    >
-                        <div className="text-center">
-                            <div className="text-4xl font-light text-white mb-2">150+</div>
-                            <div className="text-sm text-white/40">Projects Delivered</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-4xl font-light text-white mb-2">98%</div>
-                            <div className="text-sm text-white/40">Client Satisfaction</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-4xl font-light text-white mb-2">24/7</div>
-                            <div className="text-sm text-white/40">Support Available</div>
-                        </div>
-                    </motion.div>
                 </div>
             </section>
 

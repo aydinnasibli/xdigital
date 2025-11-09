@@ -106,7 +106,7 @@ export default function Navbar() {
                                 asChild
                                 className="text-gray-300 hover:text-white hover:bg-white/5 focus:text-white focus:bg-white/5 cursor-pointer py-3 px-4 transition-all duration-200 rounded-md"
                             >
-                                <Link href="/digitalsolution">
+                                <Link href="/digitalsolutions">
                                     <div className="flex flex-col">
                                         <span className="font-medium">Digital Solutions</span>
                                         <span className="text-xs text-gray-500">Comprehensive consulting</span>

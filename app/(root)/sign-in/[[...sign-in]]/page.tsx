@@ -15,7 +15,9 @@ export default function SignInPage() {
                             headerTitle: "text-2xl font-bold",
                             headerSubtitle: "text-muted-foreground",
                         }
+
                     }}
+
                 />
             </div>
         </div>
