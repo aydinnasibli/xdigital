@@ -1,3 +1,6 @@
+// app/(dashboard)/layout.tsx
+import { UserButton } from '@clerk/nextjs';
+import Link from 'next/link';
 
 export default function DashboardLayout({
     children,
@@ -5,11 +8,33 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div>
-            <main className="max-w-7xl mx-auto tracking-widest">
+        <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <header className="bg-white border-b">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center h-16">
+                        <div className="flex items-center gap-8">
+                            <Link href="/dashboard" className="text-xl font-bold">
+                                xDigital
+                            </Link>
+                            <nav className="hidden md:flex gap-6">
+                                <Link href="/dashboard" className="text-gray-700 hover:text-gray-900">
+                                    Dashboard
+                                </Link>
+                                <Link href="/dashboard/projects" className="text-gray-700 hover:text-gray-900">
+                                    Projects
+                                </Link>
+                            </nav>
+                        </div>
+                        <UserButton afterSignOutUrl="/" />
+                    </div>
+                </div>
+            </header>
+
+            {/* Main Content */}
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {children}
             </main>
-
         </div>
     );
 }
