@@ -1,16 +1,17 @@
-// app/(dashboard)/dashboard/projects/[id]/edit/page.tsx
+// app/dashboard/projects/[id]/edit/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { getProject, updateProject } from '@/app/actions/projects';
 
 export default function EditProjectPage() {
     const router = useRouter();
     const params = useParams();
-    const projectId = params.id;
+    const projectId = params.id as string;
 
-    const [loading, setLoading] = useState(false);
+    const [isPending, startTransition] = useTransition();
     const [fetching, setFetching] = useState(true);
     const [formData, setFormData] = useState({
         projectName: '',
@@ -25,16 +26,17 @@ export default function EditProjectPage() {
 
     const fetchProject = async () => {
         try {
-            const res = await fetch(`/api/projects/${projectId}`);
-            const data = await res.json();
+            const result = await getProject(projectId);
 
-            if (data.success) {
+            if (result.success && result.data) {
                 setFormData({
-                    projectName: data.project.projectName,
-                    projectDescription: data.project.projectDescription,
-                    serviceType: data.project.serviceType,
-                    package: data.project.package,
+                    projectName: result.data.projectName,
+                    projectDescription: result.data.projectDescription,
+                    serviceType: result.data.serviceType,
+                    package: result.data.package,
                 });
+            } else {
+                alert(result.error || 'Failed to fetch project');
             }
         } catch (error) {
             console.error('Error fetching project:', error);
@@ -45,31 +47,22 @@ export default function EditProjectPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
 
-        try {
-            const res = await fetch(`/api/projects/${projectId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
+        startTransition(async () => {
+            const result = await updateProject(projectId, formData);
 
-            const data = await res.json();
-
-            if (data.success) {
+            if (result.success) {
                 router.push(`/dashboard/projects/${projectId}`);
+                router.refresh();
             } else {
-                alert(data.error || 'Failed to update project');
+                alert(result.error || 'Failed to update project');
             }
-        } catch (error) {
-            console.error('Error updating project:', error);
-            alert('Failed to update project');
-        } finally {
-            setLoading(false);
-        }
+        });
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    ) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
@@ -83,7 +76,10 @@ export default function EditProjectPage() {
     return (
         <div className="max-w-3xl mx-auto">
             <div className="mb-6">
-                <Link href={`/dashboard/projects/${projectId}`} className="text-blue-600 hover:underline">
+                <Link
+                    href={`/dashboard/projects/${projectId}`}
+                    className="text-blue-600 hover:underline"
+                >
                     ← Back to Project
                 </Link>
             </div>
@@ -94,9 +90,7 @@ export default function EditProjectPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Project Name */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Project Name *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">Project Name *</label>
                         <input
                             type="text"
                             name="projectName"
@@ -109,9 +103,7 @@ export default function EditProjectPage() {
 
                     {/* Project Description */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Project Description *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">Project Description *</label>
                         <textarea
                             name="projectDescription"
                             value={formData.projectDescription}
@@ -124,9 +116,7 @@ export default function EditProjectPage() {
 
                     {/* Service Type */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Service Type *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">Service Type *</label>
                         <select
                             name="serviceType"
                             value={formData.serviceType}
@@ -146,9 +136,7 @@ export default function EditProjectPage() {
 
                     {/* Package Selection */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Package *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">Package *</label>
                         <select
                             name="package"
                             value={formData.package}
@@ -171,10 +159,10 @@ export default function EditProjectPage() {
                     <div className="flex gap-4">
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={isPending}
                             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
                         >
-                            {loading ? 'Updating...' : 'Update Project'}
+                            {isPending ? 'Updating...' : 'Update Project'}
                         </button>
                         <Link
                             href={`/dashboard/projects/${projectId}`}

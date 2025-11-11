@@ -1,13 +1,14 @@
-// app/(dashboard)/dashboard/projects/new/page.tsx
+// app/dashboard/projects/new/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { createProject } from '@/app/actions/projects';
 
 export default function NewProjectPage() {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
+    const [isPending, startTransition] = useTransition();
     const [formData, setFormData] = useState({
         projectName: '',
         projectDescription: '',
@@ -17,31 +18,22 @@ export default function NewProjectPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
 
-        try {
-            const res = await fetch('/api/projects', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
+        startTransition(async () => {
+            const result = await createProject(formData);
 
-            const data = await res.json();
-
-            if (data.success) {
+            if (result.success) {
                 router.push('/dashboard/projects');
+                router.refresh();
             } else {
-                alert(data.error || 'Failed to create project');
+                alert(result.error || 'Failed to create project');
             }
-        } catch (error) {
-            console.error('Error creating project:', error);
-            alert('Failed to create project');
-        } finally {
-            setLoading(false);
-        }
+        });
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    ) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
@@ -62,9 +54,7 @@ export default function NewProjectPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Project Name */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Project Name *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">Project Name *</label>
                         <input
                             type="text"
                             name="projectName"
@@ -78,9 +68,7 @@ export default function NewProjectPage() {
 
                     {/* Project Description */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Project Description *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">Project Description *</label>
                         <textarea
                             name="projectDescription"
                             value={formData.projectDescription}
@@ -94,9 +82,7 @@ export default function NewProjectPage() {
 
                     {/* Service Type */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Service Type *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">Service Type *</label>
                         <select
                             name="serviceType"
                             value={formData.serviceType}
@@ -116,9 +102,7 @@ export default function NewProjectPage() {
 
                     {/* Package Selection */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Package *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">Package *</label>
                         <select
                             name="package"
                             value={formData.package}
@@ -183,15 +167,12 @@ export default function NewProjectPage() {
                     <div className="flex gap-4">
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={isPending}
                             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
                         >
-                            {loading ? 'Creating...' : 'Create Project'}
+                            {isPending ? 'Creating...' : 'Create Project'}
                         </button>
-                        <Link
-                            href="/dashboard/projects"
-                            className="px-6 py-2 border rounded hover:bg-gray-50"
-                        >
+                        <Link href="/dashboard/projects" className="px-6 py-2 border rounded hover:bg-gray-50">
                             Cancel
                         </Link>
                     </div>

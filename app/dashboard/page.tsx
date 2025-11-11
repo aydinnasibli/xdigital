@@ -1,28 +1,8 @@
-// app/(dashboard)/dashboard/page.tsx
+// app/dashboard/page.tsx
 import Link from 'next/link';
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import dbConnect from '@/lib/database/mongodb';
-import Project from '@/models/Project';
-import User from '@/models/User';
-
-async function getProjectStats(userId: string) {
-    await dbConnect();
-
-    const user = await User.findOne({ clerkId: userId });
-    if (!user) return null;
-
-    const projects = await Project.find({ userId: user._id });
-
-    const stats = {
-        total: projects.length,
-        pending: projects.filter(p => p.status === 'pending').length,
-        inProgress: projects.filter(p => p.status === 'in_progress').length,
-        completed: projects.filter(p => p.status === 'completed').length,
-    };
-
-    return { stats, recentProjects: projects.slice(0, 5) };
-}
+import { auth } from '@clerk/nextjs/server';
+import { getProjectStats } from '@/app/actions/projects';
 
 export default async function DashboardPage() {
     const { userId } = await auth();
@@ -31,13 +11,17 @@ export default async function DashboardPage() {
         redirect('/sign-in');
     }
 
-    const data = await getProjectStats(userId);
+    const result = await getProjectStats();
 
-    if (!data) {
-        return <div>Loading...</div>;
+    if (!result.success) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-red-600">{result.error || 'Failed to load dashboard'}</p>
+            </div>
+        );
     }
 
-    const { stats, recentProjects } = data;
+    const { stats, recentProjects } = result.data;
 
     return (
         <div className="space-y-8">
@@ -77,10 +61,7 @@ export default async function DashboardPage() {
                     >
                         Create New Project
                     </Link>
-                    <Link
-                        href="/dashboard/projects"
-                        className="px-4 py-2 border rounded hover:bg-gray-50"
-                    >
+                    <Link href="/dashboard/projects" className="px-4 py-2 border rounded hover:bg-gray-50">
                         View All Projects
                     </Link>
                 </div>
@@ -93,7 +74,7 @@ export default async function DashboardPage() {
                     <div className="space-y-3">
                         {recentProjects.map((project: any) => (
                             <Link
-                                key={project._id.toString()}
+                                key={project._id}
                                 href={`/dashboard/projects/${project._id}`}
                                 className="block p-4 border rounded hover:bg-gray-50"
                             >
@@ -104,11 +85,16 @@ export default async function DashboardPage() {
                                             {project.projectDescription.substring(0, 100)}...
                                         </p>
                                     </div>
-                                    <span className={`px-3 py-1 text-xs rounded-full ${project.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                            project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                                                project.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-gray-100 text-gray-800'
-                                        }`}>
+                                    <span
+                                        className={`px-3 py-1 text-xs rounded-full ${project.status === 'completed'
+                                                ? 'bg-green-100 text-green-800'
+                                                : project.status === 'in_progress'
+                                                    ? 'bg-blue-100 text-blue-800'
+                                                    : project.status === 'pending'
+                                                        ? 'bg-yellow-100 text-yellow-800'
+                                                        : 'bg-gray-100 text-gray-800'
+                                            }`}
+                                    >
                                         {project.status.replace('_', ' ')}
                                     </span>
                                 </div>
