@@ -1,4 +1,5 @@
 // app/(dashboard)/layout.tsx
+import NotificationBell from '@/components/notifications/NotificationBell';
 import { UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 
@@ -26,7 +27,10 @@ export default function DashboardLayout({
                                 </Link>
                             </nav>
                         </div>
-                        <UserButton afterSignOutUrl="/" />
+                        <div className="flex items-center gap-4">
+                            <NotificationBell />
+                            <UserButton afterSignOutUrl="/" />
+                        </div>
                     </div>
                 </div>
             </header>
