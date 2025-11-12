@@ -13,7 +13,7 @@ export default async function DashboardPage() {
 
     const result = await getProjectStats();
 
-    if (!result.success) {
+    if (!result.success || !result.data) {
         return (
             <div className="text-center py-12">
                 <p className="text-red-600">{result.error || 'Failed to load dashboard'}</p>
@@ -21,7 +21,8 @@ export default async function DashboardPage() {
         );
     }
 
-    const { stats, recentProjects } = result.data;
+    const stats = result.data.stats || { total: 0, pending: 0, inProgress: 0, completed: 0 };
+    const recentProjects = result.data.recentProjects || [];
 
     return (
         <div className="space-y-8">

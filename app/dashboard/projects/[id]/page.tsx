@@ -6,9 +6,10 @@ import ProjectDetailClient from '@/components/projects/ProjectDetailComponent';
 export default async function ProjectDetailPage({
     params,
 }: {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }) {
-    const result = await getProject(params.id);
+    const { id } = await params
+    const result = await getProject(id);
 
     if (!result.success) {
         return (

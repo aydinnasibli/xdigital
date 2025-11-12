@@ -1,15 +1,19 @@
 // app/dashboard/projects/[id]/edit/page.tsx
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect, useTransition, use } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getProject, updateProject } from '@/app/actions/projects';
 
-export default function EditProjectPage() {
+export default function EditProjectPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const resolvedParams = use(params);
+    const projectId = resolvedParams.id;
     const router = useRouter();
-    const params = useParams();
-    const projectId = params.id as string;
 
     const [isPending, startTransition] = useTransition();
     const [fetching, setFetching] = useState(true);
@@ -22,6 +26,7 @@ export default function EditProjectPage() {
 
     useEffect(() => {
         fetchProject();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [projectId]);
 
     const fetchProject = async () => {
