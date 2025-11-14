@@ -48,9 +48,6 @@ const UserSchema = new Schema<IUser>(
     }
 );
 
-// Create indexes for better query performance
-UserSchema.index({ email: 1 });
-UserSchema.index({ clerkId: 1 });
 
 const User = (mongoose.models.User as Model<IUser>) || mongoose.model<IUser>('User', UserSchema);
 

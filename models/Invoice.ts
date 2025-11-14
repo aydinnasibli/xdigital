@@ -160,7 +160,7 @@ const InvoiceSchema = new Schema<IInvoice>(
 InvoiceSchema.index({ userId: 1, status: 1, createdAt: -1 });
 InvoiceSchema.index({ clerkUserId: 1, status: 1, createdAt: -1 });
 InvoiceSchema.index({ projectId: 1, createdAt: -1 });
-InvoiceSchema.index({ invoiceNumber: 1 });
+
 
 const Invoice = (mongoose.models.Invoice as Model<IInvoice>) || mongoose.model<IInvoice>('Invoice', InvoiceSchema);
 
