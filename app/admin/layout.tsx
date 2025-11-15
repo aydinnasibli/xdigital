@@ -8,7 +8,8 @@ import {
     MessageSquare,
     FileText,
     BarChart3,
-    ArrowLeft
+    ArrowLeft,
+    FileBox
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -56,6 +57,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         </NavLink>
                         <NavLink href="/admin/analytics" icon={BarChart3}>
                             Analytics
+                        </NavLink>
+                        <NavLink href="/admin/templates" icon={FileBox}>
+                            Templates
                         </NavLink>
                     </nav>
                 </aside>

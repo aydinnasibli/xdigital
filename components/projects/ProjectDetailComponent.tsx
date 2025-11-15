@@ -425,6 +425,42 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {/* Tab Content */}
             {activeTab === 'overview' && (
                 <div className="space-y-6">
+                    {/* Quick Access Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <Link
+                            href={`/dashboard/projects/${project._id}/tasks`}
+                            className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"
+                        >
+                            <div className="text-3xl mb-3">✅</div>
+                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Tasks & Kanban</h3>
+                            <p className="text-sm text-gray-600 mt-1">Manage project tasks</p>
+                        </Link>
+                        <Link
+                            href={`/dashboard/projects/${project._id}/files`}
+                            className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"
+                        >
+                            <div className="text-3xl mb-3">📁</div>
+                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Files & Documents</h3>
+                            <p className="text-sm text-gray-600 mt-1">View and upload files</p>
+                        </Link>
+                        <Link
+                            href={`/dashboard/projects/${project._id}/deliverables`}
+                            className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"
+                        >
+                            <div className="text-3xl mb-3">📦</div>
+                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Deliverables</h3>
+                            <p className="text-sm text-gray-600 mt-1">Track deliverables</p>
+                        </Link>
+                        <Link
+                            href={`/dashboard/projects/${project._id}/activity`}
+                            className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"
+                        >
+                            <div className="text-3xl mb-3">📝</div>
+                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Activity Log</h3>
+                            <p className="text-sm text-gray-600 mt-1">View project history</p>
+                        </Link>
+                    </div>
+
                     <div className="bg-white p-6 rounded-lg border">
                         <h2 className="text-xl font-semibold mb-4">Project Description</h2>
                         <p className="text-gray-700">{project.projectDescription}</p>
@@ -432,15 +468,21 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
                     {project.deliverables && project.deliverables.length > 0 && (
                         <div className="bg-white p-6 rounded-lg border">
-                            <h2 className="text-xl font-semibold mb-4">Deliverables</h2>
+                            <h2 className="text-xl font-semibold mb-4">Expected Deliverables</h2>
                             <ul className="space-y-2">
                                 {project.deliverables.map((item, index) => (
                                     <li key={index} className="flex items-start">
-                                        <span className="text-gray-600 mr-2">•</span>
+                                        <span className="text-blue-600 mr-2">✓</span>
                                         <span>{item}</span>
                                     </li>
                                 ))}
                             </ul>
+                            <Link
+                                href={`/dashboard/projects/${project._id}/deliverables`}
+                                className="inline-block mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            >
+                                View Detailed Deliverables →
+                            </Link>
                         </div>
                     )}
 

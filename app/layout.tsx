@@ -3,10 +3,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Metadata } from "next";
 import Navbar from "../components/Navbar";
-import { Epilogue } from "next/font/google";
 import HorizontalScrollBar from "@/components/HorizontalScrollbar";
 import Footer from "@/components/Footer";
-const epilogue = Epilogue({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Your SaaS Name | Build Modern Websites",
@@ -51,8 +49,8 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html className="scrollbar-hide " lang="en">
-        <body className={`${epilogue.className} max-w-7xl mx-auto tracking-widest bg-linear-to-b from-black from-20% via-[#565454] via-50% to-zinc-900 to-80%  text-gray-200`}> {/* Choose bg colur if this or bg-zinc-950 */}
+      <html className="scrollbar-hide" lang="en">
+        <body className="max-w-7xl mx-auto tracking-widest bg-linear-to-b from-black from-20% via-[#565454] via-50% to-zinc-900 to-80% text-gray-200 font-sans"> {/* Choose bg colur if this or bg-zinc-950 */}
 
 
           <main>
