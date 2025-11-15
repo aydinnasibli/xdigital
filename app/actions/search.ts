@@ -89,13 +89,14 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                 .lean();
 
             messages.forEach(m => {
+                const project = m.projectId as any;
                 results.push({
                     type: 'message',
                     id: m._id.toString(),
                     title: 'Message',
                     description: m.message.substring(0, 150),
-                    projectId: m.projectId._id.toString(),
-                    projectName: m.projectId.projectName,
+                    projectId: project?._id?.toString() || '',
+                    projectName: project?.projectName || '',
                     createdAt: m.createdAt,
                 });
             });
@@ -116,13 +117,14 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                 .lean();
 
             invoices.forEach(i => {
+                const project = i.projectId as any;
                 results.push({
                     type: 'invoice',
                     id: i._id.toString(),
                     title: `Invoice ${i.invoiceNumber}`,
                     description: i.notes || `Total: $${i.total}`,
-                    projectId: i.projectId._id.toString(),
-                    projectName: i.projectId.projectName,
+                    projectId: project?._id?.toString() || '',
+                    projectName: project?.projectName || '',
                     createdAt: i.createdAt,
                 });
             });
@@ -143,13 +145,14 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                 .lean();
 
             files.forEach(f => {
+                const project = f.projectId as any;
                 results.push({
                     type: 'file',
                     id: f._id.toString(),
                     title: f.fileName,
                     description: f.description,
-                    projectId: f.projectId._id.toString(),
-                    projectName: f.projectId.projectName,
+                    projectId: project?._id?.toString() || '',
+                    projectName: project?.projectName || '',
                     createdAt: f.createdAt,
                 });
             });
@@ -169,13 +172,14 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                 .lean();
 
             tasks.forEach(t => {
+                const project = t.projectId as any;
                 results.push({
                     type: 'task',
                     id: t._id.toString(),
                     title: t.title,
                     description: t.description,
-                    projectId: t.projectId._id.toString(),
-                    projectName: t.projectId.projectName,
+                    projectId: project?._id?.toString() || '',
+                    projectName: project?.projectName || '',
                     createdAt: t.createdAt,
                 });
             });
@@ -195,13 +199,14 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                 .lean();
 
             deliverables.forEach(d => {
+                const project = d.projectId as any;
                 results.push({
                     type: 'deliverable',
                     id: d._id.toString(),
                     title: d.title,
                     description: d.description,
-                    projectId: d.projectId._id.toString(),
-                    projectName: d.projectId.projectName,
+                    projectId: project?._id?.toString() || '',
+                    projectName: project?.projectName || '',
                     createdAt: d.createdAt,
                 });
             });
