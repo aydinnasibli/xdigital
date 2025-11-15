@@ -20,6 +20,8 @@ import {
     CheckCircle,
     AlertCircle
 } from 'lucide-react';
+import { DashboardCharts } from '@/components/analytics/DashboardCharts';
+import Link from 'next/link';
 
 export default async function AdminDashboardPage() {
     const [projectStats, clientStats, invoiceStats, messageCount] = await Promise.all([
@@ -36,9 +38,25 @@ export default async function AdminDashboardPage() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-gray-600 mt-2">Overview of all xDigital operations</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+                    <p className="text-gray-600 mt-2">Overview of all xDigital operations</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/admin/templates"
+                        className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm"
+                    >
+                        📋 Templates
+                    </Link>
+                    <Link
+                        href="/admin/analytics"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                    >
+                        📊 View Analytics
+                    </Link>
+                </div>
             </div>
 
             {/* Stats Grid */}
@@ -137,6 +155,50 @@ export default async function AdminDashboardPage() {
                         </span>
                     </div>
                 </div>
+            </div>
+
+            {/* Analytics Charts */}
+            {projects && (
+                <div className="bg-white rounded-lg shadow p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Analytics Overview</h2>
+                    <DashboardCharts
+                        projectsByStatus={[
+                            { status: 'Pending', count: projects.pending || 0 },
+                            { status: 'In Progress', count: projects.inProgress || 0 },
+                            { status: 'Completed', count: projects.completed || 0 },
+                        ]}
+                        revenueOverTime={[]}
+                        healthScore={92}
+                    />
+                </div>
+            )}
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Link
+                    href="/admin/projects"
+                    className="p-6 bg-white rounded-lg border hover:shadow-md transition-all"
+                >
+                    <div className="text-3xl mb-3">📁</div>
+                    <h3 className="font-semibold text-gray-900">Manage Projects</h3>
+                    <p className="text-sm text-gray-600 mt-1">View and update all projects</p>
+                </Link>
+                <Link
+                    href="/admin/clients"
+                    className="p-6 bg-white rounded-lg border hover:shadow-md transition-all"
+                >
+                    <div className="text-3xl mb-3">👥</div>
+                    <h3 className="font-semibold text-gray-900">Manage Clients</h3>
+                    <p className="text-sm text-gray-600 mt-1">View client details and notes</p>
+                </Link>
+                <Link
+                    href="/admin/invoices"
+                    className="p-6 bg-white rounded-lg border hover:shadow-md transition-all"
+                >
+                    <div className="text-3xl mb-3">💰</div>
+                    <h3 className="font-semibold text-gray-900">Manage Invoices</h3>
+                    <p className="text-sm text-gray-600 mt-1">Create and track invoices</p>
+                </Link>
             </div>
         </div>
     );
