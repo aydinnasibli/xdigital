@@ -24,9 +24,8 @@ if (!global.mongooseCache) {
 
 async function dbConnect(): Promise<typeof mongoose> {
     if (cached.conn) {
-        return cached.conn;
         console.log('Using cached MongoDB connection');
-
+        return cached.conn;
     }
 
     if (!cached.promise) {

@@ -6,17 +6,25 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 interface ProjectsByStatusData {
     status: string;
     count: number;
+    [key: string]: any;
 }
 
 interface RevenueData {
     month: string;
     revenue: number;
+    [key: string]: any;
+}
+
+interface ClientAcquisitionData {
+    month: string;
+    clients: number;
+    [key: string]: any;
 }
 
 interface DashboardChartsProps {
     projectsByStatus: ProjectsByStatusData[];
     revenueData: RevenueData[];
-    clientAcquisition?: Array<{ month: string; clients: number }>;
+    clientAcquisition?: ClientAcquisitionData[];
 }
 
 const COLORS = {
@@ -41,7 +49,7 @@ export function DashboardCharts({ projectsByStatus, revenueData, clientAcquisiti
                             cx="50%"
                             cy="50%"
                             labelLine={false}
-                            label={({ status, count }) => `${status}: ${count}`}
+                            label={(entry: any) => `${entry.status}: ${entry.count}`}
                             outerRadius={80}
                             fill="#8884d8"
                             dataKey="count"
