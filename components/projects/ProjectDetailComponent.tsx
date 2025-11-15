@@ -426,15 +426,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {activeTab === 'overview' && (
                 <div className="space-y-6">
                     {/* Quick Access Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <Link
-                            href={`/dashboard/projects/${project._id}/tasks`}
-                            className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"
-                        >
-                            <div className="text-3xl mb-3">✅</div>
-                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Tasks & Kanban</h3>
-                            <p className="text-sm text-gray-600 mt-1">Manage project tasks</p>
-                        </Link>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <Link
                             href={`/dashboard/projects/${project._id}/files`}
                             className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"

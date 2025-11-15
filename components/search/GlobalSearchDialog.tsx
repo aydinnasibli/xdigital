@@ -73,9 +73,6 @@ export function GlobalSearchDialog() {
             case 'file':
                 url = `/dashboard/projects/${result.projectId}/files`;
                 break;
-            case 'task':
-                url = `/dashboard/projects/${result.projectId}/tasks`;
-                break;
             case 'deliverable':
                 url = `/dashboard/projects/${result.projectId}/deliverables`;
                 break;
@@ -92,7 +89,6 @@ export function GlobalSearchDialog() {
             case 'message': return '💬';
             case 'invoice': return '💰';
             case 'file': return '📄';
-            case 'task': return '✅';
             case 'deliverable': return '📦';
             default: return '🔍';
         }
@@ -110,7 +106,7 @@ export function GlobalSearchDialog() {
                             <span className="text-2xl">🔍</span>
                             <input
                                 type="text"
-                                placeholder="Search projects, messages, files, tasks..."
+                                placeholder="Search projects, messages, files..."
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 className="flex-1 outline-none text-lg"
