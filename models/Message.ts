@@ -12,16 +12,59 @@ interface IAttachment {
     fileSize: number;
 }
 
+interface IReaction {
+    emoji: string;
+    userId: Types.ObjectId;
+    userName: string;
+    createdAt: Date;
+}
+
+interface IMention {
+    userId: Types.ObjectId;
+    userName: string;
+    position: number; // Character position in message
+}
+
+interface IReadReceipt {
+    userId: Types.ObjectId;
+    userName: string;
+    readAt: Date;
+}
+
 export interface IMessage extends Document {
     _id: mongoose.Types.ObjectId;
     projectId: Types.ObjectId;
     userId: Types.ObjectId;
     clerkUserId: string;
     sender: MessageSender;
-    message: string;
+    message: string; // Plain text or rich text HTML
+    messageRaw?: string; // Raw markdown or plain text before rendering
     attachments?: IAttachment[];
+
+    // Threading
+    parentMessageId?: Types.ObjectId; // For threaded replies
+    threadReplies?: Types.ObjectId[]; // IDs of replies to this message
+
+    // Reactions
+    reactions?: IReaction[];
+
+    // Mentions
+    mentions?: IMention[];
+
+    // Read receipts
     isRead: boolean;
     readAt?: Date;
+    readReceipts?: IReadReceipt[];
+
+    // Pinning
+    isPinned: boolean;
+    pinnedAt?: Date;
+    pinnedBy?: Types.ObjectId;
+
+    // Editing
+    isEdited: boolean;
+    editedAt?: Date;
+
     createdAt: Date;
     updatedAt: Date;
 }
@@ -56,6 +99,11 @@ const MessageSchema = new Schema<IMessage>(
             trim: true,
             maxlength: 5000,
         },
+        messageRaw: {
+            type: String,
+            trim: true,
+            maxlength: 5000,
+        },
         attachments: [
             {
                 fileName: {
@@ -76,11 +124,90 @@ const MessageSchema = new Schema<IMessage>(
                 },
             },
         ],
+        // Threading
+        parentMessageId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Message',
+            index: true,
+        },
+        threadReplies: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Message',
+        }],
+        // Reactions
+        reactions: [{
+            emoji: {
+                type: String,
+                required: true,
+            },
+            userId: {
+                type: Schema.Types.ObjectId,
+                ref: 'User',
+                required: true,
+            },
+            userName: {
+                type: String,
+                required: true,
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now,
+            },
+        }],
+        // Mentions
+        mentions: [{
+            userId: {
+                type: Schema.Types.ObjectId,
+                ref: 'User',
+                required: true,
+            },
+            userName: {
+                type: String,
+                required: true,
+            },
+            position: {
+                type: Number,
+                required: true,
+            },
+        }],
+        // Read receipts
         isRead: {
             type: Boolean,
             default: false,
         },
         readAt: Date,
+        readReceipts: [{
+            userId: {
+                type: Schema.Types.ObjectId,
+                ref: 'User',
+                required: true,
+            },
+            userName: {
+                type: String,
+                required: true,
+            },
+            readAt: {
+                type: Date,
+                default: Date.now,
+            },
+        }],
+        // Pinning
+        isPinned: {
+            type: Boolean,
+            default: false,
+            index: true,
+        },
+        pinnedAt: Date,
+        pinnedBy: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        // Editing
+        isEdited: {
+            type: Boolean,
+            default: false,
+        },
+        editedAt: Date,
     },
     {
         timestamps: true,

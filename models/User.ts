@@ -1,5 +1,23 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
+export enum OnboardingStatus {
+    NOT_STARTED = 'not_started',
+    IN_PROGRESS = 'in_progress',
+    COMPLETED = 'completed',
+}
+
+interface IClientMetrics {
+    totalProjects: number;
+    activeProjects: number;
+    completedProjects: number;
+    totalRevenue: number;
+    overdueInvoices: number;
+    lastActivityDate?: Date;
+    lastLoginDate?: Date;
+    healthScore: number; // 0-100
+    riskLevel: 'low' | 'medium' | 'high';
+}
+
 export interface IUser extends Document {
     _id: mongoose.Types.ObjectId;
     clerkId: string;
@@ -8,6 +26,25 @@ export interface IUser extends Document {
     lastName?: string;
     userName?: string;
     imageUrl?: string;
+
+    // Phone and company info
+    phone?: string;
+    company?: string;
+    position?: string;
+    website?: string;
+
+    // Onboarding
+    onboardingStatus: OnboardingStatus;
+    onboardingCompletedAt?: Date;
+
+    // Client metrics (for admin view)
+    metrics?: IClientMetrics;
+
+    // Status
+    isActive: boolean;
+    isOnline: boolean;
+    lastSeenAt?: Date;
+
     createdAt: Date;
     updatedAt: Date;
 }
@@ -42,6 +79,75 @@ const UserSchema = new Schema<IUser>(
         imageUrl: {
             type: String,
         },
+        phone: {
+            type: String,
+            trim: true,
+        },
+        company: {
+            type: String,
+            trim: true,
+        },
+        position: {
+            type: String,
+            trim: true,
+        },
+        website: {
+            type: String,
+            trim: true,
+        },
+        onboardingStatus: {
+            type: String,
+            enum: Object.values(OnboardingStatus),
+            default: OnboardingStatus.NOT_STARTED,
+            index: true,
+        },
+        onboardingCompletedAt: Date,
+        metrics: {
+            totalProjects: {
+                type: Number,
+                default: 0,
+            },
+            activeProjects: {
+                type: Number,
+                default: 0,
+            },
+            completedProjects: {
+                type: Number,
+                default: 0,
+            },
+            totalRevenue: {
+                type: Number,
+                default: 0,
+            },
+            overdueInvoices: {
+                type: Number,
+                default: 0,
+            },
+            lastActivityDate: Date,
+            lastLoginDate: Date,
+            healthScore: {
+                type: Number,
+                default: 100,
+                min: 0,
+                max: 100,
+            },
+            riskLevel: {
+                type: String,
+                enum: ['low', 'medium', 'high'],
+                default: 'low',
+            },
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
+            index: true,
+        },
+        isOnline: {
+            type: Boolean,
+            default: false,
+            index: true,
+        },
+        lastSeenAt: Date,
     },
     {
         timestamps: true,
