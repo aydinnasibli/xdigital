@@ -83,6 +83,47 @@ export async function getAllInvoices(filters?: {
     }
 }
 
+// Get single invoice by ID
+export async function getInvoiceById(invoiceId: string): Promise<ActionResponse> {
+    try {
+        await requireAdmin();
+
+        if (!mongoose.Types.ObjectId.isValid(invoiceId)) {
+            return { success: false, error: 'Invalid invoice ID' };
+        }
+
+        await dbConnect();
+
+        const invoice = await Invoice.findById(invoiceId)
+            .populate('userId', 'firstName lastName email')
+            .populate('projectId', 'projectName')
+            .lean();
+
+        if (!invoice) {
+            return { success: false, error: 'Invoice not found' };
+        }
+
+        const user = invoice.userId as any;
+        const project = invoice.projectId as any;
+
+        return {
+            success: true,
+            data: {
+                ...invoice,
+                _id: invoice._id.toString(),
+                userId: user._id.toString(),
+                projectId: project._id.toString(),
+                clientName: `${user.firstName} ${user.lastName}`,
+                clientEmail: user.email,
+                projectName: project.projectName,
+            },
+        };
+    } catch (error) {
+        console.error('Error fetching invoice:', error);
+        return { success: false, error: 'Failed to fetch invoice' };
+    }
+}
+
 // Create new invoice
 export async function createInvoice(data: CreateInvoiceData): Promise<ActionResponse> {
     try {

@@ -102,6 +102,41 @@ export async function getResource(slug: string): Promise<ActionResponse> {
     }
 }
 
+// Get resource by ID (admin only - returns unpublished too)
+export async function getResourceById(resourceId: string): Promise<ActionResponse> {
+    try {
+        const { userId } = await auth();
+        if (!userId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        await dbConnect();
+
+        const resource = await Resource.findById(resourceId)
+            .populate('authorId', 'firstName lastName email imageUrl')
+            .lean();
+
+        if (!resource) {
+            return { success: false, error: 'Resource not found' };
+        }
+
+        return {
+            success: true,
+            data: {
+                ...resource,
+                _id: resource._id.toString(),
+                authorId: resource.authorId ? {
+                    ...resource.authorId,
+                    _id: resource.authorId._id.toString(),
+                } : null,
+            },
+        };
+    } catch (error) {
+        console.error('Error fetching resource:', error);
+        return { success: false, error: 'Failed to fetch resource' };
+    }
+}
+
 // Create resource (admin only)
 export async function createResource(data: {
     title: string;
