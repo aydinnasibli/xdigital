@@ -61,15 +61,20 @@ export async function getAllInvoices(filters?: {
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedInvoices = invoices.map(inv => ({
-            ...inv,
-            _id: inv._id.toString(),
-            userId: inv.userId._id.toString(),
-            projectId: inv.projectId._id.toString(),
-            clientName: `${inv.userId.firstName || ''} ${inv.userId.lastName || ''}`.trim() || inv.userId.email,
-            clientEmail: inv.userId.email,
-            projectName: inv.projectId.projectName,
-        }));
+        const serializedInvoices = invoices.map(inv => {
+            const user = inv.userId as any;
+            const project = inv.projectId as any;
+
+            return {
+                ...inv,
+                _id: inv._id.toString(),
+                userId: user._id.toString(),
+                projectId: project._id.toString(),
+                clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+                clientEmail: user.email,
+                projectName: project.projectName,
+            };
+        });
 
         return { success: true, data: serializedInvoices };
     } catch (error) {

@@ -11,12 +11,14 @@ import MilestonesSection from './MilestonesSection';
 export default async function AdminProjectDetailPage({
     params,
 }: {
-    params: { id: string };
+    params: Promise<{ id: string }>;
+
 }) {
+    const resolvedParams = await params;
     const [projectResult, messagesResult, invoicesResult] = await Promise.all([
-        getAdminProject(params.id),
-        getAdminProjectMessages(params.id),
-        getProjectInvoices(params.id),
+        getAdminProject(resolvedParams.id),
+        getAdminProjectMessages(resolvedParams.id),
+        getProjectInvoices(resolvedParams.id),
     ]);
 
     if (!projectResult.success) {
@@ -188,8 +190,8 @@ export default async function AdminProjectDetailPage({
                                         </div>
                                         <span
                                             className={`text-xs px-2 py-1 rounded ${invoice.status === 'paid'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-yellow-100 text-yellow-800'
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-yellow-100 text-yellow-800'
                                                 }`}
                                         >
                                             {invoice.status}

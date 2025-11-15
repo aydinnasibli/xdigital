@@ -51,13 +51,16 @@ export async function getAllProjects(filters?: {
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedProjects = projects.map(project => ({
-            ...project,
-            _id: project._id.toString(),
-            userId: project.userId._id.toString(),
-            clientEmail: project.userId.email,
-            clientName: `${project.userId.firstName || ''} ${project.userId.lastName || ''}`.trim() || 'N/A',
-        }));
+        const serializedProjects = projects.map(project => {
+            const user = project.userId as any;
+            return {
+                ...project,
+                _id: project._id.toString(),
+                userId: user._id.toString(),
+                clientEmail: user.email,
+                clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'N/A',
+            };
+        });
 
         return { success: true, data: serializedProjects };
     } catch (error) {
@@ -85,15 +88,16 @@ export async function getAdminProject(projectId: string): Promise<ActionResponse
             return { success: false, error: 'Project not found' };
         }
 
+        const user = project.userId as any;
         const serializedProject = {
             ...project,
             _id: project._id.toString(),
-            userId: project.userId._id.toString(),
+            userId: user._id.toString(),
             client: {
-                id: project.userId._id.toString(),
-                email: project.userId.email,
-                name: `${project.userId.firstName || ''} ${project.userId.lastName || ''}`.trim(),
-                clerkId: project.userId.clerkId,
+                id: user._id.toString(),
+                email: user.email,
+                name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+                clerkId: user.clerkId,
             },
         };
 

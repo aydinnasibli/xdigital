@@ -1,3 +1,4 @@
+// models/Project.ts
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 // Enums for service types and statuses
@@ -150,6 +151,7 @@ ProjectSchema.index({ clerkUserId: 1, createdAt: -1 });
 ProjectSchema.index({ status: 1 });
 ProjectSchema.index({ serviceType: 1 });
 
-const Project = (mongoose.models.Project as Model<IProject>) || mongoose.model<IProject>('Project', ProjectSchema);
+// FIX: Safely check if mongoose.models exists before accessing properties
+const Project = (mongoose.models?.Project as Model<IProject>) || mongoose.model<IProject>('Project', ProjectSchema);
 
 export default Project;

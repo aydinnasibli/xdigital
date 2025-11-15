@@ -76,6 +76,6 @@ AnalyticsSchema.index({ userId: 1, recordedDate: -1 });
 AnalyticsSchema.index({ clerkUserId: 1, recordedDate: -1 });
 AnalyticsSchema.index({ metricType: 1, recordedDate: -1 });
 
-const Analytics = (mongoose.models.Analytics as Model<IAnalytics>) || mongoose.model<IAnalytics>('Analytics', AnalyticsSchema);
+const Analytics = (mongoose.models?.Analytics as Model<IAnalytics>) || mongoose.model<IAnalytics>('Analytics', AnalyticsSchema);
 
 export default Analytics;

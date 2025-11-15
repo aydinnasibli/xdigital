@@ -45,17 +45,22 @@ export async function getAllMessages(filters?: {
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedMessages = messages.map(msg => ({
-            ...msg,
-            _id: msg._id.toString(),
-            projectId: {
-                _id: msg.projectId._id.toString(),
-                projectName: msg.projectId.projectName,
-            },
-            userId: msg.userId._id.toString(),
-            clientName: `${msg.userId.firstName || ''} ${msg.userId.lastName || ''}`.trim() || msg.userId.email,
-            clientEmail: msg.userId.email,
-        }));
+        const serializedMessages = messages.map(msg => {
+            const user = msg.userId as any;
+            const project = msg.projectId as any;
+
+            return {
+                ...msg,
+                _id: msg._id.toString(),
+                projectId: {
+                    _id: project._id.toString(),
+                    projectName: project.projectName,
+                },
+                userId: user._id.toString(),
+                clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+                clientEmail: user.email,
+            };
+        });
 
         return { success: true, data: serializedMessages };
     } catch (error) {
@@ -187,13 +192,17 @@ export async function getAdminProjectMessages(
             .sort({ createdAt: 1 })
             .lean();
 
-        const serializedMessages = messages.map(msg => ({
-            ...msg,
-            _id: msg._id.toString(),
-            projectId: msg.projectId.toString(),
-            userId: msg.userId._id.toString(),
-            clientName: `${msg.userId.firstName || ''} ${msg.userId.lastName || ''}`.trim() || msg.userId.email,
-        }));
+        const serializedMessages = messages.map(msg => {
+            const user = msg.userId as any;
+
+            return {
+                ...msg,
+                _id: msg._id.toString(),
+                projectId: msg.projectId.toString(),
+                userId: user._id.toString(),
+                clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+            };
+        });
 
         return { success: true, data: serializedMessages };
     } catch (error) {

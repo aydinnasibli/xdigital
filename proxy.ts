@@ -1,9 +1,10 @@
-// middleware.ts
+// proxy.ts
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)']);
+// Route matchers
 const isAdminRoute = createRouteMatcher(['/admin(.*)']);
+const isProtectedRoute = createRouteMatcher(['/dashboard(.*)']);
 const isPublicRoute = createRouteMatcher([
     '/',
     '/sign-in(.*)',
@@ -15,51 +16,51 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-    const { userId, sessionClaims } = await auth();
+    const { userId } = await auth();
 
-    // Get user email from session claims
-    const userEmail = sessionClaims?.email as string | undefined;
+    const url = req.nextUrl.clone();
 
-    // Check if user is admin
-    const isAdmin = userEmail === 'xdigitalaz@proton.me';
-
-    // Admin route protection
+    // ------------- ADMIN ROUTES -------------
     if (isAdminRoute(req)) {
         if (!userId) {
-            const signInUrl = new URL('/sign-in', req.url);
-            signInUrl.searchParams.set('redirect_url', req.nextUrl.pathname);
-            return NextResponse.redirect(signInUrl);
+            // Not logged in → redirect to sign-in
+            url.pathname = '/sign-in';
+            url.searchParams.set('redirect_url', req.nextUrl.pathname);
+            return NextResponse.redirect(url);
         }
-
-        if (!isAdmin) {
-            // Non-admin trying to access admin routes - redirect to dashboard
-            return NextResponse.redirect(new URL('/dashboard', req.url));
-        }
-
+        // Logged-in users proceed; server-side will check admin role
         return NextResponse.next();
     }
 
-    // Authenticated user trying to access ANY public route (including /)
-    // Redirect them to appropriate dashboard
-    if (userId && isPublicRoute(req)) {
-        const redirectUrl = isAdmin ? '/admin/dashboard' : '/dashboard';
-        return NextResponse.redirect(new URL(redirectUrl, req.url));
+    // ------------- PROTECTED ROUTES -------------
+    if (isProtectedRoute(req)) {
+        if (!userId) {
+            // Not logged in → redirect to sign-in
+            url.pathname = '/sign-in';
+            url.searchParams.set('redirect_url', req.nextUrl.pathname);
+            return NextResponse.redirect(url);
+        }
+        return NextResponse.next();
     }
 
-    // Non-authenticated user trying to access protected routes
-    // Redirect them to sign-in
-    if (!userId && isProtectedRoute(req)) {
-        const signInUrl = new URL('/sign-in', req.url);
-        signInUrl.searchParams.set('redirect_url', req.nextUrl.pathname);
-        return NextResponse.redirect(signInUrl);
+    // ------------- PUBLIC ROUTES -------------
+    if (isPublicRoute(req)) {
+        if (userId) {
+            // Logged-in user trying to access public page → redirect to dashboard
+            url.pathname = '/dashboard';
+            return NextResponse.redirect(url);
+        }
+        return NextResponse.next();
     }
 
+    // ------------- DEFAULT PASS-THROUGH -------------
     return NextResponse.next();
 });
 
-// Ensure middleware runs as Edge Function
+// Middleware configuration
 export const config = {
     matcher: [
+        // Match everything except _next static files
         '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
         '/(api|trpc)(.*)',
     ],

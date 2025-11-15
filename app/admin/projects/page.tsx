@@ -2,17 +2,23 @@
 import Link from 'next/link';
 import { getAllProjects } from '@/app/actions/admin/projects';
 import { ProjectStatus, ServiceType } from '@/models/Project';
-import { Eye, Edit } from 'lucide-react';
+import { Eye } from 'lucide-react';
 
-export default async function AdminProjectsPage({
-    searchParams,
-}: {
-    searchParams: { status?: string; serviceType?: string; search?: string };
-}) {
+interface PageProps {
+    searchParams: Promise<{
+        status?: string;
+        serviceType?: string;
+        search?: string
+    }>;
+}
+
+export default async function AdminProjectsPage({ searchParams }: PageProps) {
+    const params = await searchParams;
+
     const result = await getAllProjects({
-        status: searchParams.status,
-        serviceType: searchParams.serviceType,
-        search: searchParams.search,
+        status: params.status,
+        serviceType: params.serviceType,
+        search: params.search,
     });
 
     const projects = result.success ? result.data : [];
@@ -37,7 +43,7 @@ export default async function AdminProjectsPage({
                         </label>
                         <select
                             className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                            defaultValue={searchParams.status || ''}
+                            defaultValue={params.status || ''}
                         >
                             <option value="">All Statuses</option>
                             <option value={ProjectStatus.PENDING}>Pending</option>
@@ -54,7 +60,7 @@ export default async function AdminProjectsPage({
                         </label>
                         <select
                             className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                            defaultValue={searchParams.serviceType || ''}
+                            defaultValue={params.serviceType || ''}
                         >
                             <option value="">All Services</option>
                             <option value={ServiceType.WEB_DEVELOPMENT}>Web Development</option>
@@ -73,7 +79,7 @@ export default async function AdminProjectsPage({
                             type="text"
                             placeholder="Search projects..."
                             className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                            defaultValue={searchParams.search || ''}
+                            defaultValue={params.search || ''}
                         />
                     </div>
                 </div>

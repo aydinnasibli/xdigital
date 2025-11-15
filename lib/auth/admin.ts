@@ -1,14 +1,12 @@
 // lib/auth/admin.ts
-import { auth } from '@clerk/nextjs/server';
-
-const ADMIN_EMAIL = 'xdigitalaz@proton.me';
+import { currentUser } from '@clerk/nextjs/server';
 
 export async function isAdmin(): Promise<boolean> {
     try {
-        const { sessionClaims } = await auth();
-        const userEmail = sessionClaims?.email as string | undefined;
-        return userEmail === ADMIN_EMAIL;
-    } catch (error) {
+        const user = await currentUser();
+        const role = user?.publicMetadata?.role; // Admin role stored in Clerk user
+        return role === 'admin';
+    } catch {
         return false;
     }
 }
@@ -22,12 +20,12 @@ export async function requireAdmin() {
 }
 
 export async function getAdminSession() {
-    const { userId, sessionClaims } = await auth();
-    const userEmail = sessionClaims?.email as string | undefined;
+    const user = await currentUser();
+    const role = user?.publicMetadata?.role;
 
-    if (!userId || userEmail !== ADMIN_EMAIL) {
+    if (!user?.id || role !== 'admin') {
         throw new Error('Unauthorized: Admin access required');
     }
 
-    return { userId, email: userEmail };
+    return { userId: user.id, role };
 }

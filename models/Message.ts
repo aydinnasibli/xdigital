@@ -92,6 +92,6 @@ MessageSchema.index({ projectId: 1, createdAt: -1 });
 MessageSchema.index({ userId: 1, createdAt: -1 });
 MessageSchema.index({ clerkUserId: 1, createdAt: -1 });
 
-const Message = (mongoose.models.Message as Model<IMessage>) || mongoose.model<IMessage>('Message', MessageSchema);
+const Message = (mongoose.models?.Message as Model<IMessage>) || mongoose.model<IMessage>('Message', MessageSchema);
 
 export default Message;
