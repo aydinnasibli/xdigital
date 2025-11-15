@@ -167,8 +167,7 @@ export default async function AdminDashboardPage() {
                             { status: 'In Progress', count: projects.inProgress || 0 },
                             { status: 'Completed', count: projects.completed || 0 },
                         ]}
-                        revenueOverTime={[]}
-                        healthScore={92}
+                        revenueData={[]}
                     />
                 </div>
             )}

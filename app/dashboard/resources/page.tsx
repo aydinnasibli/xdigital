@@ -13,7 +13,7 @@ export default async function ResourcesPage() {
     const resourcesResult = await getResources();
     const resources = resourcesResult.success ? resourcesResult.data : [];
 
-    const categories = [...new Set(resources.map((r: any) => r.category))];
+    const categories = [...new Set(resources.map((r: any) => r.category))] as string[];
 
     return (
         <div className="space-y-6">
@@ -27,7 +27,7 @@ export default async function ResourcesPage() {
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">
                     All Resources
                 </button>
-                {categories.map((category) => (
+                {categories.map((category: string) => (
                     <button
                         key={category}
                         className="px-4 py-2 bg-white border rounded-lg text-sm hover:bg-gray-50 capitalize"

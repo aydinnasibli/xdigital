@@ -72,8 +72,7 @@ export default async function DashboardPage() {
                             { status: 'In Progress', count: stats.inProgress },
                             { status: 'Completed', count: stats.completed },
                         ]}
-                        revenueOverTime={[]}
-                        healthScore={85}
+                        revenueData={[]}
                     />
                 </div>
             )}
