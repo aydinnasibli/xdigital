@@ -19,11 +19,17 @@ export default function DashboardLayout({
                                 xDigital
                             </Link>
                             <nav className="hidden md:flex gap-6">
-                                <Link href="/dashboard" className="text-gray-700 hover:text-gray-900">
+                                <Link href="/dashboard" className="text-gray-700 hover:text-gray-900 hover:underline">
                                     Dashboard
                                 </Link>
-                                <Link href="/dashboard/projects" className="text-gray-700 hover:text-gray-900">
+                                <Link href="/dashboard/projects" className="text-gray-700 hover:text-gray-900 hover:underline">
                                     Projects
+                                </Link>
+                                <Link href="/dashboard/notifications" className="text-gray-700 hover:text-gray-900 hover:underline">
+                                    Notifications
+                                </Link>
+                                <Link href="/dashboard/feedback" className="text-gray-700 hover:text-gray-900 hover:underline">
+                                    Feedback
                                 </Link>
                             </nav>
                         </div>
