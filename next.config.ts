@@ -1,12 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // Enable system TLS certificates for Google Fonts and other external resources
-    turbopack: {
-      useSystemTlsCerts: true,
-    },
-  },
   images: {
     remotePatterns: [
       {
