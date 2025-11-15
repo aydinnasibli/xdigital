@@ -16,11 +16,43 @@ export enum PaymentMethod {
     OTHER = 'other',
 }
 
+export enum ItemType {
+    SERVICE = 'service',
+    EXPENSE = 'expense',
+    TIME = 'time',
+    MILESTONE = 'milestone',
+}
+
 interface IInvoiceItem {
+    type: ItemType;
     description: string;
     quantity: number;
     unitPrice: number;
     total: number;
+    // For time-based items
+    hours?: number;
+    hourlyRate?: number;
+    // For expenses
+    expenseDate?: Date;
+    expenseCategory?: string;
+}
+
+interface IPartialPayment {
+    amount: number;
+    paidDate: Date;
+    paymentMethod: PaymentMethod;
+    transactionId?: string;
+    notes?: string;
+}
+
+interface IBranding {
+    logoUrl?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+    companyName?: string;
+    companyAddress?: string;
+    companyPhone?: string;
+    companyEmail?: string;
 }
 
 export interface IInvoice extends Document {
@@ -28,6 +60,7 @@ export interface IInvoice extends Document {
     userId: Types.ObjectId;
     clerkUserId: string;
     projectId: Types.ObjectId;
+    milestoneId?: Types.ObjectId; // For milestone-based payment requests
     invoiceNumber: string;
     status: InvoiceStatus;
     items: IInvoiceItem[];
@@ -35,13 +68,40 @@ export interface IInvoice extends Document {
     tax?: number;
     taxRate?: number;
     discount?: number;
+    discountType?: 'fixed' | 'percentage';
     total: number;
     currency: string;
+
+    // Partial payments
+    partialPayments: IPartialPayment[];
+    amountPaid: number;
+    amountDue: number;
+
+    // Dates
     dueDate: Date;
     issueDate: Date;
     paidDate?: Date;
+    sentDate?: Date;
+
+    // Payment
     paymentMethod?: PaymentMethod;
+    paymentTerms?: string;
+
+    // Customization
+    branding?: IBranding;
     notes?: string;
+    termsAndConditions?: string;
+    footer?: string;
+
+    // Late payment
+    isOverdue: boolean;
+    latePaymentAlertSent: boolean;
+    latePaymentAlertDate?: Date;
+
+    // Preview and send
+    previewUrl?: string;
+    pdfUrl?: string;
+
     createdAt: Date;
     updatedAt: Date;
 }
@@ -65,6 +125,10 @@ const InvoiceSchema = new Schema<IInvoice>(
             required: true,
             index: true,
         },
+        milestoneId: {
+            type: Schema.Types.ObjectId,
+            index: true,
+        },
         invoiceNumber: {
             type: String,
             required: true,
@@ -79,6 +143,11 @@ const InvoiceSchema = new Schema<IInvoice>(
         },
         items: [
             {
+                type: {
+                    type: String,
+                    enum: Object.values(ItemType),
+                    default: ItemType.SERVICE,
+                },
                 description: {
                     type: String,
                     required: true,
@@ -99,6 +168,10 @@ const InvoiceSchema = new Schema<IInvoice>(
                     required: true,
                     min: 0,
                 },
+                hours: Number,
+                hourlyRate: Number,
+                expenseDate: Date,
+                expenseCategory: String,
             },
         ],
         subtotal: {
@@ -121,6 +194,11 @@ const InvoiceSchema = new Schema<IInvoice>(
             min: 0,
             default: 0,
         },
+        discountType: {
+            type: String,
+            enum: ['fixed', 'percentage'],
+            default: 'fixed',
+        },
         total: {
             type: Number,
             required: true,
@@ -131,9 +209,40 @@ const InvoiceSchema = new Schema<IInvoice>(
             default: 'USD',
             uppercase: true,
         },
+        // Partial payments
+        partialPayments: [{
+            amount: {
+                type: Number,
+                required: true,
+                min: 0,
+            },
+            paidDate: {
+                type: Date,
+                required: true,
+            },
+            paymentMethod: {
+                type: String,
+                enum: Object.values(PaymentMethod),
+                required: true,
+            },
+            transactionId: String,
+            notes: String,
+        }],
+        amountPaid: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        amountDue: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        // Dates
         dueDate: {
             type: Date,
             required: true,
+            index: true,
         },
         issueDate: {
             type: Date,
@@ -141,15 +250,56 @@ const InvoiceSchema = new Schema<IInvoice>(
             default: Date.now,
         },
         paidDate: Date,
+        sentDate: Date,
+        // Payment
         paymentMethod: {
             type: String,
             enum: Object.values(PaymentMethod),
+        },
+        paymentTerms: {
+            type: String,
+            trim: true,
+            maxlength: 500,
+        },
+        // Customization
+        branding: {
+            logoUrl: String,
+            primaryColor: String,
+            secondaryColor: String,
+            companyName: String,
+            companyAddress: String,
+            companyPhone: String,
+            companyEmail: String,
         },
         notes: {
             type: String,
             trim: true,
             maxlength: 1000,
         },
+        termsAndConditions: {
+            type: String,
+            trim: true,
+            maxlength: 2000,
+        },
+        footer: {
+            type: String,
+            trim: true,
+            maxlength: 500,
+        },
+        // Late payment
+        isOverdue: {
+            type: Boolean,
+            default: false,
+            index: true,
+        },
+        latePaymentAlertSent: {
+            type: Boolean,
+            default: false,
+        },
+        latePaymentAlertDate: Date,
+        // Preview and send
+        previewUrl: String,
+        pdfUrl: String,
     },
     {
         timestamps: true,
