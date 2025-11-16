@@ -4,6 +4,8 @@ import { UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { GlobalSearchDialog } from '@/components/search/GlobalSearchDialog';
 
+export const dynamic = 'force-dynamic';
+
 export default function DashboardLayout({
     children,
 }: {
