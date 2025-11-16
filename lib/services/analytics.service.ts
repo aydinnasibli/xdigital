@@ -43,7 +43,7 @@ export class GoogleAnalyticsService {
         try {
             // Placeholder implementation
             // In production, use Google Analytics Data API:
-            /*
+
             const { BetaAnalyticsDataClient } = require('@google-analytics/data');
             const analyticsDataClient = new BetaAnalyticsDataClient({
                 credentials: this.credentials
@@ -67,10 +67,8 @@ export class GoogleAnalyticsService {
                     { name: 'conversions' },
                 ],
             });
-            */
 
-            // Return mock data for now (replace with actual API calls in production)
-            return this.getMockAnalyticsData();
+
         } catch (error) {
             console.error('Error fetching Google Analytics data:', error);
             return this.getMockAnalyticsData();

@@ -46,7 +46,7 @@ export class PerformanceService {
     async analyzePerformance(): Promise<PerformanceMetrics> {
         try {
             // In production, use PageSpeed Insights API:
-            /*
+
             const apiKey = process.env.PAGESPEED_API_KEY;
             const response = await fetch(
                 `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(this.siteUrl)}&key=${apiKey}&category=PERFORMANCE&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO`
@@ -65,10 +65,10 @@ export class PerformanceService {
             const lcpValue = audits['largest-contentful-paint'].numericValue;
             const fidValue = audits['max-potential-fid'].numericValue;
             const clsValue = audits['cumulative-layout-shift'].numericValue;
-            */
 
-            // Return mock data for now
-            return this.getMockPerformanceMetrics();
+
+
+
         } catch (error) {
             console.error('Error analyzing performance:', error);
             return this.getMockPerformanceMetrics();
