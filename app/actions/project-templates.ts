@@ -51,6 +51,55 @@ export async function getTemplates(serviceType?: string, packageType?: string): 
     }
 }
 
+// Get templates based on package hierarchy
+// Premium sees all, Standard sees Basic+Standard, Basic sees only Basic
+export async function getTemplatesByPackage(serviceType: string, packageType: string): Promise<ActionResponse> {
+    try {
+        const { userId: clerkUserId } = await auth();
+        if (!clerkUserId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        await dbConnect();
+
+        // Define package hierarchy
+        const packageHierarchy: { [key: string]: string[] } = {
+            basic: ['basic'],
+            standard: ['basic', 'standard'],
+            premium: ['basic', 'standard', 'premium'],
+            enterprise: ['basic', 'standard', 'premium', 'enterprise'],
+        };
+
+        const allowedPackages = packageHierarchy[packageType.toLowerCase()] || [packageType];
+
+        const templates = await ProjectTemplate.find({
+            isActive: true,
+            serviceType,
+            $or: [
+                { availableForPackages: { $in: allowedPackages } },
+                { package: { $in: allowedPackages } }, // Fallback for old templates
+            ],
+        })
+            .populate('createdBy', 'firstName lastName email')
+            .sort({ isDefault: -1, usageCount: -1 })
+            .lean();
+
+        const serializedTemplates = templates.map(template => ({
+            ...template,
+            _id: template._id.toString(),
+            createdBy: template.createdBy ? {
+                ...template.createdBy,
+                _id: template.createdBy._id.toString(),
+            } : null,
+        }));
+
+        return { success: true, data: serializedTemplates };
+    } catch (error) {
+        console.error('Error fetching templates by package:', error);
+        return { success: false, error: 'Failed to fetch templates' };
+    }
+}
+
 // Get single template
 export async function getTemplate(templateId: string): Promise<ActionResponse> {
     try {
@@ -92,6 +141,12 @@ export async function createTemplate(data: {
     description?: string;
     serviceType: string;
     package: string;
+    category?: string;
+    githubRepoUrl?: string;
+    demoUrl?: string;
+    screenshots?: string[];
+    features?: string[];
+    availableForPackages?: string[];
     estimatedDurationDays: number;
     milestones: any[];
     deliverables: any[];

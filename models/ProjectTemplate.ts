@@ -32,6 +32,18 @@ export interface IProjectTemplate extends Document {
     description?: string;
     serviceType: ServiceType;
     package: WebDevPackage | SMMPackage | DigitalSolutionsPackage;
+
+    // Website Template Fields
+    category?: string; // e.g., "Restaurant", "E-commerce", "Portfolio", "Business"
+    githubRepoUrl?: string; // GitHub repository URL
+    demoUrl?: string; // Live demo/preview URL
+    screenshots?: string[]; // Array of screenshot URLs
+    features?: string[]; // Key features list (e.g., "5 pages", "Contact form", "SEO optimized")
+
+    // Package Hierarchy: Templates available for package tiers
+    // e.g., ["basic"] or ["basic", "standard", "premium"]
+    availableForPackages?: string[];
+
     estimatedDurationDays: number;
     milestones: ITemplateMilestone[];
     deliverables: ITemplateDeliverable[];
@@ -69,6 +81,34 @@ const ProjectTemplateSchema = new Schema<IProjectTemplate>(
             required: true,
             index: true,
         },
+
+        // Website Template Fields
+        category: {
+            type: String,
+            trim: true,
+            maxlength: 100,
+        },
+        githubRepoUrl: {
+            type: String,
+            trim: true,
+        },
+        demoUrl: {
+            type: String,
+            trim: true,
+        },
+        screenshots: [{
+            type: String,
+            trim: true,
+        }],
+        features: [{
+            type: String,
+            trim: true,
+        }],
+        availableForPackages: [{
+            type: String,
+            trim: true,
+        }],
+
         estimatedDurationDays: {
             type: Number,
             required: true,

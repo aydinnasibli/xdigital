@@ -8,7 +8,16 @@ import { deleteProject } from '@/app/actions/projects';
 import { getMessages, sendMessage } from '@/app/actions/messages';
 import { useEffect } from 'react';
 import { getProjectInvoices } from '@/app/actions/invoices';
-import { getProjectAnalytics } from '@/app/actions/analytics';
+import { getProjectAnalytics } from '@/app/actions/monitoring';
+import dynamic from 'next/dynamic';
+
+// Dynamically import heavy dashboard components
+const SEODashboard = dynamic(() => import('@/components/dashboard/SEODashboard'), {
+    loading: () => <div className="text-center py-8">Loading SEO Dashboard...</div>,
+});
+const PerformanceDashboard = dynamic(() => import('@/components/dashboard/PerformanceDashboard'), {
+    loading: () => <div className="text-center py-8">Loading Performance Dashboard...</div>,
+});
 
 interface AnalyticsSummary {
     pageViews: number;
@@ -44,6 +53,9 @@ interface Project {
     serviceType: string;
     package: string;
     status: string;
+    deploymentUrl?: string;
+    vercelProjectId?: string;
+    googleAnalyticsPropertyId?: string;
     timeline?: {
         startDate?: string;
         estimatedCompletion?: string;
@@ -69,6 +81,7 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
         engagement: 0,
     });
     const [loading, setLoading] = useState(true);
+    const [generatingReport, setGeneratingReport] = useState(false);
 
     useEffect(() => {
         loadAnalytics();
@@ -78,9 +91,33 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
         setLoading(true);
         const result = await getProjectAnalytics(projectId);
         if (result.success && result.data) {
-            setSummary(result.data.summary);
+            setSummary(result.data.summary || result.data);
         }
         setLoading(false);
+    };
+
+    const handleDownloadReport = async () => {
+        setGeneratingReport(true);
+        try {
+            const { generatePDFReport } = await import('@/app/actions/monitoring');
+            const result = await generatePDFReport(projectId);
+
+            if (result.success && result.data) {
+                // Open HTML in new window for now (user can save as PDF)
+                const reportWindow = window.open('', '_blank');
+                if (reportWindow) {
+                    reportWindow.document.write(result.data.html);
+                    reportWindow.document.close();
+                }
+            } else {
+                alert(result.error || 'Failed to generate report');
+            }
+        } catch (error) {
+            console.error('Error generating report:', error);
+            alert('Failed to generate report');
+        } finally {
+            setGeneratingReport(false);
+        }
     };
 
     if (loading) {
@@ -114,10 +151,29 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
 
             <div className="bg-white p-6 rounded-lg border">
                 <h3 className="font-semibold mb-4">Analytics Overview</h3>
-                <p className="text-gray-500">
+                <p className="text-gray-500 mb-4">
                     Detailed analytics will be available once your project goes live.
                     You'll be able to track traffic, user behavior, and performance metrics.
                 </p>
+                <button
+                    onClick={handleDownloadReport}
+                    disabled={generatingReport}
+                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                    {generatingReport ? (
+                        <>
+                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                            Generating Report...
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Download Monthly Report
+                        </>
+                    )}
+                </button>
             </div>
         </div>
     );
@@ -297,7 +353,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'messages' | 'invoices' | 'analytics'>(
+    const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'messages' | 'invoices' | 'analytics' | 'seo' | 'performance'>(
         'overview'
     );
     const [isPending, startTransition] = useTransition();
@@ -410,6 +466,29 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         Analytics
                     </button>
 
+                    {project.deploymentUrl && (
+                        <>
+                            <button
+                                onClick={() => setActiveTab('seo')}
+                                className={`pb-3 px-1 border-b-2 ${activeTab === 'seo'
+                                    ? 'border-blue-600 text-blue-600'
+                                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                                    }`}
+                            >
+                                SEO
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('performance')}
+                                className={`pb-3 px-1 border-b-2 ${activeTab === 'performance'
+                                    ? 'border-blue-600 text-blue-600'
+                                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                                    }`}
+                            >
+                                Performance
+                            </button>
+                        </>
+                    )}
+
                     <button
                         onClick={() => setActiveTab('invoices')}
                         className={`pb-3 px-1 border-b-2 ${activeTab === 'invoices'
@@ -460,6 +539,39 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             <p className="text-sm text-gray-600 mt-1">View project history</p>
                         </Link>
                     </div>
+
+                    {/* Live Website */}
+                    {project.deploymentUrl && (
+                        <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 p-6 rounded-lg">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                                        <span className="text-2xl">🌐</span>
+                                        Your Website is Live!
+                                    </h2>
+                                    <p className="text-gray-700 mb-4">
+                                        Your website has been successfully deployed and is now accessible online.
+                                    </p>
+                                    <a
+                                        href={project.deploymentUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                        Visit Your Website
+                                    </a>
+                                </div>
+                                <div className="hidden md:block text-6xl">🚀</div>
+                            </div>
+                            <div className="mt-4 p-3 bg-white/50 rounded border border-blue-200">
+                                <p className="text-xs text-gray-600 mb-1">Website URL:</p>
+                                <p className="text-sm font-mono text-blue-600 break-all">{project.deploymentUrl}</p>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="bg-white p-6 rounded-lg border">
                         <h2 className="text-xl font-semibold mb-4">Project Description</h2>
@@ -574,6 +686,8 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
             {activeTab === 'messages' && <MessagesTab projectId={project._id} />}
             {activeTab === 'analytics' && <AnalyticsTab projectId={project._id} />}
+            {activeTab === 'seo' && project.deploymentUrl && <SEODashboard projectId={project._id} />}
+            {activeTab === 'performance' && project.deploymentUrl && <PerformanceDashboard projectId={project._id} />}
             {activeTab === 'invoices' && <InvoicesTab projectId={project._id} />}
         </div>
     );
