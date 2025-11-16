@@ -3,11 +3,15 @@ import Link from 'next/link';
 import { getAdminProject } from '@/app/actions/admin/projects';
 import { getAdminProjectMessages } from '@/app/actions/admin/messages';
 import { getProjectInvoices } from '@/app/actions/invoices';
+import { getProjectTasks } from '@/app/actions/tasks';
+import { getProjectDeliverables } from '@/app/actions/deliverables';
 import { ArrowLeft, User, Mail, Calendar, Package } from 'lucide-react';
 import UpdateStatusForm from './UpdateStatusForm';
 import MessageSection from './MessageSection';
 import MilestonesSection from './MilestonesSection';
 import DeploymentSection from './DeploymentSection';
+import TasksSection from './TasksSection';
+import DeliverablesSection from './DeliverablesSection';
 
 export default async function AdminProjectDetailPage({
     params,
@@ -16,10 +20,12 @@ export default async function AdminProjectDetailPage({
 
 }) {
     const resolvedParams = await params;
-    const [projectResult, messagesResult, invoicesResult] = await Promise.all([
+    const [projectResult, messagesResult, invoicesResult, tasksResult, deliverablesResult] = await Promise.all([
         getAdminProject(resolvedParams.id),
         getAdminProjectMessages(resolvedParams.id),
         getProjectInvoices(resolvedParams.id),
+        getProjectTasks(resolvedParams.id),
+        getProjectDeliverables(resolvedParams.id),
     ]);
 
     if (!projectResult.success) {
@@ -33,6 +39,8 @@ export default async function AdminProjectDetailPage({
     const project = projectResult.data;
     const messages = messagesResult.success ? messagesResult.data : [];
     const invoices = invoicesResult.success ? invoicesResult.data : [];
+    const tasks = tasksResult.success ? tasksResult.data : [];
+    const deliverables = deliverablesResult.success ? deliverablesResult.data : [];
 
     return (
         <div className="space-y-6">
@@ -104,6 +112,18 @@ export default async function AdminProjectDetailPage({
                     <MilestonesSection
                         projectId={project._id}
                         milestones={project.milestones || []}
+                    />
+
+                    {/* Tasks */}
+                    <TasksSection
+                        projectId={project._id}
+                        tasks={tasks}
+                    />
+
+                    {/* Deliverables */}
+                    <DeliverablesSection
+                        projectId={project._id}
+                        deliverables={deliverables}
                     />
 
                     {/* Messages */}

@@ -101,25 +101,25 @@ export class GoogleAnalyticsService {
             const conversions = parseInt(mainMetrics[5]?.value || '0');
 
             // Parse top pages
-            const topPages = (pagesResponse.rows || []).map(row => ({
+            const topPages = (pagesResponse.rows || []).map((row: any) => ({
                 page: row.dimensionValues?.[0]?.value || '/',
                 views: parseInt(row.metricValues?.[0]?.value || '0'),
             }));
 
             // Parse traffic sources
-            const trafficSources = (sourcesResponse.rows || []).map(row => ({
+            const trafficSources = (sourcesResponse.rows || []).map((row: any) => ({
                 source: row.dimensionValues?.[0]?.value || 'direct',
                 sessions: parseInt(row.metricValues?.[0]?.value || '0'),
             }));
 
             // Parse device breakdown
-            const deviceBreakdown = (devicesResponse.rows || []).map(row => ({
+            const deviceBreakdown = (devicesResponse.rows || []).map((row: any) => ({
                 device: row.dimensionValues?.[0]?.value || 'unknown',
                 sessions: parseInt(row.metricValues?.[0]?.value || '0'),
             }));
 
             // Parse geographic data
-            const geographicData = (geoResponse.rows || []).map(row => ({
+            const geographicData = (geoResponse.rows || []).map((row: any) => ({
                 country: row.dimensionValues?.[0]?.value || 'Unknown',
                 sessions: parseInt(row.metricValues?.[0]?.value || '0'),
             }));

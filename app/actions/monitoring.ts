@@ -55,18 +55,19 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
 
             return {
                 success: true,
-                data: summary,
+                data: {
+                    ...summary,
+                    configured: true,
+                },
             };
         }
 
-        // Return zeros if GA is not configured
+        // Return not configured status if GA is not set up
         return {
             success: true,
             data: {
-                pageViews: 0,
-                visitors: 0,
-                conversions: 0,
-                engagement: 0,
+                configured: false,
+                message: 'Google Analytics is not configured for this project',
             },
         };
     } catch (error) {
