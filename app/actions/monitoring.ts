@@ -50,39 +50,23 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
                 credentials,
             });
 
-            const endDate = new Date().toISOString().split('T')[0];
-            const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-                .toISOString()
-                .split('T')[0];
-
-            const analyticsData = await analyticsService.getAnalyticsData(startDate, endDate);
-            const realTimeUsers = await analyticsService.getRealTimeUsers();
+            // Get analytics summary (4 metrics for client dashboard)
+            const summary = await analyticsService.getAnalyticsSummary(30);
 
             return {
                 success: true,
-                data: {
-                    ...analyticsData,
-                    realTimeUsers,
-                },
+                data: summary,
             };
         }
 
-        // Return mock data if GA is not configured
+        // Return zeros if GA is not configured
         return {
             success: true,
             data: {
                 pageViews: 0,
                 visitors: 0,
-                sessions: 0,
-                bounceRate: 0,
-                avgSessionDuration: 0,
                 conversions: 0,
-                topPages: [],
-                trafficSources: [],
-                deviceBreakdown: [],
-                geographicData: [],
-                realTimeUsers: 0,
-                message: 'Google Analytics not configured for this project',
+                engagement: 0,
             },
         };
     } catch (error) {
