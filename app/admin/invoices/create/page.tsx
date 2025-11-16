@@ -4,8 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createInvoice } from '@/app/actions/admin/invoices';
-import { getAllClients } from '@/app/actions/admin/clients';
-import { getClientProjects } from '@/app/actions/admin/projects';
+import { getAllClients, getClientProjects } from '@/app/actions/admin/clients';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 

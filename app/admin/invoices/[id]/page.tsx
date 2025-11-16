@@ -187,14 +187,14 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
                                 <span className="font-medium">${invoice.subtotal.toFixed(2)}</span>
                             </div>
 
-                            {invoice.tax > 0 && (
+                            {invoice.tax && invoice.tax > 0 && (
                                 <div className="flex justify-between text-sm text-gray-700">
-                                    <span>Tax ({invoice.taxRate}%):</span>
+                                    <span>Tax ({invoice.taxRate || 0}%):</span>
                                     <span className="font-medium">${invoice.tax.toFixed(2)}</span>
                                 </div>
                             )}
 
-                            {invoice.discount > 0 && (
+                            {invoice.discount && invoice.discount > 0 && (
                                 <div className="flex justify-between text-sm text-gray-700">
                                     <span>Discount:</span>
                                     <span className="font-medium text-red-600">
