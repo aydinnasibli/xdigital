@@ -288,3 +288,49 @@ export async function getProjectStats() {
         return { success: false, error: 'Failed to fetch project stats' };
     }
 }
+
+// Update project deployment information (admin only)
+export async function updateProjectDeployment(
+    projectId: string,
+    deploymentData: {
+        deploymentUrl?: string;
+        vercelProjectId?: string;
+        googleAnalyticsPropertyId?: string;
+    }
+): Promise<ActionResponse> {
+    try {
+        const { userId: clerkUserId } = await auth();
+        if (!clerkUserId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        await dbConnect();
+
+        const project = await Project.findByIdAndUpdate(
+            projectId,
+            {
+                $set: deploymentData,
+            },
+            { new: true }
+        );
+
+        if (!project) {
+            return { success: false, error: 'Project not found' };
+        }
+
+        revalidatePath('/admin/projects');
+        revalidatePath(`/dashboard/projects/${projectId}`);
+
+        return {
+            success: true,
+            data: {
+                ...project.toObject(),
+                _id: project._id.toString(),
+                userId: project.userId.toString(),
+            },
+        };
+    } catch (error) {
+        console.error('Error updating project deployment:', error);
+        return { success: false, error: 'Failed to update deployment information' };
+    }
+}

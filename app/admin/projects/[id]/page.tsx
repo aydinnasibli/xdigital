@@ -7,6 +7,7 @@ import { ArrowLeft, User, Mail, Calendar, Package } from 'lucide-react';
 import UpdateStatusForm from './UpdateStatusForm';
 import MessageSection from './MessageSection';
 import MilestonesSection from './MilestonesSection';
+import DeploymentSection from './DeploymentSection';
 
 export default async function AdminProjectDetailPage({
     params,
@@ -90,6 +91,14 @@ export default async function AdminProjectDetailPage({
                             currentStatus={project.status}
                         />
                     </div>
+
+                    {/* Deployment Information */}
+                    <DeploymentSection
+                        projectId={project._id}
+                        deploymentUrl={project.deploymentUrl}
+                        vercelProjectId={project.vercelProjectId}
+                        googleAnalyticsPropertyId={project.googleAnalyticsPropertyId}
+                    />
 
                     {/* Milestones */}
                     <MilestonesSection

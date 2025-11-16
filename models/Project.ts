@@ -53,6 +53,29 @@ interface ITimeline {
     completedDate?: Date;
 }
 
+interface ICustomization {
+    businessName?: string;
+    industry?: string;
+    brandColors?: {
+        primary?: string;
+        secondary?: string;
+        accent?: string;
+    };
+    logoUrl?: string;
+    contactInfo?: {
+        email?: string;
+        phone?: string;
+        address?: string;
+    };
+    socialMedia?: {
+        facebook?: string;
+        twitter?: string;
+        instagram?: string;
+        linkedin?: string;
+    };
+    specialRequirements?: string;
+}
+
 export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
     userId: Types.ObjectId;
@@ -62,6 +85,16 @@ export interface IProject extends Document {
     serviceType: ServiceType;
     package: WebDevPackage | SMMPackage | DigitalSolutionsPackage;
     status: ProjectStatus;
+
+    // Template & Deployment
+    templateId?: Types.ObjectId;
+    deploymentUrl?: string;
+    vercelProjectId?: string;
+    customization?: ICustomization;
+
+    // Analytics
+    googleAnalyticsPropertyId?: string;
+
     timeline?: ITimeline;
     deliverables?: string[];
     milestones?: IMilestone[];
@@ -109,6 +142,49 @@ const ProjectSchema = new Schema<IProject>(
             enum: Object.values(ProjectStatus),
             default: ProjectStatus.PENDING,
         },
+
+        // Template & Deployment
+        templateId: {
+            type: Schema.Types.ObjectId,
+            ref: 'ProjectTemplate',
+        },
+        deploymentUrl: {
+            type: String,
+            trim: true,
+        },
+        vercelProjectId: {
+            type: String,
+            trim: true,
+        },
+        customization: {
+            businessName: String,
+            industry: String,
+            brandColors: {
+                primary: String,
+                secondary: String,
+                accent: String,
+            },
+            logoUrl: String,
+            contactInfo: {
+                email: String,
+                phone: String,
+                address: String,
+            },
+            socialMedia: {
+                facebook: String,
+                twitter: String,
+                instagram: String,
+                linkedin: String,
+            },
+            specialRequirements: String,
+        },
+
+        // Analytics
+        googleAnalyticsPropertyId: {
+            type: String,
+            trim: true,
+        },
+
         timeline: {
             startDate: Date,
             estimatedCompletion: Date,
