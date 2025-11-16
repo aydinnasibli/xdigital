@@ -21,6 +21,29 @@ type ProjectFormData = {
     projectDescription: string;
     serviceType: string;
     package: string;
+    templateId?: string;
+    customization?: {
+        businessName?: string;
+        industry?: string;
+        brandColors?: {
+            primary?: string;
+            secondary?: string;
+            accent?: string;
+        };
+        logoUrl?: string;
+        contactInfo?: {
+            email?: string;
+            phone?: string;
+            address?: string;
+        };
+        socialMedia?: {
+            facebook?: string;
+            twitter?: string;
+            instagram?: string;
+            linkedin?: string;
+        };
+        specialRequirements?: string;
+    };
 };
 
 // Get all projects for current user
@@ -116,7 +139,7 @@ export async function createProject(formData: ProjectFormData): Promise<ActionRe
             return { success: false, error: 'User not found' };
         }
 
-        const { projectName, projectDescription, serviceType, package: packageType } = formData;
+        const { projectName, projectDescription, serviceType, package: packageType, templateId, customization } = formData;
 
         // Validate required fields
         if (!projectName || !projectDescription || !serviceType || !packageType) {
@@ -132,6 +155,8 @@ export async function createProject(formData: ProjectFormData): Promise<ActionRe
             serviceType,
             package: packageType,
             status: 'pending',
+            templateId: templateId || undefined,
+            customization: customization || undefined,
         });
 
         // Revalidate the projects page
