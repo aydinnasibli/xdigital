@@ -68,8 +68,8 @@ export class SEOService {
             // Check mobile-friendliness (simplified)
             const mobileScore = this.checkMobileFriendly(pageData, issues, recommendations);
 
-            // Performance score (simplified)
-            const perfScore = 85; // Placeholder - would use Lighthouse API in production
+            // Basic performance check (checks for common performance issues in HTML)
+            const perfScore = this.checkBasicPerformance(pageData, issues, recommendations);
 
             // Calculate overall score
             const overall = Math.round(
@@ -91,8 +91,7 @@ export class SEOService {
             };
         } catch (error) {
             console.error('Error analyzing SEO:', error);
-            // Return mock data if analysis fails
-            return this.getMockSEOScore();
+            throw new Error('Failed to analyze SEO. Please check the website URL is accessible.');
         }
     }
 
@@ -326,40 +325,51 @@ export class SEOService {
     }
 
     /**
-     * Get mock SEO score for testing
+     * Check basic performance indicators in HTML
      */
-    private getMockSEOScore(): SEOScore {
-        return {
-            overall: 78,
-            breakdown: {
-                metaTags: 85,
-                headings: 90,
-                images: 75,
-                performance: 80,
-                mobile: 95,
-                ssl: 100,
-            },
-            issues: [
-                {
-                    severity: 'warning',
-                    category: 'Meta Tags',
-                    message: 'Meta description length could be improved',
-                    element: '<meta name="description">',
-                },
-                {
-                    severity: 'info',
-                    category: 'Images',
-                    message: '2 images missing alt text',
-                    element: '<img>',
-                },
-            ],
-            recommendations: [
-                'Optimize meta description to 150-160 characters',
-                'Add alt text to all images',
-                'Consider adding structured data markup',
-                'Improve page load speed',
-            ],
-        };
+    private checkBasicPerformance(html: string, issues: SEOIssue[], recommendations: string[]): number {
+        let score = 100;
+
+        // Check for inline scripts (can block rendering)
+        const inlineScripts = (html.match(/<script(?![^>]*src=)[^>]*>/gi) || []).length;
+        if (inlineScripts > 3) {
+            score -= 15;
+            issues.push({
+                severity: 'warning',
+                category: 'Performance',
+                message: `${inlineScripts} inline scripts found. Consider moving to external files.`,
+                element: '<script>',
+            });
+            recommendations.push('Minimize inline scripts to improve page load performance');
+        }
+
+        // Check for large inline styles
+        const inlineStyles = (html.match(/<style[^>]*>/gi) || []).length;
+        if (inlineStyles > 2) {
+            score -= 10;
+            issues.push({
+                severity: 'info',
+                category: 'Performance',
+                message: `${inlineStyles} inline style blocks found. Consider using external CSS.`,
+                element: '<style>',
+            });
+        }
+
+        // Check for async/defer on scripts
+        const externalScripts = (html.match(/<script[^>]*src=/gi) || []).length;
+        const asyncScripts = (html.match(/<script[^>]*(async|defer)/gi) || []).length;
+        if (externalScripts > 0 && asyncScripts === 0) {
+            score -= 20;
+            issues.push({
+                severity: 'warning',
+                category: 'Performance',
+                message: 'Scripts are not using async or defer attributes',
+                element: '<script>',
+            });
+            recommendations.push('Add async or defer attributes to script tags for better performance');
+        }
+
+        return Math.max(0, score);
     }
 
     /**

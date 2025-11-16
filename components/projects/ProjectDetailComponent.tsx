@@ -80,6 +80,8 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
         conversions: 0,
         engagement: 0,
     });
+    const [configured, setConfigured] = useState(true);
+    const [configMessage, setConfigMessage] = useState('');
     const [loading, setLoading] = useState(true);
     const [generatingReport, setGeneratingReport] = useState(false);
 
@@ -91,7 +93,13 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
         setLoading(true);
         const result = await getProjectAnalytics(projectId);
         if (result.success && result.data) {
-            setSummary(result.data.summary || result.data);
+            if (result.data.configured === false) {
+                setConfigured(false);
+                setConfigMessage(result.data.message || 'Analytics not configured');
+            } else {
+                setConfigured(true);
+                setSummary(result.data.summary || result.data);
+            }
         }
         setLoading(false);
     };
@@ -122,6 +130,26 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
 
     if (loading) {
         return <div className="text-center py-8">Loading analytics...</div>;
+    }
+
+    if (!configured) {
+        return (
+            <div className="space-y-6">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+                    <div className="text-yellow-600 mb-4">
+                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Analytics Not Configured</h3>
+                    <p className="text-gray-600 mb-4">{configMessage}</p>
+                    <p className="text-sm text-gray-500">
+                        Google Analytics will be set up by the admin when your project is deployed.
+                        You'll be able to track traffic, user behavior, and performance metrics once configured.
+                    </p>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -244,8 +272,12 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                                     </p>
                                 </div>
                                 {invoice.status === 'sent' && (
-                                    <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                        Pay Now
+                                    <button
+                                        onClick={() => alert('Online payment integration is being set up. Please contact the admin for payment instructions.')}
+                                        className="px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed hover:bg-gray-500"
+                                        title="Payment integration coming soon"
+                                    >
+                                        Pay Now (Coming Soon)
                                     </button>
                                 )}
                             </div>

@@ -5,6 +5,20 @@ import { WebhookEvent } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/database/mongodb';
 import User from '@/models/User';
+import Project from '@/models/Project';
+import Task from '@/models/Task';
+import Message from '@/models/Message';
+import File from '@/models/File';
+import FileFolder from '@/models/FileFolder';
+import Invoice from '@/models/Invoice';
+import Notification from '@/models/Notification';
+import NotificationPreference from '@/models/NotificationPreference';
+import Activity from '@/models/Activity';
+import Analytics from '@/models/Analytics';
+import Deliverable from '@/models/Deliverable';
+import Feedback from '@/models/Feedback';
+import SavedFilter from '@/models/SavedFilter';
+import TimeEntry from '@/models/TimeEntry';
 
 export async function POST(req: Request) {
     const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -177,12 +191,46 @@ export async function POST(req: Request) {
 
             console.log('User deleted from MongoDB:', deletedUser._id);
 
-            // TODO: Also delete related data (projects, messages, etc.)
-            // This can be handled with MongoDB cascade or manually
+            // Cascade delete all related data
+            const userId = deletedUser._id;
+            const clerkId = deletedUser.clerkId;
+
+            await Promise.all([
+                // Delete projects created by this user
+                Project.deleteMany({ userId: clerkId }),
+                // Delete tasks assigned to or created by this user
+                Task.deleteMany({ $or: [{ assignedTo: userId }, { createdBy: userId }] }),
+                // Delete messages sent by this user
+                Message.deleteMany({ userId: clerkId }),
+                // Delete files uploaded by this user
+                File.deleteMany({ userId: clerkId }),
+                // Delete file folders created by this user
+                FileFolder.deleteMany({ userId: clerkId }),
+                // Delete invoices created by this user
+                Invoice.deleteMany({ userId: clerkId }),
+                // Delete notifications for this user
+                Notification.deleteMany({ userId: clerkId }),
+                // Delete notification preferences for this user
+                NotificationPreference.deleteMany({ userId: clerkId }),
+                // Delete activity logs for this user
+                Activity.deleteMany({ userId: clerkId }),
+                // Delete analytics data for this user
+                Analytics.deleteMany({ userId: clerkId }),
+                // Delete deliverables created by this user
+                Deliverable.deleteMany({ createdBy: userId }),
+                // Delete feedback given by this user
+                Feedback.deleteMany({ userId: clerkId }),
+                // Delete saved filters for this user
+                SavedFilter.deleteMany({ userId: clerkId }),
+                // Delete time entries for this user
+                TimeEntry.deleteMany({ userId: clerkId }),
+            ]);
+
+            console.log('User and all related data deleted successfully:', userId);
 
             return NextResponse.json(
                 {
-                    message: 'User deleted successfully',
+                    message: 'User and all related data deleted successfully',
                     userId: deletedUser._id,
                 },
                 { status: 200 }

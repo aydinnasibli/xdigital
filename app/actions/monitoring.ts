@@ -40,43 +40,34 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
 
         // Initialize Google Analytics service
         if (project.googleAnalyticsPropertyId) {
+            // Parse credentials from environment
+            const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
+                ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
+                : undefined;
+
             const analyticsService = new GoogleAnalyticsService({
                 propertyId: project.googleAnalyticsPropertyId,
+                credentials,
             });
 
-            const endDate = new Date().toISOString().split('T')[0];
-            const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-                .toISOString()
-                .split('T')[0];
-
-            const analyticsData = await analyticsService.getAnalyticsData(startDate, endDate);
-            const realTimeUsers = await analyticsService.getRealTimeUsers();
+            // Get analytics summary (4 metrics for client dashboard)
+            const summary = await analyticsService.getAnalyticsSummary(30);
 
             return {
                 success: true,
                 data: {
-                    ...analyticsData,
-                    realTimeUsers,
+                    ...summary,
+                    configured: true,
                 },
             };
         }
 
-        // Return mock data if GA is not configured
+        // Return not configured status if GA is not set up
         return {
             success: true,
             data: {
-                pageViews: 0,
-                visitors: 0,
-                sessions: 0,
-                bounceRate: 0,
-                avgSessionDuration: 0,
-                conversions: 0,
-                topPages: [],
-                trafficSources: [],
-                deviceBreakdown: [],
-                geographicData: [],
-                realTimeUsers: 0,
-                message: 'Google Analytics not configured for this project',
+                configured: false,
+                message: 'Google Analytics is not configured for this project',
             },
         };
     } catch (error) {
@@ -200,8 +191,13 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
         if (project.deploymentUrl) {
             // Get analytics summary
             if (project.googleAnalyticsPropertyId) {
+                const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
+                    ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
+                    : undefined;
+
                 const analyticsService = new GoogleAnalyticsService({
                     propertyId: project.googleAnalyticsPropertyId,
+                    credentials,
                 });
                 summary.analytics = await analyticsService.getAnalyticsSummary(30);
             }
@@ -259,8 +255,13 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
         const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
         // Get analytics data
+        const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
+            ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
+            : undefined;
+
         const analyticsService = new GoogleAnalyticsService({
             propertyId: project.googleAnalyticsPropertyId || '',
+            credentials,
         });
         const analyticsData = await analyticsService.getAnalyticsData(
             startDate.toISOString().split('T')[0],
