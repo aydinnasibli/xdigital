@@ -40,8 +40,14 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
 
         // Initialize Google Analytics service
         if (project.googleAnalyticsPropertyId) {
+            // Parse credentials from environment
+            const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
+                ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
+                : undefined;
+
             const analyticsService = new GoogleAnalyticsService({
                 propertyId: project.googleAnalyticsPropertyId,
+                credentials,
             });
 
             const endDate = new Date().toISOString().split('T')[0];
@@ -200,8 +206,13 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
         if (project.deploymentUrl) {
             // Get analytics summary
             if (project.googleAnalyticsPropertyId) {
+                const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
+                    ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
+                    : undefined;
+
                 const analyticsService = new GoogleAnalyticsService({
                     propertyId: project.googleAnalyticsPropertyId,
+                    credentials,
                 });
                 summary.analytics = await analyticsService.getAnalyticsSummary(30);
             }
@@ -259,8 +270,13 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
         const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
         // Get analytics data
+        const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
+            ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
+            : undefined;
+
         const analyticsService = new GoogleAnalyticsService({
             propertyId: project.googleAnalyticsPropertyId || '',
+            credentials,
         });
         const analyticsData = await analyticsService.getAnalyticsData(
             startDate.toISOString().split('T')[0],
