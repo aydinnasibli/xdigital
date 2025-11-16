@@ -2,7 +2,10 @@ import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI || '';
 
-if (!MONGODB_URI && process.env.NODE_ENV !== 'production') {
+if (!MONGODB_URI) {
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('MONGODB_URI is required in production environment');
+    }
     console.warn('Warning: MONGODB_URI is not defined. Database features will not work.');
 }
 
@@ -28,7 +31,6 @@ async function dbConnect(): Promise<typeof mongoose> {
     }
 
     if (cached.conn) {
-        console.log('Using cached MongoDB connection');
         return cached.conn;
     }
 
@@ -38,12 +40,10 @@ async function dbConnect(): Promise<typeof mongoose> {
         };
 
         cached.promise = mongoose.connect(MONGODB_URI, opts);
-        console.log('Creating new MongoDB connection');
     }
 
     try {
         cached.conn = await cached.promise;
-        console.log('MongoDB connected');
     } catch (e) {
         cached.promise = null;
         throw e;

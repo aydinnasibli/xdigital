@@ -31,33 +31,18 @@ export class GoogleAnalyticsService {
 
     /**
      * Fetch analytics data for a date range
-     * Note: This is a placeholder implementation
-     * In production, you'll need to:
-     * 1. Set up Google Cloud Project
-     * 2. Enable Google Analytics Data API
-     * 3. Create service account and download credentials
-     * 4. Add credentials to environment variables
-     * 5. Install @google-analytics/data package: npm install @google-analytics/data
      */
     async getAnalyticsData(startDate: string, endDate: string): Promise<AnalyticsData> {
         try {
-            // Placeholder implementation
-            // In production, use Google Analytics Data API:
-
             const { BetaAnalyticsDataClient } = require('@google-analytics/data');
             const analyticsDataClient = new BetaAnalyticsDataClient({
                 credentials: this.credentials
             });
 
-            const [response] = await analyticsDataClient.runReport({
+            // Fetch main metrics
+            const [metricsResponse] = await analyticsDataClient.runReport({
                 property: `properties/${this.propertyId}`,
                 dateRanges: [{ startDate, endDate }],
-                dimensions: [
-                    { name: 'pagePath' },
-                    { name: 'country' },
-                    { name: 'deviceCategory' },
-                    { name: 'sessionSource' },
-                ],
                 metrics: [
                     { name: 'screenPageViews' },
                     { name: 'sessions' },
@@ -68,10 +53,96 @@ export class GoogleAnalyticsService {
                 ],
             });
 
+            // Fetch top pages
+            const [pagesResponse] = await analyticsDataClient.runReport({
+                property: `properties/${this.propertyId}`,
+                dateRanges: [{ startDate, endDate }],
+                dimensions: [{ name: 'pagePath' }],
+                metrics: [{ name: 'screenPageViews' }],
+                limit: 5,
+                orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+            });
 
+            // Fetch traffic sources
+            const [sourcesResponse] = await analyticsDataClient.runReport({
+                property: `properties/${this.propertyId}`,
+                dateRanges: [{ startDate, endDate }],
+                dimensions: [{ name: 'sessionSource' }],
+                metrics: [{ name: 'sessions' }],
+                limit: 5,
+                orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+            });
+
+            // Fetch device breakdown
+            const [devicesResponse] = await analyticsDataClient.runReport({
+                property: `properties/${this.propertyId}`,
+                dateRanges: [{ startDate, endDate }],
+                dimensions: [{ name: 'deviceCategory' }],
+                metrics: [{ name: 'sessions' }],
+            });
+
+            // Fetch geographic data
+            const [geoResponse] = await analyticsDataClient.runReport({
+                property: `properties/${this.propertyId}`,
+                dateRanges: [{ startDate, endDate }],
+                dimensions: [{ name: 'country' }],
+                metrics: [{ name: 'sessions' }],
+                limit: 5,
+                orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+            });
+
+            // Parse main metrics
+            const mainMetrics = metricsResponse.rows?.[0]?.metricValues || [];
+            const pageViews = parseInt(mainMetrics[0]?.value || '0');
+            const sessions = parseInt(mainMetrics[1]?.value || '0');
+            const visitors = parseInt(mainMetrics[2]?.value || '0');
+            const bounceRate = parseFloat(mainMetrics[3]?.value || '0');
+            const avgSessionDuration = parseFloat(mainMetrics[4]?.value || '0');
+            const conversions = parseInt(mainMetrics[5]?.value || '0');
+
+            // Parse top pages
+            const topPages = (pagesResponse.rows || []).map(row => ({
+                page: row.dimensionValues?.[0]?.value || '/',
+                views: parseInt(row.metricValues?.[0]?.value || '0'),
+            }));
+
+            // Parse traffic sources
+            const trafficSources = (sourcesResponse.rows || []).map(row => ({
+                source: row.dimensionValues?.[0]?.value || 'direct',
+                sessions: parseInt(row.metricValues?.[0]?.value || '0'),
+            }));
+
+            // Parse device breakdown
+            const deviceBreakdown = (devicesResponse.rows || []).map(row => ({
+                device: row.dimensionValues?.[0]?.value || 'unknown',
+                sessions: parseInt(row.metricValues?.[0]?.value || '0'),
+            }));
+
+            // Parse geographic data
+            const geographicData = (geoResponse.rows || []).map(row => ({
+                country: row.dimensionValues?.[0]?.value || 'Unknown',
+                sessions: parseInt(row.metricValues?.[0]?.value || '0'),
+            }));
+
+            // Get real-time users
+            const realTimeUsers = await this.getRealTimeUsers();
+
+            return {
+                pageViews,
+                visitors,
+                sessions,
+                bounceRate,
+                avgSessionDuration,
+                conversions,
+                topPages,
+                trafficSources,
+                deviceBreakdown,
+                geographicData,
+                realTimeUsers,
+            };
         } catch (error) {
             console.error('Error fetching Google Analytics data:', error);
-            return this.getMockAnalyticsData();
+            throw new Error('Failed to fetch analytics data. Please check your Google Analytics configuration.');
         }
     }
 
@@ -80,9 +151,6 @@ export class GoogleAnalyticsService {
      */
     async getRealTimeUsers(): Promise<number> {
         try {
-            // Placeholder implementation
-            // In production:
-            /*
             const { BetaAnalyticsDataClient } = require('@google-analytics/data');
             const analyticsDataClient = new BetaAnalyticsDataClient({
                 credentials: this.credentials
@@ -94,53 +162,10 @@ export class GoogleAnalyticsService {
             });
 
             return parseInt(response.rows?.[0]?.metricValues?.[0]?.value || '0');
-            */
-
-            return Math.floor(Math.random() * 50) + 10; // Mock data
         } catch (error) {
             console.error('Error fetching real-time users:', error);
             return 0;
         }
-    }
-
-    /**
-     * Get mock analytics data (for development/testing)
-     */
-    private getMockAnalyticsData(): AnalyticsData {
-        return {
-            pageViews: Math.floor(Math.random() * 10000) + 1000,
-            visitors: Math.floor(Math.random() * 5000) + 500,
-            sessions: Math.floor(Math.random() * 6000) + 600,
-            bounceRate: Math.random() * 0.5 + 0.3, // 30-80%
-            avgSessionDuration: Math.floor(Math.random() * 300) + 60, // 60-360 seconds
-            conversions: Math.floor(Math.random() * 100) + 10,
-            topPages: [
-                { page: '/', views: Math.floor(Math.random() * 2000) + 500 },
-                { page: '/about', views: Math.floor(Math.random() * 1000) + 200 },
-                { page: '/services', views: Math.floor(Math.random() * 800) + 150 },
-                { page: '/contact', views: Math.floor(Math.random() * 600) + 100 },
-                { page: '/blog', views: Math.floor(Math.random() * 500) + 80 },
-            ],
-            trafficSources: [
-                { source: 'google', sessions: Math.floor(Math.random() * 2000) + 400 },
-                { source: 'direct', sessions: Math.floor(Math.random() * 1500) + 300 },
-                { source: 'social', sessions: Math.floor(Math.random() * 1000) + 200 },
-                { source: 'referral', sessions: Math.floor(Math.random() * 500) + 100 },
-            ],
-            deviceBreakdown: [
-                { device: 'mobile', sessions: Math.floor(Math.random() * 3000) + 600 },
-                { device: 'desktop', sessions: Math.floor(Math.random() * 2500) + 500 },
-                { device: 'tablet', sessions: Math.floor(Math.random() * 500) + 100 },
-            ],
-            geographicData: [
-                { country: 'United States', sessions: Math.floor(Math.random() * 2000) + 400 },
-                { country: 'United Kingdom', sessions: Math.floor(Math.random() * 1000) + 200 },
-                { country: 'Canada', sessions: Math.floor(Math.random() * 800) + 150 },
-                { country: 'Australia', sessions: Math.floor(Math.random() * 600) + 100 },
-                { country: 'Germany', sessions: Math.floor(Math.random() * 500) + 80 },
-            ],
-            realTimeUsers: Math.floor(Math.random() * 50) + 10,
-        };
     }
 
     /**

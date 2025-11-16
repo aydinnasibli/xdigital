@@ -45,33 +45,117 @@ export class PerformanceService {
      */
     async analyzePerformance(): Promise<PerformanceMetrics> {
         try {
-            // In production, use PageSpeed Insights API:
-
             const apiKey = process.env.PAGESPEED_API_KEY;
+            if (!apiKey) {
+                throw new Error('PAGESPEED_API_KEY is not configured');
+            }
+
             const response = await fetch(
                 `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(this.siteUrl)}&key=${apiKey}&category=PERFORMANCE&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO`
             );
+
+            if (!response.ok) {
+                throw new Error(`PageSpeed API error: ${response.status} ${response.statusText}`);
+            }
+
             const data = await response.json();
 
             // Extract Lighthouse scores
             const lighthouseScores = data.lighthouseResult.categories;
-            const performanceScore = lighthouseScores.performance.score * 100;
-            const accessibilityScore = lighthouseScores.accessibility.score * 100;
-            const bestPracticesScore = lighthouseScores['best-practices'].score * 100;
-            const seoScore = lighthouseScores.seo.score * 100;
+            const performanceScore = Math.round(lighthouseScores.performance.score * 100);
+            const accessibilityScore = Math.round(lighthouseScores.accessibility.score * 100);
+            const bestPracticesScore = Math.round(lighthouseScores['best-practices'].score * 100);
+            const seoScore = Math.round(lighthouseScores.seo.score * 100);
 
             // Extract Core Web Vitals
             const audits = data.lighthouseResult.audits;
-            const lcpValue = audits['largest-contentful-paint'].numericValue;
-            const fidValue = audits['max-potential-fid'].numericValue;
-            const clsValue = audits['cumulative-layout-shift'].numericValue;
+            const lcpValue = Math.round(audits['largest-contentful-paint']?.numericValue || 0);
+            const fidValue = Math.round(audits['max-potential-fid']?.numericValue || 0);
+            const clsValue = parseFloat((audits['cumulative-layout-shift']?.numericValue || 0).toFixed(2));
 
+            // Extract page speed metrics
+            const loadTime = (audits['speed-index']?.numericValue || 0) / 1000;
+            const timeToInteractive = (audits['interactive']?.numericValue || 0) / 1000;
+            const firstContentfulPaint = (audits['first-contentful-paint']?.numericValue || 0) / 1000;
 
+            // Calculate resource sizes from audits
+            const resourceSummary = audits['resource-summary'];
+            const totalSize = resourceSummary?.details?.items?.reduce((sum: number, item: any) => sum + (item.transferSize || 0), 0) || 0;
 
+            // Get image, script, and CSS sizes
+            const items = resourceSummary?.details?.items || [];
+            const imageSize = items.find((i: any) => i.resourceType === 'image')?.transferSize || 0;
+            const scriptSize = items.find((i: any) => i.resourceType === 'script')?.transferSize || 0;
+            const cssSize = items.find((i: any) => i.resourceType === 'stylesheet')?.transferSize || 0;
+            const requests = audits['network-requests']?.details?.items?.length || 0;
 
+            // Generate recommendations from opportunities
+            const recommendations: string[] = [];
+            const opportunities = [
+                'uses-optimized-images',
+                'offscreen-images',
+                'render-blocking-resources',
+                'unused-css-rules',
+                'unminified-css',
+                'unminified-javascript',
+                'unused-javascript',
+                'uses-text-compression',
+                'uses-responsive-images',
+                'efficient-animated-content',
+            ];
+
+            opportunities.forEach(key => {
+                const audit = audits[key];
+                if (audit && audit.score !== null && audit.score < 1) {
+                    recommendations.push(audit.title);
+                }
+            });
+
+            // If no recommendations, add some generic ones
+            if (recommendations.length === 0) {
+                recommendations.push('Continue monitoring performance regularly');
+                recommendations.push('Consider implementing a CDN for static assets');
+            }
+
+            return {
+                overall: performanceScore,
+                coreWebVitals: {
+                    lcp: {
+                        value: lcpValue,
+                        rating: this.getRating('lcp', lcpValue),
+                    },
+                    fid: {
+                        value: fidValue,
+                        rating: this.getRating('fid', fidValue),
+                    },
+                    cls: {
+                        value: clsValue,
+                        rating: this.getRating('cls', clsValue),
+                    },
+                },
+                lighthouse: {
+                    performance: performanceScore,
+                    accessibility: accessibilityScore,
+                    bestPractices: bestPracticesScore,
+                    seo: seoScore,
+                },
+                pageSpeed: {
+                    loadTime: Math.round(loadTime * 100) / 100,
+                    timeToInteractive: Math.round(timeToInteractive * 100) / 100,
+                    firstContentfulPaint: Math.round(firstContentfulPaint * 100) / 100,
+                },
+                resources: {
+                    totalSize,
+                    imageSize,
+                    scriptSize,
+                    cssSize,
+                    requests,
+                },
+                recommendations: recommendations.slice(0, 6), // Limit to 6 recommendations
+            };
         } catch (error) {
             console.error('Error analyzing performance:', error);
-            return this.getMockPerformanceMetrics();
+            throw new Error('Failed to analyze performance. Please check your PageSpeed API configuration.');
         }
     }
 
@@ -91,77 +175,6 @@ export class PerformanceService {
         if (value <= threshold.good) return 'good';
         if (value <= threshold.poor) return 'needs-improvement';
         return 'poor';
-    }
-
-    /**
-     * Mock performance metrics for development
-     */
-    private getMockPerformanceMetrics(): PerformanceMetrics {
-        const lcpValue = Math.random() * 3000 + 1500; // 1.5-4.5s
-        const fidValue = Math.random() * 150 + 50; // 50-200ms
-        const clsValue = Math.random() * 0.2 + 0.05; // 0.05-0.25
-
-        return {
-            overall: Math.floor(Math.random() * 20) + 75, // 75-95
-            coreWebVitals: {
-                lcp: {
-                    value: Math.round(lcpValue),
-                    rating: this.getRating('lcp', lcpValue),
-                },
-                fid: {
-                    value: Math.round(fidValue),
-                    rating: this.getRating('fid', fidValue),
-                },
-                cls: {
-                    value: Math.round(clsValue * 100) / 100,
-                    rating: this.getRating('cls', clsValue),
-                },
-            },
-            lighthouse: {
-                performance: Math.floor(Math.random() * 20) + 75,
-                accessibility: Math.floor(Math.random() * 15) + 80,
-                bestPractices: Math.floor(Math.random() * 15) + 80,
-                seo: Math.floor(Math.random() * 15) + 80,
-            },
-            pageSpeed: {
-                loadTime: Math.random() * 2 + 1, // 1-3s
-                timeToInteractive: Math.random() * 3 + 2, // 2-5s
-                firstContentfulPaint: Math.random() * 1.5 + 0.5, // 0.5-2s
-            },
-            resources: {
-                totalSize: Math.floor(Math.random() * 2000000) + 500000, // 0.5-2.5MB
-                imageSize: Math.floor(Math.random() * 1000000) + 200000,
-                scriptSize: Math.floor(Math.random() * 500000) + 100000,
-                cssSize: Math.floor(Math.random() * 200000) + 50000,
-                requests: Math.floor(Math.random() * 40) + 20,
-            },
-            recommendations: this.generateRecommendations(),
-        };
-    }
-
-    /**
-     * Generate performance recommendations
-     */
-    private generateRecommendations(): string[] {
-        const recommendations = [
-            'Optimize images by using modern formats (WebP, AVIF)',
-            'Enable browser caching for static resources',
-            'Minify JavaScript and CSS files',
-            'Use a Content Delivery Network (CDN)',
-            'Implement lazy loading for images',
-            'Reduce server response time',
-            'Eliminate render-blocking resources',
-            'Defer offscreen images',
-            'Remove unused CSS',
-            'Compress images without losing quality',
-            'Use HTTP/2 for faster resource loading',
-            'Implement code splitting for JavaScript',
-        ];
-
-        // Return 4-6 random recommendations
-        const count = Math.floor(Math.random() * 3) + 4;
-        const shuffled = recommendations.sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, count);
     }
 
     /**
