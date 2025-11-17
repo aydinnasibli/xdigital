@@ -119,7 +119,8 @@ export async function createTask(data: {
                     title: 'New Task Assigned',
                     message: `You have been assigned: "${data.title}"${data.dueDate ? ` - Due: ${new Date(data.dueDate).toLocaleDateString()}` : ''}`,
                     link: `/dashboard/projects/${data.projectId}`,
-                    sendEmail: false, // Don't email for task assignments
+                    sendEmail: true,
+                    emailSubject: `New Task Assigned - ${data.title}`,
                 });
             }
         }
@@ -199,7 +200,8 @@ export async function updateTask(taskId: string, data: Partial<{
                     title: 'Task Completed',
                     message: `Task "${task.title}" has been completed`,
                     link: `/dashboard/projects/${task.projectId}`,
-                    sendEmail: false, // Don't email for task completions
+                    sendEmail: true,
+                    emailSubject: `Task Completed - ${task.title}`,
                 });
             }
         } else if (oldStatus !== data.status) {

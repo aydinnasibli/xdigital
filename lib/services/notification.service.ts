@@ -19,8 +19,9 @@ interface CreateNotificationParams {
 }
 
 /**
- * Create a notification and optionally send email
+ * Create a notification with email and real-time delivery
  * This is the MAIN function to use when you want to notify a user
+ * REQUIRES: PUSHER credentials and RESEND_API_KEY to be configured
  */
 export async function createNotification(params: CreateNotificationParams): Promise<{success: boolean; error?: string}> {
     try {
@@ -45,36 +46,26 @@ export async function createNotification(params: CreateNotificationParams): Prom
             isRead: false,
         });
 
-        // Trigger Pusher event for real-time notification delivery (optional, will fail silently if not configured)
-        try {
-            await triggerPusherEvent(params.userId, 'new-notification', {
-                notificationId: notification._id.toString(),
-                title: params.title,
-                message: params.message,
-                type: params.type,
-                link: params.link,
-            });
-        } catch (error) {
-            // Pusher not configured or failed - that's okay, notification is still in database
-            console.log('Pusher not available, notification saved to database');
-        }
+        // Trigger Pusher event for real-time notification delivery
+        await triggerPusherEvent(params.userId, 'new-notification', {
+            notificationId: notification._id.toString(),
+            title: params.title,
+            message: params.message,
+            type: params.type,
+            link: params.link,
+        });
 
-        // Send email if requested
+        // Send email if requested and user has email
         if (params.sendEmail && user.email) {
-            try {
-                await sendEmail({
-                    to: user.email,
-                    subject: params.emailSubject || params.title,
-                    html: `
-                        <h2>${params.title}</h2>
-                        <p>${params.message}</p>
-                        ${params.link ? `<p><a href="${process.env.NEXT_PUBLIC_APP_URL}${params.link}">View Details</a></p>` : ''}
-                    `,
-                });
-            } catch (error) {
-                // Email not configured or failed - that's okay, notification is still in database
-                console.log('Email service not available, notification saved to database');
-            }
+            await sendEmail({
+                to: user.email,
+                subject: params.emailSubject || params.title,
+                html: `
+                    <h2>${params.title}</h2>
+                    <p>${params.message}</p>
+                    ${params.link ? `<p><a href="${process.env.NEXT_PUBLIC_APP_URL}${params.link}">View Details</a></p>` : ''}
+                `,
+            });
         }
 
         return { success: true };
