@@ -5,12 +5,28 @@ import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/database/mongodb';
 import Notification from '@/models/Notification';
 import User from '@/models/User';
+import { createNotification as createNotificationService } from '@/lib/services/notification.service';
+import { NotificationType } from '@/models/Notification';
 
 type ActionResponse<T = any> = {
     success: boolean;
     data?: T;
     error?: string;
 };
+
+// Export createNotification for use in other actions
+export async function createNotification(params: {
+    userId: string;
+    projectId?: string;
+    type: NotificationType;
+    title: string;
+    message: string;
+    link?: string;
+    sendEmail?: boolean;
+    emailSubject?: string;
+}): Promise<ActionResponse> {
+    return createNotificationService(params);
+}
 
 // Get all notifications for current user
 export async function getNotifications(): Promise<ActionResponse> {
