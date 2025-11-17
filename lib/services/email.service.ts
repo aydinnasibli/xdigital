@@ -1,0 +1,195 @@
+// lib/services/email.service.ts
+'use server';
+
+import { Resend } from 'resend';
+
+let resendInstance: Resend | null = null;
+
+function getResendInstance(): Resend {
+    if (!resendInstance) {
+        const apiKey = process.env.RESEND_API_KEY;
+        if (!apiKey) {
+            throw new Error('RESEND_API_KEY not configured');
+        }
+        resendInstance = new Resend(apiKey);
+    }
+    return resendInstance;
+}
+
+interface SendEmailParams {
+    to: string | string[];
+    subject: string;
+    html: string;
+    from?: string;
+    replyTo?: string;
+}
+
+/**
+ * Send an email using Resend
+ */
+export async function sendEmail(params: SendEmailParams): Promise<{ success: boolean; error?: string }> {
+    try {
+        const resend = getResendInstance();
+
+        const { data, error } = await resend.emails.send({
+            from: params.from || process.env.EMAIL_FROM || 'XDigital <noreply@xdigital.com>',
+            to: params.to,
+            subject: params.subject,
+            html: params.html,
+            replyTo: params.replyTo,
+        });
+
+        if (error) {
+            console.error('Resend error:', error);
+            return { success: false, error: error.message };
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Email service error:', error);
+        return { success: false, error: error instanceof Error ? error.message : 'Failed to send email' };
+    }
+}
+
+/**
+ * Email templates
+ */
+
+export async function sendInvoiceEmail(
+    to: string,
+    invoiceNumber: string,
+    amount: number,
+    projectName: string,
+    invoiceLink: string
+) {
+    return sendEmail({
+        to,
+        subject: `New Invoice: ${invoiceNumber}`,
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9fafb; padding: 30px; }
+        .button { display: inline-block; background: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Invoice</h1>
+        </div>
+        <div class="content">
+            <h2>Invoice ${invoiceNumber}</h2>
+            <p><strong>Project:</strong> ${projectName}</p>
+            <p><strong>Amount:</strong> $${amount}</p>
+            <p>A new invoice has been created for your project. Please review and process payment at your earliest convenience.</p>
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="${invoiceLink}" class="button">View Invoice</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>XDigital SaaS Platform</p>
+        </div>
+    </div>
+</body>
+</html>
+        `,
+    });
+}
+
+export async function sendDeliverableApprovedEmail(
+    to: string,
+    deliverableTitle: string,
+    projectName: string,
+    projectLink: string
+) {
+    return sendEmail({
+        to,
+        subject: `Deliverable Approved: ${deliverableTitle}`,
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #10b981; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9fafb; padding: 30px; }
+        .button { display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Deliverable Approved</h1>
+        </div>
+        <div class="content">
+            <h2>${deliverableTitle}</h2>
+            <p><strong>Project:</strong> ${projectName}</p>
+            <p>Great news! Your deliverable has been reviewed and approved.</p>
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="${projectLink}" class="button">View Project</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>XDigital SaaS Platform</p>
+        </div>
+    </div>
+</body>
+</html>
+        `,
+    });
+}
+
+export async function sendTaskAssignedEmail(
+    to: string,
+    taskTitle: string,
+    projectName: string,
+    dueDate: string | undefined,
+    taskLink: string
+) {
+    return sendEmail({
+        to,
+        subject: `New Task Assigned: ${taskTitle}`,
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #f59e0b; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9fafb; padding: 30px; }
+        .button { display: inline-block; background: #f59e0b; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Task Assigned</h1>
+        </div>
+        <div class="content">
+            <h2>${taskTitle}</h2>
+            <p><strong>Project:</strong> ${projectName}</p>
+            ${dueDate ? `<p><strong>Due Date:</strong> ${dueDate}</p>` : ''}
+            <p>A new task has been assigned to you. Please review the details and start working on it.</p>
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="${taskLink}" class="button">View Task</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>XDigital SaaS Platform</p>
+        </div>
+    </div>
+</body>
+</html>
+        `,
+    });
+}

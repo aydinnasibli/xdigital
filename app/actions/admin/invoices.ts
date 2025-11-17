@@ -7,6 +7,8 @@ import Invoice, { InvoiceStatus } from '@/models/Invoice';
 import Project from '@/models/Project';
 import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
+import { createNotification } from '@/lib/services/notification.service';
+import { NotificationType } from '@/models/Notification';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -244,6 +246,18 @@ export async function sendInvoice(invoiceId: string): Promise<ActionResponse> {
             return { success: false, error: 'Invoice not found' };
         }
 
+        // Notify client about new invoice
+        await createNotification({
+            userId: invoice.clerkUserId,
+            projectId: invoice.projectId.toString(),
+            type: NotificationType.INVOICE,
+            title: 'New Invoice',
+            message: `Invoice ${invoice.invoiceNumber} for $${invoice.total.toFixed(2)} has been sent. Due by ${new Date(invoice.dueDate).toLocaleDateString()}.`,
+            link: `/dashboard/projects/${invoice.projectId.toString()}`,
+            sendEmail: true,
+            emailSubject: `Invoice ${invoice.invoiceNumber} - $${invoice.total.toFixed(2)}`,
+        });
+
         revalidatePath('/admin/invoices');
         revalidatePath(`/dashboard/projects/${invoice.projectId.toString()}`);
 
@@ -289,6 +303,18 @@ export async function markInvoiceAsPaid(
         if (!invoice) {
             return { success: false, error: 'Invoice not found' };
         }
+
+        // Notify client that payment was received
+        await createNotification({
+            userId: invoice.clerkUserId,
+            projectId: invoice.projectId.toString(),
+            type: NotificationType.INVOICE,
+            title: 'Payment Received',
+            message: `Payment for invoice ${invoice.invoiceNumber} ($${invoice.total.toFixed(2)}) has been confirmed. Thank you!`,
+            link: `/dashboard/projects/${invoice.projectId.toString()}`,
+            sendEmail: true,
+            emailSubject: `Payment Confirmed - Invoice ${invoice.invoiceNumber}`,
+        });
 
         revalidatePath('/admin/invoices');
         revalidatePath(`/dashboard/projects/${invoice.projectId.toString()}`);

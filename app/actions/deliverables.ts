@@ -6,9 +6,12 @@ import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/database/mongodb';
 import Deliverable, { DeliverableStatus, DeliverableCategory } from '@/models/Deliverable';
 import User from '@/models/User';
+import Project from '@/models/Project';
 import mongoose from 'mongoose';
 import { logActivity } from './activities';
 import { ActivityType, ActivityEntity } from '@/models/Activity';
+import { createNotification } from '@/lib/services/notification.service';
+import { NotificationType } from '@/models/Notification';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -161,6 +164,12 @@ export async function approveDeliverable(deliverableId: string, notes?: string):
             return { success: false, error: 'Deliverable not found' };
         }
 
+        // Get project to get client clerkId
+        const project = await Project.findById(deliverable.projectId);
+        if (!project) {
+            return { success: false, error: 'Project not found' };
+        }
+
         deliverable.status = DeliverableStatus.APPROVED;
         deliverable.approvedDate = new Date();
         deliverable.approval = {
@@ -178,6 +187,18 @@ export async function approveDeliverable(deliverableId: string, notes?: string):
             entityId: deliverableId,
             projectId: deliverable.projectId.toString(),
             title: `Approved deliverable: ${deliverable.title}`,
+        });
+
+        // Notify client about approval
+        await createNotification({
+            userId: project.clerkUserId,
+            projectId: deliverable.projectId.toString(),
+            type: NotificationType.MILESTONE,
+            title: 'Deliverable Approved',
+            message: `Your deliverable "${deliverable.title}" has been approved${notes ? ': ' + notes : '!'}`,
+            link: `/dashboard/projects/${deliverable.projectId}`,
+            sendEmail: true,
+            emailSubject: `Deliverable Approved - ${deliverable.title}`,
         });
 
         revalidatePath(`/dashboard/projects/${deliverable.projectId}`);
@@ -206,6 +227,12 @@ export async function requestChanges(deliverableId: string, feedback: string, ra
             return { success: false, error: 'Deliverable not found' };
         }
 
+        // Get project to get client clerkId
+        const project = await Project.findById(deliverable.projectId);
+        if (!project) {
+            return { success: false, error: 'Project not found' };
+        }
+
         deliverable.status = DeliverableStatus.CHANGES_REQUESTED;
         deliverable.feedback.push({
             userId: user!._id,
@@ -223,6 +250,18 @@ export async function requestChanges(deliverableId: string, feedback: string, ra
             entityId: deliverableId,
             projectId: deliverable.projectId.toString(),
             title: `Requested changes on deliverable: ${deliverable.title}`,
+        });
+
+        // Notify client about requested changes
+        await createNotification({
+            userId: project.clerkUserId,
+            projectId: deliverable.projectId.toString(),
+            type: NotificationType.PROJECT_UPDATE,
+            title: 'Changes Requested',
+            message: `Changes have been requested for "${deliverable.title}". Please review the feedback and resubmit.`,
+            link: `/dashboard/projects/${deliverable.projectId}`,
+            sendEmail: true,
+            emailSubject: `Changes Requested - ${deliverable.title}`,
         });
 
         revalidatePath(`/dashboard/projects/${deliverable.projectId}`);

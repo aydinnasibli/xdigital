@@ -6,9 +6,12 @@ import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/database/mongodb';
 import Task, { TaskStatus, TaskPriority } from '@/models/Task';
 import User from '@/models/User';
+import Project from '@/models/Project';
 import mongoose from 'mongoose';
 import { logActivity } from './activities';
 import { ActivityType, ActivityEntity } from '@/models/Activity';
+import { createNotification } from '@/lib/services/notification.service';
+import { NotificationType } from '@/models/Notification';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -105,6 +108,23 @@ export async function createTask(data: {
             title: `Created task: ${data.title}`,
         });
 
+        // If task is assigned, notify the assignee
+        if (data.assignedTo && mongoose.Types.ObjectId.isValid(data.assignedTo)) {
+            const assignedUser = await User.findById(data.assignedTo);
+            if (assignedUser?.clerkId) {
+                await createNotification({
+                    userId: assignedUser.clerkId,
+                    projectId: data.projectId,
+                    type: NotificationType.PROJECT_UPDATE,
+                    title: 'New Task Assigned',
+                    message: `You have been assigned: "${data.title}"${data.dueDate ? ` - Due: ${new Date(data.dueDate).toLocaleDateString()}` : ''}`,
+                    link: `/dashboard/projects/${data.projectId}`,
+                    sendEmail: true,
+                    emailSubject: `New Task Assigned - ${data.title}`,
+                });
+            }
+        }
+
         revalidatePath(`/dashboard/projects/${data.projectId}`);
         revalidatePath('/dashboard/projects');
 
@@ -169,6 +189,21 @@ export async function updateTask(taskId: string, data: Partial<{
                 projectId: task.projectId.toString(),
                 title: `Completed task: ${task.title}`,
             });
+
+            // Notify project client about task completion
+            const project = await Project.findById(task.projectId);
+            if (project?.clerkUserId) {
+                await createNotification({
+                    userId: project.clerkUserId,
+                    projectId: task.projectId.toString(),
+                    type: NotificationType.PROJECT_UPDATE,
+                    title: 'Task Completed',
+                    message: `Task "${task.title}" has been completed`,
+                    link: `/dashboard/projects/${task.projectId}`,
+                    sendEmail: true,
+                    emailSubject: `Task Completed - ${task.title}`,
+                });
+            }
         } else if (oldStatus !== data.status) {
             // Log status change
             await logActivity({

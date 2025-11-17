@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import Navbar from "../components/Navbar";
 import HorizontalScrollBar from "@/components/HorizontalScrollbar";
 import Footer from "@/components/Footer";
+import { ToastProvider } from "@/components/providers/ToastProvider";
 
 export const metadata: Metadata = {
   title: "Your SaaS Name | Build Modern Websites",
@@ -51,7 +52,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html className="scrollbar-hide" lang="en">
         <body className="max-w-7xl mx-auto tracking-widest bg-linear-to-b from-black from-20% via-[#565454] via-50% to-zinc-900 to-80% text-gray-200 font-sans"> {/* Choose bg colur if this or bg-zinc-950 */}
-
+          <ToastProvider />
 
           <main>
             {children}
