@@ -113,6 +113,7 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
             const result = await generatePDFReport(projectId);
 
             if (result.success && result.data) {
+                toast.success('Report generated successfully!');
                 // Open HTML in new window for now (user can save as PDF)
                 const reportWindow = window.open('', '_blank');
                 if (reportWindow) {
@@ -120,11 +121,11 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
                     reportWindow.document.close();
                 }
             } else {
-                alert(result.error || 'Failed to generate report');
+                toast.error(result.error || 'Failed to generate report');
             }
         } catch (error) {
             console.error('Error generating report:', error);
-            alert('Failed to generate report');
+            toast.error('Failed to generate report');
         } finally {
             setGeneratingReport(false);
         }
@@ -416,10 +417,11 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             const result = await deleteProject(project._id);
 
             if (result.success) {
+                toast.success('Project deleted successfully');
                 router.push('/dashboard/projects');
                 router.refresh();
             } else {
-                alert(result.error || 'Failed to delete project');
+                toast.error(result.error || 'Failed to delete project');
             }
         });
     };

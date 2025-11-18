@@ -4,6 +4,7 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { createFile } from '@/app/actions/files';
+import { toast } from 'sonner';
 
 interface FileUploadProps {
     projectId: string;
@@ -62,19 +63,36 @@ export function FileUpload({
                     // Update progress to 100%
                     setUploadProgress(prev => ({ ...prev, [file.name]: 100 }));
 
-                    if (fileData.success && onUploadComplete) {
-                        onUploadComplete(fileData.data);
+                    if (fileData.success) {
+                        toast.success(`${file.name} uploaded successfully`);
+                        if (onUploadComplete) {
+                            onUploadComplete(fileData.data);
+                        }
+                    } else {
+                        toast.error(`Failed to upload ${file.name}`);
+                        setErrors(prev => [...prev, `Failed to upload ${file.name}`]);
                     }
 
                     return fileData;
                 } catch (error) {
                     console.error('Error uploading file:', error);
-                    setErrors(prev => [...prev, `Failed to upload ${file.name}`]);
+                    const errorMessage = `Failed to upload ${file.name}`;
+                    toast.error(errorMessage);
+                    setErrors(prev => [...prev, errorMessage]);
                     return { success: false, error: error instanceof Error ? error.message : 'Upload failed' };
                 }
             });
 
-            await Promise.all(uploadPromises);
+            const results = await Promise.all(uploadPromises);
+            const successCount = results.filter(r => r.success).length;
+            const failCount = results.filter(r => !r.success).length;
+
+            if (successCount > 1) {
+                toast.success(`${successCount} files uploaded successfully`);
+            }
+            if (failCount > 1) {
+                toast.error(`${failCount} files failed to upload`);
+            }
 
             setUploading(false);
             setUploadProgress({});
