@@ -178,6 +178,7 @@ export async function createTemplate(data: {
             data: {
                 ...template.toObject(),
                 _id: template._id.toString(),
+                createdBy: template.createdBy.toString(),
             },
         };
     } catch (error) {
@@ -209,7 +210,7 @@ export async function updateTemplate(templateId: string, data: Partial<{
             templateId,
             data,
             { new: true }
-        );
+        ).populate('createdBy', 'firstName lastName email').lean();
 
         if (!template) {
             return { success: false, error: 'Template not found' };
@@ -217,7 +218,17 @@ export async function updateTemplate(templateId: string, data: Partial<{
 
         revalidatePath('/admin/templates');
 
-        return { success: true, data: template.toObject() };
+        return {
+            success: true,
+            data: {
+                ...template,
+                _id: template._id.toString(),
+                createdBy: template.createdBy ? {
+                    ...template.createdBy,
+                    _id: template.createdBy._id.toString(),
+                } : null,
+            },
+        };
     } catch (error) {
         console.error('Error updating template:', error);
         return { success: false, error: 'Failed to update template' };
@@ -342,6 +353,7 @@ export async function createProjectFromTemplate(
             data: {
                 ...project.toObject(),
                 _id: project._id.toString(),
+                userId: project.userId.toString(),
             },
         };
     } catch (error) {
@@ -427,6 +439,7 @@ export async function cloneProjectAsTemplate(
             data: {
                 ...template.toObject(),
                 _id: template._id.toString(),
+                createdBy: template.createdBy.toString(),
             },
         };
     } catch (error) {

@@ -7,6 +7,8 @@ import Project from '@/models/Project';
 import User from '@/models/User';
 import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
+import { createNotification } from '@/lib/services/notification.service';
+import { NotificationType } from '@/models/Notification';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -131,6 +133,18 @@ export async function updateProjectStatus(
         if (!updatedProject) {
             return { success: false, error: 'Project not found' };
         }
+
+        // Notify client about status change
+        await createNotification({
+            userId: updatedProject.clerkUserId,
+            projectId: projectId,
+            type: NotificationType.PROJECT_UPDATE,
+            title: 'Project Status Updated',
+            message: `Your project "${updatedProject.projectName}" status has been updated to: ${status.replace('_', ' ')}`,
+            link: `/dashboard/projects/${projectId}`,
+            sendEmail: true,
+            emailSubject: `Project Status Update - ${updatedProject.projectName}`,
+        });
 
         revalidatePath('/admin/projects');
         revalidatePath(`/admin/projects/${projectId}`);
@@ -275,12 +289,27 @@ export async function updateMilestone(
             return { success: false, error: 'Milestone not found' };
         }
 
+        const milestone = project.milestones[milestoneIndex];
+        const wasCompleted = milestone.completed;
+
         // Update the milestone
         Object.assign(project.milestones[milestoneIndex], updates);
 
         // If marking as completed, set completedDate
-        if (updates.completed) {
+        if (updates.completed && !wasCompleted) {
             project.milestones[milestoneIndex].completedDate = new Date();
+
+            // Notify client about milestone completion
+            await createNotification({
+                userId: project.clerkUserId,
+                projectId: projectId,
+                type: NotificationType.MILESTONE,
+                title: 'Milestone Completed',
+                message: `Great news! The milestone "${milestone.title}" for your project "${project.projectName}" has been completed!`,
+                link: `/dashboard/projects/${projectId}`,
+                sendEmail: true,
+                emailSubject: `Milestone Completed - ${milestone.title}`,
+            });
         }
 
         await project.save();
