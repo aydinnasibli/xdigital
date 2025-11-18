@@ -11,9 +11,11 @@ import UpdateStatusForm from './UpdateStatusForm';
 import MessageSection from './MessageSection';
 import MilestonesSection from './MilestonesSection';
 import DeploymentSection from './DeploymentSection';
+import TimelineSection from './TimelineSection';
 import TasksSection from './TasksSection';
 import DeliverablesSection from './DeliverablesSection';
 import FilesSection from './FilesSection';
+import EditProjectSection from './EditProjectSection';
 
 export default async function AdminProjectDetailPage({
     params,
@@ -67,31 +69,8 @@ export default async function AdminProjectDetailPage({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Project Info */}
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                            Project Details
-                        </h2>
-                        <div className="grid grid-cols-2 gap-4">
-                            <InfoItem
-                                label="Service Type"
-                                value={formatServiceType(project.serviceType)}
-                            />
-                            <InfoItem
-                                label="Package"
-                                value={project.package}
-                                capitalize
-                            />
-                            <InfoItem
-                                label="Status"
-                                value={<StatusBadge status={project.status} />}
-                            />
-                            <InfoItem
-                                label="Created"
-                                value={new Date(project.createdAt).toLocaleDateString()}
-                            />
-                        </div>
-                    </div>
+                    {/* Edit Project Section */}
+                    <EditProjectSection project={project} />
 
                     {/* Update Status */}
                     <div className="bg-white rounded-lg shadow p-6">
@@ -103,6 +82,12 @@ export default async function AdminProjectDetailPage({
                             currentStatus={project.status}
                         />
                     </div>
+
+                    {/* Timeline */}
+                    <TimelineSection
+                        projectId={project._id}
+                        timeline={project.timeline}
+                    />
 
                     {/* Deployment Information */}
                     <DeploymentSection

@@ -3,9 +3,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Send, CheckCircle, Download, Printer } from 'lucide-react';
-import { sendInvoice, markInvoiceAsPaid } from '@/app/actions/admin/invoices';
+import { Send, CheckCircle, Download, Printer, Edit, Trash2 } from 'lucide-react';
+import { sendInvoice, markInvoiceAsPaid, deleteInvoice } from '@/app/actions/admin/invoices';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface InvoiceActionsProps {
     invoice: any;
@@ -59,6 +60,22 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
         }
     };
 
+    const handleDelete = async () => {
+        if (!confirm('Are you sure you want to delete this invoice? This action cannot be undone.')) {
+            return;
+        }
+
+        setLoading(true);
+        const result = await deleteInvoice(invoice._id);
+        if (result.success) {
+            toast.success('Invoice deleted successfully');
+            router.push('/admin/invoices');
+        } else {
+            toast.error(result.error || 'Failed to delete invoice');
+        }
+        setLoading(false);
+    };
+
     return (
         <>
             <div className="bg-white rounded-lg shadow p-4">
@@ -100,6 +117,26 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
                         <Download className="w-4 h-4" />
                         Download PDF
                     </button>
+
+                    {invoice.status === 'draft' && (
+                        <>
+                            <Link
+                                href={`/admin/invoices/${invoice._id}/edit`}
+                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                            >
+                                <Edit className="w-4 h-4" />
+                                Edit
+                            </Link>
+                            <button
+                                onClick={handleDelete}
+                                disabled={loading}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                Delete
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 

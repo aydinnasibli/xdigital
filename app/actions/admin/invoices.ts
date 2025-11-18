@@ -33,6 +33,46 @@ interface CreateInvoiceData {
     discount?: number;
 }
 
+// Get single invoice by ID
+export async function getInvoiceById(invoiceId: string): Promise<ActionResponse> {
+    try {
+        await requireAdmin();
+
+        if (!mongoose.Types.ObjectId.isValid(invoiceId)) {
+            return { success: false, error: 'Invalid invoice ID' };
+        }
+
+        await dbConnect();
+
+        const invoice = await Invoice.findById(invoiceId)
+            .populate('userId', 'email firstName lastName')
+            .populate('projectId', 'projectName')
+            .lean();
+
+        if (!invoice) {
+            return { success: false, error: 'Invoice not found' };
+        }
+
+        const user = invoice.userId as any;
+        const project = invoice.projectId as any;
+
+        const serializedInvoice = {
+            ...invoice,
+            _id: invoice._id.toString(),
+            userId: user._id.toString(),
+            projectId: project._id.toString(),
+            clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+            clientEmail: user.email,
+            projectName: project.projectName,
+        };
+
+        return { success: true, data: serializedInvoice };
+    } catch (error) {
+        console.error('Error fetching invoice:', error);
+        return { success: false, error: 'Failed to fetch invoice' };
+    }
+}
+
 // Get all invoices
 export async function getAllInvoices(filters?: {
     status?: string;

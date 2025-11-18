@@ -10,7 +10,8 @@ import {
     BarChart3,
     ArrowLeft,
     FileBox,
-    BookOpen
+    BookOpen,
+    Star
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -54,6 +55,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         </NavLink>
                         <NavLink href="/admin/messages" icon={MessageSquare}>
                             Messages
+                        </NavLink>
+                        <NavLink href="/admin/feedback" icon={Star}>
+                            Feedback
                         </NavLink>
                         <NavLink href="/admin/invoices" icon={FileText}>
                             Invoices

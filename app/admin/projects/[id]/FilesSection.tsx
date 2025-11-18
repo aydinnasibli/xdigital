@@ -2,9 +2,18 @@
 'use client';
 
 import { useState } from 'react';
-import { deleteFile } from '@/app/actions/files';
+import { deleteFile, addFileComment } from '@/app/actions/files';
 import { useRouter } from 'next/navigation';
-import { Trash2, Download, Eye } from 'lucide-react';
+import { Trash2, Download, Eye, MessageSquare, Send } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface Comment {
+    userId: string;
+    userName: string;
+    userImageUrl?: string;
+    comment: string;
+    createdAt: string;
+}
 
 interface File {
     _id: string;
@@ -17,6 +26,7 @@ interface File {
     uploadedBy: any;
     isPreviewable: boolean;
     previewUrl?: string;
+    comments?: Comment[];
     createdAt: string;
 }
 
@@ -28,16 +38,43 @@ export default function FilesSection({
     files: File[];
 }) {
     const router = useRouter();
+    const [expandedFile, setExpandedFile] = useState<string | null>(null);
+    const [commentText, setCommentText] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleDelete = async (fileId: string, fileName: string) => {
         if (!confirm(`Are you sure you want to delete "${fileName}"?`)) return;
 
         const result = await deleteFile(fileId);
         if (result.success) {
+            toast.success('File deleted successfully');
             router.refresh();
         } else {
-            alert(result.error || 'Failed to delete file');
+            toast.error(result.error || 'Failed to delete file');
         }
+    };
+
+    const handleAddComment = async (fileId: string) => {
+        if (!commentText.trim()) {
+            toast.error('Please enter a comment');
+            return;
+        }
+
+        setLoading(true);
+        const result = await addFileComment(fileId, commentText);
+        if (result.success) {
+            toast.success('Comment added successfully');
+            setCommentText('');
+            router.refresh();
+        } else {
+            toast.error(result.error || 'Failed to add comment');
+        }
+        setLoading(false);
+    };
+
+    const toggleComments = (fileId: string) => {
+        setExpandedFile(expandedFile === fileId ? null : fileId);
+        setCommentText('');
     };
 
     const formatFileSize = (bytes: number) => {
@@ -133,6 +170,80 @@ export default function FilesSection({
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
+                                </div>
+
+                                {/* Comments Section */}
+                                <div className="mt-3 border-t pt-3">
+                                    <button
+                                        onClick={() => toggleComments(file._id)}
+                                        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+                                    >
+                                        <MessageSquare className="w-4 h-4" />
+                                        <span>
+                                            {file.comments?.length || 0} Comment{file.comments?.length !== 1 ? 's' : ''}
+                                        </span>
+                                    </button>
+
+                                    {expandedFile === file._id && (
+                                        <div className="mt-3 space-y-3">
+                                            {/* Existing Comments */}
+                                            {file.comments && file.comments.length > 0 && (
+                                                <div className="space-y-2 max-h-60 overflow-y-auto">
+                                                    {file.comments.map((comment, idx) => (
+                                                        <div key={idx} className="bg-gray-50 rounded p-3">
+                                                            <div className="flex items-start gap-2">
+                                                                {comment.userImageUrl && (
+                                                                    <img
+                                                                        src={comment.userImageUrl}
+                                                                        alt={comment.userName}
+                                                                        className="w-6 h-6 rounded-full"
+                                                                    />
+                                                                )}
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-sm font-medium text-gray-900">
+                                                                            {comment.userName}
+                                                                        </span>
+                                                                        <span className="text-xs text-gray-500">
+                                                                            {new Date(comment.createdAt).toLocaleString()}
+                                                                        </span>
+                                                                    </div>
+                                                                    <p className="text-sm text-gray-700 mt-1">
+                                                                        {comment.comment}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Add Comment Form */}
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={commentText}
+                                                    onChange={(e) => setCommentText(e.target.value)}
+                                                    placeholder="Add a comment..."
+                                                    className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                                                    onKeyPress={(e) => {
+                                                        if (e.key === 'Enter' && !loading) {
+                                                            handleAddComment(file._id);
+                                                        }
+                                                    }}
+                                                    disabled={loading}
+                                                />
+                                                <button
+                                                    onClick={() => handleAddComment(file._id)}
+                                                    disabled={loading || !commentText.trim()}
+                                                    className="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 flex items-center gap-1 disabled:opacity-50"
+                                                >
+                                                    <Send className="w-3 h-3" />
+                                                    {loading ? 'Sending...' : 'Send'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
