@@ -1,7 +1,7 @@
 // components/projects/ProjectDetailClient.tsx
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { deleteProject } from '@/app/actions/projects';
@@ -10,6 +10,8 @@ import { useEffect } from 'react';
 import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectAnalytics } from '@/app/actions/monitoring';
 import dynamic from 'next/dynamic';
+import { usePusherChannel } from '@/lib/hooks/usePusher';
+import { toast } from 'sonner';
 
 // Dynamically import heavy dashboard components
 const SEODashboard = dynamic(() => import('@/components/dashboard/SEODashboard'), {
@@ -295,6 +297,23 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
 
+    // Real-time message listener
+    const handleNewMessage = useCallback((data: any) => {
+        console.log('📨 New message received via Pusher:', data);
+        setMessages(prev => [...prev, {
+            _id: data._id,
+            sender: data.sender,
+            message: data.message,
+            createdAt: data.createdAt,
+        }]);
+        // Show toast if message is from admin
+        if (data.sender === 'admin') {
+            toast.info('New message from admin');
+        }
+    }, []);
+
+    usePusherChannel(`project-${projectId}`, 'new-message', handleNewMessage);
+
     useEffect(() => {
         loadMessages();
     }, [projectId]);
@@ -316,9 +335,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
         const result = await sendMessage(projectId, newMessage);
         if (result.success) {
             setNewMessage('');
-            await loadMessages();
+            toast.success('Message sent');
         } else {
-            alert(result.error || 'Failed to send message');
+            toast.error(result.error || 'Failed to send message');
         }
         setSending(false);
     };
@@ -385,7 +404,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'messages' | 'invoices' | 'analytics' | 'seo' | 'performance'>(
+    const [activeTab, setActiveTab] = useState<'overview' | 'messages' | 'invoices' | 'analytics' | 'seo' | 'performance'>(
         'overview'
     );
     const [isPending, startTransition] = useTransition();
@@ -471,15 +490,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         Overview
                     </button>
                     <button
-                        onClick={() => setActiveTab('timeline')}
-                        className={`pb-3 px-1 border-b-2 ${activeTab === 'timeline'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-600 hover:text-gray-900'
-                            }`}
-                    >
-                        Timeline & Milestones
-                    </button>
-                    <button
                         onClick={() => setActiveTab('messages')}
                         className={`pb-3 px-1 border-b-2 ${activeTab === 'messages'
                             ? 'border-blue-600 text-blue-600'
@@ -562,14 +572,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Deliverables</h3>
                             <p className="text-sm text-gray-600 mt-1">Track deliverables</p>
                         </Link>
-                        <Link
-                            href={`/dashboard/projects/${project._id}/activity`}
-                            className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"
-                        >
-                            <div className="text-3xl mb-3">📝</div>
-                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Activity Log</h3>
-                            <p className="text-sm text-gray-600 mt-1">View project history</p>
-                        </Link>
                     </div>
 
                     {/* Live Website */}
@@ -647,72 +649,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-
-            {activeTab === 'timeline' && (
-                <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-lg border">
-                        <h2 className="text-xl font-semibold mb-4">Timeline</h2>
-                        <div className="space-y-3">
-                            {project.timeline?.startDate && (
-                                <div>
-                                    <div className="text-sm text-gray-600">Start Date</div>
-                                    <div className="font-medium">
-                                        {new Date(project.timeline.startDate).toLocaleDateString()}
-                                    </div>
-                                </div>
-                            )}
-                            {project.timeline?.estimatedCompletion && (
-                                <div>
-                                    <div className="text-sm text-gray-600">Estimated Completion</div>
-                                    <div className="font-medium">
-                                        {new Date(project.timeline.estimatedCompletion).toLocaleDateString()}
-                                    </div>
-                                </div>
-                            )}
-                            {project.timeline?.completedDate && (
-                                <div>
-                                    <div className="text-sm text-gray-600">Completed Date</div>
-                                    <div className="font-medium">
-                                        {new Date(project.timeline.completedDate).toLocaleDateString()}
-                                    </div>
-                                </div>
-                            )}
-                            {!project.timeline?.startDate && (
-                                <p className="text-gray-500">Timeline will be set by admin</p>
-                            )}
-                        </div>
-                    </div>
-
-                    {project.milestones && project.milestones.length > 0 && (
-                        <div className="bg-white p-6 rounded-lg border">
-                            <h2 className="text-xl font-semibold mb-4">Milestones</h2>
-                            <div className="space-y-4">
-                                {project.milestones.map((milestone, index) => (
-                                    <div key={index} className="flex items-start gap-3 p-4 border rounded">
-                                        <div
-                                            className={`w-6 h-6 rounded-full flex items-center justify-center ${milestone.completed ? 'bg-green-500' : 'bg-gray-300'
-                                                }`}
-                                        >
-                                            {milestone.completed && <span className="text-white text-sm">✓</span>}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="font-medium">{milestone.title}</h3>
-                                            {milestone.description && (
-                                                <p className="text-sm text-gray-600 mt-1">{milestone.description}</p>
-                                            )}
-                                            {milestone.dueDate && (
-                                                <p className="text-sm text-gray-500 mt-2">
-                                                    Due: {new Date(milestone.dueDate).toLocaleDateString()}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             )}
 

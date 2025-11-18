@@ -6,6 +6,7 @@ import dbConnect from '@/lib/database/mongodb';
 import Message, { MessageSender } from '@/models/Message';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { sendRealtimeMessage } from '@/lib/services/pusher.service';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -86,6 +87,16 @@ export async function sendMessage(
             message: message.trim(),
             isRead: false,
         });
+
+        // Send real-time message via Pusher
+        const messageData = {
+            _id: newMessage._id.toString(),
+            sender: newMessage.sender,
+            message: newMessage.message,
+            createdAt: newMessage.createdAt.toISOString(),
+        };
+
+        await sendRealtimeMessage(projectId, messageData);
 
         revalidatePath(`/dashboard/projects/${projectId}`);
 
