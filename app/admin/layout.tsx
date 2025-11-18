@@ -11,7 +11,9 @@ import {
     ArrowLeft,
     FileBox,
     BookOpen,
-    Star
+    Star,
+    Filter,
+    Activity
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -59,11 +61,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <NavLink href="/admin/feedback" icon={Star}>
                             Feedback
                         </NavLink>
+                        <NavLink href="/admin/saved-filters" icon={Filter}>
+                            Saved Filters
+                        </NavLink>
                         <NavLink href="/admin/invoices" icon={FileText}>
                             Invoices
                         </NavLink>
                         <NavLink href="/admin/analytics" icon={BarChart3}>
                             Analytics
+                        </NavLink>
+                        <NavLink href="/admin/activities" icon={Activity}>
+                            Activities
                         </NavLink>
                         <NavLink href="/admin/templates" icon={FileBox}>
                             Templates
