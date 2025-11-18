@@ -16,6 +16,17 @@ type ActionResponse<T = any> = {
     error?: string;
 };
 
+// Helper function to safely parse JSON environment variables
+function safeJSONParse(jsonString: string | undefined): any {
+    if (!jsonString) return undefined;
+    try {
+        return JSON.parse(jsonString);
+    } catch (error) {
+        console.error('Failed to parse JSON:', error);
+        return undefined;
+    }
+}
+
 /**
  * Get comprehensive analytics for a project
  */
@@ -41,9 +52,7 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
         // Initialize Google Analytics service
         if (project.googleAnalyticsPropertyId) {
             // Parse credentials from environment
-            const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
-                ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
-                : undefined;
+            const credentials = safeJSONParse(process.env.GOOGLE_ANALYTICS_CREDENTIALS);
 
             const analyticsService = new GoogleAnalyticsService({
                 propertyId: project.googleAnalyticsPropertyId,
@@ -191,9 +200,7 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
         if (project.deploymentUrl) {
             // Get analytics summary
             if (project.googleAnalyticsPropertyId) {
-                const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
-                    ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
-                    : undefined;
+                const credentials = safeJSONParse(process.env.GOOGLE_ANALYTICS_CREDENTIALS);
 
                 const analyticsService = new GoogleAnalyticsService({
                     propertyId: project.googleAnalyticsPropertyId,
@@ -255,9 +262,7 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
         const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
         // Get analytics data
-        const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
-            ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
-            : undefined;
+        const credentials = safeJSONParse(process.env.GOOGLE_ANALYTICS_CREDENTIALS);
 
         const analyticsService = new GoogleAnalyticsService({
             propertyId: project.googleAnalyticsPropertyId || '',

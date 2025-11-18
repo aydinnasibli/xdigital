@@ -16,6 +16,7 @@ import TasksSection from './TasksSection';
 import DeliverablesSection from './DeliverablesSection';
 import FilesSection from './FilesSection';
 import EditProjectSection from './EditProjectSection';
+import CloneAsTemplateButton from './CloneAsTemplateButton';
 
 export default async function AdminProjectDetailPage({
     params,
@@ -64,6 +65,10 @@ export default async function AdminProjectDetailPage({
                     </h1>
                     <p className="text-gray-600 mt-1">{project.projectDescription}</p>
                 </div>
+                <CloneAsTemplateButton
+                    projectId={project._id}
+                    projectName={project.projectName}
+                />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
