@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Send, CheckCircle, Download, Printer } from 'lucide-react';
 import { sendInvoice, markInvoiceAsPaid } from '@/app/actions/admin/invoices';
+import { toast } from 'sonner';
 
 interface InvoiceActionsProps {
     invoice: any;
@@ -24,10 +25,10 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
         setLoading(true);
         const result = await sendInvoice(invoice._id);
         if (result.success) {
-            alert('Invoice sent successfully!');
+            toast.success('Invoice sent successfully! Client notified via email');
             router.refresh();
         } else {
-            alert(result.error || 'Failed to send invoice');
+            toast.error(result.error || 'Failed to send invoice');
         }
         setLoading(false);
     };
@@ -36,12 +37,12 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
         setLoading(true);
         const result = await markInvoiceAsPaid(invoice._id, paymentMethod);
         if (result.success) {
-            alert('Invoice marked as paid!');
+            toast.success('Invoice marked as paid! Client notified via email');
             setShowPaymentModal(false);
             setPaymentMethod('');
             router.refresh();
         } else {
-            alert(result.error || 'Failed to mark invoice as paid');
+            toast.error(result.error || 'Failed to mark invoice as paid');
         }
         setLoading(false);
     };

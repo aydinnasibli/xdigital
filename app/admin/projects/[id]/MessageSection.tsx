@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { sendAdminMessage } from '@/app/actions/admin/messages';
 import { useRouter } from 'next/navigation';
 import { Send } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function MessageSection({
     projectId,
@@ -25,10 +26,11 @@ export default function MessageSection({
         const result = await sendAdminMessage(projectId, newMessage);
 
         if (result.success) {
+            toast.success('Message sent to client');
             setNewMessage('');
             router.refresh();
         } else {
-            alert(result.error || 'Failed to send message');
+            toast.error(result.error || 'Failed to send message');
         }
 
         setLoading(false);

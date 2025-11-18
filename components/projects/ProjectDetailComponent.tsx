@@ -404,7 +404,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'messages' | 'invoices' | 'analytics' | 'seo' | 'performance'>(
+    const [activeTab, setActiveTab] = useState<'overview' | 'milestones' | 'messages' | 'invoices' | 'analytics' | 'seo' | 'performance'>(
         'overview'
     );
     const [isPending, startTransition] = useTransition();
@@ -488,6 +488,15 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             }`}
                     >
                         Overview
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('milestones')}
+                        className={`pb-3 px-1 border-b-2 ${activeTab === 'milestones'
+                            ? 'border-blue-600 text-blue-600'
+                            : 'border-transparent text-gray-600 hover:text-gray-900'
+                            }`}
+                    >
+                        Milestones
                     </button>
                     <button
                         onClick={() => setActiveTab('messages')}
@@ -649,6 +658,92 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {activeTab === 'milestones' && (
+                <div className="space-y-6">
+                    {/* Timeline */}
+                    <div className="bg-white p-6 rounded-lg border">
+                        <h2 className="text-xl font-semibold mb-4">Project Timeline</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <div className="text-sm text-gray-600">Start Date</div>
+                                <div className="font-medium text-lg">
+                                    {project.timeline?.startDate
+                                        ? new Date(project.timeline.startDate).toLocaleDateString()
+                                        : 'Not set by admin yet'}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-sm text-gray-600">Estimated Completion</div>
+                                <div className="font-medium text-lg">
+                                    {project.timeline?.estimatedCompletion
+                                        ? new Date(project.timeline.estimatedCompletion).toLocaleDateString()
+                                        : 'Not set by admin yet'}
+                                </div>
+                            </div>
+                            {project.timeline?.completedDate && (
+                                <div>
+                                    <div className="text-sm text-gray-600">Completed Date</div>
+                                    <div className="font-medium text-lg text-green-600">
+                                        {new Date(project.timeline.completedDate).toLocaleDateString()}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Milestones */}
+                    {project.milestones && project.milestones.length > 0 ? (
+                        <div className="bg-white p-6 rounded-lg border">
+                            <h2 className="text-xl font-semibold mb-4">Project Milestones</h2>
+                            <div className="space-y-4">
+                                {project.milestones.map((milestone, index) => (
+                                    <div
+                                        key={index}
+                                        className={`flex items-start gap-4 p-4 border rounded-lg ${
+                                            milestone.completed ? 'bg-green-50 border-green-200' : 'bg-white'
+                                        }`}
+                                    >
+                                        <div
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                                milestone.completed ? 'bg-green-500' : 'bg-gray-300'
+                                            }`}
+                                        >
+                                            {milestone.completed && <span className="text-white text-lg">✓</span>}
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold text-lg">{milestone.title}</h3>
+                                            {milestone.description && (
+                                                <p className="text-gray-600 mt-1">{milestone.description}</p>
+                                            )}
+                                            <div className="flex gap-4 mt-2 text-sm">
+                                                {milestone.dueDate && (
+                                                    <div className="text-gray-500">
+                                                        📅 Due: {new Date(milestone.dueDate).toLocaleDateString()}
+                                                    </div>
+                                                )}
+                                                {milestone.completed && milestone.completedDate && (
+                                                    <div className="text-green-600">
+                                                        ✓ Completed: {new Date(milestone.completedDate).toLocaleDateString()}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bg-white p-12 rounded-lg border text-center">
+                            <div className="text-6xl mb-4">🎯</div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Milestones Yet</h3>
+                            <p className="text-gray-600">
+                                Milestones will be added by the admin as your project progresses.
+                            </p>
+                        </div>
+                    )}
                 </div>
             )}
 
