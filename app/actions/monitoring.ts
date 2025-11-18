@@ -9,6 +9,7 @@ import { GoogleAnalyticsService } from '@/lib/services/analytics.service';
 import { SEOService } from '@/lib/services/seo.service';
 import { PerformanceService } from '@/lib/services/performance.service';
 import { PDFReportService, type ReportData } from '@/lib/services/pdf-report.service';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -22,7 +23,7 @@ function safeJSONParse(jsonString: string | undefined): any {
     try {
         return JSON.parse(jsonString);
     } catch (error) {
-        console.error('Failed to parse JSON:', error);
+        logError(error, { context: 'safeJSONParse', jsonString });
         return undefined;
     }
 }
@@ -80,7 +81,7 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
             },
         };
     } catch (error) {
-        console.error('Error fetching project analytics:', error);
+        logError(error, { context: 'getProjectAnalytics', projectId });
         return { success: false, error: 'Failed to fetch analytics' };
     }
 }
@@ -122,7 +123,7 @@ export async function getSEOAnalysis(projectId: string): Promise<ActionResponse>
             data: seoScore,
         };
     } catch (error) {
-        console.error('Error analyzing SEO:', error);
+        logError(error, { context: 'getSEOAnalysis', projectId });
         return { success: false, error: 'Failed to analyze SEO' };
     }
 }
@@ -164,7 +165,7 @@ export async function getPerformanceMetrics(projectId: string): Promise<ActionRe
             data: performanceMetrics,
         };
     } catch (error) {
-        console.error('Error analyzing performance:', error);
+        logError(error, { context: 'getPerformanceMetrics', projectId });
         return { success: false, error: 'Failed to analyze performance' };
     }
 }
@@ -223,7 +224,7 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
             data: summary,
         };
     } catch (error) {
-        console.error('Error fetching dashboard summary:', error);
+        logError(error, { context: 'getDashboardSummary', projectId });
         return { success: false, error: 'Failed to fetch dashboard summary' };
     }
 }
@@ -322,7 +323,7 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
             },
         };
     } catch (error) {
-        console.error('Error generating PDF report:', error);
+        logError(error, { context: 'generatePDFReport', projectId });
         return { success: false, error: 'Failed to generate report' };
     }
 }
