@@ -41,12 +41,24 @@ export async function getAllFeedback(filters?: {
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedFeedback = feedbacks.map(fb => ({
-            ...fb,
-            _id: fb._id.toString(),
-            userId: fb.userId.toString(),
-            projectId: fb.projectId?.toString(),
-        }));
+        const serializedFeedback = feedbacks.map(fb => {
+            // Handle populated userId (becomes object with _id, firstName, etc.)
+            const userIdValue = typeof fb.userId === 'object' && fb.userId !== null
+                ? (fb.userId as any)._id?.toString() || (fb.userId as any).toString()
+                : fb.userId?.toString();
+
+            // Handle populated projectId
+            const projectIdValue = typeof fb.projectId === 'object' && fb.projectId !== null
+                ? (fb.projectId as any)._id?.toString() || (fb.projectId as any).toString()
+                : fb.projectId?.toString();
+
+            return {
+                ...fb,
+                _id: fb._id.toString(),
+                userId: userIdValue,
+                projectId: projectIdValue,
+            };
+        });
 
         return { success: true, data: serializedFeedback };
     } catch (error) {
@@ -75,12 +87,19 @@ export async function getUserFeedback(): Promise<ActionResponse> {
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedFeedback = feedbacks.map(fb => ({
-            ...fb,
-            _id: fb._id.toString(),
-            userId: fb.userId.toString(),
-            projectId: fb.projectId?.toString(),
-        }));
+        const serializedFeedback = feedbacks.map(fb => {
+            // Handle populated projectId
+            const projectIdValue = typeof fb.projectId === 'object' && fb.projectId !== null
+                ? (fb.projectId as any)._id?.toString() || (fb.projectId as any).toString()
+                : fb.projectId?.toString();
+
+            return {
+                ...fb,
+                _id: fb._id.toString(),
+                userId: fb.userId.toString(), // userId is not populated here, safe to use .toString()
+                projectId: projectIdValue,
+            };
+        });
 
         return { success: true, data: serializedFeedback };
     } catch (error) {
@@ -267,11 +286,18 @@ export async function getPublicTestimonials(limit: number = 10): Promise<ActionR
             .limit(limit)
             .lean();
 
-        const serializedTestimonials = testimonials.map(t => ({
-            ...t,
-            _id: t._id.toString(),
-            projectId: t.projectId?.toString(),
-        }));
+        const serializedTestimonials = testimonials.map(t => {
+            // Handle populated projectId
+            const projectIdValue = typeof t.projectId === 'object' && t.projectId !== null
+                ? (t.projectId as any)._id?.toString() || (t.projectId as any).toString()
+                : t.projectId?.toString();
+
+            return {
+                ...t,
+                _id: t._id.toString(),
+                projectId: projectIdValue,
+            };
+        });
 
         return { success: true, data: serializedTestimonials };
     } catch (error) {

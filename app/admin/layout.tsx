@@ -13,7 +13,8 @@ import {
     BookOpen,
     Star,
     Filter,
-    Activity
+    Activity,
+    Bell
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -54,6 +55,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         </NavLink>
                         <NavLink href="/admin/clients" icon={Users}>
                             Clients
+                        </NavLink>
+                        <NavLink href="/admin/reminders" icon={Bell}>
+                            Reminders
                         </NavLink>
                         <NavLink href="/admin/messages" icon={MessageSquare}>
                             Messages

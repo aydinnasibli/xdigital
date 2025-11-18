@@ -5,10 +5,11 @@ import Pusher from 'pusher';
 
 let pusherInstance: Pusher | null = null;
 
-function getPusherInstance(): Pusher {
+function getPusherInstance(): Pusher | null {
     if (!pusherInstance) {
         if (!process.env.PUSHER_APP_ID || !process.env.PUSHER_KEY || !process.env.PUSHER_SECRET) {
-            throw new Error('Pusher credentials not configured. Add PUSHER_APP_ID, PUSHER_KEY, PUSHER_SECRET to environment variables');
+            console.warn('Pusher credentials not configured. Real-time messaging features will be disabled. Add PUSHER_APP_ID, PUSHER_KEY, PUSHER_SECRET to environment variables to enable.');
+            return null;
         }
 
         pusherInstance = new Pusher({
@@ -25,6 +26,8 @@ function getPusherInstance(): Pusher {
 
 /**
  * Trigger a Pusher event
+ * NOTE: Pusher is OPTIONAL. If not configured, real-time features will be disabled but the app will still work.
+ * Real-time messaging is used for instant message delivery in the messaging system.
  */
 export async function triggerPusherEvent(
     channel: string,
@@ -33,10 +36,15 @@ export async function triggerPusherEvent(
 ): Promise<void> {
     try {
         const pusher = getPusherInstance();
+        if (!pusher) {
+            // Pusher not configured - this is OK, just means no real-time updates
+            // Messages will still be saved to database and visible on refresh
+            return;
+        }
         await pusher.trigger(channel, event, data);
     } catch (error) {
-        console.error('Pusher trigger error:', error);
-        throw error;
+        // Log but don't throw - we don't want Pusher errors to break the app
+        console.error('Pusher trigger error (non-fatal):', error);
     }
 }
 
