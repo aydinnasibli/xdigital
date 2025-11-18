@@ -9,7 +9,8 @@ import {
     FileText,
     BarChart3,
     ArrowLeft,
-    FileBox
+    FileBox,
+    BookOpen
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -62,6 +63,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         </NavLink>
                         <NavLink href="/admin/templates" icon={FileBox}>
                             Templates
+                        </NavLink>
+                        <NavLink href="/admin/resources" icon={BookOpen}>
+                            Resources
                         </NavLink>
                     </nav>
                 </aside>
