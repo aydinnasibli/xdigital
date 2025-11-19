@@ -7,7 +7,6 @@ export enum NoteType {
     RISK = 'risk',
     OPPORTUNITY = 'opportunity',
     FEEDBACK = 'feedback',
-    REMINDER = 'reminder',
 }
 
 export interface IClientNote extends Document {
@@ -21,8 +20,6 @@ export interface IClientNote extends Document {
     content: string;
     tags?: string[];
     isPinned: boolean;
-    reminderDate?: Date;
-    isReminded: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -75,14 +72,6 @@ const ClientNoteSchema = new Schema<IClientNote>(
             type: Boolean,
             default: false,
             index: true,
-        },
-        reminderDate: {
-            type: Date,
-            index: true,
-        },
-        isReminded: {
-            type: Boolean,
-            default: false,
         },
     },
     {

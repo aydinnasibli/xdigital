@@ -14,6 +14,7 @@ import { createNotification } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
+import { requireAdmin } from '@/lib/auth/admin';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -62,7 +63,7 @@ export async function getProjectTasks(projectId: string): Promise<ActionResponse
     }
 }
 
-// Create a new task
+// Create a new task (Admin only)
 export async function createTask(data: {
     projectId: string;
     title: string;
@@ -76,6 +77,8 @@ export async function createTask(data: {
     milestoneId?: string;
 }): Promise<ActionResponse> {
     try {
+        await requireAdmin();
+
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -140,7 +143,7 @@ export async function createTask(data: {
     }
 }
 
-// Update task
+// Update task (Admin only)
 export async function updateTask(taskId: string, data: Partial<{
     title: string;
     description: string;
@@ -153,6 +156,8 @@ export async function updateTask(taskId: string, data: Partial<{
     tags: string[];
 }>): Promise<ActionResponse> {
     try {
+        await requireAdmin();
+
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -231,9 +236,11 @@ export async function updateTask(taskId: string, data: Partial<{
     }
 }
 
-// Update task order (for Kanban drag-and-drop)
+// Update task order (for Kanban drag-and-drop) (Admin only)
 export async function updateTaskOrder(taskId: string, newOrder: number, newStatus?: TaskStatus): Promise<ActionResponse> {
     try {
+        await requireAdmin();
+
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -262,9 +269,11 @@ export async function updateTaskOrder(taskId: string, newOrder: number, newStatu
     }
 }
 
-// Delete task
+// Delete task (Admin only)
 export async function deleteTask(taskId: string): Promise<ActionResponse> {
     try {
+        await requireAdmin();
+
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -286,9 +295,11 @@ export async function deleteTask(taskId: string): Promise<ActionResponse> {
     }
 }
 
-// Add subtask to a task
+// Add subtask to a task (Admin only)
 export async function addSubtask(taskId: string, title: string): Promise<ActionResponse> {
     try {
+        await requireAdmin();
+
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -318,9 +329,11 @@ export async function addSubtask(taskId: string, title: string): Promise<ActionR
     }
 }
 
-// Toggle subtask completion
+// Toggle subtask completion (Admin only)
 export async function toggleSubtask(taskId: string, subtaskIndex: number): Promise<ActionResponse> {
     try {
+        await requireAdmin();
+
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };

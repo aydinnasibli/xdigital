@@ -23,6 +23,7 @@ interface Task {
 interface TaskCardProps {
     task: Task;
     isDragging?: boolean;
+    readOnly?: boolean;
 }
 
 const priorityColors = {
@@ -32,7 +33,7 @@ const priorityColors = {
     [TaskPriority.URGENT]: 'bg-red-200 text-red-700',
 };
 
-export function TaskCard({ task, isDragging = false }: TaskCardProps) {
+export function TaskCard({ task, isDragging = false, readOnly = false }: TaskCardProps) {
     const {
         attributes,
         listeners,
@@ -40,7 +41,7 @@ export function TaskCard({ task, isDragging = false }: TaskCardProps) {
         transform,
         transition,
         isDragging: isSortableDragging,
-    } = useSortable({ id: task._id });
+    } = useSortable({ id: task._id, disabled: readOnly });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -58,10 +59,10 @@ export function TaskCard({ task, isDragging = false }: TaskCardProps) {
             ref={setNodeRef}
             style={style}
             {...attributes}
-            {...listeners}
-            className={`bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing ${
-                isDragging ? 'rotate-3' : ''
-            }`}
+            {...(readOnly ? {} : listeners)}
+            className={`bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md transition-shadow ${
+                readOnly ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
+            } ${isDragging ? 'rotate-3' : ''}`}
         >
             {/* Priority Badge */}
             <div className="flex items-center justify-between mb-2">

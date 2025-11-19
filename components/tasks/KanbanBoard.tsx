@@ -36,6 +36,7 @@ interface Task {
 interface KanbanBoardProps {
     tasks: Task[];
     projectId: string;
+    readOnly?: boolean;
 }
 
 const columns = [
@@ -45,7 +46,7 @@ const columns = [
     { id: TaskStatus.COMPLETED, title: 'Completed', color: 'bg-green-50' },
 ];
 
-export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, projectId, readOnly = false }: KanbanBoardProps) {
     const [activeTask, setActiveTask] = useState<Task | null>(null);
     const [isPending, startTransition] = useTransition();
 
@@ -58,11 +59,14 @@ export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
     );
 
     const handleDragStart = (event: DragStartEvent) => {
+        if (readOnly) return;
         const task = tasks.find(t => t._id === event.active.id);
         setActiveTask(task || null);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
+        if (readOnly) return;
+
         const { active, over } = event;
 
         if (!over) {
@@ -127,7 +131,7 @@ export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
                             >
                                 <div className={`${column.color} rounded-b-lg p-3 min-h-[200px] flex-1 space-y-2`}>
                                     {columnTasks.map(task => (
-                                        <TaskCard key={task._id} task={task} />
+                                        <TaskCard key={task._id} task={task} readOnly={readOnly} />
                                     ))}
                                     {columnTasks.length === 0 && (
                                         <div className="text-center text-gray-400 py-8">
