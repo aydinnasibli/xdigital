@@ -26,6 +26,7 @@ interface Resource {
     slug: string;
     metaDescription?: string;
     isFeatured?: boolean;
+    isPublished?: boolean;
 }
 
 export default function ResourceForm({ resource }: { resource?: Resource }) {
@@ -50,6 +51,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
         slug: resource?.slug || '',
         metaDescription: resource?.metaDescription || '',
         isFeatured: resource?.isFeatured || false,
+        isPublished: resource?.isPublished || false,
     });
 
     const [tagsInput, setTagsInput] = useState(formData.tags?.join(', ') || '');
@@ -238,19 +240,38 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        id="isFeatured"
-                        checked={formData.isFeatured}
-                        onChange={(e) =>
-                            setFormData({ ...formData, isFeatured: e.target.checked })
-                        }
-                        className="rounded border-gray-300"
-                    />
-                    <label htmlFor="isFeatured" className="text-sm text-gray-700">
-                        Featured Resource (show at top)
-                    </label>
+                <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            id="isPublished"
+                            checked={formData.isPublished}
+                            onChange={(e) =>
+                                setFormData({ ...formData, isPublished: e.target.checked })
+                            }
+                            className="rounded border-gray-300 w-5 h-5 text-blue-600"
+                        />
+                        <label htmlFor="isPublished" className="text-sm font-semibold text-blue-900 cursor-pointer">
+                            ✓ Publish Resource (make visible to users)
+                        </label>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            id="isFeatured"
+                            checked={formData.isFeatured}
+                            onChange={(e) =>
+                                setFormData({ ...formData, isFeatured: e.target.checked })
+                            }
+                            className="rounded border-gray-300 w-5 h-5 text-blue-600"
+                        />
+                        <label htmlFor="isFeatured" className="text-sm text-gray-700 cursor-pointer">
+                            Featured Resource (show at top of list)
+                        </label>
+                    </div>
+                    <p className="text-xs text-blue-700 mt-2">
+                        {formData.isPublished ? '✓ This resource will be visible to users based on visibility settings' : '⚠️ This resource is a draft and will not be visible to users'}
+                    </p>
                 </div>
             </div>
 

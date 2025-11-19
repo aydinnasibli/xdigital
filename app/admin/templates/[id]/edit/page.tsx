@@ -1,0 +1,34 @@
+// app/admin/templates/[id]/edit/page.tsx
+import { redirect } from 'next/navigation';
+import { auth } from '@clerk/nextjs/server';
+import { getTemplate } from '@/app/actions/project-templates';
+import EditTemplateForm from './EditTemplateForm';
+
+export default async function EditTemplatePage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const { userId } = await auth();
+    if (!userId) {
+        redirect('/sign-in');
+    }
+
+    const { id } = await params;
+    const response = await getTemplate(id);
+
+    if (!response.success || !response.data) {
+        redirect('/admin/templates');
+    }
+
+    return (
+        <div className="max-w-4xl mx-auto space-y-6">
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900">Edit Template</h1>
+                <p className="text-gray-600 mt-2">Update template information and settings</p>
+            </div>
+
+            <EditTemplateForm template={response.data} />
+        </div>
+    );
+}

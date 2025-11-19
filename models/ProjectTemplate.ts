@@ -9,13 +9,6 @@ interface ITemplateMilestone {
     order: number;
 }
 
-interface ITemplateDeliverable {
-    title: string;
-    description?: string;
-    category: string;
-    milestoneName?: string; // Which milestone this belongs to
-}
-
 interface ITemplateTask {
     title: string;
     description?: string;
@@ -46,7 +39,6 @@ export interface IProjectTemplate extends Document {
 
     estimatedDurationDays: number;
     milestones: ITemplateMilestone[];
-    deliverables: ITemplateDeliverable[];
     tasks: ITemplateTask[];
     isActive: boolean;
     isDefault: boolean; // Is this the default template for this service/package combination?
@@ -130,19 +122,6 @@ const ProjectTemplateSchema = new Schema<IProjectTemplate>(
                 type: Number,
                 required: true,
             },
-        }],
-        deliverables: [{
-            title: {
-                type: String,
-                required: true,
-                trim: true,
-            },
-            description: String,
-            category: {
-                type: String,
-                required: true,
-            },
-            milestoneName: String,
         }],
         tasks: [{
             title: {

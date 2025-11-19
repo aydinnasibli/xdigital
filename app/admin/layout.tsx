@@ -15,7 +15,6 @@ import {
     FileBox,
     BookOpen,
     Star,
-    Filter,
     Activity,
     Bell,
     Menu,
@@ -133,14 +132,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             onClick={() => setSidebarOpen(false)}
                         >
                             Feedback
-                        </NavLink>
-                        <NavLink
-                            href="/admin/saved-filters"
-                            icon={Filter}
-                            active={isActive('/admin/saved-filters')}
-                            onClick={() => setSidebarOpen(false)}
-                        >
-                            Saved Filters
                         </NavLink>
                         <NavLink
                             href="/admin/invoices"

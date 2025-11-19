@@ -4,7 +4,6 @@ import { getAdminProject } from '@/app/actions/admin/projects';
 import { getAdminProjectMessages } from '@/app/actions/admin/messages';
 import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectTasks } from '@/app/actions/tasks';
-import { getProjectDeliverables } from '@/app/actions/deliverables';
 import { getProjectFiles } from '@/app/actions/files';
 import { ArrowLeft, User, Mail, Calendar, Package } from 'lucide-react';
 import UpdateStatusForm from './UpdateStatusForm';
@@ -13,7 +12,6 @@ import MilestonesSection from './MilestonesSection';
 import DeploymentSection from './DeploymentSection';
 import TimelineSection from './TimelineSection';
 import TasksSection from './TasksSection';
-import DeliverablesSection from './DeliverablesSection';
 import FilesSection from './FilesSection';
 import EditProjectSection from './EditProjectSection';
 import CloneAsTemplateButton from './CloneAsTemplateButton';
@@ -25,12 +23,11 @@ export default async function AdminProjectDetailPage({
 
 }) {
     const resolvedParams = await params;
-    const [projectResult, messagesResult, invoicesResult, tasksResult, deliverablesResult, filesResult] = await Promise.all([
+    const [projectResult, messagesResult, invoicesResult, tasksResult, filesResult] = await Promise.all([
         getAdminProject(resolvedParams.id),
         getAdminProjectMessages(resolvedParams.id),
         getProjectInvoices(resolvedParams.id),
         getProjectTasks(resolvedParams.id),
-        getProjectDeliverables(resolvedParams.id),
         getProjectFiles(resolvedParams.id),
     ]);
 
@@ -46,7 +43,6 @@ export default async function AdminProjectDetailPage({
     const messages = messagesResult.success ? messagesResult.data : [];
     const invoices = invoicesResult.success ? invoicesResult.data : [];
     const tasks = tasksResult.success ? tasksResult.data : [];
-    const deliverables = deliverablesResult.success ? deliverablesResult.data : [];
     const files = filesResult.success ? filesResult.data : [];
 
     return (
@@ -112,12 +108,6 @@ export default async function AdminProjectDetailPage({
                     <TasksSection
                         projectId={project._id}
                         tasks={tasks}
-                    />
-
-                    {/* Deliverables */}
-                    <DeliverablesSection
-                        projectId={project._id}
-                        deliverables={deliverables}
                     />
 
                     {/* Files */}

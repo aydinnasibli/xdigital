@@ -63,7 +63,6 @@ interface Project {
         estimatedCompletion?: string;
         completedDate?: string;
     };
-    deliverables?: string[];
     milestones?: Array<{
         title: string;
         description?: string;
@@ -575,14 +574,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Files & Documents</h3>
                             <p className="text-sm text-gray-600 mt-1">View and upload files</p>
                         </Link>
-                        <Link
-                            href={`/dashboard/projects/${project._id}/deliverables`}
-                            className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"
-                        >
-                            <div className="text-3xl mb-3">📦</div>
-                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Deliverables</h3>
-                            <p className="text-sm text-gray-600 mt-1">Track deliverables</p>
-                        </Link>
                     </div>
 
                     {/* Live Website */}
@@ -622,26 +613,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         <h2 className="text-xl font-semibold mb-4">Project Description</h2>
                         <p className="text-gray-700">{project.projectDescription}</p>
                     </div>
-
-                    {project.deliverables && project.deliverables.length > 0 && (
-                        <div className="bg-white p-6 rounded-lg border">
-                            <h2 className="text-xl font-semibold mb-4">Expected Deliverables</h2>
-                            <ul className="space-y-2">
-                                {project.deliverables.map((item, index) => (
-                                    <li key={index} className="flex items-start">
-                                        <span className="text-blue-600 mr-2">✓</span>
-                                        <span>{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                            <Link
-                                href={`/dashboard/projects/${project._id}/deliverables`}
-                                className="inline-block mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                            >
-                                View Detailed Deliverables →
-                            </Link>
-                        </div>
-                    )}
 
                     <div className="bg-white p-6 rounded-lg border">
                         <h2 className="text-xl font-semibold mb-4">Project Details</h2>
