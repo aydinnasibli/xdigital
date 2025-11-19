@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { checkAndSendReminderEmail } from '@/app/actions/client-notes';
+import { checkAndSendReminderEmail } from '@/app/actions/reminders';
 
 /**
  * This component silently checks and sends reminder emails when admin visits admin pages.
