@@ -25,7 +25,7 @@ interface SearchResult {
     description?: string;
     projectId?: string;
     projectName?: string;
-    createdAt: Date;
+    createdAt: string;
     relevance?: number;
 }
 
@@ -73,7 +73,7 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                     id: p._id.toString(),
                     title: p.projectName,
                     description: p.projectDescription.substring(0, 150),
-                    createdAt: p.createdAt,
+                    createdAt: p.createdAt.toISOString(),
                 });
             });
         }
@@ -98,7 +98,7 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                     description: m.message.substring(0, 150),
                     projectId: project?._id?.toString() || '',
                     projectName: project?.projectName || '',
-                    createdAt: m.createdAt,
+                    createdAt: m.createdAt.toISOString(),
                 });
             });
         }
@@ -126,7 +126,7 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                     description: i.notes || `Total: $${i.total}`,
                     projectId: project?._id?.toString() || '',
                     projectName: project?.projectName || '',
-                    createdAt: i.createdAt,
+                    createdAt: i.createdAt.toISOString(),
                 });
             });
         }
@@ -154,7 +154,7 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                     description: f.description,
                     projectId: project?._id?.toString() || '',
                     projectName: project?.projectName || '',
-                    createdAt: f.createdAt,
+                    createdAt: f.createdAt.toISOString(),
                 });
             });
         }
@@ -181,7 +181,7 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                     description: t.description,
                     projectId: project?._id?.toString() || '',
                     projectName: project?.projectName || '',
-                    createdAt: t.createdAt,
+                    createdAt: t.createdAt.toISOString(),
                 });
             });
         }
@@ -208,13 +208,13 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                     description: d.description,
                     projectId: project?._id?.toString() || '',
                     projectName: project?.projectName || '',
-                    createdAt: d.createdAt,
+                    createdAt: d.createdAt.toISOString(),
                 });
             });
         }
 
         // Sort by most recent
-        results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         // Limit total results
         const limitedResults = results.slice(0, 50);
@@ -259,7 +259,7 @@ export async function searchInProject(projectId: string, searchTerm: string): Pr
                 title: 'Message',
                 description: m.message.substring(0, 150),
                 projectId,
-                createdAt: m.createdAt,
+                createdAt: m.createdAt.toISOString(),
             });
         });
 
@@ -282,7 +282,7 @@ export async function searchInProject(projectId: string, searchTerm: string): Pr
                 title: f.fileName,
                 description: f.description,
                 projectId,
-                createdAt: f.createdAt,
+                createdAt: f.createdAt.toISOString(),
             });
         });
 
@@ -305,7 +305,7 @@ export async function searchInProject(projectId: string, searchTerm: string): Pr
                 title: t.title,
                 description: t.description,
                 projectId,
-                createdAt: t.createdAt,
+                createdAt: t.createdAt.toISOString(),
             });
         });
 
@@ -328,12 +328,12 @@ export async function searchInProject(projectId: string, searchTerm: string): Pr
                 title: d.title,
                 description: d.description,
                 projectId,
-                createdAt: d.createdAt,
+                createdAt: d.createdAt.toISOString(),
             });
         });
 
         // Sort by most recent
-        results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         return { success: true, data: results };
     } catch (error) {

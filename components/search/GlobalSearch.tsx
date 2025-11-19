@@ -12,7 +12,7 @@ interface SearchResult {
     description?: string;
     projectId?: string;
     projectName?: string;
-    createdAt: Date;
+    createdAt: string;
 }
 
 export function GlobalSearch() {

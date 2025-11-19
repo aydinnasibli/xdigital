@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Edit, Trash2, Star, Users, Clock, TrendingUp } from 'lucide-react';
+import { Edit, Trash2, Star, Users, Clock, TrendingUp, Filter as FilterIcon } from 'lucide-react';
 import { deleteSavedFilter, updateSavedFilter } from '@/app/actions/saved-filters';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -88,7 +88,7 @@ export default function SavedFiltersList({ filters, type }: { filters: Filter[];
     if (filters.length === 0) {
         return (
             <div className="p-12 text-center text-gray-500">
-                <Filter className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                <FilterIcon className="w-12 h-12 mx-auto mb-3 text-gray-400" />
                 <p>No {type === 'shared' ? 'shared' : ''} filters yet</p>
                 <p className="text-sm mt-1">Create your first filter to get started</p>
             </div>
