@@ -9,6 +9,7 @@ import { GoogleAnalyticsService } from '@/lib/services/analytics.service';
 import { SEOService } from '@/lib/services/seo.service';
 import { PerformanceService } from '@/lib/services/performance.service';
 import { PDFReportService, type ReportData } from '@/lib/services/pdf-report.service';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -33,7 +34,7 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
             return { success: false, error: 'User not found' };
         }
 
-        const project = await Project.findOne({ _id: projectId, userId: user._id });
+        const project = await Project.findOne({ _id: projectId, userId: user._id }).lean();
         if (!project) {
             return { success: false, error: 'Project not found' };
         }
@@ -71,7 +72,7 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
             },
         };
     } catch (error) {
-        console.error('Error fetching project analytics:', error);
+        logError(error as Error, { context: 'getProjectAnalytics', projectId });
         return { success: false, error: 'Failed to fetch analytics' };
     }
 }
@@ -93,7 +94,7 @@ export async function getSEOAnalysis(projectId: string): Promise<ActionResponse>
             return { success: false, error: 'User not found' };
         }
 
-        const project = await Project.findOne({ _id: projectId, userId: user._id });
+        const project = await Project.findOne({ _id: projectId, userId: user._id }).lean();
         if (!project) {
             return { success: false, error: 'Project not found' };
         }
@@ -113,7 +114,7 @@ export async function getSEOAnalysis(projectId: string): Promise<ActionResponse>
             data: seoScore,
         };
     } catch (error) {
-        console.error('Error analyzing SEO:', error);
+        logError(error as Error, { context: 'analyzeSEO', projectId });
         return { success: false, error: 'Failed to analyze SEO' };
     }
 }
@@ -135,7 +136,7 @@ export async function getPerformanceMetrics(projectId: string): Promise<ActionRe
             return { success: false, error: 'User not found' };
         }
 
-        const project = await Project.findOne({ _id: projectId, userId: user._id });
+        const project = await Project.findOne({ _id: projectId, userId: user._id }).lean();
         if (!project) {
             return { success: false, error: 'Project not found' };
         }
@@ -155,7 +156,7 @@ export async function getPerformanceMetrics(projectId: string): Promise<ActionRe
             data: performanceMetrics,
         };
     } catch (error) {
-        console.error('Error analyzing performance:', error);
+        logError(error as Error, { context: 'analyzePerformance', projectId });
         return { success: false, error: 'Failed to analyze performance' };
     }
 }
@@ -177,7 +178,7 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
             return { success: false, error: 'User not found' };
         }
 
-        const project = await Project.findOne({ _id: projectId, userId: user._id });
+        const project = await Project.findOne({ _id: projectId, userId: user._id }).lean();
         if (!project) {
             return { success: false, error: 'Project not found' };
         }
@@ -216,7 +217,7 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
             data: summary,
         };
     } catch (error) {
-        console.error('Error fetching dashboard summary:', error);
+        logError(error as Error, { context: 'getDashboardSummary', projectId });
         return { success: false, error: 'Failed to fetch dashboard summary' };
     }
 }
@@ -238,7 +239,7 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
             return { success: false, error: 'User not found' };
         }
 
-        const project = await Project.findOne({ _id: projectId, userId: user._id });
+        const project = await Project.findOne({ _id: projectId, userId: user._id }).lean();
         if (!project) {
             return { success: false, error: 'Project not found' };
         }
@@ -317,7 +318,7 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
             },
         };
     } catch (error) {
-        console.error('Error generating PDF report:', error);
+        logError(error as Error, { context: 'generatePDFReport', projectId });
         return { success: false, error: 'Failed to generate report' };
     }
 }

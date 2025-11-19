@@ -6,6 +6,8 @@ import dbConnect from '@/lib/database/mongodb';
 import Activity, { ActivityType, ActivityEntity } from '@/models/Activity';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -43,9 +45,9 @@ export async function logActivity(data: {
             userImageUrl: user.imageUrl,
         });
 
-        return { success: true, data: activity.toObject() };
+        return { success: true, data: toSerializedObject(activity) };
     } catch (error) {
-        console.error('Error logging activity:', error);
+        logError(error as Error, { context: 'logActivity', data });
         return { success: false, error: 'Failed to log activity' };
     }
 }
@@ -79,7 +81,7 @@ export async function getProjectActivities(projectId: string, limit: number = 50
 
         return { success: true, data: serializedActivities };
     } catch (error) {
-        console.error('Error fetching activities:', error);
+        logError(error as Error, { context: 'getProjectActivities', projectId });
         return { success: false, error: 'Failed to fetch activities' };
     }
 }
@@ -114,7 +116,7 @@ export async function getUserActivities(limit: number = 50): Promise<ActionRespo
 
         return { success: true, data: serializedActivities };
     } catch (error) {
-        console.error('Error fetching activities:', error);
+        logError(error as Error, { context: 'getUserActivities' });
         return { success: false, error: 'Failed to fetch activities' };
     }
 }
@@ -161,7 +163,7 @@ export async function getAllActivities(filters?: {
 
         return { success: true, data: serializedActivities };
     } catch (error) {
-        console.error('Error fetching activities:', error);
+        logError(error as Error, { context: 'getAllActivities', filters });
         return { success: false, error: 'Failed to fetch activities' };
     }
 }

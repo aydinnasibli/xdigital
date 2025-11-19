@@ -7,6 +7,8 @@ import dbConnect from '@/lib/database/mongodb';
 import Resource, { ResourceType, ResourceCategory, ResourceVisibility } from '@/models/Resource';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -62,7 +64,7 @@ export async function getResources(filters?: {
 
         return { success: true, data: serializedResources };
     } catch (error) {
-        console.error('Error fetching resources:', error);
+        logError(error as Error, { context: 'getResources', filters });
         return { success: false, error: 'Failed to fetch resources' };
     }
 }
@@ -97,7 +99,7 @@ export async function getResource(slug: string): Promise<ActionResponse> {
             },
         };
     } catch (error) {
-        console.error('Error fetching resource:', error);
+        logError(error as Error, { context: 'getResource', slug });
         return { success: false, error: 'Failed to fetch resource' };
     }
 }
@@ -153,12 +155,12 @@ export async function createResource(data: {
         return {
             success: true,
             data: {
-                ...resource.toObject(),
+                ...toSerializedObject(resource),
                 _id: resource._id.toString(),
             },
         };
     } catch (error) {
-        console.error('Error creating resource:', error);
+        logError(error as Error, { context: 'createResource', slug: data.slug });
         return { success: false, error: 'Failed to create resource' };
     }
 }
@@ -215,9 +217,9 @@ export async function updateResource(resourceId: string, data: Partial<{
         revalidatePath('/admin/resources');
         revalidatePath(`/resources/${resource.slug}`);
 
-        return { success: true, data: resource.toObject() };
+        return { success: true, data: toSerializedObject(resource) };
     } catch (error) {
-        console.error('Error updating resource:', error);
+        logError(error as Error, { context: 'updateResource', resourceId });
         return { success: false, error: 'Failed to update resource' };
     }
 }
@@ -248,9 +250,9 @@ export async function publishResource(resourceId: string): Promise<ActionRespons
         revalidatePath('/admin/resources');
         revalidatePath('/resources');
 
-        return { success: true, data: resource.toObject() };
+        return { success: true, data: toSerializedObject(resource) };
     } catch (error) {
-        console.error('Error publishing resource:', error);
+        logError(error as Error, { context: 'publishResource', resourceId });
         return { success: false, error: 'Failed to publish resource' };
     }
 }
@@ -280,7 +282,7 @@ export async function unpublishResource(resourceId: string): Promise<ActionRespo
 
         return { success: true };
     } catch (error) {
-        console.error('Error unpublishing resource:', error);
+        logError(error as Error, { context: 'unpublishResource', resourceId });
         return { success: false, error: 'Failed to unpublish resource' };
     }
 }
@@ -306,7 +308,7 @@ export async function deleteResource(resourceId: string): Promise<ActionResponse
 
         return { success: true };
     } catch (error) {
-        console.error('Error deleting resource:', error);
+        logError(error as Error, { context: 'deleteResource', resourceId });
         return { success: false, error: 'Failed to delete resource' };
     }
 }
@@ -322,7 +324,7 @@ export async function trackResourceDownload(resourceId: string): Promise<ActionR
 
         return { success: true };
     } catch (error) {
-        console.error('Error tracking download:', error);
+        logError(error as Error, { context: 'trackResourceDownload', resourceId });
         return { success: false, error: 'Failed to track download' };
     }
 }
@@ -350,7 +352,7 @@ export async function getFeaturedResources(limit: number = 5): Promise<ActionRes
 
         return { success: true, data: serializedResources };
     } catch (error) {
-        console.error('Error fetching featured resources:', error);
+        logError(error as Error, { context: 'getFeaturedResources', limit });
         return { success: false, error: 'Failed to fetch featured resources' };
     }
 }
@@ -377,7 +379,7 @@ export async function searchResources(searchTerm: string): Promise<ActionRespons
 
         return { success: true, data: serializedResources };
     } catch (error) {
-        console.error('Error searching resources:', error);
+        logError(error as Error, { context: 'searchResources', searchTerm });
         return { success: false, error: 'Failed to search resources' };
     }
 }

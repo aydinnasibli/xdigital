@@ -9,6 +9,8 @@ import User from '@/models/User';
 import mongoose from 'mongoose';
 import { logActivity } from './activities';
 import { ActivityType, ActivityEntity } from '@/models/Activity';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -50,7 +52,7 @@ export async function getProjectFiles(projectId: string, folderId?: string): Pro
 
         return { success: true, data: serializedFiles };
     } catch (error) {
-        console.error('Error fetching files:', error);
+        logError(error as Error, { context: 'getProjectFiles', projectId });
         return { success: false, error: 'Failed to fetch files' };
     }
 }
@@ -112,9 +114,9 @@ export async function createFile(data: {
 
         revalidatePath(`/dashboard/projects/${data.projectId}`);
 
-        return { success: true, data: file.toObject() };
+        return { success: true, data: toSerializedObject(file) };
     } catch (error) {
-        console.error('Error creating file:', error);
+        logError(error as Error, { context: 'createFile', projectId: data.projectId });
         return { success: false, error: 'Failed to create file' };
     }
 }
@@ -163,9 +165,9 @@ export async function uploadFileVersion(fileId: string, fileUrl: string, fileNam
 
         revalidatePath(`/dashboard/projects/${file.projectId}`);
 
-        return { success: true, data: file.toObject() };
+        return { success: true, data: toSerializedObject(file) };
     } catch (error) {
-        console.error('Error uploading file version:', error);
+        logError(error as Error, { context: 'uploadFileVersion', fileId });
         return { success: false, error: 'Failed to upload file version' };
     }
 }
@@ -207,9 +209,9 @@ export async function addFileComment(fileId: string, comment: string): Promise<A
 
         revalidatePath(`/dashboard/projects/${file.projectId}`);
 
-        return { success: true, data: file.toObject() };
+        return { success: true, data: toSerializedObject(file) };
     } catch (error) {
-        console.error('Error adding file comment:', error);
+        logError(error as Error, { context: 'addFileComment', fileId });
         return { success: false, error: 'Failed to add comment' };
     }
 }
@@ -247,7 +249,7 @@ export async function trackFileDownload(fileId: string): Promise<ActionResponse>
 
         return { success: true };
     } catch (error) {
-        console.error('Error tracking download:', error);
+        logError(error as Error, { context: 'trackFileDownload', fileId });
         return { success: false, error: 'Failed to track download' };
     }
 }
@@ -279,7 +281,7 @@ export async function deleteFile(fileId: string): Promise<ActionResponse> {
 
         return { success: true };
     } catch (error) {
-        console.error('Error deleting file:', error);
+        logError(error as Error, { context: 'deleteFile', fileId });
         return { success: false, error: 'Failed to delete file' };
     }
 }

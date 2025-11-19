@@ -7,6 +7,7 @@ import Project from '@/models/Project';
 import Invoice from '@/models/Invoice';
 import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -71,7 +72,7 @@ export async function getAllClients(filters?: {
 
         return { success: true, data: filteredClients };
     } catch (error) {
-        console.error('Error fetching clients:', error);
+        logError(error as Error, { context: 'getAllClients', hasActiveProjects: filters?.hasActiveProjects });
         return { success: false, error: 'Failed to fetch clients' };
     }
 }
@@ -152,7 +153,7 @@ export async function getClientDetails(clientId: string): Promise<ActionResponse
             },
         };
     } catch (error) {
-        console.error('Error fetching client details:', error);
+        logError(error as Error, { context: 'getClientDetails', clientId });
         return { success: false, error: 'Failed to fetch client details' };
     }
 }
@@ -180,7 +181,7 @@ export async function getClientProjects(clientId: string): Promise<ActionRespons
 
         return { success: true, data: serializedProjects };
     } catch (error) {
-        console.error('Error fetching client projects:', error);
+        logError(error as Error, { context: 'getClientProjects', clientId });
         return { success: false, error: 'Failed to fetch client projects' };
     }
 }
@@ -211,7 +212,7 @@ export async function getAdminClientStats(): Promise<ActionResponse> {
             },
         };
     } catch (error) {
-        console.error('Error fetching client stats:', error);
+        logError(error as Error, { context: 'getAdminClientStats' });
         return { success: false, error: 'Failed to fetch client stats' };
     }
 }

@@ -19,6 +19,7 @@ import Deliverable from '@/models/Deliverable';
 import Feedback from '@/models/Feedback';
 import SavedFilter from '@/models/SavedFilter';
 import TimeEntry from '@/models/TimeEntry';
+import { logError, logInfo } from '@/lib/sentry-logger';
 
 export async function POST(req: Request) {
     const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
             'svix-signature': svix_signature,
         }) as WebhookEvent;
     } catch (err) {
-        console.error('Error verifying webhook:', err);
+        logError(err as Error, { context: 'webhook verification failed' });
         return NextResponse.json(
             { error: 'Verification failed' },
             { status: 400 }
@@ -106,7 +107,7 @@ export async function POST(req: Request) {
                 imageUrl: image_url || profile_image_url || '',
             });
 
-            console.log('User created in MongoDB:', newUser._id);
+            logInfo('User created in MongoDB', { userId: newUser._id.toString() });
 
             return NextResponse.json(
                 {
@@ -116,7 +117,7 @@ export async function POST(req: Request) {
                 { status: 201 }
             );
         } catch (error) {
-            console.error('Error creating user in MongoDB:', error);
+            logError(error as Error, { context: 'createUser', clerkId: id });
             return NextResponse.json(
                 { error: 'Failed to create user' },
                 { status: 500 }
@@ -157,7 +158,7 @@ export async function POST(req: Request) {
                 );
             }
 
-            console.log('User updated in MongoDB:', updatedUser._id);
+            logInfo('User updated in MongoDB', { userId: updatedUser._id.toString() });
 
             return NextResponse.json(
                 {
@@ -167,7 +168,7 @@ export async function POST(req: Request) {
                 { status: 200 }
             );
         } catch (error) {
-            console.error('Error updating user in MongoDB:', error);
+            logError(error as Error, { context: 'updateUser', clerkId: id });
             return NextResponse.json(
                 { error: 'Failed to update user' },
                 { status: 500 }
@@ -189,44 +190,44 @@ export async function POST(req: Request) {
                 );
             }
 
-            console.log('User deleted from MongoDB:', deletedUser._id);
+            logInfo('User deleted from MongoDB', { userId: deletedUser._id.toString(), clerkId: deletedUser.clerkId });
 
             // Cascade delete all related data
-            const userId = deletedUser._id;
-            const clerkId = deletedUser.clerkId;
+            const userId = deletedUser._id; // ObjectId
+            const clerkId = deletedUser.clerkId; // String
 
             await Promise.all([
-                // Delete projects created by this user
-                Project.deleteMany({ userId: clerkId }),
-                // Delete tasks assigned to or created by this user
+                // Delete projects created by this user (uses clerkUserId string field)
+                Project.deleteMany({ clerkUserId: clerkId }),
+                // Delete tasks assigned to or created by this user (uses ObjectId fields)
                 Task.deleteMany({ $or: [{ assignedTo: userId }, { createdBy: userId }] }),
-                // Delete messages sent by this user
-                Message.deleteMany({ userId: clerkId }),
-                // Delete files uploaded by this user
-                File.deleteMany({ userId: clerkId }),
-                // Delete file folders created by this user
-                FileFolder.deleteMany({ userId: clerkId }),
-                // Delete invoices created by this user
-                Invoice.deleteMany({ userId: clerkId }),
-                // Delete notifications for this user
-                Notification.deleteMany({ userId: clerkId }),
-                // Delete notification preferences for this user
-                NotificationPreference.deleteMany({ userId: clerkId }),
-                // Delete activity logs for this user
-                Activity.deleteMany({ userId: clerkId }),
-                // Delete analytics data for this user
-                Analytics.deleteMany({ userId: clerkId }),
-                // Delete deliverables created by this user
+                // Delete messages sent by this user (uses clerkUserId string field)
+                Message.deleteMany({ clerkUserId: clerkId }),
+                // Delete files uploaded by this user (uses uploadedBy ObjectId field)
+                File.deleteMany({ uploadedBy: userId }),
+                // Delete file folders created by this user (uses createdBy ObjectId field)
+                FileFolder.deleteMany({ createdBy: userId }),
+                // Delete invoices created by this user (uses clerkUserId string field)
+                Invoice.deleteMany({ clerkUserId: clerkId }),
+                // Delete notifications for this user (uses clerkUserId string field)
+                Notification.deleteMany({ clerkUserId: clerkId }),
+                // Delete notification preferences for this user (uses clerkUserId string field)
+                NotificationPreference.deleteMany({ clerkUserId: clerkId }),
+                // Delete activity logs for this user (uses userId ObjectId field)
+                Activity.deleteMany({ userId: userId }),
+                // Delete analytics data for this user (uses clerkUserId string field)
+                Analytics.deleteMany({ clerkUserId: clerkId }),
+                // Delete deliverables created by this user (uses createdBy ObjectId field)
                 Deliverable.deleteMany({ createdBy: userId }),
-                // Delete feedback given by this user
-                Feedback.deleteMany({ userId: clerkId }),
-                // Delete saved filters for this user
-                SavedFilter.deleteMany({ userId: clerkId }),
-                // Delete time entries for this user
-                TimeEntry.deleteMany({ userId: clerkId }),
+                // Delete feedback given by this user (uses userId ObjectId field)
+                Feedback.deleteMany({ userId: userId }),
+                // Delete saved filters for this user (uses userId ObjectId field)
+                SavedFilter.deleteMany({ userId: userId }),
+                // Delete time entries for this user (uses userId ObjectId field)
+                TimeEntry.deleteMany({ userId: userId }),
             ]);
 
-            console.log('User and all related data deleted successfully:', userId);
+            logInfo('User and all related data deleted successfully', { userId: userId.toString(), clerkId });
 
             return NextResponse.json(
                 {
@@ -236,7 +237,7 @@ export async function POST(req: Request) {
                 { status: 200 }
             );
         } catch (error) {
-            console.error('Error deleting user from MongoDB:', error);
+            logError(error as Error, { context: 'deleteUser', clerkId: id });
             return NextResponse.json(
                 { error: 'Failed to delete user' },
                 { status: 500 }

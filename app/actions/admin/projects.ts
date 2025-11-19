@@ -7,6 +7,8 @@ import Project from '@/models/Project';
 import User from '@/models/User';
 import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -64,7 +66,7 @@ export async function getAllProjects(filters?: {
 
         return { success: true, data: serializedProjects };
     } catch (error) {
-        console.error('Error fetching all projects:', error);
+        logError(error as Error, { context: 'getAllProjects', filters });
         return { success: false, error: 'Failed to fetch projects' };
     }
 }
@@ -103,7 +105,7 @@ export async function getAdminProject(projectId: string): Promise<ActionResponse
 
         return { success: true, data: serializedProject };
     } catch (error) {
-        console.error('Error fetching admin project:', error);
+        logError(error as Error, { context: 'getAdminProject', projectId });
         return { success: false, error: 'Failed to fetch project' };
     }
 }
@@ -144,7 +146,7 @@ export async function updateProjectStatus(
             },
         };
     } catch (error) {
-        console.error('Error updating project status:', error);
+        logError(error as Error, { context: 'updateProjectStatus', projectId, status });
         return { success: false, error: 'Failed to update project status' };
     }
 }
@@ -197,7 +199,7 @@ export async function updateAdminProject(
             },
         };
     } catch (error) {
-        console.error('Error updating project:', error);
+        logError(error as Error, { context: 'updateAdminProject', projectId });
         return { success: false, error: 'Failed to update project' };
     }
 }
@@ -241,7 +243,7 @@ export async function addMilestone(
 
         return { success: true, data: updatedProject };
     } catch (error) {
-        console.error('Error adding milestone:', error);
+        logError(error as Error, { context: 'addMilestone', projectId, milestoneTitle: milestone.title });
         return { success: false, error: 'Failed to add milestone' };
     }
 }
@@ -287,9 +289,9 @@ export async function updateMilestone(
 
         revalidatePath(`/admin/projects/${projectId}`);
 
-        return { success: true, data: project.toObject() };
+        return { success: true, data: toSerializedObject(project) };
     } catch (error) {
-        console.error('Error updating milestone:', error);
+        logError(error as Error, { context: 'updateMilestone', projectId, milestoneIndex });
         return { success: false, error: 'Failed to update milestone' };
     }
 }
@@ -319,7 +321,7 @@ export async function bulkUpdateProjects(
 
         return { success: true, data: { updated: validIds.length } };
     } catch (error) {
-        console.error('Error bulk updating projects:', error);
+        logError(error as Error, { context: 'bulkUpdateProjects', projectIds, updates });
         return { success: false, error: 'Failed to bulk update projects' };
     }
 }
@@ -353,7 +355,7 @@ export async function getAdminProjectStats(): Promise<ActionResponse> {
             },
         };
     } catch (error) {
-        console.error('Error fetching admin project stats:', error);
+        logError(error as Error, { context: 'getAdminProjectStats' });
         return { success: false, error: 'Failed to fetch project stats' };
     }
 }

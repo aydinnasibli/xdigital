@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { logError } from '@/lib/sentry-logger';
 
 export async function POST(request: NextRequest) {
     try {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
             },
         });
     } catch (error) {
-        console.error('Error uploading file:', error);
+        logError(error as Error, { context: 'uploadFile' });
         return NextResponse.json(
             { error: 'Failed to upload file' },
             { status: 500 }
