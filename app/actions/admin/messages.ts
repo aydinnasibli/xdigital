@@ -7,6 +7,7 @@ import Message, { MessageSender } from '@/models/Message';
 import Project from '@/models/Project';
 import { requireAdmin, getAdminSession } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
+import { sendRealtimeMessage } from '@/lib/services/pusher.service';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -101,6 +102,16 @@ export async function sendAdminMessage(
             message: message.trim(),
             isRead: false,
         });
+
+        // Send real-time message via Pusher
+        const messageData = {
+            _id: newMessage._id.toString(),
+            sender: newMessage.sender,
+            message: newMessage.message,
+            createdAt: newMessage.createdAt.toISOString(),
+        };
+
+        await sendRealtimeMessage(projectId, messageData);
 
         revalidatePath(`/admin/projects/${projectId}`);
         revalidatePath(`/admin/messages`);

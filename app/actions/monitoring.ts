@@ -9,12 +9,24 @@ import { GoogleAnalyticsService } from '@/lib/services/analytics.service';
 import { SEOService } from '@/lib/services/seo.service';
 import { PerformanceService } from '@/lib/services/performance.service';
 import { PDFReportService, type ReportData } from '@/lib/services/pdf-report.service';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
     data?: T;
     error?: string;
 };
+
+// Helper function to safely parse JSON environment variables
+function safeJSONParse(jsonString: string | undefined): any {
+    if (!jsonString) return undefined;
+    try {
+        return JSON.parse(jsonString);
+    } catch (error) {
+        logError(error, { context: 'safeJSONParse', jsonString });
+        return undefined;
+    }
+}
 
 /**
  * Get comprehensive analytics for a project
@@ -41,9 +53,7 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
         // Initialize Google Analytics service
         if (project.googleAnalyticsPropertyId) {
             // Parse credentials from environment
-            const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
-                ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
-                : undefined;
+            const credentials = safeJSONParse(process.env.GOOGLE_ANALYTICS_CREDENTIALS);
 
             const analyticsService = new GoogleAnalyticsService({
                 propertyId: project.googleAnalyticsPropertyId,
@@ -71,7 +81,7 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
             },
         };
     } catch (error) {
-        console.error('Error fetching project analytics:', error);
+        logError(error, { context: 'getProjectAnalytics', projectId });
         return { success: false, error: 'Failed to fetch analytics' };
     }
 }
@@ -113,7 +123,7 @@ export async function getSEOAnalysis(projectId: string): Promise<ActionResponse>
             data: seoScore,
         };
     } catch (error) {
-        console.error('Error analyzing SEO:', error);
+        logError(error, { context: 'getSEOAnalysis', projectId });
         return { success: false, error: 'Failed to analyze SEO' };
     }
 }
@@ -155,7 +165,7 @@ export async function getPerformanceMetrics(projectId: string): Promise<ActionRe
             data: performanceMetrics,
         };
     } catch (error) {
-        console.error('Error analyzing performance:', error);
+        logError(error, { context: 'getPerformanceMetrics', projectId });
         return { success: false, error: 'Failed to analyze performance' };
     }
 }
@@ -191,9 +201,7 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
         if (project.deploymentUrl) {
             // Get analytics summary
             if (project.googleAnalyticsPropertyId) {
-                const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
-                    ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
-                    : undefined;
+                const credentials = safeJSONParse(process.env.GOOGLE_ANALYTICS_CREDENTIALS);
 
                 const analyticsService = new GoogleAnalyticsService({
                     propertyId: project.googleAnalyticsPropertyId,
@@ -216,7 +224,7 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
             data: summary,
         };
     } catch (error) {
-        console.error('Error fetching dashboard summary:', error);
+        logError(error, { context: 'getDashboardSummary', projectId });
         return { success: false, error: 'Failed to fetch dashboard summary' };
     }
 }
@@ -255,9 +263,7 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
         const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
         // Get analytics data
-        const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
-            ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
-            : undefined;
+        const credentials = safeJSONParse(process.env.GOOGLE_ANALYTICS_CREDENTIALS);
 
         const analyticsService = new GoogleAnalyticsService({
             propertyId: project.googleAnalyticsPropertyId || '',
@@ -317,7 +323,7 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
             },
         };
     } catch (error) {
-        console.error('Error generating PDF report:', error);
+        logError(error, { context: 'generatePDFReport', projectId });
         return { success: false, error: 'Failed to generate report' };
     }
 }

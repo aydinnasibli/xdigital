@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { updateProjectStatus } from '@/app/actions/admin/projects';
 import { ProjectStatus } from '@/models/Project';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function UpdateStatusForm({
     projectId,
@@ -15,21 +16,19 @@ export default function UpdateStatusForm({
 }) {
     const [status, setStatus] = useState(currentStatus);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setMessage('');
 
         const result = await updateProjectStatus(projectId, status);
 
         if (result.success) {
-            setMessage('Status updated successfully!');
+            toast.success('Project status updated successfully!');
             router.refresh();
         } else {
-            setMessage(result.error || 'Failed to update status');
+            toast.error(result.error || 'Failed to update status');
         }
 
         setLoading(false);
@@ -55,17 +54,6 @@ export default function UpdateStatusForm({
                     <option value={ProjectStatus.CANCELLED}>Cancelled</option>
                 </select>
             </div>
-
-            {message && (
-                <div
-                    className={`p-3 rounded-lg ${message.includes('success')
-                            ? 'bg-green-50 text-green-800'
-                            : 'bg-red-50 text-red-800'
-                        }`}
-                >
-                    {message}
-                </div>
-            )}
 
             <button
                 type="submit"

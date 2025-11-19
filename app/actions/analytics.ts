@@ -12,8 +12,10 @@ type ActionResponse<T = any> = {
     error?: string;
 };
 
-// Get analytics for a project
-export async function getProjectAnalytics(projectId: string): Promise<ActionResponse> {
+// Get stored analytics for a project (from Analytics model/database)
+// NOTE: This is different from monitoring.ts getProjectAnalytics which fetches live Google Analytics data
+// This function reads historical analytics stored in the database
+export async function getStoredProjectAnalytics(projectId: string): Promise<ActionResponse> {
     try {
         const { userId: clerkUserId } = await auth();
 

@@ -1,7 +1,9 @@
 // app/admin/clients/[id]/page.tsx
 import Link from 'next/link';
 import { getClientDetails } from '@/app/actions/admin/clients';
+import { getClientNotes } from '@/app/actions/client-notes';
 import { ArrowLeft, Mail, Calendar, FolderKanban, FileText, DollarSign } from 'lucide-react';
+import ClientNotesSection from './ClientNotesSection';
 
 export default async function AdminClientDetailPage({
     params,
@@ -9,7 +11,11 @@ export default async function AdminClientDetailPage({
     params: Promise<{ id: string }>;
 
 }) {
-    const result = await getClientDetails((await params).id);
+    const resolvedParams = await params;
+    const [result, notesResult] = await Promise.all([
+        getClientDetails(resolvedParams.id),
+        getClientNotes(resolvedParams.id),
+    ]);
 
     if (!result.success) {
         return (
@@ -20,6 +26,7 @@ export default async function AdminClientDetailPage({
     }
 
     const { client, projects, invoices, stats } = result.data;
+    const notes = notesResult.success ? notesResult.data : [];
 
     // Calculate stats
     const projectStats = stats.projects.reduce((acc: any, item: any) => {
@@ -186,6 +193,9 @@ export default async function AdminClientDetailPage({
                             )}
                         </div>
                     </div>
+
+                    {/* Client Notes */}
+                    <ClientNotesSection clientId={resolvedParams.id} notes={notes} />
                 </div>
 
                 {/* Sidebar */}

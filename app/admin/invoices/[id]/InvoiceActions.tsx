@@ -3,8 +3,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Send, CheckCircle, Download, Printer } from 'lucide-react';
-import { sendInvoice, markInvoiceAsPaid } from '@/app/actions/admin/invoices';
+import { Send, CheckCircle, Download, Printer, Edit, Trash2 } from 'lucide-react';
+import { sendInvoice, markInvoiceAsPaid, deleteInvoice } from '@/app/actions/admin/invoices';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface InvoiceActionsProps {
     invoice: any;
@@ -24,10 +26,10 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
         setLoading(true);
         const result = await sendInvoice(invoice._id);
         if (result.success) {
-            alert('Invoice sent successfully!');
+            toast.success('Invoice sent successfully! Client notified via email');
             router.refresh();
         } else {
-            alert(result.error || 'Failed to send invoice');
+            toast.error(result.error || 'Failed to send invoice');
         }
         setLoading(false);
     };
@@ -36,12 +38,12 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
         setLoading(true);
         const result = await markInvoiceAsPaid(invoice._id, paymentMethod);
         if (result.success) {
-            alert('Invoice marked as paid!');
+            toast.success('Invoice marked as paid! Client notified via email');
             setShowPaymentModal(false);
             setPaymentMethod('');
             router.refresh();
         } else {
-            alert(result.error || 'Failed to mark invoice as paid');
+            toast.error(result.error || 'Failed to mark invoice as paid');
         }
         setLoading(false);
     };
@@ -56,6 +58,22 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
         if (content) {
             window.print();
         }
+    };
+
+    const handleDelete = async () => {
+        if (!confirm('Are you sure you want to delete this invoice? This action cannot be undone.')) {
+            return;
+        }
+
+        setLoading(true);
+        const result = await deleteInvoice(invoice._id);
+        if (result.success) {
+            toast.success('Invoice deleted successfully');
+            router.push('/admin/invoices');
+        } else {
+            toast.error(result.error || 'Failed to delete invoice');
+        }
+        setLoading(false);
     };
 
     return (
@@ -99,6 +117,26 @@ export default function InvoiceActions({ invoice }: InvoiceActionsProps) {
                         <Download className="w-4 h-4" />
                         Download PDF
                     </button>
+
+                    {invoice.status === 'draft' && (
+                        <>
+                            <Link
+                                href={`/admin/invoices/${invoice._id}/edit`}
+                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                            >
+                                <Edit className="w-4 h-4" />
+                                Edit
+                            </Link>
+                            <button
+                                onClick={handleDelete}
+                                disabled={loading}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                Delete
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 

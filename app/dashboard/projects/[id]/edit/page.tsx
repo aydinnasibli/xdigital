@@ -5,6 +5,7 @@ import { useState, useEffect, useTransition, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getProject, updateProject } from '@/app/actions/projects';
+import { toast } from 'sonner';
 
 export default function EditProjectPage({
     params,
@@ -41,10 +42,11 @@ export default function EditProjectPage({
                     package: result.data.package,
                 });
             } else {
-                alert(result.error || 'Failed to fetch project');
+                toast.error(result.error || 'Failed to fetch project');
             }
         } catch (error) {
             console.error('Error fetching project:', error);
+            toast.error('An error occurred while loading the project');
         } finally {
             setFetching(false);
         }
@@ -57,10 +59,11 @@ export default function EditProjectPage({
             const result = await updateProject(projectId, formData);
 
             if (result.success) {
+                toast.success('Project updated successfully!');
                 router.push(`/dashboard/projects/${projectId}`);
                 router.refresh();
             } else {
-                alert(result.error || 'Failed to update project');
+                toast.error(result.error || 'Failed to update project');
             }
         });
     };

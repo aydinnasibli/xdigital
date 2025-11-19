@@ -6,6 +6,8 @@ import dbConnect from '@/lib/database/mongodb';
 import Message, { MessageSender } from '@/models/Message';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { sendRealtimeMessage } from '@/lib/services/pusher.service';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -46,7 +48,7 @@ export async function getMessages(projectId: string): Promise<ActionResponse> {
 
         return { success: true, data: serializedMessages };
     } catch (error) {
-        console.error('Error fetching messages:', error);
+        logError(error, { context: 'getMessages', projectId });
         return { success: false, error: 'Failed to fetch messages' };
     }
 }
@@ -87,6 +89,16 @@ export async function sendMessage(
             isRead: false,
         });
 
+        // Send real-time message via Pusher
+        const messageData = {
+            _id: newMessage._id.toString(),
+            sender: newMessage.sender,
+            message: newMessage.message,
+            createdAt: newMessage.createdAt.toISOString(),
+        };
+
+        await sendRealtimeMessage(projectId, messageData);
+
         revalidatePath(`/dashboard/projects/${projectId}`);
 
         return {
@@ -99,7 +111,7 @@ export async function sendMessage(
             },
         };
     } catch (error) {
-        console.error('Error sending message:', error);
+        logError(error, { context: 'sendMessage', projectId, messageLength: message.length });
         return { success: false, error: 'Failed to send message' };
     }
 }
@@ -129,7 +141,7 @@ export async function markMessagesAsRead(projectId: string): Promise<ActionRespo
 
         return { success: true };
     } catch (error) {
-        console.error('Error marking messages as read:', error);
+        logError(error, { context: 'markMessagesAsRead', projectId });
         return { success: false, error: 'Failed to mark messages as read' };
     }
 }
