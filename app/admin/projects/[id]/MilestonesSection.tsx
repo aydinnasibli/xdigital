@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { addMilestone, updateMilestone } from '@/app/actions/admin/projects';
 import { useRouter } from 'next/navigation';
 import { CheckCircle, Circle, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function MilestonesSection({
     projectId,
@@ -34,11 +35,12 @@ export default function MilestonesSection({
         });
 
         if (result.success) {
+            toast.success('Milestone added successfully');
             setNewMilestone({ title: '', description: '', dueDate: '' });
             setShowAddForm(false);
             router.refresh();
         } else {
-            alert(result.error || 'Failed to add milestone');
+            toast.error(result.error || 'Failed to add milestone');
         }
 
         setLoading(false);
@@ -48,9 +50,10 @@ export default function MilestonesSection({
         const result = await updateMilestone(projectId, index, { completed });
 
         if (result.success) {
+            toast.success(completed ? 'Milestone marked as completed! Client notified via email' : 'Milestone updated');
             router.refresh();
         } else {
-            alert(result.error || 'Failed to update milestone');
+            toast.error(result.error || 'Failed to update milestone');
         }
     };
 

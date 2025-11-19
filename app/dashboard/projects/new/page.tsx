@@ -8,6 +8,7 @@ import { createProject } from '@/app/actions/projects';
 import { getTemplatesByPackage } from '@/app/actions/project-templates';
 import { Check, ChevronRight, ChevronLeft, Eye, Upload, X } from 'lucide-react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -82,10 +83,11 @@ export default function NewProjectPage() {
             });
 
             if (result.success) {
+                toast.success('Project created successfully! Redirecting...');
                 router.push('/dashboard/projects');
                 router.refresh();
             } else {
-                alert(result.error || 'Failed to create project');
+                toast.error(result.error || 'Failed to create project');
             }
         });
     };

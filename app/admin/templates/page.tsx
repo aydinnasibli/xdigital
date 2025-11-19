@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { getTemplates } from '@/app/actions/project-templates';
 import { ExternalLink, Eye, Trash2, Edit } from 'lucide-react';
 import Image from 'next/image';
+import TemplateActions from './TemplateActions';
 
 export default async function TemplatesPage() {
     const { userId } = await auth();
@@ -137,6 +138,7 @@ export default async function TemplatesPage() {
                                                 >
                                                     <Edit size={18} />
                                                 </Link>
+                                                <TemplateActions templateId={template._id} templateName={template.name} />
                                             </div>
                                         </div>
 

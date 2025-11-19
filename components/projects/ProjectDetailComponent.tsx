@@ -1,7 +1,7 @@
 // components/projects/ProjectDetailClient.tsx
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { deleteProject } from '@/app/actions/projects';
@@ -10,6 +10,8 @@ import { useEffect } from 'react';
 import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectAnalytics } from '@/app/actions/monitoring';
 import dynamic from 'next/dynamic';
+import { usePusherChannel } from '@/lib/hooks/usePusher';
+import { toast } from 'sonner';
 
 // Dynamically import heavy dashboard components
 const SEODashboard = dynamic(() => import('@/components/dashboard/SEODashboard'), {
@@ -111,6 +113,7 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
             const result = await generatePDFReport(projectId);
 
             if (result.success && result.data) {
+                toast.success('Report generated successfully!');
                 // Open HTML in new window for now (user can save as PDF)
                 const reportWindow = window.open('', '_blank');
                 if (reportWindow) {
@@ -118,11 +121,11 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
                     reportWindow.document.close();
                 }
             } else {
-                alert(result.error || 'Failed to generate report');
+                toast.error(result.error || 'Failed to generate report');
             }
         } catch (error) {
             console.error('Error generating report:', error);
-            alert('Failed to generate report');
+            toast.error('Failed to generate report');
         } finally {
             setGeneratingReport(false);
         }
@@ -295,6 +298,23 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
 
+    // Real-time message listener
+    const handleNewMessage = useCallback((data: any) => {
+        console.log('📨 New message received via Pusher:', data);
+        setMessages(prev => [...prev, {
+            _id: data._id,
+            sender: data.sender,
+            message: data.message,
+            createdAt: data.createdAt,
+        }]);
+        // Show toast if message is from admin
+        if (data.sender === 'admin') {
+            toast.info('New message from admin');
+        }
+    }, []);
+
+    usePusherChannel(`project-${projectId}`, 'new-message', handleNewMessage);
+
     useEffect(() => {
         loadMessages();
     }, [projectId]);
@@ -316,9 +336,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
         const result = await sendMessage(projectId, newMessage);
         if (result.success) {
             setNewMessage('');
-            await loadMessages();
+            toast.success('Message sent');
         } else {
-            alert(result.error || 'Failed to send message');
+            toast.error(result.error || 'Failed to send message');
         }
         setSending(false);
     };
@@ -385,7 +405,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'messages' | 'invoices' | 'analytics' | 'seo' | 'performance'>(
+    const [activeTab, setActiveTab] = useState<'overview' | 'milestones' | 'messages' | 'invoices' | 'analytics' | 'seo' | 'performance'>(
         'overview'
     );
     const [isPending, startTransition] = useTransition();
@@ -397,10 +417,11 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             const result = await deleteProject(project._id);
 
             if (result.success) {
+                toast.success('Project deleted successfully');
                 router.push('/dashboard/projects');
                 router.refresh();
             } else {
-                alert(result.error || 'Failed to delete project');
+                toast.error(result.error || 'Failed to delete project');
             }
         });
     };
@@ -471,13 +492,13 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         Overview
                     </button>
                     <button
-                        onClick={() => setActiveTab('timeline')}
-                        className={`pb-3 px-1 border-b-2 ${activeTab === 'timeline'
+                        onClick={() => setActiveTab('milestones')}
+                        className={`pb-3 px-1 border-b-2 ${activeTab === 'milestones'
                             ? 'border-blue-600 text-blue-600'
                             : 'border-transparent text-gray-600 hover:text-gray-900'
                             }`}
                     >
-                        Timeline & Milestones
+                        Milestones
                     </button>
                     <button
                         onClick={() => setActiveTab('messages')}
@@ -562,14 +583,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Deliverables</h3>
                             <p className="text-sm text-gray-600 mt-1">Track deliverables</p>
                         </Link>
-                        <Link
-                            href={`/dashboard/projects/${project._id}/activity`}
-                            className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"
-                        >
-                            <div className="text-3xl mb-3">📝</div>
-                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Activity Log</h3>
-                            <p className="text-sm text-gray-600 mt-1">View project history</p>
-                        </Link>
                     </div>
 
                     {/* Live Website */}
@@ -650,67 +663,87 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                 </div>
             )}
 
-            {activeTab === 'timeline' && (
+            {activeTab === 'milestones' && (
                 <div className="space-y-6">
+                    {/* Timeline */}
                     <div className="bg-white p-6 rounded-lg border">
-                        <h2 className="text-xl font-semibold mb-4">Timeline</h2>
-                        <div className="space-y-3">
-                            {project.timeline?.startDate && (
-                                <div>
-                                    <div className="text-sm text-gray-600">Start Date</div>
-                                    <div className="font-medium">
-                                        {new Date(project.timeline.startDate).toLocaleDateString()}
-                                    </div>
+                        <h2 className="text-xl font-semibold mb-4">Project Timeline</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <div className="text-sm text-gray-600">Start Date</div>
+                                <div className="font-medium text-lg">
+                                    {project.timeline?.startDate
+                                        ? new Date(project.timeline.startDate).toLocaleDateString()
+                                        : 'Not set by admin yet'}
                                 </div>
-                            )}
-                            {project.timeline?.estimatedCompletion && (
-                                <div>
-                                    <div className="text-sm text-gray-600">Estimated Completion</div>
-                                    <div className="font-medium">
-                                        {new Date(project.timeline.estimatedCompletion).toLocaleDateString()}
-                                    </div>
+                            </div>
+                            <div>
+                                <div className="text-sm text-gray-600">Estimated Completion</div>
+                                <div className="font-medium text-lg">
+                                    {project.timeline?.estimatedCompletion
+                                        ? new Date(project.timeline.estimatedCompletion).toLocaleDateString()
+                                        : 'Not set by admin yet'}
                                 </div>
-                            )}
+                            </div>
                             {project.timeline?.completedDate && (
                                 <div>
                                     <div className="text-sm text-gray-600">Completed Date</div>
-                                    <div className="font-medium">
+                                    <div className="font-medium text-lg text-green-600">
                                         {new Date(project.timeline.completedDate).toLocaleDateString()}
                                     </div>
                                 </div>
                             )}
-                            {!project.timeline?.startDate && (
-                                <p className="text-gray-500">Timeline will be set by admin</p>
-                            )}
                         </div>
                     </div>
 
-                    {project.milestones && project.milestones.length > 0 && (
+                    {/* Milestones */}
+                    {project.milestones && project.milestones.length > 0 ? (
                         <div className="bg-white p-6 rounded-lg border">
-                            <h2 className="text-xl font-semibold mb-4">Milestones</h2>
+                            <h2 className="text-xl font-semibold mb-4">Project Milestones</h2>
                             <div className="space-y-4">
                                 {project.milestones.map((milestone, index) => (
-                                    <div key={index} className="flex items-start gap-3 p-4 border rounded">
+                                    <div
+                                        key={index}
+                                        className={`flex items-start gap-4 p-4 border rounded-lg ${
+                                            milestone.completed ? 'bg-green-50 border-green-200' : 'bg-white'
+                                        }`}
+                                    >
                                         <div
-                                            className={`w-6 h-6 rounded-full flex items-center justify-center ${milestone.completed ? 'bg-green-500' : 'bg-gray-300'
-                                                }`}
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                                milestone.completed ? 'bg-green-500' : 'bg-gray-300'
+                                            }`}
                                         >
-                                            {milestone.completed && <span className="text-white text-sm">✓</span>}
+                                            {milestone.completed && <span className="text-white text-lg">✓</span>}
                                         </div>
                                         <div className="flex-1">
-                                            <h3 className="font-medium">{milestone.title}</h3>
+                                            <h3 className="font-semibold text-lg">{milestone.title}</h3>
                                             {milestone.description && (
-                                                <p className="text-sm text-gray-600 mt-1">{milestone.description}</p>
+                                                <p className="text-gray-600 mt-1">{milestone.description}</p>
                                             )}
-                                            {milestone.dueDate && (
-                                                <p className="text-sm text-gray-500 mt-2">
-                                                    Due: {new Date(milestone.dueDate).toLocaleDateString()}
-                                                </p>
-                                            )}
+                                            <div className="flex gap-4 mt-2 text-sm">
+                                                {milestone.dueDate && (
+                                                    <div className="text-gray-500">
+                                                        📅 Due: {new Date(milestone.dueDate).toLocaleDateString()}
+                                                    </div>
+                                                )}
+                                                {milestone.completed && milestone.completedDate && (
+                                                    <div className="text-green-600">
+                                                        ✓ Completed: {new Date(milestone.completedDate).toLocaleDateString()}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
+                        </div>
+                    ) : (
+                        <div className="bg-white p-12 rounded-lg border text-center">
+                            <div className="text-6xl mb-4">🎯</div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Milestones Yet</h3>
+                            <p className="text-gray-600">
+                                Milestones will be added by the admin as your project progresses.
+                            </p>
                         </div>
                     )}
                 </div>

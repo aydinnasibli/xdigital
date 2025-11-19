@@ -15,6 +15,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { TaskStatus, TaskPriority } from '@/models/Task';
 import { updateTaskOrder } from '@/app/actions/tasks';
 import { TaskCard } from './TaskCard';
+import { toast } from 'sonner';
 
 interface Task {
     _id: string;
@@ -77,7 +78,12 @@ export function KanbanBoard({ tasks, projectId }: KanbanBoardProps) {
         if (task && task.status !== newStatus) {
             // Optimistically update UI
             startTransition(async () => {
-                await updateTaskOrder(taskId, 0, newStatus);
+                const result = await updateTaskOrder(taskId, 0, newStatus);
+                if (result.success) {
+                    toast.success(`Task moved to ${columns.find(c => c.id === newStatus)?.title}`);
+                } else {
+                    toast.error('Failed to update task status');
+                }
             });
         }
 
