@@ -96,7 +96,6 @@ export interface IProject extends Document {
     googleAnalyticsPropertyId?: string;
 
     timeline?: ITimeline;
-    deliverables?: string[];
     milestones?: IMilestone[];
     createdAt: Date;
     updatedAt: Date;
@@ -190,12 +189,6 @@ const ProjectSchema = new Schema<IProject>(
             estimatedCompletion: Date,
             completedDate: Date,
         },
-        deliverables: [
-            {
-                type: String,
-                trim: true,
-            },
-        ],
         milestones: [
             {
                 title: {

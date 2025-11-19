@@ -40,7 +40,6 @@ export default function NewTemplatePage() {
                 screenshots: formData.screenshots.filter(s => s.trim() !== ''),
                 features: formData.features.filter(f => f.trim() !== ''),
                 milestones: [],
-                deliverables: [],
                 tasks: [],
             };
 

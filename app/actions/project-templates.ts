@@ -151,7 +151,6 @@ export async function createTemplate(data: {
     availableForPackages?: string[];
     estimatedDurationDays: number;
     milestones: any[];
-    deliverables: any[];
     tasks: any[];
     isDefault?: boolean;
 }): Promise<ActionResponse> {
@@ -194,7 +193,6 @@ export async function updateTemplate(templateId: string, data: Partial<{
     description: string;
     estimatedDurationDays: number;
     milestones: any[];
-    deliverables: any[];
     tasks: any[];
     isActive: boolean;
     isDefault: boolean;
@@ -313,7 +311,6 @@ export async function createProjectFromTemplate(
                 estimatedCompletion,
             },
             milestones,
-            deliverables: template.deliverables.map(d => d.title),
         });
 
         // Create tasks from template
@@ -392,13 +389,6 @@ export async function cloneProjectAsTemplate(
             order: index,
         }));
 
-        // Convert deliverables to template format
-        const templateDeliverables = (project.deliverables || []).map(d => ({
-            title: d,
-            description: '',
-            category: 'other',
-        }));
-
         // Convert tasks to template format
         const templateTasks = tasks.map((t, index) => ({
             title: t.title,
@@ -416,7 +406,6 @@ export async function cloneProjectAsTemplate(
             package: project.package,
             estimatedDurationDays: duration,
             milestones: templateMilestones,
-            deliverables: templateDeliverables,
             tasks: templateTasks,
             isDefault: templateData.isDefault || false,
             createdBy: user!._id,
