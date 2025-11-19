@@ -29,7 +29,7 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
 
         await dbConnect();
 
-        const user = await User.findOne({ clerkId: clerkUserId });
+        const user = await User.findOne({ clerkId: clerkUserId }).lean();
         if (!user) {
             return { success: false, error: 'User not found' };
         }
@@ -89,7 +89,7 @@ export async function getSEOAnalysis(projectId: string): Promise<ActionResponse>
 
         await dbConnect();
 
-        const user = await User.findOne({ clerkId: clerkUserId });
+        const user = await User.findOne({ clerkId: clerkUserId }).lean();
         if (!user) {
             return { success: false, error: 'User not found' };
         }
@@ -131,7 +131,7 @@ export async function getPerformanceMetrics(projectId: string): Promise<ActionRe
 
         await dbConnect();
 
-        const user = await User.findOne({ clerkId: clerkUserId });
+        const user = await User.findOne({ clerkId: clerkUserId }).lean();
         if (!user) {
             return { success: false, error: 'User not found' };
         }
@@ -173,7 +173,7 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
 
         await dbConnect();
 
-        const user = await User.findOne({ clerkId: clerkUserId });
+        const user = await User.findOne({ clerkId: clerkUserId }).lean();
         if (!user) {
             return { success: false, error: 'User not found' };
         }
@@ -234,7 +234,7 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
 
         await dbConnect();
 
-        const user = await User.findOne({ clerkId: clerkUserId });
+        const user = await User.findOne({ clerkId: clerkUserId }).lean();
         if (!user) {
             return { success: false, error: 'User not found' };
         }

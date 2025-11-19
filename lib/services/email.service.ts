@@ -32,8 +32,10 @@ export async function sendEmail(params: SendEmailParams): Promise<{ success: boo
     try {
         const resend = getResendInstance();
 
+        const defaultFrom = process.env.EMAIL_FROM || 'XDigital <noreply@xdigital.com>';
+
         const { data, error } = await resend.emails.send({
-            from: params.from || process.env.EMAIL_FROM || 'XDigital <noreply@xdigital.com>',
+            from: params.from || defaultFrom,
             to: params.to,
             subject: params.subject,
             html: params.html,
@@ -41,7 +43,7 @@ export async function sendEmail(params: SendEmailParams): Promise<{ success: boo
         });
 
         if (error) {
-            logError(error.message, {
+            logError(new Error(error.message), {
                 context: 'sendEmail-resend',
                 to: params.to,
                 subject: params.subject,

@@ -47,12 +47,12 @@ export async function getAllFeedback(filters?: {
             // Handle populated userId (becomes object with _id, firstName, etc.)
             const userIdValue = typeof fb.userId === 'object' && fb.userId !== null
                 ? (fb.userId as any)._id?.toString() || (fb.userId as any).toString()
-                : fb.userId?.toString();
+                : (fb.userId as any)?.toString();
 
             // Handle populated projectId
             const projectIdValue = typeof fb.projectId === 'object' && fb.projectId !== null
                 ? (fb.projectId as any)._id?.toString() || (fb.projectId as any).toString()
-                : fb.projectId?.toString();
+                : (fb.projectId as any)?.toString();
 
             return {
                 ...fb,
@@ -93,7 +93,7 @@ export async function getUserFeedback(): Promise<ActionResponse> {
             // Handle populated projectId
             const projectIdValue = typeof fb.projectId === 'object' && fb.projectId !== null
                 ? (fb.projectId as any)._id?.toString() || (fb.projectId as any).toString()
-                : fb.projectId?.toString();
+                : (fb.projectId as any)?.toString();
 
             return {
                 ...fb,
@@ -292,7 +292,7 @@ export async function getPublicTestimonials(limit: number = 10): Promise<ActionR
             // Handle populated projectId
             const projectIdValue = typeof t.projectId === 'object' && t.projectId !== null
                 ? (t.projectId as any)._id?.toString() || (t.projectId as any).toString()
-                : t.projectId?.toString();
+                : (t.projectId as any)?.toString();
 
             return {
                 ...t,

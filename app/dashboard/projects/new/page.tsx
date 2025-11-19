@@ -9,6 +9,7 @@ import { getTemplatesByPackage } from '@/app/actions/project-templates';
 import { Check, ChevronRight, ChevronLeft, Eye, Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
+import * as Sentry from '@sentry/nextjs';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -69,7 +70,7 @@ export default function NewProjectPage() {
                 setTemplates(response.data || []);
             }
         } catch (error) {
-            console.error('Error loading templates:', error);
+            Sentry.captureException(error, { tags: { context: 'loadTemplates', serviceType: formData.serviceType, package: formData.package } });
         } finally {
             setLoadingTemplates(false);
         }
