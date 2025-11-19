@@ -8,6 +8,9 @@ import dbConnect from '@/lib/database/mongodb';
 import Project from '@/models/Project';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
+import { requireAdmin } from '@/lib/auth/admin';
 
 // Type definitions
 type ActionResponse<T = any> = {
@@ -75,7 +78,7 @@ export async function getProjects(): Promise<ActionResponse> {
 
         return { success: true, data: serializedProjects };
     } catch (error) {
-        console.error('Error fetching projects:', error);
+        logError(error as Error, { context: 'getProjects' });
         return { success: false, error: 'Failed to fetch projects' };
     }
 }
@@ -118,7 +121,7 @@ export async function getProject(projectId: string): Promise<ActionResponse> {
 
         return { success: true, data: serializedProject };
     } catch (error) {
-        console.error('Error fetching project:', error);
+        logError(error as Error, { context: 'getProject', projectId });
         return { success: false, error: 'Failed to fetch project' };
     }
 }
@@ -166,13 +169,13 @@ export async function createProject(formData: ProjectFormData): Promise<ActionRe
         return {
             success: true,
             data: {
-                ...newProject.toObject(),
+                ...toSerializedObject(newProject),
                 _id: newProject._id.toString(),
                 userId: newProject.userId.toString(),
             },
         };
     } catch (error) {
-        console.error('Error creating project:', error);
+        logError(error as Error, { context: 'createProject', projectName: formData.projectName });
         return { success: false, error: 'Failed to create project' };
     }
 }
@@ -231,7 +234,7 @@ export async function updateProject(
             },
         };
     } catch (error) {
-        console.error('Error updating project:', error);
+        logError(error as Error, { context: 'updateProject', projectId });
         return { success: false, error: 'Failed to update project' };
     }
 }
@@ -271,7 +274,7 @@ export async function deleteProject(projectId: string): Promise<ActionResponse> 
 
         return { success: true, data: { message: 'Project deleted successfully' } };
     } catch (error) {
-        console.error('Error deleting project:', error);
+        logError(error as Error, { context: 'deleteProject', projectId });
         return { success: false, error: 'Failed to delete project' };
     }
 }
@@ -309,7 +312,7 @@ export async function getProjectStats() {
 
         return { success: true, data: { stats, recentProjects } };
     } catch (error) {
-        console.error('Error fetching project stats:', error);
+        logError(error as Error, { context: 'getProjectStats' });
         return { success: false, error: 'Failed to fetch project stats' };
     }
 }
@@ -324,10 +327,8 @@ export async function updateProjectDeployment(
     }
 ): Promise<ActionResponse> {
     try {
-        const { userId: clerkUserId } = await auth();
-        if (!clerkUserId) {
-            return { success: false, error: 'Unauthorized' };
-        }
+        // Verify admin access
+        await requireAdmin();
 
         await dbConnect();
 
@@ -349,13 +350,13 @@ export async function updateProjectDeployment(
         return {
             success: true,
             data: {
-                ...project.toObject(),
+                ...toSerializedObject(project),
                 _id: project._id.toString(),
                 userId: project.userId.toString(),
             },
         };
     } catch (error) {
-        console.error('Error updating project deployment:', error);
+        logError(error as Error, { context: 'updateProjectDeployment', projectId });
         return { success: false, error: 'Failed to update deployment information' };
     }
 }

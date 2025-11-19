@@ -7,6 +7,7 @@ import Notification from '@/models/Notification';
 import User from '@/models/User';
 import { createNotification as createNotificationService } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -58,7 +59,7 @@ export async function getNotifications(): Promise<ActionResponse> {
 
         return { success: true, data: serializedNotifications };
     } catch (error) {
-        console.error('Error fetching notifications:', error);
+        logError(error as Error, { context: 'getNotifications' });
         return { success: false, error: 'Failed to fetch notifications' };
     }
 }
@@ -86,7 +87,7 @@ export async function getUnreadCount(): Promise<ActionResponse> {
 
         return { success: true, data: { count } };
     } catch (error) {
-        console.error('Error fetching unread count:', error);
+        logError(error as Error, { context: 'getUnreadCount' });
         return { success: false, error: 'Failed to fetch unread count' };
     }
 }
@@ -116,7 +117,7 @@ export async function markAsRead(notificationId: string): Promise<ActionResponse
 
         return { success: true };
     } catch (error) {
-        console.error('Error marking notification as read:', error);
+        logError(error as Error, { context: 'markAsRead', notificationId });
         return { success: false, error: 'Failed to mark as read' };
     }
 }
@@ -146,7 +147,7 @@ export async function markAllAsRead(): Promise<ActionResponse> {
 
         return { success: true };
     } catch (error) {
-        console.error('Error marking all as read:', error);
+        logError(error as Error, { context: 'markAllAsRead' });
         return { success: false, error: 'Failed to mark all as read' };
     }
 }

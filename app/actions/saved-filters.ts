@@ -6,6 +6,8 @@ import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/database/mongodb';
 import SavedFilter, { FilterEntity } from '@/models/SavedFilter';
 import User from '@/models/User';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -45,7 +47,7 @@ export async function getUserFilters(entity?: FilterEntity): Promise<ActionRespo
 
         return { success: true, data: serializedFilters };
     } catch (error) {
-        console.error('Error fetching user filters:', error);
+        logError(error as Error, { context: 'getUserFilters', entity });
         return { success: false, error: 'Failed to fetch filters' };
     }
 }
@@ -81,7 +83,7 @@ export async function getSharedFilters(entity?: FilterEntity): Promise<ActionRes
 
         return { success: true, data: serializedFilters };
     } catch (error) {
-        console.error('Error fetching shared filters:', error);
+        logError(error as Error, { context: 'getSharedFilters', entity });
         return { success: false, error: 'Failed to fetch shared filters' };
     }
 }
@@ -132,12 +134,12 @@ export async function createSavedFilter(data: {
         return {
             success: true,
             data: {
-                ...filter.toObject(),
+                ...toSerializedObject(filter),
                 _id: filter._id.toString(),
             },
         };
     } catch (error) {
-        console.error('Error creating saved filter:', error);
+        logError(error as Error, { context: 'createSavedFilter', entity: data.entity });
         return { success: false, error: 'Failed to create saved filter' };
     }
 }
@@ -185,9 +187,9 @@ export async function updateSavedFilter(filterId: string, data: Partial<{
 
         revalidatePath('/dashboard');
 
-        return { success: true, data: filter.toObject() };
+        return { success: true, data: toSerializedObject(filter) };
     } catch (error) {
-        console.error('Error updating saved filter:', error);
+        logError(error as Error, { context: 'updateSavedFilter', filterId });
         return { success: false, error: 'Failed to update saved filter' };
     }
 }
@@ -216,7 +218,7 @@ export async function deleteSavedFilter(filterId: string): Promise<ActionRespons
 
         return { success: true };
     } catch (error) {
-        console.error('Error deleting saved filter:', error);
+        logError(error as Error, { context: 'deleteSavedFilter', filterId });
         return { success: false, error: 'Failed to delete saved filter' };
     }
 }
@@ -244,9 +246,9 @@ export async function useSavedFilter(filterId: string): Promise<ActionResponse> 
             return { success: false, error: 'Filter not found' };
         }
 
-        return { success: true, data: filter.toObject() };
+        return { success: true, data: toSerializedObject(filter) };
     } catch (error) {
-        console.error('Error using saved filter:', error);
+        logError(error as Error, { context: 'useSavedFilter', filterId });
         return { success: false, error: 'Failed to use saved filter' };
     }
 }
@@ -285,7 +287,7 @@ export async function getDefaultFilter(entity: FilterEntity): Promise<ActionResp
             },
         };
     } catch (error) {
-        console.error('Error fetching default filter:', error);
+        logError(error as Error, { context: 'getDefaultFilter', entity });
         return { success: false, error: 'Failed to fetch default filter' };
     }
 }

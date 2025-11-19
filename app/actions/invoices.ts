@@ -5,6 +5,7 @@ import dbConnect from '@/lib/database/mongodb';
 import Invoice from '@/models/Invoice';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -45,7 +46,7 @@ export async function getProjectInvoices(projectId: string): Promise<ActionRespo
 
         return { success: true, data: serializedInvoices };
     } catch (error) {
-        console.error('Error fetching invoices:', error);
+        logError(error as Error, { context: 'getProjectInvoices', projectId });
         return { success: false, error: 'Failed to fetch invoices' };
     }
 }

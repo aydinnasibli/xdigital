@@ -12,6 +12,8 @@ import { logActivity } from './activities';
 import { ActivityType, ActivityEntity } from '@/models/Activity';
 import { createNotification } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -46,7 +48,7 @@ export async function getProjectDeliverables(projectId: string): Promise<ActionR
 
         return { success: true, data: serializedDeliverables };
     } catch (error) {
-        console.error('Error fetching deliverables:', error);
+        logError(error as Error, { context: 'getProjectDeliverables', projectId });
         return { success: false, error: 'Failed to fetch deliverables' };
     }
 }
@@ -90,9 +92,9 @@ export async function createDeliverable(data: {
 
         revalidatePath(`/dashboard/projects/${data.projectId}`);
 
-        return { success: true, data: deliverable.toObject() };
+        return { success: true, data: toSerializedObject(deliverable) };
     } catch (error) {
-        console.error('Error creating deliverable:', error);
+        logError(error as Error, { context: 'createDeliverable', projectId: data.projectId });
         return { success: false, error: 'Failed to create deliverable' };
     }
 }
@@ -140,9 +142,9 @@ export async function submitDeliverable(deliverableId: string, fileUrl: string, 
 
         revalidatePath(`/dashboard/projects/${deliverable.projectId}`);
 
-        return { success: true, data: deliverable.toObject() };
+        return { success: true, data: toSerializedObject(deliverable) };
     } catch (error) {
-        console.error('Error submitting deliverable:', error);
+        logError(error as Error, { context: 'submitDeliverable', deliverableId });
         return { success: false, error: 'Failed to submit deliverable' };
     }
 }
@@ -203,9 +205,9 @@ export async function approveDeliverable(deliverableId: string, notes?: string):
 
         revalidatePath(`/dashboard/projects/${deliverable.projectId}`);
 
-        return { success: true, data: deliverable.toObject() };
+        return { success: true, data: toSerializedObject(deliverable) };
     } catch (error) {
-        console.error('Error approving deliverable:', error);
+        logError(error as Error, { context: 'approveDeliverable', deliverableId });
         return { success: false, error: 'Failed to approve deliverable' };
     }
 }
@@ -266,9 +268,9 @@ export async function requestChanges(deliverableId: string, feedback: string, ra
 
         revalidatePath(`/dashboard/projects/${deliverable.projectId}`);
 
-        return { success: true, data: deliverable.toObject() };
+        return { success: true, data: toSerializedObject(deliverable) };
     } catch (error) {
-        console.error('Error requesting changes:', error);
+        logError(error as Error, { context: 'requestChanges', deliverableId });
         return { success: false, error: 'Failed to request changes' };
     }
 }

@@ -9,6 +9,8 @@ import Project from '@/models/Project';
 import Task from '@/models/Task';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -46,7 +48,7 @@ export async function getTemplates(serviceType?: string, packageType?: string): 
 
         return { success: true, data: serializedTemplates };
     } catch (error) {
-        console.error('Error fetching templates:', error);
+        logError(error as Error, { context: 'getTemplates', serviceType, packageType });
         return { success: false, error: 'Failed to fetch templates' };
     }
 }
@@ -95,7 +97,7 @@ export async function getTemplatesByPackage(serviceType: string, packageType: st
 
         return { success: true, data: serializedTemplates };
     } catch (error) {
-        console.error('Error fetching templates by package:', error);
+        logError(error as Error, { context: 'getTemplatesByPackage', serviceType, packageType });
         return { success: false, error: 'Failed to fetch templates' };
     }
 }
@@ -130,7 +132,7 @@ export async function getTemplate(templateId: string): Promise<ActionResponse> {
             },
         };
     } catch (error) {
-        console.error('Error fetching template:', error);
+        logError(error as Error, { context: 'getTemplate', templateId });
         return { success: false, error: 'Failed to fetch template' };
     }
 }
@@ -176,13 +178,12 @@ export async function createTemplate(data: {
         return {
             success: true,
             data: {
-                ...template.toObject(),
+                ...toSerializedObject(template),
                 _id: template._id.toString(),
-                createdBy: template.createdBy.toString(),
             },
         };
     } catch (error) {
-        console.error('Error creating template:', error);
+        logError(error as Error, { context: 'createTemplate', templateName: data.name });
         return { success: false, error: 'Failed to create template' };
     }
 }
@@ -210,7 +211,7 @@ export async function updateTemplate(templateId: string, data: Partial<{
             templateId,
             data,
             { new: true }
-        ).populate('createdBy', 'firstName lastName email').lean();
+        );
 
         if (!template) {
             return { success: false, error: 'Template not found' };
@@ -218,19 +219,9 @@ export async function updateTemplate(templateId: string, data: Partial<{
 
         revalidatePath('/admin/templates');
 
-        return {
-            success: true,
-            data: {
-                ...template,
-                _id: template._id.toString(),
-                createdBy: template.createdBy ? {
-                    ...template.createdBy,
-                    _id: template.createdBy._id.toString(),
-                } : null,
-            },
-        };
+        return { success: true, data: toSerializedObject(template) };
     } catch (error) {
-        console.error('Error updating template:', error);
+        logError(error as Error, { context: 'updateTemplate', templateId });
         return { success: false, error: 'Failed to update template' };
     }
 }
@@ -260,7 +251,7 @@ export async function deleteTemplate(templateId: string): Promise<ActionResponse
 
         return { success: true };
     } catch (error) {
-        console.error('Error deleting template:', error);
+        logError(error as Error, { context: 'deleteTemplate', templateId });
         return { success: false, error: 'Failed to delete template' };
     }
 }
@@ -351,13 +342,12 @@ export async function createProjectFromTemplate(
         return {
             success: true,
             data: {
-                ...project.toObject(),
+                ...toSerializedObject(project),
                 _id: project._id.toString(),
-                userId: project.userId.toString(),
             },
         };
     } catch (error) {
-        console.error('Error creating project from template:', error);
+        logError(error as Error, { context: 'createProjectFromTemplate', templateId, projectName: projectData.projectName });
         return { success: false, error: 'Failed to create project from template' };
     }
 }
@@ -437,13 +427,12 @@ export async function cloneProjectAsTemplate(
         return {
             success: true,
             data: {
-                ...template.toObject(),
+                ...toSerializedObject(template),
                 _id: template._id.toString(),
-                createdBy: template.createdBy.toString(),
             },
         };
     } catch (error) {
-        console.error('Error cloning project as template:', error);
+        logError(error as Error, { context: 'cloneProjectAsTemplate', projectId, templateName: templateData.name });
         return { success: false, error: 'Failed to clone project as template' };
     }
 }

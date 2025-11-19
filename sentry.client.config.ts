@@ -1,7 +1,3 @@
-// This file configures the initialization of Sentry on the client.
-// The config you add here will be used whenever a users loads a page in their browser.
-// https://docs.sentry.io/platforms/javascript/guides/nextjs/
-
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
@@ -28,40 +24,5 @@ Sentry.init({
     }),
   ],
 
-  // Note: if you want to override the automatic release value, do not set a
-  // `release` value here - use the environment variable `SENTRY_RELEASE`, so
-  // that it will also get attached to your source maps
-
-  // Filter out non-error events
-  beforeSend(event, hint) {
-    // Don't send events in development
-    if (process.env.NODE_ENV === 'development') {
-      return null;
-    }
-
-    // Filter out certain errors
-    const error = hint.originalException;
-
-    // Ignore network errors
-    if (error && typeof error === 'object' && 'message' in error) {
-      const message = (error as Error).message;
-      if (
-        message.includes('Failed to fetch') ||
-        message.includes('NetworkError') ||
-        message.includes('Load failed')
-      ) {
-        return null;
-      }
-    }
-
-    return event;
-  },
-
-  // Set context tags
-  initialScope: {
-    tags: {
-      'app.environment': process.env.NODE_ENV,
-      'app.name': 'xDigital',
-    },
-  },
+  environment: process.env.NODE_ENV,
 });

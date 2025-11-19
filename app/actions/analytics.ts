@@ -5,6 +5,7 @@ import dbConnect from '@/lib/database/mongodb';
 import Analytics from '@/models/Analytics';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -69,7 +70,7 @@ export async function getStoredProjectAnalytics(projectId: string): Promise<Acti
             },
         };
     } catch (error) {
-        console.error('Error fetching analytics:', error);
+        logError(error as Error, { context: 'getProjectAnalytics', projectId });
         return { success: false, error: 'Failed to fetch analytics' };
     }
 }

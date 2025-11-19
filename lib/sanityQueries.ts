@@ -1,4 +1,5 @@
 import { client } from "@/sanity/lib/client";
+import { logError } from '@/lib/sentry-logger';
 
 export interface PricingPackage {
   _id: string
@@ -98,7 +99,10 @@ export async function getComparisonFeatures(): Promise<ComparisonFeature[]> {
   try {
     return await client.fetch(query)
   } catch (error) {
-    console.error("Error fetching comparison features:", error);
+    logError(error as Error, {
+      context: 'getComparisonFeatures',
+      query
+    });
     return [];
   }
 }
@@ -114,7 +118,9 @@ export const getFaqWeb = async (): Promise<FaqWeb[]> => {
       }
     `);
   } catch (error) {
-    console.error("Error fetching FAQs:", error);
+    logError(error as Error, {
+      context: 'getFaqWeb'
+    });
     return [];
   }
 };
@@ -139,7 +145,9 @@ export const getPortfolioShowcases = async (): Promise<PortfolioShowcase[]> => {
       }
     `);
   } catch (error) {
-    console.error("Error fetching Portfolio Showcases:", error);
+    logError(error as Error, {
+      context: 'getPortfolioShowcases'
+    });
     return [];
   }
 };

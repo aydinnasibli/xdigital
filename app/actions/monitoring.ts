@@ -17,17 +17,6 @@ type ActionResponse<T = any> = {
     error?: string;
 };
 
-// Helper function to safely parse JSON environment variables
-function safeJSONParse(jsonString: string | undefined): any {
-    if (!jsonString) return undefined;
-    try {
-        return JSON.parse(jsonString);
-    } catch (error) {
-        logError(error, { context: 'safeJSONParse', jsonString });
-        return undefined;
-    }
-}
-
 /**
  * Get comprehensive analytics for a project
  */
@@ -45,7 +34,7 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
             return { success: false, error: 'User not found' };
         }
 
-        const project = await Project.findOne({ _id: projectId, userId: user._id });
+        const project = await Project.findOne({ _id: projectId, userId: user._id }).lean();
         if (!project) {
             return { success: false, error: 'Project not found' };
         }
@@ -53,7 +42,9 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
         // Initialize Google Analytics service
         if (project.googleAnalyticsPropertyId) {
             // Parse credentials from environment
-            const credentials = safeJSONParse(process.env.GOOGLE_ANALYTICS_CREDENTIALS);
+            const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
+                ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
+                : undefined;
 
             const analyticsService = new GoogleAnalyticsService({
                 propertyId: project.googleAnalyticsPropertyId,
@@ -81,7 +72,7 @@ export async function getProjectAnalytics(projectId: string): Promise<ActionResp
             },
         };
     } catch (error) {
-        logError(error, { context: 'getProjectAnalytics', projectId });
+        logError(error as Error, { context: 'getProjectAnalytics', projectId });
         return { success: false, error: 'Failed to fetch analytics' };
     }
 }
@@ -103,7 +94,7 @@ export async function getSEOAnalysis(projectId: string): Promise<ActionResponse>
             return { success: false, error: 'User not found' };
         }
 
-        const project = await Project.findOne({ _id: projectId, userId: user._id });
+        const project = await Project.findOne({ _id: projectId, userId: user._id }).lean();
         if (!project) {
             return { success: false, error: 'Project not found' };
         }
@@ -123,7 +114,7 @@ export async function getSEOAnalysis(projectId: string): Promise<ActionResponse>
             data: seoScore,
         };
     } catch (error) {
-        logError(error, { context: 'getSEOAnalysis', projectId });
+        logError(error as Error, { context: 'analyzeSEO', projectId });
         return { success: false, error: 'Failed to analyze SEO' };
     }
 }
@@ -145,7 +136,7 @@ export async function getPerformanceMetrics(projectId: string): Promise<ActionRe
             return { success: false, error: 'User not found' };
         }
 
-        const project = await Project.findOne({ _id: projectId, userId: user._id });
+        const project = await Project.findOne({ _id: projectId, userId: user._id }).lean();
         if (!project) {
             return { success: false, error: 'Project not found' };
         }
@@ -165,7 +156,7 @@ export async function getPerformanceMetrics(projectId: string): Promise<ActionRe
             data: performanceMetrics,
         };
     } catch (error) {
-        logError(error, { context: 'getPerformanceMetrics', projectId });
+        logError(error as Error, { context: 'analyzePerformance', projectId });
         return { success: false, error: 'Failed to analyze performance' };
     }
 }
@@ -187,7 +178,7 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
             return { success: false, error: 'User not found' };
         }
 
-        const project = await Project.findOne({ _id: projectId, userId: user._id });
+        const project = await Project.findOne({ _id: projectId, userId: user._id }).lean();
         if (!project) {
             return { success: false, error: 'Project not found' };
         }
@@ -201,7 +192,9 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
         if (project.deploymentUrl) {
             // Get analytics summary
             if (project.googleAnalyticsPropertyId) {
-                const credentials = safeJSONParse(process.env.GOOGLE_ANALYTICS_CREDENTIALS);
+                const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
+                    ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
+                    : undefined;
 
                 const analyticsService = new GoogleAnalyticsService({
                     propertyId: project.googleAnalyticsPropertyId,
@@ -224,7 +217,7 @@ export async function getDashboardSummary(projectId: string): Promise<ActionResp
             data: summary,
         };
     } catch (error) {
-        logError(error, { context: 'getDashboardSummary', projectId });
+        logError(error as Error, { context: 'getDashboardSummary', projectId });
         return { success: false, error: 'Failed to fetch dashboard summary' };
     }
 }
@@ -246,7 +239,7 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
             return { success: false, error: 'User not found' };
         }
 
-        const project = await Project.findOne({ _id: projectId, userId: user._id });
+        const project = await Project.findOne({ _id: projectId, userId: user._id }).lean();
         if (!project) {
             return { success: false, error: 'Project not found' };
         }
@@ -263,7 +256,9 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
         const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
         // Get analytics data
-        const credentials = safeJSONParse(process.env.GOOGLE_ANALYTICS_CREDENTIALS);
+        const credentials = process.env.GOOGLE_ANALYTICS_CREDENTIALS
+            ? JSON.parse(process.env.GOOGLE_ANALYTICS_CREDENTIALS)
+            : undefined;
 
         const analyticsService = new GoogleAnalyticsService({
             propertyId: project.googleAnalyticsPropertyId || '',
@@ -323,7 +318,7 @@ export async function generatePDFReport(projectId: string): Promise<ActionRespon
             },
         };
     } catch (error) {
-        logError(error, { context: 'generatePDFReport', projectId });
+        logError(error as Error, { context: 'generatePDFReport', projectId });
         return { success: false, error: 'Failed to generate report' };
     }
 }

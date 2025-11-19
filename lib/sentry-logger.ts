@@ -1,59 +1,62 @@
-// lib/sentry-logger.ts
 import * as Sentry from "@sentry/nextjs";
 
 /**
  * Log an error to Sentry
- * Use this instead of console.error for production error tracking
+ * @param error - The error object or message
+ * @param context - Additional context data
  */
-export function logError(error: unknown, context?: Record<string, any>): void {
-  if (process.env.NODE_ENV === 'development') {
-    console.error('Error:', error, context);
+export function logError(error: Error | string, context?: Record<string, unknown>) {
+  if (typeof error === "string") {
+    Sentry.captureMessage(error, {
+      level: "error",
+      extra: context,
+    });
+  } else {
+    Sentry.captureException(error, {
+      extra: context,
+    });
   }
-
-  Sentry.captureException(error, {
-    extra: context,
-  });
-}
-
-/**
- * Log a message to Sentry
- * Use this for important informational logs that need tracking
- */
-export function logMessage(message: string, level: 'info' | 'warning' | 'error' = 'info', context?: Record<string, any>): void {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[${level.toUpperCase()}]`, message, context);
-  }
-
-  Sentry.captureMessage(message, {
-    level,
-    extra: context,
-  });
 }
 
 /**
  * Log a warning to Sentry
- * Use this for potential issues that aren't critical errors
+ * @param message - The warning message
+ * @param context - Additional context data
  */
-export function logWarning(message: string, context?: Record<string, any>): void {
-  if (process.env.NODE_ENV === 'development') {
-    console.warn('Warning:', message, context);
-  }
-
+export function logWarning(message: string, context?: Record<string, unknown>) {
   Sentry.captureMessage(message, {
-    level: 'warning',
+    level: "warning",
     extra: context,
   });
 }
 
 /**
- * Add breadcrumb for debugging context
- * Use this to track the flow leading up to an error
+ * Log an info message to Sentry
+ * @param message - The info message
+ * @param context - Additional context data
  */
-export function addBreadcrumb(message: string, category: string, data?: Record<string, any>): void {
-  Sentry.addBreadcrumb({
-    message,
-    category,
-    data,
-    level: 'info',
+export function logInfo(message: string, context?: Record<string, unknown>) {
+  Sentry.captureMessage(message, {
+    level: "info",
+    extra: context,
   });
+}
+
+/**
+ * Set user context for Sentry
+ * @param userId - The user ID
+ * @param userData - Additional user data
+ */
+export function setUserContext(userId: string, userData?: Record<string, unknown>) {
+  Sentry.setUser({
+    id: userId,
+    ...userData,
+  });
+}
+
+/**
+ * Clear user context from Sentry
+ */
+export function clearUserContext() {
+  Sentry.setUser(null);
 }

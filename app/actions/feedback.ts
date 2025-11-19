@@ -7,6 +7,8 @@ import dbConnect from '@/lib/database/mongodb';
 import Feedback, { FeedbackType, FeedbackStatus } from '@/models/Feedback';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -62,7 +64,7 @@ export async function getAllFeedback(filters?: {
 
         return { success: true, data: serializedFeedback };
     } catch (error) {
-        console.error('Error fetching feedback:', error);
+        logError(error as Error, { context: 'getAllFeedback', filters });
         return { success: false, error: 'Failed to fetch feedback' };
     }
 }
@@ -103,7 +105,7 @@ export async function getUserFeedback(): Promise<ActionResponse> {
 
         return { success: true, data: serializedFeedback };
     } catch (error) {
-        console.error('Error fetching user feedback:', error);
+        logError(error as Error, { context: 'getUserFeedback' });
         return { success: false, error: 'Failed to fetch feedback' };
     }
 }
@@ -161,12 +163,12 @@ export async function submitFeedback(data: {
         return {
             success: true,
             data: {
-                ...feedback.toObject(),
+                ...toSerializedObject(feedback),
                 _id: feedback._id.toString(),
             },
         };
     } catch (error) {
-        console.error('Error submitting feedback:', error);
+        logError(error as Error, { context: 'submitFeedback', type: data.type, projectId: data.projectId });
         return { success: false, error: 'Failed to submit feedback' };
     }
 }
@@ -197,9 +199,9 @@ export async function approveTestimonial(feedbackId: string): Promise<ActionResp
 
         revalidatePath('/admin/feedback');
 
-        return { success: true, data: feedback.toObject() };
+        return { success: true, data: toSerializedObject(feedback) };
     } catch (error) {
-        console.error('Error approving testimonial:', error);
+        logError(error as Error, { context: 'approveTestimonial', feedbackId });
         return { success: false, error: 'Failed to approve testimonial' };
     }
 }
@@ -229,9 +231,9 @@ export async function rejectTestimonial(feedbackId: string): Promise<ActionRespo
 
         revalidatePath('/admin/feedback');
 
-        return { success: true, data: feedback.toObject() };
+        return { success: true, data: toSerializedObject(feedback) };
     } catch (error) {
-        console.error('Error rejecting testimonial:', error);
+        logError(error as Error, { context: 'rejectTestimonial', feedbackId });
         return { success: false, error: 'Failed to reject testimonial' };
     }
 }
@@ -264,9 +266,9 @@ export async function addAdminResponse(feedbackId: string, response: string): Pr
 
         revalidatePath('/admin/feedback');
 
-        return { success: true, data: feedback.toObject() };
+        return { success: true, data: toSerializedObject(feedback) };
     } catch (error) {
-        console.error('Error adding admin response:', error);
+        logError(error as Error, { context: 'addAdminResponse', feedbackId });
         return { success: false, error: 'Failed to add response' };
     }
 }
@@ -301,7 +303,7 @@ export async function getPublicTestimonials(limit: number = 10): Promise<ActionR
 
         return { success: true, data: serializedTestimonials };
     } catch (error) {
-        console.error('Error fetching testimonials:', error);
+        logError(error as Error, { context: 'getPublicTestimonials', limit });
         return { success: false, error: 'Failed to fetch testimonials' };
     }
 }
@@ -351,7 +353,7 @@ export async function getNPSStats(startDate?: Date, endDate?: Date): Promise<Act
             },
         };
     } catch (error) {
-        console.error('Error calculating NPS stats:', error);
+        logError(error as Error, { context: 'getNPSStats', startDate, endDate });
         return { success: false, error: 'Failed to calculate NPS stats' };
     }
 }

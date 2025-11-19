@@ -10,6 +10,7 @@ import File from '@/models/File';
 import Task from '@/models/Task';
 import Deliverable from '@/models/Deliverable';
 import User from '@/models/User';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -220,7 +221,7 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
 
         return { success: true, data: limitedResults };
     } catch (error) {
-        console.error('Error performing global search:', error);
+        logError(error as Error, { context: 'globalSearch', searchTerm, entities });
         return { success: false, error: 'Failed to perform search' };
     }
 }
@@ -336,7 +337,7 @@ export async function searchInProject(projectId: string, searchTerm: string): Pr
 
         return { success: true, data: results };
     } catch (error) {
-        console.error('Error searching in project:', error);
+        logError(error as Error, { context: 'searchInProject', projectId, searchTerm });
         return { success: false, error: 'Failed to search in project' };
     }
 }

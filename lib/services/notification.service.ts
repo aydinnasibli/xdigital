@@ -5,6 +5,8 @@ import dbConnect from '@/lib/database/mongodb';
 import Notification, { NotificationType } from '@/models/Notification';
 import User from '@/models/User';
 import { sendEmail } from './email.service';
+import { triggerPusherEvent } from './pusher.service';
+import { logError } from '@/lib/sentry-logger';
 
 interface CreateNotificationParams {
     userId: string; // Clerk user ID
@@ -18,10 +20,9 @@ interface CreateNotificationParams {
 }
 
 /**
- * Create a notification with email delivery
+ * Create a notification with email and real-time delivery
  * This is the MAIN function to use when you want to notify a user
- * Notifications are stored in database and fetched via polling on the client
- * REQUIRES: RESEND_API_KEY to be configured for email notifications
+ * REQUIRES: PUSHER credentials and RESEND_API_KEY to be configured
  */
 export async function createNotification(params: CreateNotificationParams): Promise<{success: boolean; error?: string}> {
     try {
@@ -30,7 +31,11 @@ export async function createNotification(params: CreateNotificationParams): Prom
         // Get user from database
         const user = await User.findOne({ clerkId: params.userId });
         if (!user) {
-            console.error('User not found:', params.userId);
+            logError('User not found', {
+                context: 'createNotification',
+                userId: params.userId,
+                type: params.type
+            });
             return { success: false, error: 'User not found' };
         }
 
@@ -44,6 +49,15 @@ export async function createNotification(params: CreateNotificationParams): Prom
             message: params.message,
             link: params.link,
             isRead: false,
+        });
+
+        // Trigger Pusher event for real-time notification delivery
+        await triggerPusherEvent(params.userId, 'new-notification', {
+            notificationId: notification._id.toString(),
+            title: params.title,
+            message: params.message,
+            type: params.type,
+            link: params.link,
         });
 
         // Send email if requested and user has email
@@ -61,7 +75,13 @@ export async function createNotification(params: CreateNotificationParams): Prom
 
         return { success: true };
     } catch (error) {
-        console.error('Error creating notification:', error);
+        logError(error as Error, {
+            context: 'createNotification',
+            userId: params.userId,
+            projectId: params.projectId,
+            type: params.type,
+            title: params.title
+        });
         return { success: false, error: 'Failed to create notification' };
     }
 }

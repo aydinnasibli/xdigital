@@ -9,6 +9,8 @@ import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
 import { createNotification } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -120,7 +122,7 @@ export async function getAllInvoices(filters?: {
 
         return { success: true, data: serializedInvoices };
     } catch (error) {
-        console.error('Error fetching all invoices:', error);
+        logError(error as Error, { context: 'getAllInvoices', filters });
         return { success: false, error: 'Failed to fetch invoices' };
     }
 }
@@ -187,14 +189,14 @@ export async function createInvoice(data: CreateInvoiceData): Promise<ActionResp
         return {
             success: true,
             data: {
-                ...newInvoice.toObject(),
+                ...toSerializedObject(newInvoice),
                 _id: newInvoice._id.toString(),
                 userId: newInvoice.userId.toString(),
                 projectId: newInvoice.projectId.toString(),
             },
         };
     } catch (error) {
-        console.error('Error creating invoice:', error);
+        logError(error as Error, { context: 'createInvoice', clientId: data.clientId, projectId: data.projectId });
         return { success: false, error: 'Failed to create invoice' };
     }
 }
@@ -250,14 +252,14 @@ export async function updateInvoice(
         return {
             success: true,
             data: {
-                ...invoice.toObject(),
+                ...toSerializedObject(invoice),
                 _id: invoice._id.toString(),
                 userId: invoice.userId.toString(),
                 projectId: invoice.projectId.toString(),
             },
         };
     } catch (error) {
-        console.error('Error updating invoice:', error);
+        logError(error as Error, { context: 'updateInvoice', invoiceId });
         return { success: false, error: 'Failed to update invoice' };
     }
 }
@@ -311,7 +313,7 @@ export async function sendInvoice(invoiceId: string): Promise<ActionResponse> {
             },
         };
     } catch (error) {
-        console.error('Error sending invoice:', error);
+        logError(error as Error, { context: 'sendInvoice', invoiceId });
         return { success: false, error: 'Failed to send invoice' };
     }
 }
@@ -369,7 +371,7 @@ export async function markInvoiceAsPaid(
             },
         };
     } catch (error) {
-        console.error('Error marking invoice as paid:', error);
+        logError(error as Error, { context: 'markInvoiceAsPaid', invoiceId });
         return { success: false, error: 'Failed to mark invoice as paid' };
     }
 }
@@ -401,7 +403,7 @@ export async function deleteInvoice(invoiceId: string): Promise<ActionResponse> 
 
         return { success: true, data: { message: 'Invoice deleted successfully' } };
     } catch (error) {
-        console.error('Error deleting invoice:', error);
+        logError(error as Error, { context: 'deleteInvoice', invoiceId });
         return { success: false, error: 'Failed to delete invoice' };
     }
 }
@@ -446,7 +448,7 @@ export async function getAdminInvoiceStats(): Promise<ActionResponse> {
             },
         };
     } catch (error) {
-        console.error('Error fetching invoice stats:', error);
+        logError(error as Error, { context: 'getAdminInvoiceStats' });
         return { success: false, error: 'Failed to fetch invoice stats' };
     }
 }

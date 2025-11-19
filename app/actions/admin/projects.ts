@@ -7,8 +7,8 @@ import Project from '@/models/Project';
 import User from '@/models/User';
 import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
-import { createNotification } from '@/lib/services/notification.service';
-import { NotificationType } from '@/models/Notification';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -66,7 +66,7 @@ export async function getAllProjects(filters?: {
 
         return { success: true, data: serializedProjects };
     } catch (error) {
-        console.error('Error fetching all projects:', error);
+        logError(error as Error, { context: 'getAllProjects', filters });
         return { success: false, error: 'Failed to fetch projects' };
     }
 }
@@ -105,7 +105,7 @@ export async function getAdminProject(projectId: string): Promise<ActionResponse
 
         return { success: true, data: serializedProject };
     } catch (error) {
-        console.error('Error fetching admin project:', error);
+        logError(error as Error, { context: 'getAdminProject', projectId });
         return { success: false, error: 'Failed to fetch project' };
     }
 }
@@ -134,18 +134,6 @@ export async function updateProjectStatus(
             return { success: false, error: 'Project not found' };
         }
 
-        // Notify client about status change
-        await createNotification({
-            userId: updatedProject.clerkUserId,
-            projectId: projectId,
-            type: NotificationType.PROJECT_UPDATE,
-            title: 'Project Status Updated',
-            message: `Your project "${updatedProject.projectName}" status has been updated to: ${status.replace('_', ' ')}`,
-            link: `/dashboard/projects/${projectId}`,
-            sendEmail: true,
-            emailSubject: `Project Status Update - ${updatedProject.projectName}`,
-        });
-
         revalidatePath('/admin/projects');
         revalidatePath(`/admin/projects/${projectId}`);
 
@@ -158,7 +146,7 @@ export async function updateProjectStatus(
             },
         };
     } catch (error) {
-        console.error('Error updating project status:', error);
+        logError(error as Error, { context: 'updateProjectStatus', projectId, status });
         return { success: false, error: 'Failed to update project status' };
     }
 }
@@ -211,7 +199,7 @@ export async function updateAdminProject(
             },
         };
     } catch (error) {
-        console.error('Error updating project:', error);
+        logError(error as Error, { context: 'updateAdminProject', projectId });
         return { success: false, error: 'Failed to update project' };
     }
 }
@@ -255,7 +243,7 @@ export async function addMilestone(
 
         return { success: true, data: updatedProject };
     } catch (error) {
-        console.error('Error adding milestone:', error);
+        logError(error as Error, { context: 'addMilestone', projectId, milestoneTitle: milestone.title });
         return { success: false, error: 'Failed to add milestone' };
     }
 }
@@ -289,36 +277,21 @@ export async function updateMilestone(
             return { success: false, error: 'Milestone not found' };
         }
 
-        const milestone = project.milestones[milestoneIndex];
-        const wasCompleted = milestone.completed;
-
         // Update the milestone
         Object.assign(project.milestones[milestoneIndex], updates);
 
         // If marking as completed, set completedDate
-        if (updates.completed && !wasCompleted) {
+        if (updates.completed) {
             project.milestones[milestoneIndex].completedDate = new Date();
-
-            // Notify client about milestone completion
-            await createNotification({
-                userId: project.clerkUserId,
-                projectId: projectId,
-                type: NotificationType.MILESTONE,
-                title: 'Milestone Completed',
-                message: `Great news! The milestone "${milestone.title}" for your project "${project.projectName}" has been completed!`,
-                link: `/dashboard/projects/${projectId}`,
-                sendEmail: true,
-                emailSubject: `Milestone Completed - ${milestone.title}`,
-            });
         }
 
         await project.save();
 
         revalidatePath(`/admin/projects/${projectId}`);
 
-        return { success: true, data: project.toObject() };
+        return { success: true, data: toSerializedObject(project) };
     } catch (error) {
-        console.error('Error updating milestone:', error);
+        logError(error as Error, { context: 'updateMilestone', projectId, milestoneIndex });
         return { success: false, error: 'Failed to update milestone' };
     }
 }
@@ -348,7 +321,7 @@ export async function bulkUpdateProjects(
 
         return { success: true, data: { updated: validIds.length } };
     } catch (error) {
-        console.error('Error bulk updating projects:', error);
+        logError(error as Error, { context: 'bulkUpdateProjects', projectIds, updates });
         return { success: false, error: 'Failed to bulk update projects' };
     }
 }
@@ -382,7 +355,7 @@ export async function getAdminProjectStats(): Promise<ActionResponse> {
             },
         };
     } catch (error) {
-        console.error('Error fetching admin project stats:', error);
+        logError(error as Error, { context: 'getAdminProjectStats' });
         return { success: false, error: 'Failed to fetch project stats' };
     }
 }

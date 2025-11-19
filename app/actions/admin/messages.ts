@@ -7,7 +7,8 @@ import Message, { MessageSender } from '@/models/Message';
 import Project from '@/models/Project';
 import { requireAdmin, getAdminSession } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
-import { sendRealtimeMessage } from '@/lib/services/pusher.service';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -65,7 +66,7 @@ export async function getAllMessages(filters?: {
 
         return { success: true, data: serializedMessages };
     } catch (error) {
-        console.error('Error fetching all messages:', error);
+        logError(error as Error, { context: 'getAllMessages', filters });
         return { success: false, error: 'Failed to fetch messages' };
     }
 }
@@ -103,16 +104,6 @@ export async function sendAdminMessage(
             isRead: false,
         });
 
-        // Send real-time message via Pusher
-        const messageData = {
-            _id: newMessage._id.toString(),
-            sender: newMessage.sender,
-            message: newMessage.message,
-            createdAt: newMessage.createdAt.toISOString(),
-        };
-
-        await sendRealtimeMessage(projectId, messageData);
-
         revalidatePath(`/admin/projects/${projectId}`);
         revalidatePath(`/admin/messages`);
         revalidatePath(`/dashboard/projects/${projectId}`); // Also revalidate client view
@@ -120,14 +111,14 @@ export async function sendAdminMessage(
         return {
             success: true,
             data: {
-                ...newMessage.toObject(),
+                ...toSerializedObject(newMessage),
                 _id: newMessage._id.toString(),
                 projectId: newMessage.projectId.toString(),
                 userId: newMessage.userId.toString(),
             },
         };
     } catch (error) {
-        console.error('Error sending admin message:', error);
+        logError(error as Error, { context: 'sendAdminMessage', projectId });
         return { success: false, error: 'Failed to send message' };
     }
 }
@@ -162,7 +153,7 @@ export async function markAdminMessagesAsRead(
 
         return { success: true, data: { marked: validIds.length } };
     } catch (error) {
-        console.error('Error marking messages as read:', error);
+        logError(error as Error, { context: 'markAdminMessagesAsRead', messageIds });
         return { success: false, error: 'Failed to mark messages as read' };
     }
 }
@@ -180,7 +171,7 @@ export async function getUnreadMessageCount(): Promise<ActionResponse> {
 
         return { success: true, data: { count } };
     } catch (error) {
-        console.error('Error fetching unread count:', error);
+        logError(error as Error, { context: 'getUnreadMessageCount' });
         return { success: false, error: 'Failed to fetch unread count' };
     }
 }
@@ -217,7 +208,7 @@ export async function getAdminProjectMessages(
 
         return { success: true, data: serializedMessages };
     } catch (error) {
-        console.error('Error fetching project messages:', error);
+        logError(error as Error, { context: 'getAdminProjectMessages', projectId });
         return { success: false, error: 'Failed to fetch project messages' };
     }
 }

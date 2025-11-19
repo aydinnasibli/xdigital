@@ -7,6 +7,8 @@ import dbConnect from '@/lib/database/mongodb';
 import ClientNote, { NoteType } from '@/models/ClientNote';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -41,7 +43,7 @@ export async function getClientNotes(clientId: string): Promise<ActionResponse> 
 
         return { success: true, data: serializedNotes };
     } catch (error) {
-        console.error('Error fetching client notes:', error);
+        logError(error as Error, { context: 'getClientNotes', clientId });
         return { success: false, error: 'Failed to fetch client notes' };
     }
 }
@@ -86,12 +88,12 @@ export async function createClientNote(data: {
         return {
             success: true,
             data: {
-                ...note.toObject(),
+                ...toSerializedObject(note),
                 _id: note._id.toString(),
             },
         };
     } catch (error) {
-        console.error('Error creating client note:', error);
+        logError(error as Error, { context: 'createClientNote', clientId: data.clientId });
         return { success: false, error: 'Failed to create client note' };
     }
 }
@@ -125,9 +127,9 @@ export async function updateClientNote(noteId: string, data: Partial<{
 
         revalidatePath(`/admin/clients/${note.clientId}`);
 
-        return { success: true, data: note.toObject() };
+        return { success: true, data: toSerializedObject(note) };
     } catch (error) {
-        console.error('Error updating client note:', error);
+        logError(error as Error, { context: 'updateClientNote', noteId });
         return { success: false, error: 'Failed to update client note' };
     }
 }
@@ -152,7 +154,7 @@ export async function deleteClientNote(noteId: string): Promise<ActionResponse> 
 
         return { success: true };
     } catch (error) {
-        console.error('Error deleting client note:', error);
+        logError(error as Error, { context: 'deleteClientNote', noteId });
         return { success: false, error: 'Failed to delete client note' };
     }
 }
@@ -178,9 +180,9 @@ export async function toggleNotePin(noteId: string): Promise<ActionResponse> {
 
         revalidatePath(`/admin/clients/${note.clientId}`);
 
-        return { success: true, data: note.toObject() };
+        return { success: true, data: toSerializedObject(note) };
     } catch (error) {
-        console.error('Error toggling note pin:', error);
+        logError(error as Error, { context: 'toggleNotePin', noteId });
         return { success: false, error: 'Failed to toggle pin' };
     }
 }
@@ -226,7 +228,7 @@ export async function getUpcomingReminders(days: number = 7): Promise<ActionResp
 
         return { success: true, data: serializedNotes };
     } catch (error) {
-        console.error('Error fetching upcoming reminders:', error);
+        logError(error as Error, { context: 'getUpcomingReminders', days });
         return { success: false, error: 'Failed to fetch reminders' };
     }
 }
@@ -253,7 +255,7 @@ export async function markReminderSent(noteId: string): Promise<ActionResponse> 
 
         return { success: true };
     } catch (error) {
-        console.error('Error marking reminder as sent:', error);
+        logError(error as Error, { context: 'markReminderSent', noteId });
         return { success: false, error: 'Failed to mark reminder' };
     }
 }

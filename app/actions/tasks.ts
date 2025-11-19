@@ -12,6 +12,8 @@ import { logActivity } from './activities';
 import { ActivityType, ActivityEntity } from '@/models/Activity';
 import { createNotification } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -55,7 +57,7 @@ export async function getProjectTasks(projectId: string): Promise<ActionResponse
 
         return { success: true, data: serializedTasks };
     } catch (error) {
-        console.error('Error fetching tasks:', error);
+        logError(error as Error, { context: 'getProjectTasks', projectId });
         return { success: false, error: 'Failed to fetch tasks' };
     }
 }
@@ -137,7 +139,7 @@ export async function createTask(data: {
             },
         };
     } catch (error) {
-        console.error('Error creating task:', error);
+        logError(error as Error, { context: 'createTask', projectId: data.projectId, title: data.title });
         return { success: false, error: 'Failed to create task' };
     }
 }
@@ -232,7 +234,7 @@ export async function updateTask(taskId: string, data: Partial<{
             },
         };
     } catch (error) {
-        console.error('Error updating task:', error);
+        logError(error as Error, { context: 'updateTask', taskId, status: data.status });
         return { success: false, error: 'Failed to update task' };
     }
 }
@@ -263,7 +265,7 @@ export async function updateTaskOrder(taskId: string, newOrder: number, newStatu
 
         return { success: true };
     } catch (error) {
-        console.error('Error updating task order:', error);
+        logError(error as Error, { context: 'updateTaskOrder', taskId, newOrder, newStatus });
         return { success: false, error: 'Failed to update task order' };
     }
 }
@@ -287,7 +289,7 @@ export async function deleteTask(taskId: string): Promise<ActionResponse> {
 
         return { success: true };
     } catch (error) {
-        console.error('Error deleting task:', error);
+        logError(error as Error, { context: 'deleteTask', taskId });
         return { success: false, error: 'Failed to delete task' };
     }
 }
@@ -317,9 +319,9 @@ export async function addSubtask(taskId: string, title: string): Promise<ActionR
 
         revalidatePath(`/dashboard/projects/${task.projectId}`);
 
-        return { success: true, data: task.toObject() };
+        return { success: true, data: toSerializedObject(task) };
     } catch (error) {
-        console.error('Error adding subtask:', error);
+        logError(error as Error, { context: 'addSubtask', taskId, title });
         return { success: false, error: 'Failed to add subtask' };
     }
 }
@@ -359,9 +361,9 @@ export async function toggleSubtask(taskId: string, subtaskIndex: number): Promi
 
         revalidatePath(`/dashboard/projects/${task.projectId}`);
 
-        return { success: true, data: task.toObject() };
+        return { success: true, data: toSerializedObject(task) };
     } catch (error) {
-        console.error('Error toggling subtask:', error);
+        logError(error as Error, { context: 'toggleSubtask', taskId, subtaskIndex });
         return { success: false, error: 'Failed to toggle subtask' };
     }
 }

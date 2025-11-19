@@ -6,7 +6,7 @@ import dbConnect from '@/lib/database/mongodb';
 import Message, { MessageSender } from '@/models/Message';
 import User from '@/models/User';
 import mongoose from 'mongoose';
-import { sendRealtimeMessage } from '@/lib/services/pusher.service';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
@@ -48,7 +48,7 @@ export async function getMessages(projectId: string): Promise<ActionResponse> {
 
         return { success: true, data: serializedMessages };
     } catch (error) {
-        logError(error, { context: 'getMessages', projectId });
+        logError(error as Error, { context: 'getMessages', projectId });
         return { success: false, error: 'Failed to fetch messages' };
     }
 }
@@ -89,29 +89,19 @@ export async function sendMessage(
             isRead: false,
         });
 
-        // Send real-time message via Pusher
-        const messageData = {
-            _id: newMessage._id.toString(),
-            sender: newMessage.sender,
-            message: newMessage.message,
-            createdAt: newMessage.createdAt.toISOString(),
-        };
-
-        await sendRealtimeMessage(projectId, messageData);
-
         revalidatePath(`/dashboard/projects/${projectId}`);
 
         return {
             success: true,
             data: {
-                ...newMessage.toObject(),
+                ...toSerializedObject(newMessage),
                 _id: newMessage._id.toString(),
                 projectId: newMessage.projectId.toString(),
                 userId: newMessage.userId.toString(),
             },
         };
     } catch (error) {
-        logError(error, { context: 'sendMessage', projectId, messageLength: message.length });
+        logError(error as Error, { context: 'sendMessage', projectId });
         return { success: false, error: 'Failed to send message' };
     }
 }
@@ -141,7 +131,7 @@ export async function markMessagesAsRead(projectId: string): Promise<ActionRespo
 
         return { success: true };
     } catch (error) {
-        logError(error, { context: 'markMessagesAsRead', projectId });
+        logError(error as Error, { context: 'markMessagesAsRead', projectId });
         return { success: false, error: 'Failed to mark messages as read' };
     }
 }

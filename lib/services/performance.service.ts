@@ -1,6 +1,8 @@
 // lib/services/performance.service.ts
 // Website performance monitoring using Lighthouse and Web Vitals
 
+import { logError } from '@/lib/sentry-logger';
+
 export interface PerformanceMetrics {
     overall: number; // 0-100
     coreWebVitals: {
@@ -154,7 +156,10 @@ export class PerformanceService {
                 recommendations: recommendations.slice(0, 6), // Limit to 6 recommendations
             };
         } catch (error) {
-            console.error('Error analyzing performance:', error);
+            logError(error as Error, {
+                context: 'analyzePerformance',
+                siteUrl: this.siteUrl
+            });
             throw new Error('Failed to analyze performance. Please check your PageSpeed API configuration.');
         }
     }

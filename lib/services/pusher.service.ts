@@ -9,7 +9,7 @@ let pusherInstance: Pusher | null = null;
 function getPusherInstance(): Pusher {
     if (!pusherInstance) {
         if (!process.env.PUSHER_APP_ID || !process.env.PUSHER_KEY || !process.env.PUSHER_SECRET) {
-            throw new Error('Pusher credentials are required. Add PUSHER_APP_ID, PUSHER_KEY, PUSHER_SECRET to environment variables.');
+            throw new Error('Pusher credentials not configured. Add PUSHER_APP_ID, PUSHER_KEY, PUSHER_SECRET to environment variables');
         }
 
         pusherInstance = new Pusher({
@@ -26,7 +26,6 @@ function getPusherInstance(): Pusher {
 
 /**
  * Trigger a Pusher event
- * NOTE: Used for real-time messaging only. Pusher credentials are required.
  */
 export async function triggerPusherEvent(
     channel: string,
@@ -37,7 +36,12 @@ export async function triggerPusherEvent(
         const pusher = getPusherInstance();
         await pusher.trigger(channel, event, data);
     } catch (error) {
-        logError(error, { context: 'triggerPusherEvent', channel, event });
+        logError(error as Error, {
+            context: 'triggerPusherEvent',
+            channel,
+            event,
+            dataKeys: data ? Object.keys(data) : []
+        });
         throw error;
     }
 }
