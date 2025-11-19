@@ -123,24 +123,32 @@ export async function getClientDetails(clientId: string): Promise<ActionResponse
             ]),
         ]);
 
-        const serializedProjects = projects.map(p => ({
-            ...p,
-            _id: p._id.toString(),
-            userId: p.userId.toString(),
-        }));
+        const serializedProjects = projects.map(p => {
+            const baseProject = toSerializedObject(p);
+            return {
+                ...baseProject,
+                _id: p._id.toString(),
+                userId: p.userId.toString(),
+            };
+        });
 
-        const serializedInvoices = invoices.map(i => ({
-            ...i,
-            _id: i._id.toString(),
-            userId: i.userId.toString(),
-            projectId: i.projectId.toString(),
-        }));
+        const serializedInvoices = invoices.map(i => {
+            const baseInvoice = toSerializedObject(i);
+            return {
+                ...baseInvoice,
+                _id: i._id.toString(),
+                userId: i.userId.toString(),
+                projectId: i.projectId.toString(),
+            };
+        });
+
+        const serializedClient = toSerializedObject(client);
 
         return {
             success: true,
             data: {
                 client: {
-                    ...client,
+                    ...serializedClient,
                     _id: client._id.toString(),
                     name: `${client.firstName || ''} ${client.lastName || ''}`.trim() || 'N/A',
                 },

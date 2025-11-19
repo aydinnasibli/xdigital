@@ -55,8 +55,9 @@ export async function getAllProjects(filters?: {
 
         const serializedProjects = projects.map(project => {
             const user = project.userId as any;
+            const baseProject = toSerializedObject(project);
             return {
-                ...project,
+                ...baseProject,
                 _id: project._id.toString(),
                 userId: user._id.toString(),
                 clientEmail: user.email,
@@ -91,8 +92,12 @@ export async function getAdminProject(projectId: string): Promise<ActionResponse
         }
 
         const user = project.userId as any;
+
+        // Properly serialize all MongoDB objects and Dates
+        const baseProject = toSerializedObject(project);
+
         const serializedProject = {
-            ...project,
+            ...baseProject,
             _id: project._id.toString(),
             userId: user._id.toString(),
             client: {

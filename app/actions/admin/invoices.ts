@@ -58,8 +58,9 @@ export async function getInvoiceById(invoiceId: string): Promise<ActionResponse>
         const user = invoice.userId as any;
         const project = invoice.projectId as any;
 
+        const baseInvoice = toSerializedObject(invoice);
         const serializedInvoice = {
-            ...invoice,
+            ...baseInvoice,
             _id: invoice._id.toString(),
             userId: user._id.toString(),
             projectId: project._id.toString(),
@@ -108,9 +109,10 @@ export async function getAllInvoices(filters?: {
         const serializedInvoices = invoices.map(inv => {
             const user = inv.userId as any;
             const project = inv.projectId as any;
+            const baseInvoice = toSerializedObject(inv);
 
             return {
-                ...inv,
+                ...baseInvoice,
                 _id: inv._id.toString(),
                 userId: user._id.toString(),
                 projectId: project._id.toString(),
@@ -303,10 +305,11 @@ export async function sendInvoice(invoiceId: string): Promise<ActionResponse> {
         revalidatePath('/admin/invoices');
         revalidatePath(`/dashboard/projects/${invoice.projectId.toString()}`);
 
+        const serializedInvoice = toSerializedObject(invoice);
         return {
             success: true,
             data: {
-                ...invoice,
+                ...serializedInvoice,
                 _id: invoice._id.toString(),
                 userId: invoice.userId.toString(),
                 projectId: invoice.projectId.toString(),
@@ -361,10 +364,11 @@ export async function markInvoiceAsPaid(
         revalidatePath('/admin/invoices');
         revalidatePath(`/dashboard/projects/${invoice.projectId.toString()}`);
 
+        const serializedInvoice = toSerializedObject(invoice);
         return {
             success: true,
             data: {
-                ...invoice,
+                ...serializedInvoice,
                 _id: invoice._id.toString(),
                 userId: invoice.userId.toString(),
                 projectId: invoice.projectId.toString(),
