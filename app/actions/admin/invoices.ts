@@ -70,7 +70,7 @@ export async function getInvoiceById(invoiceId: string): Promise<ActionResponse>
 
         return { success: true, data: serializedInvoice };
     } catch (error) {
-        console.error('Error fetching invoice:', error);
+        logError(error as Error, { context: 'getInvoice', invoiceId });
         return { success: false, error: 'Failed to fetch invoice' };
     }
 }

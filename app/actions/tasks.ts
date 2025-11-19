@@ -132,11 +132,7 @@ export async function createTask(data: {
 
         return {
             success: true,
-            data: {
-                ...task.toObject(),
-                _id: task._id.toString(),
-                projectId: task.projectId.toString(),
-            },
+            data: toSerializedObject(task),
         };
     } catch (error) {
         logError(error as Error, { context: 'createTask', projectId: data.projectId, title: data.title });
@@ -227,11 +223,7 @@ export async function updateTask(taskId: string, data: Partial<{
 
         return {
             success: true,
-            data: {
-                ...task.toObject(),
-                _id: task._id.toString(),
-                projectId: task.projectId.toString(),
-            },
+            data: toSerializedObject(task),
         };
     } catch (error) {
         logError(error as Error, { context: 'updateTask', taskId, status: data.status });

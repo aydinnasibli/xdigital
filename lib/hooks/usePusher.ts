@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import Pusher from 'pusher-js';
+import * as Sentry from '@sentry/nextjs';
 
 let pusherInstance: Pusher | null = null;
 
@@ -12,7 +13,7 @@ function getPusherInstance() {
         const cluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'us2';
 
         if (!key) {
-            console.error('Pusher key not configured');
+            Sentry.captureMessage('Pusher key not configured', { level: 'warning', tags: { context: 'pusherSetup' } });
             return null;
         }
 
@@ -29,7 +30,7 @@ export function usePusherChannel(channelName: string, eventName: string, callbac
     useEffect(() => {
         const pusher = getPusherInstance();
         if (!pusher) {
-            console.log('Pusher not configured');
+            // Pusher not configured - silently skip (already logged in getPusherInstance)
             return;
         }
 
@@ -37,11 +38,11 @@ export function usePusherChannel(channelName: string, eventName: string, callbac
 
         channel.bind('pusher:subscription_succeeded', () => {
             setIsConnected(true);
-            console.log(`✅ Connected to channel: ${channelName}`);
+            // Successfully connected to Pusher channel
         });
 
         channel.bind('pusher:subscription_error', (error: any) => {
-            console.error('Pusher subscription error:', error);
+            Sentry.captureException(error, { tags: { context: 'pusherSubscription', channelName } });
         });
 
         channel.bind(eventName, callback);

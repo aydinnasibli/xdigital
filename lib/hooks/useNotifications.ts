@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { getUnreadCount, getNotifications } from '@/app/actions/notifications';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Hook to poll for notifications every 30 seconds
@@ -20,15 +21,15 @@ export function useNotificationPolling(intervalMs: number = 30000) {
 
                 // If count increased, we have new notifications
                 if (newCount > unreadCount && unreadCount > 0) {
-                    // New notification received
+                    // New notification received (logged to Sentry for monitoring)
                     const difference = newCount - unreadCount;
-                    console.log(`📬 ${difference} new notification(s) received`);
+                    Sentry.captureMessage(`${difference} new notification(s) received`, { level: 'info', tags: { context: 'notificationPolling' } });
                 }
 
                 setUnreadCount(newCount);
             }
         } catch (error) {
-            console.error('Error polling notifications:', error);
+            Sentry.captureException(error, { tags: { context: 'pollingNotifications' } });
         }
     }, [unreadCount]);
 
@@ -70,7 +71,7 @@ export function useNotifications() {
                 setNotifications(result.data);
             }
         } catch (error) {
-            console.error('Error fetching notifications:', error);
+            Sentry.captureException(error, { tags: { context: 'fetchNotifications' } });
         } finally {
             setLoading(false);
         }

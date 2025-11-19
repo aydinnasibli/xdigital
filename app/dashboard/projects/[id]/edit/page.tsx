@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getProject, updateProject } from '@/app/actions/projects';
 import { toast } from 'sonner';
+import * as Sentry from '@sentry/nextjs';
 
 export default function EditProjectPage({
     params,
@@ -45,7 +46,7 @@ export default function EditProjectPage({
                 toast.error(result.error || 'Failed to fetch project');
             }
         } catch (error) {
-            console.error('Error fetching project:', error);
+            Sentry.captureException(error, { tags: { context: 'fetchProject', projectId } });
             toast.error('An error occurred while loading the project');
         } finally {
             setFetching(false);
