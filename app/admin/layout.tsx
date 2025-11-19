@@ -21,6 +21,7 @@ import {
     X
 } from 'lucide-react';
 import { useState } from 'react';
+import ReminderEmailChecker from '@/components/admin/ReminderEmailChecker';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,6 +31,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
+            {/* Silent reminder email checker */}
+            <ReminderEmailChecker />
             {/* Top Navigation */}
             <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
                 <div className="max-w-full px-4 sm:px-6 lg:px-8">
