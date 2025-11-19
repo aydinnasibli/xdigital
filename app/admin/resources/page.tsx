@@ -1,7 +1,7 @@
 // app/admin/resources/page.tsx
 import { redirect } from 'next/navigation';
 import { isAdmin } from '@/lib/auth/admin';
-import { getResources } from '@/app/actions/resources';
+import { getAdminResources } from '@/app/actions/resources';
 import Link from 'next/link';
 import ResourcesList from './ResourcesList';
 
@@ -12,7 +12,7 @@ export default async function AdminResourcesPage() {
     }
 
     // Get ALL resources (published and unpublished) for admin
-    const resourcesResult = await getResources();
+    const resourcesResult = await getAdminResources();
     const resources = resourcesResult.success ? resourcesResult.data : [];
 
     return (

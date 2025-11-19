@@ -16,6 +16,35 @@ type ActionResponse<T = any> = {
     error?: string;
 };
 
+// Get all resources for admin (no filters on publish status)
+export async function getAdminResources(): Promise<ActionResponse> {
+    try {
+        const { userId: clerkUserId } = await auth();
+        if (!clerkUserId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        await dbConnect();
+
+        // Admin sees ALL resources regardless of publish status
+        const resources = await Resource.find({})
+            .select('-content') // Don't send full content in list view
+            .sort({ createdAt: -1 })
+            .lean();
+
+        const serializedResources = resources.map(r => ({
+            ...r,
+            _id: r._id.toString(),
+            authorId: r.authorId.toString(),
+        }));
+
+        return { success: true, data: serializedResources };
+    } catch (error) {
+        logError(error as Error, { context: 'getAdminResources' });
+        return { success: false, error: 'Failed to fetch admin resources' };
+    }
+}
+
 // Get all published resources
 export async function getResources(filters?: {
     type?: ResourceType;
