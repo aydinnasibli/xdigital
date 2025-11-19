@@ -1,6 +1,8 @@
 // lib/services/analytics.service.ts
 // Google Analytics Data API integration for fetching website analytics
 
+import { logError } from '@/lib/sentry-logger';
+
 interface GoogleAnalyticsConfig {
     propertyId: string;
     credentials?: any; // Service account credentials
@@ -141,7 +143,12 @@ export class GoogleAnalyticsService {
                 realTimeUsers,
             };
         } catch (error) {
-            console.error('Error fetching Google Analytics data:', error);
+            logError(error as Error, {
+                context: 'getAnalyticsData',
+                propertyId: this.propertyId,
+                startDate,
+                endDate
+            });
             throw new Error('Failed to fetch analytics data. Please check your Google Analytics configuration.');
         }
     }
@@ -163,7 +170,10 @@ export class GoogleAnalyticsService {
 
             return parseInt(response.rows?.[0]?.metricValues?.[0]?.value || '0');
         } catch (error) {
-            console.error('Error fetching real-time users:', error);
+            logError(error as Error, {
+                context: 'getRealTimeUsers',
+                propertyId: this.propertyId
+            });
             return 0;
         }
     }

@@ -6,6 +6,7 @@ import Notification, { NotificationType } from '@/models/Notification';
 import User from '@/models/User';
 import { sendEmail } from './email.service';
 import { triggerPusherEvent } from './pusher.service';
+import { logError } from '@/lib/sentry-logger';
 
 interface CreateNotificationParams {
     userId: string; // Clerk user ID
@@ -30,7 +31,11 @@ export async function createNotification(params: CreateNotificationParams): Prom
         // Get user from database
         const user = await User.findOne({ clerkId: params.userId });
         if (!user) {
-            console.error('User not found:', params.userId);
+            logError('User not found', {
+                context: 'createNotification',
+                userId: params.userId,
+                type: params.type
+            });
             return { success: false, error: 'User not found' };
         }
 
@@ -70,7 +75,13 @@ export async function createNotification(params: CreateNotificationParams): Prom
 
         return { success: true };
     } catch (error) {
-        console.error('Error creating notification:', error);
+        logError(error as Error, {
+            context: 'createNotification',
+            userId: params.userId,
+            projectId: params.projectId,
+            type: params.type,
+            title: params.title
+        });
         return { success: false, error: 'Failed to create notification' };
     }
 }

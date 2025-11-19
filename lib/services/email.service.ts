@@ -2,6 +2,7 @@
 'use server';
 
 import { Resend } from 'resend';
+import { logError } from '@/lib/sentry-logger';
 
 let resendInstance: Resend | null = null;
 
@@ -40,13 +41,23 @@ export async function sendEmail(params: SendEmailParams): Promise<{ success: boo
         });
 
         if (error) {
-            console.error('Resend error:', error);
+            logError(error.message, {
+                context: 'sendEmail-resend',
+                to: params.to,
+                subject: params.subject,
+                error
+            });
             return { success: false, error: error.message };
         }
 
         return { success: true };
     } catch (error) {
-        console.error('Email service error:', error);
+        logError(error as Error, {
+            context: 'sendEmail',
+            to: params.to,
+            subject: params.subject,
+            from: params.from
+        });
         return { success: false, error: error instanceof Error ? error.message : 'Failed to send email' };
     }
 }

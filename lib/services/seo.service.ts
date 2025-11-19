@@ -1,6 +1,8 @@
 // lib/services/seo.service.ts
 // SEO analysis and monitoring service
 
+import { logError } from '@/lib/sentry-logger';
+
 export interface SEOScore {
     overall: number; // 0-100
     breakdown: {
@@ -90,7 +92,10 @@ export class SEOService {
                 recommendations,
             };
         } catch (error) {
-            console.error('Error analyzing SEO:', error);
+            logError(error as Error, {
+                context: 'analyzeSEO',
+                siteUrl: this.siteUrl
+            });
             throw new Error('Failed to analyze SEO. Please check the website URL is accessible.');
         }
     }
@@ -107,7 +112,10 @@ export class SEOService {
             });
             return await response.text();
         } catch (error) {
-            console.error('Error fetching page:', error);
+            logError(error as Error, {
+                context: 'fetchPage',
+                url
+            });
             return '';
         }
     }

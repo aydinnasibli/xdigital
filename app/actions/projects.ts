@@ -10,6 +10,7 @@ import User from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
+import { requireAdmin } from '@/lib/auth/admin';
 
 // Type definitions
 type ActionResponse<T = any> = {
@@ -326,10 +327,8 @@ export async function updateProjectDeployment(
     }
 ): Promise<ActionResponse> {
     try {
-        const { userId: clerkUserId } = await auth();
-        if (!clerkUserId) {
-            return { success: false, error: 'Unauthorized' };
-        }
+        // Verify admin access
+        await requireAdmin();
 
         await dbConnect();
 

@@ -1,10 +1,15 @@
 // app/api/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
 import { logError } from '@/lib/sentry-logger';
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(request: NextRequest) {
     try {
@@ -35,39 +40,35 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Create uploads directory if it doesn't exist
-        const uploadsDir = join(process.cwd(), 'public', 'uploads');
-        if (!existsSync(uploadsDir)) {
-            await mkdir(uploadsDir, { recursive: true });
-        }
-
-        // Create user-specific directory
-        const userDir = join(uploadsDir, userId);
-        if (!existsSync(userDir)) {
-            await mkdir(userDir, { recursive: true });
-        }
-
-        // Generate unique filename
-        const timestamp = Date.now();
-        const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const filename = `${timestamp}-${originalName}`;
-        const filepath = join(userDir, filename);
-
-        // Convert file to buffer and save
+        // Convert file to buffer
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        await writeFile(filepath, buffer);
 
-        // Return public URL
-        const fileUrl = `/uploads/${userId}/${filename}`;
+        // Upload to Cloudinary
+        const uploadResult = await new Promise<any>((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    folder: `xdigital/${userId}`,
+                    resource_type: 'auto', // Automatically detect file type
+                    public_id: `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`,
+                },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            );
+
+            uploadStream.end(buffer);
+        });
 
         return NextResponse.json({
             success: true,
             data: {
                 fileName: file.name,
-                fileUrl,
+                fileUrl: uploadResult.secure_url,
                 fileType: file.type,
                 fileSize: file.size,
+                publicId: uploadResult.public_id,
             },
         });
     } catch (error) {

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { logWarning } from '@/lib/sentry-logger';
 
 const MONGODB_URI = process.env.MONGODB_URI || '';
 
@@ -6,7 +7,10 @@ if (!MONGODB_URI) {
     if (process.env.NODE_ENV === 'production') {
         throw new Error('MONGODB_URI is required in production environment');
     }
-    console.warn('Warning: MONGODB_URI is not defined. Database features will not work.');
+    logWarning('MONGODB_URI is not defined. Database features will not work.', {
+        context: 'mongodb-init',
+        nodeEnv: process.env.NODE_ENV
+    });
 }
 
 interface MongooseCache {

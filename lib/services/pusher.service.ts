@@ -2,6 +2,7 @@
 'use server';
 
 import Pusher from 'pusher';
+import { logError } from '@/lib/sentry-logger';
 
 let pusherInstance: Pusher | null = null;
 
@@ -35,7 +36,12 @@ export async function triggerPusherEvent(
         const pusher = getPusherInstance();
         await pusher.trigger(channel, event, data);
     } catch (error) {
-        console.error('Pusher trigger error:', error);
+        logError(error as Error, {
+            context: 'triggerPusherEvent',
+            channel,
+            event,
+            dataKeys: data ? Object.keys(data) : []
+        });
         throw error;
     }
 }
