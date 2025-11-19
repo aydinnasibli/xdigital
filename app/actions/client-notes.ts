@@ -216,14 +216,9 @@ export async function getUpcomingReminders(days: number = 7): Promise<ActionResp
         const serializedNotes = notes.map(note => ({
             ...note,
             _id: note._id.toString(),
-            clientId: {
-                ...note.clientId,
-                _id: note.clientId._id.toString(),
-            },
-            authorId: {
-                ...note.authorId,
-                _id: note.authorId._id.toString(),
-            },
+            clientId: note.clientId._id.toString(),
+            clientName: `${note.clientId.firstName || ''} ${note.clientId.lastName || ''}`.trim() || note.clientId.email,
+            authorName: `${note.authorId.firstName || ''} ${note.authorId.lastName || ''}`.trim() || note.authorId.email,
         }));
 
         return { success: true, data: serializedNotes };

@@ -8,7 +8,6 @@ import Message from '@/models/Message';
 import Invoice from '@/models/Invoice';
 import File from '@/models/File';
 import Task from '@/models/Task';
-import Deliverable from '@/models/Deliverable';
 import User from '@/models/User';
 import { logError } from '@/lib/sentry-logger';
 
@@ -19,7 +18,7 @@ type ActionResponse<T = any> = {
 };
 
 interface SearchResult {
-    type: 'project' | 'message' | 'invoice' | 'file' | 'task' | 'deliverable';
+    type: 'project' | 'message' | 'invoice' | 'file' | 'task';
     id: string;
     title: string;
     description?: string;
@@ -52,7 +51,7 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
         const results: SearchResult[] = [];
 
         // Determine which entities to search
-        const searchEntities = entities || ['projects', 'messages', 'invoices', 'files', 'tasks', 'deliverables'];
+        const searchEntities = entities || ['projects', 'messages', 'invoices', 'files', 'tasks'];
 
         // Search Projects
         if (searchEntities.includes('projects')) {
@@ -186,33 +185,6 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
             });
         }
 
-        // Search Deliverables
-        if (searchEntities.includes('deliverables')) {
-            const deliverables = await Deliverable.find({
-                $or: [
-                    { title: searchRegex },
-                    { description: searchRegex },
-                ],
-            })
-                .populate('projectId', 'projectName')
-                .select('title description projectId createdAt')
-                .limit(10)
-                .lean();
-
-            deliverables.forEach(d => {
-                const project = d.projectId as any;
-                results.push({
-                    type: 'deliverable',
-                    id: d._id.toString(),
-                    title: d.title,
-                    description: d.description,
-                    projectId: project?._id?.toString() || '',
-                    projectName: project?.projectName || '',
-                    createdAt: d.createdAt.toISOString(),
-                });
-            });
-        }
-
         // Sort by most recent
         results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
@@ -306,29 +278,6 @@ export async function searchInProject(projectId: string, searchTerm: string): Pr
                 description: t.description,
                 projectId,
                 createdAt: t.createdAt.toISOString(),
-            });
-        });
-
-        // Search Deliverables in project
-        const deliverables = await Deliverable.find({
-            projectId,
-            $or: [
-                { title: searchRegex },
-                { description: searchRegex },
-            ],
-        })
-            .select('title description createdAt')
-            .limit(20)
-            .lean();
-
-        deliverables.forEach(d => {
-            results.push({
-                type: 'deliverable',
-                id: d._id.toString(),
-                title: d.title,
-                description: d.description,
-                projectId,
-                createdAt: d.createdAt.toISOString(),
             });
         });
 

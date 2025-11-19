@@ -165,7 +165,6 @@ export async function updateAdminProject(
             estimatedCompletion?: Date;
             completedDate?: Date;
         };
-        deliverables?: string[];
     }
 ): Promise<ActionResponse> {
     try {

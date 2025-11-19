@@ -36,7 +36,7 @@ export default async function ProjectTasksPage({
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Tasks & Kanban Board</h1>
-                    <p className="text-gray-600 mt-2">Drag and drop tasks to update their status</p>
+                    <p className="text-gray-600 mt-2">View your project tasks and their current status</p>
                 </div>
                 <Link
                     href={`/dashboard/projects/${projectId}`}
@@ -46,7 +46,7 @@ export default async function ProjectTasksPage({
                 </Link>
             </div>
 
-            <KanbanBoard projectId={projectId} tasks={tasks} />
+            <KanbanBoard projectId={projectId} tasks={tasks} readOnly={true} />
         </div>
     );
 }

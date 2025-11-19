@@ -14,7 +14,7 @@ interface Reminder {
     content: string;
     type: string;
     reminderDate: string;
-    reminderSent: boolean;
+    isReminded: boolean;
     clientId: string;
     clientName?: string;
     authorName: string;
@@ -31,7 +31,7 @@ export default function RemindersDashboard({ initialReminders }: { initialRemind
         const result = await markReminderSent(noteId);
         if (result.success) {
             toast.success('Reminder marked as sent');
-            setReminders(reminders.map(r => r._id === noteId ? { ...r, reminderSent: true } : r));
+            setReminders(reminders.map(r => r._id === noteId ? { ...r, isReminded: true } : r));
         } else {
             toast.error(result.error || 'Failed to mark reminder as sent');
         }
@@ -85,8 +85,8 @@ export default function RemindersDashboard({ initialReminders }: { initialRemind
         return 'text-green-600 bg-green-50';
     };
 
-    const pendingReminders = reminders.filter(r => !r.reminderSent);
-    const sentReminders = reminders.filter(r => r.reminderSent);
+    const pendingReminders = reminders.filter(r => !r.isReminded);
+    const sentReminders = reminders.filter(r => r.isReminded);
 
     return (
         <div className="space-y-6">
@@ -133,7 +133,7 @@ export default function RemindersDashboard({ initialReminders }: { initialRemind
                         <div>
                             <p className="text-sm text-gray-600">Overdue</p>
                             <p className="text-2xl font-bold text-gray-900">
-                                {reminders.filter(r => new Date(r.reminderDate) < new Date() && !r.reminderSent).length}
+                                {reminders.filter(r => new Date(r.reminderDate) < new Date() && !r.isReminded).length}
                             </p>
                         </div>
                     </div>
