@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { getResource } from '@/app/actions/resources';
 import Link from 'next/link';
-import DOMPurify from 'isomorphic-dompurify';
 
 export default async function ResourceDetailPage({
     params,
@@ -30,18 +29,6 @@ export default async function ResourceDetailPage({
     }
 
     const resource = resourceResult.data;
-
-    // Sanitize HTML content to prevent XSS attacks
-    const sanitizedVideoEmbed = resource.videoEmbedCode
-        ? DOMPurify.sanitize(resource.videoEmbedCode, {
-            ALLOWED_TAGS: ['iframe'],
-            ALLOWED_ATTR: ['src', 'width', 'height', 'frameborder', 'allow', 'allowfullscreen', 'class', 'style']
-          })
-        : '';
-
-    const sanitizedContent = resource.content
-        ? DOMPurify.sanitize(resource.content)
-        : '';
 
     return (
         <div className="space-y-6">
@@ -99,7 +86,7 @@ export default async function ResourceDetailPage({
                 {resource.type === 'video' && resource.videoEmbedCode && (
                     <div
                         className="mb-6 aspect-video rounded-lg overflow-hidden"
-                        dangerouslySetInnerHTML={{ __html: sanitizedVideoEmbed }}
+                        dangerouslySetInnerHTML={{ __html: resource.videoEmbedCode }}
                     />
                 )}
 
@@ -114,7 +101,7 @@ export default async function ResourceDetailPage({
                 {/* Content */}
                 {resource.content && (
                     <div className="prose prose-sm max-w-none mb-6">
-                        <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+                        <div dangerouslySetInnerHTML={{ __html: resource.content }} />
                     </div>
                 )}
 
