@@ -31,15 +31,19 @@ export async function getClientNotes(clientId: string): Promise<ActionResponse> 
             .sort({ isPinned: -1, createdAt: -1 })
             .lean();
 
-        const serializedNotes = notes.map(note => ({
-            ...note,
+        const serializedNotes = notes.map(note => {
+            const baseNote = toSerializedObject(note);
+            const baseAuthor = toSerializedObject(note.authorId);
+            return {
+            ...baseNote,note,
             _id: note._id.toString(),
             clientId: note.clientId.toString(),
             authorId: {
-                ...note.authorId,
+                ...baseNo...baseAuthor,
                 _id: note.authorId._id.toString(),
             },
-        }));
+                    };
+        });
 
         return { success: true, data: serializedNotes };
     } catch (error) {
