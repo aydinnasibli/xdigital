@@ -44,14 +44,14 @@ export async function getProjectFiles(projectId: string, folderId?: string): Pro
             const baseFile = toSerializedObject(file);
             const baseUploadedBy = toSerializedObject(file.uploadedBy);
             return {
-            ...baseFile,file,
-            _id: file._id.toString(),
-            projectId: file.projectId.toString(),
-            uploadedBy: {
-                ...baseFi...baseUploadedBy,
-                _id: file.uploadedBy._id.toString(),
-            },
-                    };
+                ...baseFile,
+                _id: file._id.toString(),
+                projectId: file.projectId.toString(),
+                uploadedBy: {
+                    ...baseUploadedBy,
+                    _id: file.uploadedBy._id.toString(),
+                },
+            };
         });
 
         return { success: true, data: serializedFiles };

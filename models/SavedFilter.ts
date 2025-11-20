@@ -7,7 +7,6 @@ export enum FilterEntity {
     FILES = 'files',
     MESSAGES = 'messages',
     INVOICES = 'invoices',
-    DELIVERABLES = 'deliverables',
     CLIENTS = 'clients',
     ACTIVITIES = 'activities',
 }

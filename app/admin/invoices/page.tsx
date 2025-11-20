@@ -6,12 +6,14 @@ import { Eye, Plus, Send, DollarSign } from 'lucide-react';
 export default async function AdminInvoicesPage({
     searchParams,
 }: {
-    searchParams: { status?: string; clientId?: string; projectId?: string };
+    searchParams: Promise<{ status?: string; clientId?: string; projectId?: string }>;
 }) {
+    const params = await searchParams;
+
     const result = await getAllInvoices({
-        status: searchParams.status,
-        clientId: searchParams.clientId,
-        projectId: searchParams.projectId,
+        status: params.status,
+        clientId: params.clientId,
+        projectId: params.projectId,
     });
 
     const invoices = result.success ? result.data : [];

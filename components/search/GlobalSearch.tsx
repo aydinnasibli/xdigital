@@ -6,7 +6,7 @@ import { globalSearch } from '@/app/actions/search';
 import { useRouter } from 'next/navigation';
 
 interface SearchResult {
-    type: 'project' | 'message' | 'invoice' | 'file' | 'task' | 'deliverable';
+    type: 'project' | 'message' | 'invoice' | 'file' | 'task';
     id: string;
     title: string;
     description?: string;
@@ -69,7 +69,6 @@ export function GlobalSearch() {
             case 'message':
             case 'file':
             case 'task':
-            case 'deliverable':
                 if (result.projectId) {
                     router.push(`/dashboard/projects/${result.projectId}`);
                 }
@@ -89,7 +88,6 @@ export function GlobalSearch() {
             invoice: '💰',
             file: '📄',
             task: '✓',
-            deliverable: '📦',
         };
         return icons[type] || '📄';
     };

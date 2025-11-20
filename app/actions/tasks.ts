@@ -47,18 +47,18 @@ export async function getProjectTasks(projectId: string): Promise<ActionResponse
             const baseAssignedTo = task.assignedTo ? toSerializedObject(task.assignedTo) : null;
             const baseCreatedBy = toSerializedObject(task.createdBy);
             return {
-            ...baseTask,task,
-            _id: task._id.toString(),
-            projectId: task.projectId.toString(),
-            assignedTo: baseAssignedTo ? {
-                ...baseTa...baseAssignedTo,
-                _id: task.assignedTo._id.toString(),
-            } : null,
-            createdBy: {
-                ...baseTa...baseCreatedBy,
-                _id: task.createdBy._id.toString(),
-            },
-                    };
+                ...baseTask,
+                _id: task._id.toString(),
+                projectId: task.projectId.toString(),
+                assignedTo: baseAssignedTo ? {
+                    ...baseAssignedTo,
+                    _id: task.assignedTo._id.toString(),
+                } : null,
+                createdBy: {
+                    ...baseCreatedBy,
+                    _id: task.createdBy._id.toString(),
+                },
+            };
         });
 
         return { success: true, data: serializedTasks };

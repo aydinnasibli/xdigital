@@ -10,7 +10,6 @@ export default function NotificationSettingsPage() {
         newMessage: true,
         invoiceCreated: true,
         invoiceDue: true,
-        deliverableSubmitted: true,
         taskAssigned: false,
         weeklyDigest: true,
     });
@@ -21,7 +20,6 @@ export default function NotificationSettingsPage() {
         newMessage: true,
         invoiceCreated: true,
         invoiceDue: true,
-        deliverableSubmitted: true,
         taskAssigned: true,
     });
 
@@ -167,7 +165,6 @@ function getNotificationDescription(key: string): string {
         newMessage: 'When you receive a new message from admin',
         invoiceCreated: 'When a new invoice is created for your project',
         invoiceDue: 'Reminders for upcoming invoice due dates',
-        deliverableSubmitted: 'When admin submits a deliverable for review',
         taskAssigned: 'When a task is assigned to you',
         weeklyDigest: 'Weekly summary of all activities',
     };
