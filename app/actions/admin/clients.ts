@@ -8,6 +8,7 @@ import Invoice from '@/models/Invoice';
 import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
 import { logError } from '@/lib/sentry-logger';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 
 type ActionResponse<T = any> = {
     success: boolean;

@@ -50,7 +50,7 @@ export async function getProjectTasks(projectId: string): Promise<ActionResponse
                 ...baseTask,
                 _id: task._id.toString(),
                 projectId: task.projectId.toString(),
-                assignedTo: baseAssignedTo ? {
+                assignedTo: task.assignedTo && baseAssignedTo ? {
                     ...baseAssignedTo,
                     _id: task.assignedTo._id.toString(),
                 } : null,
