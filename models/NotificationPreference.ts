@@ -36,7 +36,6 @@ export interface INotificationPreference extends Document {
         invoices: INotificationSetting;
         milestones: INotificationSetting;
         tasks: INotificationSetting;
-        deliverables: INotificationSetting;
         mentions: INotificationSetting;
         general: INotificationSetting;
     };
@@ -129,16 +128,6 @@ const NotificationPreferenceSchema = new Schema<INotificationPreference>(
                     enum: Object.values(NotificationChannel),
                 }],
             },
-            deliverables: {
-                enabled: {
-                    type: Boolean,
-                    default: true,
-                },
-                channels: [{
-                    type: String,
-                    enum: Object.values(NotificationChannel),
-                }],
-            },
             mentions: {
                 enabled: {
                     type: Boolean,
@@ -193,7 +182,6 @@ NotificationPreferenceSchema.path('preferences.messages.channels').default([Noti
 NotificationPreferenceSchema.path('preferences.invoices.channels').default([NotificationChannel.BOTH]);
 NotificationPreferenceSchema.path('preferences.milestones.channels').default([NotificationChannel.BOTH]);
 NotificationPreferenceSchema.path('preferences.tasks.channels').default([NotificationChannel.IN_APP]);
-NotificationPreferenceSchema.path('preferences.deliverables.channels').default([NotificationChannel.BOTH]);
 NotificationPreferenceSchema.path('preferences.mentions.channels').default([NotificationChannel.BOTH]);
 NotificationPreferenceSchema.path('preferences.general.channels').default([NotificationChannel.IN_APP]);
 

@@ -6,6 +6,7 @@ import Invoice from '@/models/Invoice';
 import User from '@/models/User';
 import mongoose from 'mongoose';
 import { logError } from '@/lib/sentry-logger';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -37,12 +38,15 @@ export async function getProjectInvoices(projectId: string): Promise<ActionRespo
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedInvoices = invoices.map(inv => ({
-            ...inv,
-            _id: inv._id.toString(),
-            userId: inv.userId.toString(),
-            projectId: inv.projectId.toString(),
-        }));
+        const serializedInvoices = invoices.map(inv => {
+            const baseInvoice = toSerializedObject(inv);
+            return {
+                ...baseInvoice,
+                _id: inv._id.toString(),
+                userId: inv.userId.toString(),
+                projectId: inv.projectId.toString(),
+            };
+        });
 
         return { success: true, data: serializedInvoices };
     } catch (error) {

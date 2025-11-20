@@ -39,11 +39,14 @@ export async function getUserFilters(entity?: FilterEntity): Promise<ActionRespo
             .sort({ isDefault: -1, lastUsedAt: -1 })
             .lean();
 
-        const serializedFilters = filters.map(f => ({
-            ...f,
-            _id: f._id.toString(),
-            userId: f.userId.toString(),
-        }));
+        const serializedFilters = filters.map(f => {
+            const baseFilter = toSerializedObject(f);
+            return {
+                ...baseFilter,
+                _id: f._id.toString(),
+                userId: f.userId.toString(),
+            };
+        });
 
         return { success: true, data: serializedFilters };
     } catch (error) {
@@ -72,14 +75,18 @@ export async function getSharedFilters(entity?: FilterEntity): Promise<ActionRes
             .sort({ usageCount: -1 })
             .lean();
 
-        const serializedFilters = filters.map(f => ({
-            ...f,
-            _id: f._id.toString(),
-            userId: {
-                ...f.userId,
-                _id: f.userId._id.toString(),
-            },
-        }));
+        const serializedFilters = filters.map(f => {
+            const baseFilter = toSerializedObject(f);
+            const baseUserId = toSerializedObject(f.userId);
+            return {
+                ...baseFilter,
+                _id: f._id.toString(),
+                userId: {
+                    ...baseUserId,
+                    _id: f.userId._id.toString(),
+                },
+            };
+        });
 
         return { success: true, data: serializedFilters };
     } catch (error) {
@@ -278,10 +285,11 @@ export async function getDefaultFilter(entity: FilterEntity): Promise<ActionResp
             return { success: true, data: null };
         }
 
+        const baseFilter = toSerializedObject(filter);
         return {
             success: true,
             data: {
-                ...filter,
+                ...baseFilter,
                 _id: filter._id.toString(),
                 userId: filter.userId.toString(),
             },

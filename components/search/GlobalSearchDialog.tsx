@@ -76,9 +76,6 @@ export function GlobalSearchDialog() {
             case 'task':
                 url = `/dashboard/projects/${result.projectId}/tasks`;
                 break;
-            case 'deliverable':
-                url = `/dashboard/projects/${result.projectId}/deliverables`;
-                break;
             default:
                 url = '/dashboard';
         }
@@ -93,7 +90,6 @@ export function GlobalSearchDialog() {
             case 'invoice': return '💰';
             case 'file': return '📄';
             case 'task': return '✅';
-            case 'deliverable': return '📦';
             default: return '🔍';
         }
     };

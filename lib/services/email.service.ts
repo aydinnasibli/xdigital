@@ -115,51 +115,6 @@ export async function sendInvoiceEmail(
     });
 }
 
-export async function sendDeliverableApprovedEmail(
-    to: string,
-    deliverableTitle: string,
-    projectName: string,
-    projectLink: string
-) {
-    return sendEmail({
-        to,
-        subject: `Deliverable Approved: ${deliverableTitle}`,
-        html: `
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #10b981; color: white; padding: 20px; text-align: center; }
-        .content { background: #f9fafb; padding: 30px; }
-        .button { display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; }
-        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>✅ Deliverable Approved</h1>
-        </div>
-        <div class="content">
-            <h2>${deliverableTitle}</h2>
-            <p><strong>Project:</strong> ${projectName}</p>
-            <p>Great news! Your deliverable has been reviewed and approved.</p>
-            <p style="text-align: center; margin: 30px 0;">
-                <a href="${projectLink}" class="button">View Project</a>
-            </p>
-        </div>
-        <div class="footer">
-            <p>XDigital SaaS Platform</p>
-        </div>
-    </div>
-</body>
-</html>
-        `,
-    });
-}
-
 export async function sendTaskAssignedEmail(
     to: string,
     taskTitle: string,

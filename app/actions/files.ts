@@ -40,15 +40,19 @@ export async function getProjectFiles(projectId: string, folderId?: string): Pro
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedFiles = files.map(file => ({
-            ...file,
-            _id: file._id.toString(),
-            projectId: file.projectId.toString(),
-            uploadedBy: {
-                ...file.uploadedBy,
-                _id: file.uploadedBy._id.toString(),
-            },
-        }));
+        const serializedFiles = files.map(file => {
+            const baseFile = toSerializedObject(file);
+            const baseUploadedBy = toSerializedObject(file.uploadedBy);
+            return {
+                ...baseFile,
+                _id: file._id.toString(),
+                projectId: file.projectId.toString(),
+                uploadedBy: {
+                    ...baseUploadedBy,
+                    _id: file.uploadedBy._id.toString(),
+                },
+            };
+        });
 
         return { success: true, data: serializedFiles };
     } catch (error) {

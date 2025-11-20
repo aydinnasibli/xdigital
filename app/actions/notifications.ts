@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/database/mongodb';
 import Notification from '@/models/Notification';
 import User from '@/models/User';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { createNotification as createNotificationService } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
 import { logError } from '@/lib/sentry-logger';
@@ -50,12 +51,15 @@ export async function getNotifications(): Promise<ActionResponse> {
             .limit(50)
             .lean();
 
-        const serializedNotifications = notifications.map(notif => ({
-            ...notif,
+        const serializedNotifications = notifications.map(notif => {
+            const baseNotif = toSerializedObject(notif);
+            return {
+            ...baseNotif,notif,
             _id: notif._id.toString(),
             userId: notif.userId.toString(),
             projectId: notif.projectId?.toString(),
-        }));
+                    };
+        });
 
         return { success: true, data: serializedNotifications };
     } catch (error) {

@@ -42,19 +42,24 @@ export async function getProjectTasks(projectId: string): Promise<ActionResponse
             .sort({ order: 1 })
             .lean();
 
-        const serializedTasks = tasks.map(task => ({
-            ...task,
-            _id: task._id.toString(),
-            projectId: task.projectId.toString(),
-            assignedTo: task.assignedTo ? {
-                ...task.assignedTo,
-                _id: task.assignedTo._id.toString(),
-            } : null,
-            createdBy: {
-                ...task.createdBy,
-                _id: task.createdBy._id.toString(),
-            },
-        }));
+        const serializedTasks = tasks.map(task => {
+            const baseTask = toSerializedObject(task);
+            const baseAssignedTo = task.assignedTo ? toSerializedObject(task.assignedTo) : null;
+            const baseCreatedBy = toSerializedObject(task.createdBy);
+            return {
+                ...baseTask,
+                _id: task._id.toString(),
+                projectId: task.projectId.toString(),
+                assignedTo: baseAssignedTo ? {
+                    ...baseAssignedTo,
+                    _id: task.assignedTo._id.toString(),
+                } : null,
+                createdBy: {
+                    ...baseCreatedBy,
+                    _id: task.createdBy._id.toString(),
+                },
+            };
+        });
 
         return { success: true, data: serializedTasks };
     } catch (error) {

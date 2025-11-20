@@ -534,10 +534,12 @@ export default function RemindersDashboard() {
                                     <input
                                         type="datetime-local"
                                         required
+                                        min={new Date().toISOString().slice(0, 16)}
                                         value={formData.reminderDate}
                                         onChange={(e) => setFormData({ ...formData, reminderDate: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
+                                    <p className="text-xs text-gray-500 mt-1">Must be a future date and time</p>
                                 </div>
 
                                 <div>

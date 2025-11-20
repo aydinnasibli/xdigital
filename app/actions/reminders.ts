@@ -110,6 +110,13 @@ export async function createReminder(data: {
             return { success: false, error: 'Invalid client ID' };
         }
 
+        // Validate reminder date is not in the past
+        const now = new Date();
+        const reminderDate = new Date(data.reminderDate);
+        if (reminderDate < now) {
+            return { success: false, error: 'Reminder date cannot be in the past' };
+        }
+
         const reminder = await Reminder.create({
             ...data,
             createdBy: user._id,
@@ -149,6 +156,15 @@ export async function updateReminder(
 
         if (!mongoose.Types.ObjectId.isValid(reminderId)) {
             return { success: false, error: 'Invalid reminder ID' };
+        }
+
+        // Validate reminder date is not in the past if being updated
+        if (data.reminderDate) {
+            const now = new Date();
+            const reminderDate = new Date(data.reminderDate);
+            if (reminderDate < now) {
+                return { success: false, error: 'Reminder date cannot be in the past' };
+            }
         }
 
         await dbConnect();

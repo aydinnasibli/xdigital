@@ -70,11 +70,15 @@ export async function getProjects(): Promise<ActionResponse> {
             .lean();
 
         // Convert _id to string for serialization
-        const serializedProjects = projects.map(project => ({
-            ...project,
-            _id: project._id.toString(),
-            userId: project.userId.toString(),
-        }));
+        const serializedProjects = projects.map(project => {
+            const baseProject = toSerializedObject(project);
+            return {
+                ...baseProject,
+                _id: project._id.toString(),
+                userId: project.userId.toString(),
+                templateId: project.templateId ? project.templateId.toString() : undefined,
+            };
+        });
 
         return { success: true, data: serializedProjects };
     } catch (error) {
@@ -113,10 +117,12 @@ export async function getProject(projectId: string): Promise<ActionResponse> {
         }
 
         // Serialize the project
+        const baseProject = toSerializedObject(project);
         const serializedProject = {
-            ...project,
+            ...baseProject,
             _id: project._id.toString(),
             userId: project.userId.toString(),
+            templateId: project.templateId ? project.templateId.toString() : undefined,
         };
 
         return { success: true, data: serializedProject };
@@ -225,12 +231,14 @@ export async function updateProject(
         revalidatePath(`/dashboard/projects/${projectId}`);
         revalidatePath('/dashboard');
 
+        const baseProject = toSerializedObject(updatedProject);
         return {
             success: true,
             data: {
-                ...updatedProject,
+                ...baseProject,
                 _id: updatedProject._id.toString(),
                 userId: updatedProject.userId.toString(),
+                templateId: updatedProject.templateId ? updatedProject.templateId.toString() : undefined,
             },
         };
     } catch (error) {
@@ -304,11 +312,15 @@ export async function getProjectStats() {
             completed: projects.filter(p => p.status === 'completed').length,
         };
 
-        const recentProjects = projects.slice(0, 5).map(project => ({
-            ...project,
-            _id: project._id.toString(),
-            userId: project.userId.toString(),
-        }));
+        const recentProjects = projects.slice(0, 5).map(project => {
+            const baseProject = toSerializedObject(project);
+            return {
+                ...baseProject,
+                _id: project._id.toString(),
+                userId: project.userId.toString(),
+                templateId: project.templateId ? project.templateId.toString() : undefined,
+            };
+        });
 
         return { success: true, data: { stats, recentProjects } };
     } catch (error) {

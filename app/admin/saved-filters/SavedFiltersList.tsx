@@ -78,7 +78,6 @@ export default function SavedFiltersList({ filters, type }: { filters: Filter[];
             files: 'bg-green-100 text-green-800',
             messages: 'bg-yellow-100 text-yellow-800',
             invoices: 'bg-orange-100 text-orange-800',
-            deliverables: 'bg-pink-100 text-pink-800',
             clients: 'bg-indigo-100 text-indigo-800',
             activities: 'bg-gray-100 text-gray-800',
         };

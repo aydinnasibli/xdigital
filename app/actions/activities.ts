@@ -71,13 +71,16 @@ export async function getProjectActivities(projectId: string, limit: number = 50
             .limit(limit)
             .lean();
 
-        const serializedActivities = activities.map(activity => ({
-            ...activity,
+        const serializedActivities = activities.map(activity => {
+            const baseActivity = toSerializedObject(activity);
+            return {
+            ...baseActivity,activity,
             _id: activity._id.toString(),
             userId: activity.userId.toString(),
             projectId: activity.projectId?.toString(),
             entityId: activity.entityId?.toString(),
-        }));
+                    };
+        });
 
         return { success: true, data: serializedActivities };
     } catch (error) {
@@ -106,13 +109,16 @@ export async function getUserActivities(limit: number = 50): Promise<ActionRespo
             .limit(limit)
             .lean();
 
-        const serializedActivities = activities.map(activity => ({
-            ...activity,
+        const serializedActivities = activities.map(activity => {
+            const baseActivity = toSerializedObject(activity);
+            return {
+            ...baseActivity,activity,
             _id: activity._id.toString(),
             userId: activity.userId.toString(),
             projectId: activity.projectId?.toString(),
             entityId: activity.entityId?.toString(),
-        }));
+                    };
+        });
 
         return { success: true, data: serializedActivities };
     } catch (error) {
@@ -153,13 +159,16 @@ export async function getAllActivities(filters?: {
             .limit(limit)
             .lean();
 
-        const serializedActivities = activities.map(activity => ({
-            ...activity,
+        const serializedActivities = activities.map(activity => {
+            const baseActivity = toSerializedObject(activity);
+            return {
+            ...baseActivity,activity,
             _id: activity._id.toString(),
             userId: activity.userId.toString(),
             projectId: activity.projectId?.toString(),
             entityId: activity.entityId?.toString(),
-        }));
+                    };
+        });
 
         return { success: true, data: serializedActivities };
     } catch (error) {

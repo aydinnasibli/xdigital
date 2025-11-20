@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 
 interface SearchResult {
-    type: 'project' | 'message' | 'invoice' | 'file' | 'task' | 'deliverable';
+    type: 'project' | 'message' | 'invoice' | 'file' | 'task';
     id: string;
     title: string;
     description?: string;
@@ -23,7 +23,6 @@ const entityOptions = [
     { value: 'files', label: 'Files', icon: FileIcon },
     { value: 'messages', label: 'Messages', icon: MessageSquare },
     { value: 'invoices', label: 'Invoices', icon: FileText },
-    { value: 'deliverables', label: 'Deliverables', icon: Package },
 ];
 
 export default function SearchInterface() {
@@ -85,7 +84,6 @@ export default function SearchInterface() {
             case 'file': return FileIcon;
             case 'message': return MessageSquare;
             case 'invoice': return FileText;
-            case 'deliverable': return Package;
             default: return FileIcon;
         }
     };
@@ -102,8 +100,6 @@ export default function SearchInterface() {
                 return result.projectId ? `/dashboard/projects/${result.projectId}#messages` : '#';
             case 'invoice':
                 return `/dashboard/invoices/${result.id}`;
-            case 'deliverable':
-                return result.projectId ? `/dashboard/projects/${result.projectId}#deliverables` : '#';
             default:
                 return '#';
         }
@@ -116,7 +112,6 @@ export default function SearchInterface() {
             file: 'bg-green-100 text-green-800',
             message: 'bg-yellow-100 text-yellow-800',
             invoice: 'bg-orange-100 text-orange-800',
-            deliverable: 'bg-pink-100 text-pink-800',
         };
         return colors[type] || 'bg-gray-100 text-gray-800';
     };

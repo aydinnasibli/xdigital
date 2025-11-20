@@ -37,14 +37,18 @@ export async function getTemplates(serviceType?: string, packageType?: string): 
             .sort({ isDefault: -1, usageCount: -1 })
             .lean();
 
-        const serializedTemplates = templates.map(template => ({
-            ...template,
-            _id: template._id.toString(),
-            createdBy: template.createdBy ? {
-                ...template.createdBy,
-                _id: template.createdBy._id.toString(),
-            } : null,
-        }));
+        const serializedTemplates = templates.map(template => {
+            const baseTemplate = toSerializedObject(template);
+            const baseCreatedBy = template.createdBy ? toSerializedObject(template.createdBy) : null;
+            return {
+                ...baseTemplate,
+                _id: template._id.toString(),
+                createdBy: baseCreatedBy ? {
+                    ...baseCreatedBy,
+                    _id: template.createdBy._id.toString(),
+                } : null,
+            };
+        });
 
         return { success: true, data: serializedTemplates };
     } catch (error) {
@@ -86,14 +90,18 @@ export async function getTemplatesByPackage(serviceType: string, packageType: st
             .sort({ isDefault: -1, usageCount: -1 })
             .lean();
 
-        const serializedTemplates = templates.map(template => ({
-            ...template,
-            _id: template._id.toString(),
-            createdBy: template.createdBy ? {
-                ...template.createdBy,
-                _id: template.createdBy._id.toString(),
-            } : null,
-        }));
+        const serializedTemplates = templates.map(template => {
+            const baseTemplate = toSerializedObject(template);
+            const baseCreatedBy = template.createdBy ? toSerializedObject(template.createdBy) : null;
+            return {
+                ...baseTemplate,
+                _id: template._id.toString(),
+                createdBy: baseCreatedBy ? {
+                    ...baseCreatedBy,
+                    _id: template.createdBy._id.toString(),
+                } : null,
+            };
+        });
 
         return { success: true, data: serializedTemplates };
     } catch (error) {
@@ -120,13 +128,15 @@ export async function getTemplate(templateId: string): Promise<ActionResponse> {
             return { success: false, error: 'Template not found' };
         }
 
+        const baseTemplate = toSerializedObject(template);
+        const baseCreatedBy = template.createdBy ? toSerializedObject(template.createdBy) : null;
         return {
             success: true,
             data: {
-                ...template,
+                ...baseTemplate,
                 _id: template._id.toString(),
-                createdBy: template.createdBy ? {
-                    ...template.createdBy,
+                createdBy: baseCreatedBy ? {
+                    ...baseCreatedBy,
                     _id: template.createdBy._id.toString(),
                 } : null,
             },

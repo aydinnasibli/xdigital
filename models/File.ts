@@ -3,7 +3,6 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export enum FileCategory {
     PROJECT_ASSET = 'project_asset',
-    DELIVERABLE = 'deliverable',
     BRAND_ASSET = 'brand_asset',
     DOCUMENT = 'document',
     IMAGE = 'image',

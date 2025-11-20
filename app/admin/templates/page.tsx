@@ -191,7 +191,7 @@ export default async function TemplatesPage() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                 <h3 className="font-semibold text-blue-900 mb-2">💡 What are Project Templates?</h3>
                 <p className="text-blue-800 text-sm">
-                    Project templates allow you to create standardized workflows with pre-defined milestones, tasks, deliverables, and timelines.
+                    Project templates allow you to create standardized workflows with pre-defined milestones, tasks, and timelines.
                     When creating a new project, you can select a template to automatically populate all the standard items, saving time and ensuring consistency.
                 </p>
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
