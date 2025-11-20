@@ -18,9 +18,9 @@ export function serializeMongoDocument<T>(obj: any): T {
     return obj.toString() as T;
   }
 
-  // Handle Date objects
+  // Handle Date objects - convert to ISO string for Next.js serialization
   if (obj instanceof Date) {
-    return obj as T;
+    return obj.toISOString() as T;
   }
 
   // Handle plain objects
@@ -35,8 +35,12 @@ export function serializeMongoDocument<T>(obj: any): T {
         if (value instanceof Types.ObjectId) {
           serialized[key] = value.toString();
         }
-        // Recursively handle nested objects
-        else if (typeof value === 'object' && value !== null && !(value instanceof Date)) {
+        // Convert Date to ISO string
+        else if (value instanceof Date) {
+          serialized[key] = value.toISOString();
+        }
+        // Recursively handle nested objects and arrays
+        else if (typeof value === 'object' && value !== null) {
           serialized[key] = serializeMongoDocument(value);
         }
         // Keep primitive values as-is

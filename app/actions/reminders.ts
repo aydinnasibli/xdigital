@@ -477,3 +477,33 @@ export async function checkAndSendReminderEmail(): Promise<ActionResponse> {
         return { success: false, error: 'Failed to check and send reminder email' };
     }
 }
+
+// Get all clients for dropdown selection (admin only)
+export async function getAllClients(): Promise<ActionResponse> {
+    try {
+        await requireAdmin();
+
+        const { userId: clerkUserId } = await auth();
+        if (!clerkUserId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        await dbConnect();
+
+        const clients = await User.find({ isActive: true })
+            .select('_id firstName lastName email')
+            .sort({ firstName: 1, lastName: 1 })
+            .lean();
+
+        const serializedClients = clients.map(client => ({
+            _id: client._id.toString(),
+            name: `${client.firstName || ''} ${client.lastName || ''}`.trim() || client.email,
+            email: client.email,
+        }));
+
+        return { success: true, data: serializedClients };
+    } catch (error) {
+        logError(error as Error, { context: 'getAllClients' });
+        return { success: false, error: 'Failed to fetch clients' };
+    }
+}

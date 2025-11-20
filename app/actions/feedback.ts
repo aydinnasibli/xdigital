@@ -54,8 +54,9 @@ export async function getAllFeedback(filters?: {
                 ? (fb.projectId as any)._id?.toString() || (fb.projectId as any).toString()
                 : (fb.projectId as any)?.toString();
 
+            const baseFeedback = toSerializedObject(fb);
             return {
-                ...fb,
+                ...baseFeedback,
                 _id: fb._id.toString(),
                 userId: userIdValue,
                 projectId: projectIdValue,
@@ -95,8 +96,9 @@ export async function getUserFeedback(): Promise<ActionResponse> {
                 ? (fb.projectId as any)._id?.toString() || (fb.projectId as any).toString()
                 : (fb.projectId as any)?.toString();
 
+            const baseFeedback = toSerializedObject(fb);
             return {
-                ...fb,
+                ...baseFeedback,
                 _id: fb._id.toString(),
                 userId: fb.userId.toString(), // userId is not populated here, safe to use .toString()
                 projectId: projectIdValue,
@@ -294,8 +296,9 @@ export async function getPublicTestimonials(limit: number = 10): Promise<ActionR
                 ? (t.projectId as any)._id?.toString() || (t.projectId as any).toString()
                 : (t.projectId as any)?.toString();
 
+            const baseTestimonial = toSerializedObject(t);
             return {
-                ...t,
+                ...baseTestimonial,
                 _id: t._id.toString(),
                 projectId: projectIdValue,
             };
