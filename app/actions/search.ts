@@ -10,6 +10,7 @@ import File from '@/models/File';
 import Task from '@/models/Task';
 import User from '@/models/User';
 import { logError } from '@/lib/sentry-logger';
+import { escapeRegex } from '@/lib/utils';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -47,7 +48,7 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
             return { success: false, error: 'User not found' };
         }
 
-        const searchRegex = new RegExp(searchTerm, 'i');
+        const searchRegex = new RegExp(escapeRegex(searchTerm), 'i');
         const results: SearchResult[] = [];
 
         // Determine which entities to search
@@ -212,7 +213,7 @@ export async function searchInProject(projectId: string, searchTerm: string): Pr
 
         await dbConnect();
 
-        const searchRegex = new RegExp(searchTerm, 'i');
+        const searchRegex = new RegExp(escapeRegex(searchTerm), 'i');
         const results: SearchResult[] = [];
 
         // Search Messages in project

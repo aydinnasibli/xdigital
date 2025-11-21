@@ -11,6 +11,7 @@ import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
 import { createNotification } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
+import { escapeRegex } from '@/lib/utils';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -44,9 +45,10 @@ export async function getAllProjects(filters?: {
         }
 
         if (filters?.search) {
+            const escapedSearch = escapeRegex(filters.search);
             query.$or = [
-                { projectName: { $regex: filters.search, $options: 'i' } },
-                { projectDescription: { $regex: filters.search, $options: 'i' } },
+                { projectName: { $regex: escapedSearch, $options: 'i' } },
+                { projectDescription: { $regex: escapedSearch, $options: 'i' } },
             ];
         }
 
