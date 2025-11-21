@@ -664,15 +664,23 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                             {/* Reactions */}
                                                             {msg.reactions && msg.reactions.length > 0 && (
                                                                 <div className="flex flex-wrap gap-1 mt-2">
-                                                                    {msg.reactions.map((reaction, idx) => (
-                                                                        <span
-                                                                            key={idx}
-                                                                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-white bg-opacity-20"
-                                                                            title={reaction.userName}
-                                                                        >
-                                                                            {reaction.emoji}
-                                                                        </span>
-                                                                    ))}
+                                                                    {msg.reactions.map((reaction) => {
+                                                                        const isMyReaction = reaction.userId === currentAdminUserId;
+                                                                        return (
+                                                                            <button
+                                                                                key={`${msg._id}-${reaction.emoji}-${reaction.userId}`}
+                                                                                onClick={() => handleReaction(msg._id, reaction.emoji)}
+                                                                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs transition-all ${
+                                                                                    isMyReaction
+                                                                                        ? 'bg-white bg-opacity-40 ring-1 ring-white ring-opacity-50 scale-110'
+                                                                                        : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                                                                                }`}
+                                                                                title={`${reaction.userName}${isMyReaction ? ' (click to remove)' : ''}`}
+                                                                            >
+                                                                                {reaction.emoji}
+                                                                            </button>
+                                                                        );
+                                                                    })}
                                                                 </div>
                                                             )}
 

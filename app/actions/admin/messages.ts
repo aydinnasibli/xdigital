@@ -556,13 +556,22 @@ export async function adminEditMessage(
 // Pin/Unpin message
 export async function togglePinMessage(messageId: string): Promise<ActionResponse> {
     try {
-        const { userId } = await getAdminSession();
+        const { userId: clerkUserId } = await getAdminSession();
 
         if (!mongoose.Types.ObjectId.isValid(messageId)) {
             return { success: false, error: 'Invalid message ID' };
         }
 
         await dbConnect();
+
+        // Get the admin user from database using Clerk ID
+        const User = mongoose.model('User');
+        const adminUser = await User.findOne({ clerkId: clerkUserId }).lean();
+
+        if (!adminUser) {
+            logError(new Error('Admin user not found'), { context: 'togglePinMessage', clerkUserId });
+            return { success: false, error: 'Admin user not found' };
+        }
 
         const message = await Message.findById(messageId);
         if (!message) {
@@ -572,7 +581,7 @@ export async function togglePinMessage(messageId: string): Promise<ActionRespons
         // Toggle pin
         message.isPinned = !message.isPinned;
         message.pinnedAt = message.isPinned ? new Date() : undefined;
-        message.pinnedBy = message.isPinned ? userId : undefined;
+        message.pinnedBy = message.isPinned ? adminUser._id : undefined;
         await message.save();
 
         try {
