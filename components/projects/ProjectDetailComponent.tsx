@@ -297,6 +297,21 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    // Helper function to deduplicate messages and ensure unique IDs
+    const deduplicateMessages = useCallback((messageList: Message[]): Message[] => {
+        const uniqueMessages = new Map<string, Message>();
+        messageList.forEach(msg => {
+            // Only keep the first occurrence of each message ID
+            if (!uniqueMessages.has(msg._id)) {
+                uniqueMessages.set(msg._id, msg);
+            }
+        });
+        // Return sorted by createdAt to maintain chronological order
+        return Array.from(uniqueMessages.values()).sort(
+            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+    }, []);
+
     // Real-time message listener
     const handleNewMessage = useCallback((data: any) => {
         console.log('📨 New message received via Pusher:', data);
@@ -304,20 +319,23 @@ function MessagesTab({ projectId }: { projectId: string }) {
             // Check if message already exists (prevent duplicates)
             const exists = prev.some(msg => msg._id === data._id);
             if (exists) {
+                console.log('📨 Message already exists, skipping:', data._id);
                 return prev;
             }
-            return [...prev, {
+            // Add new message and deduplicate
+            const updatedMessages = [...prev, {
                 _id: data._id,
                 sender: data.sender,
                 message: data.message,
                 createdAt: data.createdAt,
             }];
+            return deduplicateMessages(updatedMessages);
         });
         // Show toast if message is from admin
         if (data.sender === 'admin') {
             toast.info('New message from admin');
         }
-    }, []);
+    }, [deduplicateMessages]);
 
     usePusherChannel(`project-${projectId}`, 'new-message', handleNewMessage);
 
@@ -334,7 +352,8 @@ function MessagesTab({ projectId }: { projectId: string }) {
         setLoading(true);
         const result = await getMessages(projectId);
         if (result.success && result.data) {
-            setMessages(result.data);
+            // Deduplicate messages from server
+            setMessages(deduplicateMessages(result.data));
         }
         setLoading(false);
     };
@@ -346,13 +365,21 @@ function MessagesTab({ projectId }: { projectId: string }) {
         setSending(true);
         const result = await sendMessage(projectId, newMessage);
         if (result.success && result.data) {
-            // Optimistically add message to local state
-            setMessages(prev => [...prev, {
-                _id: result.data._id,
-                sender: result.data.sender,
-                message: result.data.message,
-                createdAt: result.data.createdAt,
-            }]);
+            // Optimistically add message to local state with deduplication
+            setMessages(prev => {
+                const exists = prev.some(msg => msg._id === result.data._id);
+                if (exists) {
+                    console.log('📨 Message already exists after send, skipping:', result.data._id);
+                    return prev;
+                }
+                const updatedMessages = [...prev, {
+                    _id: result.data._id,
+                    sender: result.data.sender,
+                    message: result.data.message,
+                    createdAt: result.data.createdAt,
+                }];
+                return deduplicateMessages(updatedMessages);
+            });
             setNewMessage('');
             toast.success('Message sent');
         } else {
