@@ -43,6 +43,13 @@ const FileFolderSchema = new Schema<IFileFolder>(
             type: String,
             required: true,
             index: true,
+            validate: {
+                validator: function(v: string) {
+                    // Prevent path traversal attacks (no ../, ..\, absolute paths)
+                    return !/(\.\.[\/\\]|^[\/\\]|^[a-zA-Z]:)/.test(v);
+                },
+                message: 'Invalid path: Path cannot contain ../, start with /, or be an absolute path'
+            },
         },
         color: {
             type: String,
