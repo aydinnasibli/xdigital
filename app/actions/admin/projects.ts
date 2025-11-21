@@ -265,6 +265,18 @@ export async function addMilestone(
             return { success: false, error: 'Project not found' };
         }
 
+        // Notify client about new milestone
+        await createNotification({
+            userId: updatedProject.clerkUserId,
+            projectId: projectId,
+            type: NotificationType.MILESTONE,
+            title: 'New Milestone Added',
+            message: `A new milestone "${milestone.title}" has been added to your project "${updatedProject.projectName}"${milestone.dueDate ? ` - Due: ${new Date(milestone.dueDate).toLocaleDateString()}` : ''}`,
+            link: `/dashboard/projects/${projectId}`,
+            sendEmail: true,
+            emailSubject: `New Milestone - ${updatedProject.projectName}`,
+        });
+
         revalidatePath(`/admin/projects/${projectId}`);
         revalidatePath(`/dashboard/projects/${projectId}`);
 
@@ -304,17 +316,33 @@ export async function updateMilestone(
             return { success: false, error: 'Milestone not found' };
         }
 
+        const milestone = project.milestones[milestoneIndex];
+        const wasCompleted = milestone.completed;
+
         // Update the milestone
         Object.assign(project.milestones[milestoneIndex], updates);
 
-        // If marking as completed, set completedDate
-        if (updates.completed) {
+        // If marking as completed, set completedDate and notify client
+        if (updates.completed && !wasCompleted) {
             project.milestones[milestoneIndex].completedDate = new Date();
+
+            // Notify client about milestone completion
+            await createNotification({
+                userId: project.clerkUserId,
+                projectId: projectId,
+                type: NotificationType.MILESTONE,
+                title: 'Milestone Completed',
+                message: `Milestone "${milestone.title}" has been completed for your project "${project.projectName}"`,
+                link: `/dashboard/projects/${projectId}`,
+                sendEmail: true,
+                emailSubject: `Milestone Completed - ${project.projectName}`,
+            });
         }
 
         await project.save();
 
         revalidatePath(`/admin/projects/${projectId}`);
+        revalidatePath(`/dashboard/projects/${projectId}`);
 
         return { success: true, data: toSerializedObject(project) };
     } catch (error) {

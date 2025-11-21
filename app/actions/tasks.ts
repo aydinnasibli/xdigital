@@ -174,8 +174,26 @@ export async function updateTask(taskId: string, data: Partial<{
         }
 
         const oldStatus = task.status;
+        const oldAssignee = task.assignedTo?.toString();
 
         Object.assign(task, data);
+
+        // If task was reassigned, notify the new assignee
+        if (data.assignedTo && data.assignedTo !== oldAssignee && mongoose.Types.ObjectId.isValid(data.assignedTo)) {
+            const newAssignee = await User.findById(data.assignedTo);
+            if (newAssignee?.clerkId) {
+                await createNotification({
+                    userId: newAssignee.clerkId,
+                    projectId: task.projectId.toString(),
+                    type: NotificationType.PROJECT_UPDATE,
+                    title: 'Task Reassigned',
+                    message: `You have been assigned: "${task.title}"${data.dueDate ? ` - Due: ${new Date(data.dueDate).toLocaleDateString()}` : ''}`,
+                    link: `/dashboard/projects/${task.projectId}`,
+                    sendEmail: true,
+                    emailSubject: `Task Assigned - ${task.title}`,
+                });
+            }
+        }
 
         // If status changed to completed, set completedDate
         if (data.status === TaskStatus.COMPLETED && oldStatus !== TaskStatus.COMPLETED) {

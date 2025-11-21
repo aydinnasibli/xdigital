@@ -5,10 +5,12 @@ import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/database/mongodb';
 import Feedback, { FeedbackType, FeedbackStatus } from '@/models/Feedback';
-import User from '@/models/User';
+import User, { UserRole } from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
+import { createNotifications, createNotification } from '@/lib/services/notification.service';
+import { NotificationType } from '@/models/Notification';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -160,7 +162,26 @@ export async function submitFeedback(data: {
             submittedAt: new Date(),
         });
 
+        // Notify all admins about new feedback
+        const adminUsers = await User.find({ role: UserRole.ADMIN }).lean();
+        const adminClerkIds = adminUsers.map(admin => admin.clerkId);
+
+        if (adminClerkIds.length > 0) {
+            const feedbackTypeLabel = data.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            await createNotifications({
+                userIds: adminClerkIds,
+                projectId: data.projectId,
+                type: NotificationType.GENERAL,
+                title: 'New Feedback Received',
+                message: `${user.firstName || user.email} submitted ${feedbackTypeLabel} feedback${data.title ? `: "${data.title}"` : ''}`,
+                link: `/admin/feedback`,
+                sendEmail: true,
+                emailSubject: `New Feedback - ${feedbackTypeLabel}`,
+            });
+        }
+
         revalidatePath('/dashboard/feedback');
+        revalidatePath('/admin/feedback');
         if (data.projectId) {
             revalidatePath(`/dashboard/projects/${data.projectId}`);
         }
@@ -196,13 +217,29 @@ export async function approveTestimonial(feedbackId: string): Promise<ActionResp
                 testimonialApprovedAt: new Date(),
             },
             { new: true }
-        );
+        ).lean();
 
         if (!feedback) {
             return { success: false, error: 'Feedback not found' };
         }
 
+        // Get user to send notification
+        const user = await User.findById(feedback.userId);
+        if (user?.clerkId) {
+            await createNotification({
+                userId: user.clerkId,
+                projectId: feedback.projectId?.toString(),
+                type: NotificationType.GENERAL,
+                title: 'Testimonial Approved',
+                message: 'Thank you! Your testimonial has been approved and is now featured on our website.',
+                link: `/dashboard/feedback`,
+                sendEmail: true,
+                emailSubject: 'Your Testimonial Has Been Approved',
+            });
+        }
+
         revalidatePath('/admin/feedback');
+        revalidatePath('/dashboard/feedback');
 
         return { success: true, data: toSerializedObject(feedback) };
     } catch (error) {

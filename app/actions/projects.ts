@@ -6,11 +6,13 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/database/mongodb';
 import Project from '@/models/Project';
-import User from '@/models/User';
+import User, { UserRole } from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
 import { requireAdmin } from '@/lib/auth/admin';
+import { createNotifications } from '@/lib/services/notification.service';
+import { NotificationType } from '@/models/Notification';
 
 // Type definitions
 type ActionResponse<T = any> = {
@@ -154,9 +156,27 @@ export async function createProject(formData: ProjectFormData): Promise<ActionRe
             customization: customization || undefined,
         });
 
+        // Notify all admins about new project request
+        const adminUsers = await User.find({ role: UserRole.ADMIN }).lean();
+        const adminClerkIds = adminUsers.map(admin => admin.clerkId);
+
+        if (adminClerkIds.length > 0) {
+            await createNotifications({
+                userIds: adminClerkIds,
+                projectId: newProject._id.toString(),
+                type: NotificationType.PROJECT_UPDATE,
+                title: 'New Project Request',
+                message: `${user.firstName || user.email} submitted a new project: "${projectName}" (${serviceType})`,
+                link: `/admin/projects/${newProject._id.toString()}`,
+                sendEmail: true,
+                emailSubject: `New Project Request - ${projectName}`,
+            });
+        }
+
         // Revalidate the projects page
         revalidatePath('/dashboard/projects');
         revalidatePath('/dashboard');
+        revalidatePath('/admin/projects');
 
         return {
             success: true,
