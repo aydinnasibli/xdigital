@@ -322,6 +322,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [replyingTo, setReplyingTo] = useState<Message | null>(null);
     const [editingMessage, setEditingMessage] = useState<Message | null>(null);
     const [editText, setEditText] = useState('');
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -412,9 +413,8 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const handleTypingIndicator = useCallback((data: any) => {
         logInfo('Typing indicator received', data);
 
-        // Only show typing indicator if it's from admin
-        // Client's own typing has userId as their MongoDB ObjectId, admin typing has userId as 'admin'
-        if (data.userId !== 'admin') {
+        // Don't show own typing indicator
+        if (data.userId === currentUserId) {
             return;
         }
 
@@ -433,7 +433,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
             return newMap;
         });
-    }, []);
+    }, [currentUserId]);
 
     usePusherChannel(`project-${projectId}`, 'new-message', handleNewMessage);
     usePusherChannel(`project-${projectId}`, 'typing', handleTypingIndicator);
@@ -450,7 +450,8 @@ function MessagesTab({ projectId }: { projectId: string }) {
         setLoading(true);
         const result = await getMessages(projectId);
         if (result.success && result.data) {
-            setMessages(deduplicateMessages(result.data));
+            setMessages(deduplicateMessages(result.data.messages));
+            setCurrentUserId(result.data.currentUserId);
         }
         setLoading(false);
     };

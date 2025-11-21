@@ -49,6 +49,7 @@ interface Project {
 interface MessagesClientProps {
     initialMessages: Message[];
     availableProjects: Project[];
+    currentAdminUserId: string | null;
 }
 
 interface Conversation {
@@ -69,7 +70,7 @@ interface TypingIndicator {
 
 const COMMON_EMOJIS = ['👍', '❤️', '😊', '🎉', '🔥', '👏'];
 
-export default function MessagesClient({ initialMessages, availableProjects }: MessagesClientProps) {
+export default function MessagesClient({ initialMessages, availableProjects, currentAdminUserId }: MessagesClientProps) {
     const [allMessages, setAllMessages] = useState<Message[]>(initialMessages);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState('');
@@ -272,7 +273,7 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
         logInfo('Typing indicator received', data);
 
         // Don't show admin's own typing indicator
-        if (data.userId === 'admin') {
+        if (data.userId === currentAdminUserId) {
             return;
         }
 
@@ -292,7 +293,7 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
 
             return newMap;
         });
-    }, []);
+    }, [currentAdminUserId]);
 
     // Subscribe to global admin Pusher channel
     usePusherChannel('admin-messages', 'new-message', handleNewMessage);

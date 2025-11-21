@@ -44,7 +44,7 @@ export async function getMessages(projectId: string): Promise<ActionResponse> {
             toSerializedObject(msg)
         );
 
-        return { success: true, data: serializedMessages };
+        return { success: true, data: { messages: serializedMessages, currentUserId: user._id.toString() } };
     } catch (error) {
         logError(error as Error, { context: 'getMessages', projectId });
         return { success: false, error: 'Failed to fetch messages' };
