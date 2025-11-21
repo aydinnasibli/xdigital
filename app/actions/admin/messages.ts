@@ -61,12 +61,7 @@ export async function getAllMessages(filters?: {
                 const project = msg.projectId as any;
 
                 return {
-                    _id: msg._id.toString(),
-                    sender: msg.sender,
-                    message: msg.message,
-                    createdAt: msg.createdAt,
-                    isRead: msg.isRead,
-                    readAt: msg.readAt,
+                    ...toSerializedObject(msg),
                     projectId: {
                         _id: project._id.toString(),
                         projectName: project.projectName,
@@ -74,16 +69,6 @@ export async function getAllMessages(filters?: {
                     userId: user._id.toString(),
                     clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
                     clientEmail: user.email,
-                    clerkUserId: msg.clerkUserId,
-                    reactions: msg.reactions || [],
-                    parentMessageId: msg.parentMessageId ? msg.parentMessageId.toString() : undefined,
-                    threadReplies: msg.threadReplies ? msg.threadReplies.map((id: any) => id.toString()) : [],
-                    isEdited: msg.isEdited || false,
-                    editedAt: msg.editedAt,
-                    editHistory: msg.editHistory || [],
-                    isPinned: msg.isPinned || false,
-                    pinnedAt: msg.pinnedAt,
-                    pinnedBy: msg.pinnedBy,
                 };
             });
 
@@ -226,12 +211,7 @@ export async function getAdminMessage(messageId: string): Promise<ActionResponse
         }
 
         const serializedMessage = {
-            _id: message._id.toString(),
-            sender: message.sender,
-            message: message.message,
-            createdAt: message.createdAt,
-            isRead: message.isRead,
-            readAt: message.readAt,
+            ...toSerializedObject(message),
             projectId: {
                 _id: project._id.toString(),
                 projectName: project.projectName,
@@ -239,16 +219,6 @@ export async function getAdminMessage(messageId: string): Promise<ActionResponse
             userId: user._id.toString(),
             clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
             clientEmail: user.email,
-            clerkUserId: message.clerkUserId,
-            reactions: message.reactions || [],
-            parentMessageId: message.parentMessageId ? message.parentMessageId.toString() : undefined,
-            threadReplies: message.threadReplies ? message.threadReplies.map((id: any) => id.toString()) : [],
-            isEdited: message.isEdited || false,
-            editedAt: message.editedAt,
-            editHistory: message.editHistory || [],
-            isPinned: message.isPinned || false,
-            pinnedAt: message.pinnedAt,
-            pinnedBy: message.pinnedBy,
         };
 
         return { success: true, data: serializedMessage };
@@ -298,25 +268,9 @@ export async function getAdminProjectMessages(
             const user = msg.userId as any;
 
             return {
-                _id: msg._id.toString(),
-                sender: msg.sender,
-                message: msg.message,
-                createdAt: msg.createdAt,
-                isRead: msg.isRead,
-                readAt: msg.readAt,
-                projectId: msg.projectId.toString(),
+                ...toSerializedObject(msg),
                 userId: user._id.toString(),
                 clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
-                clerkUserId: msg.clerkUserId,
-                reactions: msg.reactions || [],
-                parentMessageId: msg.parentMessageId ? msg.parentMessageId.toString() : undefined,
-                threadReplies: msg.threadReplies ? msg.threadReplies.map((id: any) => id.toString()) : [],
-                isEdited: msg.isEdited || false,
-                editedAt: msg.editedAt,
-                editHistory: msg.editHistory || [],
-                isPinned: msg.isPinned || false,
-                pinnedAt: msg.pinnedAt,
-                pinnedBy: msg.pinnedBy,
             };
         });
 
