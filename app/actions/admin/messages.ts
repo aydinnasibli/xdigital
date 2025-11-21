@@ -168,11 +168,31 @@ export async function markAdminMessagesAsRead(
 
         await dbConnect();
 
+        // Get project IDs before updating so we can send Pusher events
+        const messages = await Message.find({
+            _id: { $in: validIds },
+            sender: MessageSender.CLIENT
+        }).select('projectId').lean();
+
+        const projectIds = [...new Set(messages.map(m => m.projectId.toString()))];
+
         // Simple update - just set isRead and readAt
         const result = await Message.updateMany(
             { _id: { $in: validIds }, sender: MessageSender.CLIENT },
             { isRead: true, readAt: new Date() }
         );
+
+        // Send Pusher events for each project
+        for (const projectId of projectIds) {
+            try {
+                await sendRealtimeMessage(projectId, {
+                    type: 'read',
+                    messageIds: validIds
+                });
+            } catch (error) {
+                logError(error as Error, { context: 'markAdminMessagesAsRead-pusher', projectId });
+            }
+        }
 
         revalidatePath('/admin/messages');
 
@@ -346,6 +366,14 @@ export async function addMessageReaction(
 
         await message.save();
 
+        // Serialize reactions to remove MongoDB ObjectIds
+        const serializedReactions = message.reactions?.map(r => ({
+            emoji: r.emoji,
+            userId: r.userId.toString(),
+            userName: r.userName,
+            createdAt: r.createdAt.toISOString ? r.createdAt.toISOString() : r.createdAt
+        })) || [];
+
         revalidatePath('/admin/messages');
         revalidatePath(`/dashboard/projects/${message.projectId}`);
 
@@ -354,13 +382,13 @@ export async function addMessageReaction(
             await sendRealtimeMessage(message.projectId.toString(), {
                 type: 'reaction',
                 messageId: message._id.toString(),
-                reactions: message.reactions
+                reactions: serializedReactions
             });
         } catch (error) {
             logError(error as Error, { context: 'addMessageReaction-pusher' });
         }
 
-        return { success: true, data: { reactions: message.reactions } };
+        return { success: true, data: { reactions: serializedReactions } };
     } catch (error) {
         logError(error as Error, { context: 'addMessageReaction', messageId });
         return { success: false, error: 'Failed to add reaction' };
@@ -405,21 +433,27 @@ export async function adminReplyToMessage(
         const proj = populatedMessage?.projectId as any;
 
         const serializedMessage = {
-            ...toSerializedObject(reply),
             _id: reply._id.toString(),
+            sender: 'admin',
+            message: reply.message,
+            createdAt: reply.createdAt.toISOString(),
+            isRead: reply.isRead,
             projectId: reply.projectId.toString(),
             userId: reply.userId.toString(),
             parentMessageId: parentMessageId,
             clientName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : '',
             clientEmail: user?.email || '',
             projectName: proj?.projectName || '',
+            reactions: reply.reactions || [],
+            threadReplies: [],
+            isEdited: false,
+            isPinned: false,
         };
 
         try {
-            await sendRealtimeMessage(projectId, {
-                ...serializedMessage,
-                type: 'reply'
-            });
+            // Send as regular message, not as type: 'reply'
+            // The client will detect it's a reply via parentMessageId
+            await sendRealtimeMessage(projectId, serializedMessage);
         } catch (error) {
             logError(error as Error, { context: 'adminReplyToMessage-pusher', projectId });
         }
@@ -518,7 +552,9 @@ export async function togglePinMessage(messageId: string): Promise<ActionRespons
             await sendRealtimeMessage(message.projectId.toString(), {
                 type: 'pin',
                 messageId: message._id.toString(),
-                isPinned: message.isPinned
+                isPinned: message.isPinned,
+                pinnedAt: message.pinnedAt?.toISOString(),
+                pinnedBy: message.pinnedBy
             });
         } catch (error) {
             logError(error as Error, { context: 'togglePinMessage-pusher' });
