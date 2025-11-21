@@ -1,12 +1,11 @@
 // components/projects/ProjectDetailClient.tsx
 'use client';
 
-import { useState, useTransition, useCallback } from 'react';
+import { useState, useTransition, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { deleteProject } from '@/app/actions/projects';
 import { getMessages, sendMessage } from '@/app/actions/messages';
-import { useEffect } from 'react';
 import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectAnalytics } from '@/app/actions/monitoring';
 import dynamic from 'next/dynamic';
@@ -296,16 +295,24 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Real-time message listener
     const handleNewMessage = useCallback((data: any) => {
         console.log('📨 New message received via Pusher:', data);
-        setMessages(prev => [...prev, {
-            _id: data._id,
-            sender: data.sender,
-            message: data.message,
-            createdAt: data.createdAt,
-        }]);
+        setMessages(prev => {
+            // Check if message already exists (prevent duplicates)
+            const exists = prev.some(msg => msg._id === data._id);
+            if (exists) {
+                return prev;
+            }
+            return [...prev, {
+                _id: data._id,
+                sender: data.sender,
+                message: data.message,
+                createdAt: data.createdAt,
+            }];
+        });
         // Show toast if message is from admin
         if (data.sender === 'admin') {
             toast.info('New message from admin');
@@ -317,6 +324,11 @@ function MessagesTab({ projectId }: { projectId: string }) {
     useEffect(() => {
         loadMessages();
     }, [projectId]);
+
+    // Auto-scroll to bottom when messages change
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
     const loadMessages = async () => {
         setLoading(true);
@@ -333,7 +345,14 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
         setSending(true);
         const result = await sendMessage(projectId, newMessage);
-        if (result.success) {
+        if (result.success && result.data) {
+            // Optimistically add message to local state
+            setMessages(prev => [...prev, {
+                _id: result.data._id,
+                sender: result.data.sender,
+                message: result.data.message,
+                createdAt: result.data.createdAt,
+            }]);
             setNewMessage('');
             toast.success('Message sent');
         } else {
@@ -369,12 +388,18 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                     className={`text-xs mt-2 ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-500'
                                         }`}
                                 >
-                                    {new Date(msg.createdAt).toLocaleString()}
+                                    {new Date(msg.createdAt).toLocaleString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
                                 </p>
                             </div>
                         </div>
                     ))
                 )}
+                <div ref={messagesEndRef} />
             </div>
 
             {/* Message Input */}
