@@ -61,8 +61,7 @@ export async function getAllMessages(filters?: {
                 const project = msg.projectId as any;
 
                 return {
-                    ...msg,
-                    _id: msg._id.toString(),
+                    ...toSerializedObject(msg),
                     projectId: {
                         _id: project._id.toString(),
                         projectName: project.projectName,
@@ -212,8 +211,7 @@ export async function getAdminMessage(messageId: string): Promise<ActionResponse
         }
 
         const serializedMessage = {
-            ...message,
-            _id: message._id.toString(),
+            ...toSerializedObject(message),
             projectId: {
                 _id: project._id.toString(),
                 projectName: project.projectName,
@@ -270,9 +268,7 @@ export async function getAdminProjectMessages(
             const user = msg.userId as any;
 
             return {
-                ...msg,
-                _id: msg._id.toString(),
-                projectId: msg.projectId.toString(),
+                ...toSerializedObject(msg),
                 userId: user._id.toString(),
                 clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
             };
