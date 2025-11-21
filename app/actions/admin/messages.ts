@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/database/mongodb';
 import Message, { MessageSender } from '@/models/Message';
 import Project from '@/models/Project';
+import User, { IUser } from '@/models/User';
 import { requireAdmin, getAdminSession } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
@@ -311,7 +312,6 @@ export async function sendAdminTypingIndicator(
         await dbConnect();
 
         // Get the admin user from database using Clerk ID
-        const User = mongoose.model('User');
         const adminUser = await User.findOne({ clerkId: clerkUserId }).lean();
 
         if (!adminUser) {
@@ -351,7 +351,6 @@ export async function addMessageReaction(
         await dbConnect();
 
         // Get the admin user from database using Clerk ID
-        const User = mongoose.model('User');
         const adminUser = await User.findOne({ clerkId: clerkUserId }).lean();
 
         if (!adminUser) {
@@ -519,13 +518,6 @@ export async function adminEditMessage(
             return { success: false, error: 'Can only edit admin messages' };
         }
 
-        // Store old message in history
-        if (!message.editHistory) message.editHistory = [];
-        message.editHistory.push({
-            previousMessage: message.message,
-            editedAt: new Date()
-        } as any);
-
         message.message = newMessage.trim();
         message.isEdited = true;
         message.editedAt = new Date();
@@ -565,7 +557,6 @@ export async function togglePinMessage(messageId: string): Promise<ActionRespons
         await dbConnect();
 
         // Get the admin user from database using Clerk ID
-        const User = mongoose.model('User');
         const adminUser = await User.findOne({ clerkId: clerkUserId }).lean();
 
         if (!adminUser) {

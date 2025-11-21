@@ -374,13 +374,6 @@ export async function editMessage(
             return { success: false, error: 'Unauthorized to edit this message' };
         }
 
-        // Store old message in history
-        if (!message.editHistory) message.editHistory = [];
-        message.editHistory.push({
-            previousMessage: message.message,
-            editedAt: new Date()
-        } as any);
-
         // Update message
         message.message = newMessage.trim();
         message.isEdited = true;
