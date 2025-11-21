@@ -55,13 +55,16 @@ export async function getInvoiceById(invoiceId: string): Promise<ActionResponse>
             return { success: false, error: 'Invoice not found' };
         }
 
-        const user = invoice.userId as any;
-        const project = invoice.projectId as any;
+        // Type-safe handling of populated fields
+        type PopulatedUser = { _id: mongoose.Types.ObjectId; email: string; firstName?: string; lastName?: string };
+        type PopulatedProject = { _id: mongoose.Types.ObjectId; projectName: string };
 
-        const baseInvoice = toSerializedObject(invoice);
+        const user = invoice.userId as unknown as PopulatedUser;
+        const project = invoice.projectId as unknown as PopulatedProject;
+
+        // Serialize the base invoice and reconstruct with additional fields
         const serializedInvoice = {
-            ...baseInvoice,
-            _id: invoice._id.toString(),
+            ...toSerializedObject<Record<string, unknown>>(invoice),
             userId: user._id.toString(),
             projectId: project._id.toString(),
             clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
@@ -107,13 +110,14 @@ export async function getAllInvoices(filters?: {
             .lean();
 
         const serializedInvoices = invoices.map(inv => {
-            const user = inv.userId as any;
-            const project = inv.projectId as any;
-            const baseInvoice = toSerializedObject(inv);
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; email: string; firstName?: string; lastName?: string };
+            type PopulatedProject = { _id: mongoose.Types.ObjectId; projectName: string };
+
+            const user = inv.userId as unknown as PopulatedUser;
+            const project = inv.projectId as unknown as PopulatedProject;
 
             return {
-                ...baseInvoice,
-                _id: inv._id.toString(),
+                ...toSerializedObject<Record<string, unknown>>(inv),
                 userId: user._id.toString(),
                 projectId: project._id.toString(),
                 clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
@@ -305,15 +309,9 @@ export async function sendInvoice(invoiceId: string): Promise<ActionResponse> {
         revalidatePath('/admin/invoices');
         revalidatePath(`/dashboard/projects/${invoice.projectId.toString()}`);
 
-        const serializedInvoice = toSerializedObject(invoice);
         return {
             success: true,
-            data: {
-                ...serializedInvoice,
-                _id: invoice._id.toString(),
-                userId: invoice.userId.toString(),
-                projectId: invoice.projectId.toString(),
-            },
+            data: toSerializedObject(invoice),
         };
     } catch (error) {
         logError(error as Error, { context: 'sendInvoice', invoiceId });
@@ -364,15 +362,9 @@ export async function markInvoiceAsPaid(
         revalidatePath('/admin/invoices');
         revalidatePath(`/dashboard/projects/${invoice.projectId.toString()}`);
 
-        const serializedInvoice = toSerializedObject(invoice);
         return {
             success: true,
-            data: {
-                ...serializedInvoice,
-                _id: invoice._id.toString(),
-                userId: invoice.userId.toString(),
-                projectId: invoice.projectId.toString(),
-            },
+            data: toSerializedObject(invoice),
         };
     } catch (error) {
         logError(error as Error, { context: 'markInvoiceAsPaid', invoiceId });

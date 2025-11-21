@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/database/mongodb';
 import SavedFilter, { FilterEntity } from '@/models/SavedFilter';
 import User from '@/models/User';
+import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
 
@@ -39,14 +40,9 @@ export async function getUserFilters(entity?: FilterEntity): Promise<ActionRespo
             .sort({ isDefault: -1, lastUsedAt: -1 })
             .lean();
 
-        const serializedFilters = filters.map(f => {
-            const baseFilter = toSerializedObject(f);
-            return {
-                ...baseFilter,
-                _id: f._id.toString(),
-                userId: f.userId.toString(),
-            };
-        });
+        const serializedFilters = filters.map(f =>
+            toSerializedObject(f)
+        );
 
         return { success: true, data: serializedFilters };
     } catch (error) {
@@ -76,15 +72,12 @@ export async function getSharedFilters(entity?: FilterEntity): Promise<ActionRes
             .lean();
 
         const serializedFilters = filters.map(f => {
-            const baseFilter = toSerializedObject(f);
-            const baseUserId = toSerializedObject(f.userId);
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string };
+            const user = f.userId as unknown as PopulatedUser;
+
             return {
-                ...baseFilter,
-                _id: f._id.toString(),
-                userId: {
-                    ...baseUserId,
-                    _id: f.userId._id.toString(),
-                },
+                ...toSerializedObject<Record<string, unknown>>(f),
+                userId: toSerializedObject(user),
             };
         });
 
@@ -285,14 +278,9 @@ export async function getDefaultFilter(entity: FilterEntity): Promise<ActionResp
             return { success: true, data: null };
         }
 
-        const baseFilter = toSerializedObject(filter);
         return {
             success: true,
-            data: {
-                ...baseFilter,
-                _id: filter._id.toString(),
-                userId: filter.userId.toString(),
-            },
+            data: toSerializedObject(filter),
         };
     } catch (error) {
         logError(error as Error, { context: 'getDefaultFilter', entity });

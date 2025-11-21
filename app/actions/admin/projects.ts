@@ -54,11 +54,11 @@ export async function getAllProjects(filters?: {
             .lean();
 
         const serializedProjects = projects.map(project => {
-            const user = project.userId as any;
-            const baseProject = toSerializedObject(project);
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; email: string; firstName?: string; lastName?: string };
+            const user = project.userId as unknown as PopulatedUser;
+
             return {
-                ...baseProject,
-                _id: project._id.toString(),
+                ...toSerializedObject<Record<string, unknown>>(project),
                 userId: user._id.toString(),
                 clientEmail: user.email,
                 clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'N/A',
@@ -91,14 +91,12 @@ export async function getAdminProject(projectId: string): Promise<ActionResponse
             return { success: false, error: 'Project not found' };
         }
 
-        const user = project.userId as any;
-
-        // Properly serialize all MongoDB objects and Dates
-        const baseProject = toSerializedObject(project);
+        // Type-safe handling of populated fields
+        type PopulatedUser = { _id: mongoose.Types.ObjectId; email: string; firstName?: string; lastName?: string; clerkId: string };
+        const user = project.userId as unknown as PopulatedUser;
 
         const serializedProject = {
-            ...baseProject,
-            _id: project._id.toString(),
+            ...toSerializedObject<Record<string, unknown>>(project),
             userId: user._id.toString(),
             client: {
                 id: user._id.toString(),

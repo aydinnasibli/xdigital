@@ -70,15 +70,9 @@ export async function getProjects(): Promise<ActionResponse> {
             .lean();
 
         // Convert _id to string for serialization
-        const serializedProjects = projects.map(project => {
-            const baseProject = toSerializedObject(project);
-            return {
-                ...baseProject,
-                _id: project._id.toString(),
-                userId: project.userId.toString(),
-                templateId: project.templateId ? project.templateId.toString() : undefined,
-            };
-        });
+        const serializedProjects = projects.map(project =>
+            toSerializedObject(project)
+        );
 
         return { success: true, data: serializedProjects };
     } catch (error) {
@@ -117,15 +111,7 @@ export async function getProject(projectId: string): Promise<ActionResponse> {
         }
 
         // Serialize the project
-        const baseProject = toSerializedObject(project);
-        const serializedProject = {
-            ...baseProject,
-            _id: project._id.toString(),
-            userId: project.userId.toString(),
-            templateId: project.templateId ? project.templateId.toString() : undefined,
-        };
-
-        return { success: true, data: serializedProject };
+        return { success: true, data: toSerializedObject(project) };
     } catch (error) {
         logError(error as Error, { context: 'getProject', projectId });
         return { success: false, error: 'Failed to fetch project' };
@@ -231,15 +217,9 @@ export async function updateProject(
         revalidatePath(`/dashboard/projects/${projectId}`);
         revalidatePath('/dashboard');
 
-        const baseProject = toSerializedObject(updatedProject);
         return {
             success: true,
-            data: {
-                ...baseProject,
-                _id: updatedProject._id.toString(),
-                userId: updatedProject.userId.toString(),
-                templateId: updatedProject.templateId ? updatedProject.templateId.toString() : undefined,
-            },
+            data: toSerializedObject(updatedProject),
         };
     } catch (error) {
         logError(error as Error, { context: 'updateProject', projectId });
@@ -312,15 +292,9 @@ export async function getProjectStats() {
             completed: projects.filter(p => p.status === 'completed').length,
         };
 
-        const recentProjects = projects.slice(0, 5).map(project => {
-            const baseProject = toSerializedObject(project);
-            return {
-                ...baseProject,
-                _id: project._id.toString(),
-                userId: project.userId.toString(),
-                templateId: project.templateId ? project.templateId.toString() : undefined,
-            };
-        });
+        const recentProjects = projects.slice(0, 5).map(project =>
+            toSerializedObject(project)
+        );
 
         return { success: true, data: { stats, recentProjects } };
     } catch (error) {

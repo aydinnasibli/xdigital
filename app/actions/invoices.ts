@@ -38,15 +38,9 @@ export async function getProjectInvoices(projectId: string): Promise<ActionRespo
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedInvoices = invoices.map(inv => {
-            const baseInvoice = toSerializedObject(inv);
-            return {
-                ...baseInvoice,
-                _id: inv._id.toString(),
-                userId: inv.userId.toString(),
-                projectId: inv.projectId.toString(),
-            };
-        });
+        const serializedInvoices = invoices.map(inv =>
+            toSerializedObject(inv)
+        );
 
         return { success: true, data: serializedInvoices };
     } catch (error) {

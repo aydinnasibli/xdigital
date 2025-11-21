@@ -51,15 +51,9 @@ export async function getNotifications(): Promise<ActionResponse> {
             .limit(50)
             .lean();
 
-        const serializedNotifications = notifications.map(notif => {
-            const baseNotif = toSerializedObject(notif);
-            return {
-            ...baseNotif,notif,
-            _id: notif._id.toString(),
-            userId: notif.userId.toString(),
-            projectId: notif.projectId?.toString(),
-                    };
-        });
+        const serializedNotifications = notifications.map(notif =>
+            toSerializedObject(notif)
+        );
 
         return { success: true, data: serializedNotifications };
     } catch (error) {

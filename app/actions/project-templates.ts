@@ -38,15 +38,13 @@ export async function getTemplates(serviceType?: string, packageType?: string): 
             .lean();
 
         const serializedTemplates = templates.map(template => {
-            const baseTemplate = toSerializedObject(template);
-            const baseCreatedBy = template.createdBy ? toSerializedObject(template.createdBy) : null;
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string };
+
             return {
-                ...baseTemplate,
-                _id: template._id.toString(),
-                createdBy: baseCreatedBy ? {
-                    ...baseCreatedBy,
-                    _id: template.createdBy._id.toString(),
-                } : null,
+                ...toSerializedObject<Record<string, unknown>>(template),
+                createdBy: template.createdBy
+                    ? toSerializedObject(template.createdBy as unknown as PopulatedUser)
+                    : null,
             };
         });
 
@@ -91,15 +89,13 @@ export async function getTemplatesByPackage(serviceType: string, packageType: st
             .lean();
 
         const serializedTemplates = templates.map(template => {
-            const baseTemplate = toSerializedObject(template);
-            const baseCreatedBy = template.createdBy ? toSerializedObject(template.createdBy) : null;
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string };
+
             return {
-                ...baseTemplate,
-                _id: template._id.toString(),
-                createdBy: baseCreatedBy ? {
-                    ...baseCreatedBy,
-                    _id: template.createdBy._id.toString(),
-                } : null,
+                ...toSerializedObject<Record<string, unknown>>(template),
+                createdBy: template.createdBy
+                    ? toSerializedObject(template.createdBy as unknown as PopulatedUser)
+                    : null,
             };
         });
 
@@ -128,17 +124,15 @@ export async function getTemplate(templateId: string): Promise<ActionResponse> {
             return { success: false, error: 'Template not found' };
         }
 
-        const baseTemplate = toSerializedObject(template);
-        const baseCreatedBy = template.createdBy ? toSerializedObject(template.createdBy) : null;
+        type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string };
+
         return {
             success: true,
             data: {
-                ...baseTemplate,
-                _id: template._id.toString(),
-                createdBy: baseCreatedBy ? {
-                    ...baseCreatedBy,
-                    _id: template.createdBy._id.toString(),
-                } : null,
+                ...toSerializedObject<Record<string, unknown>>(template),
+                createdBy: template.createdBy
+                    ? toSerializedObject(template.createdBy as unknown as PopulatedUser)
+                    : null,
             },
         };
     } catch (error) {

@@ -43,21 +43,15 @@ export async function getProjectTasks(projectId: string): Promise<ActionResponse
             .lean();
 
         const serializedTasks = tasks.map(task => {
-            const baseTask = toSerializedObject(task);
-            const baseAssignedTo = task.assignedTo ? toSerializedObject(task.assignedTo) : null;
-            const baseCreatedBy = toSerializedObject(task.createdBy);
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string; imageUrl?: string };
+
+            const assignedTo = task.assignedTo as unknown as PopulatedUser | null;
+            const createdBy = task.createdBy as unknown as PopulatedUser;
+
             return {
-                ...baseTask,
-                _id: task._id.toString(),
-                projectId: task.projectId.toString(),
-                assignedTo: task.assignedTo && baseAssignedTo ? {
-                    ...baseAssignedTo,
-                    _id: task.assignedTo._id.toString(),
-                } : null,
-                createdBy: {
-                    ...baseCreatedBy,
-                    _id: task.createdBy._id.toString(),
-                },
+                ...toSerializedObject<Record<string, unknown>>(task),
+                assignedTo: assignedTo ? toSerializedObject(assignedTo) : null,
+                createdBy: toSerializedObject(createdBy),
             };
         });
 

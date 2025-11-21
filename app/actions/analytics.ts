@@ -40,15 +40,9 @@ export async function getStoredProjectAnalytics(projectId: string): Promise<Acti
             .sort({ recordedDate: -1 })
             .lean();
 
-        const serializedAnalytics = analytics.map(item => {
-            const baseItem = toSerializedObject(item);
-            return {
-            ...baseItem,item,
-            _id: item._id.toString(),
-            projectId: item.projectId.toString(),
-            userId: item.userId.toString(),
-                    };
-        });
+        const serializedAnalytics = analytics.map(item =>
+            toSerializedObject(item)
+        );
 
         // Calculate summary stats
         const summary = {
