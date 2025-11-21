@@ -9,6 +9,7 @@ import User from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
+import { requireAdmin } from '@/lib/auth/admin';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -19,6 +20,7 @@ type ActionResponse<T = any> = {
 // Get all notes for a client (admin only)
 export async function getClientNotes(clientId: string): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -60,6 +62,7 @@ export async function createClientNote(data: {
     reminderDate?: Date;
 }): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -109,6 +112,7 @@ export async function updateClientNote(noteId: string, data: Partial<{
     reminderDate: Date;
 }>): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -138,6 +142,7 @@ export async function updateClientNote(noteId: string, data: Partial<{
 // Delete note (admin only)
 export async function deleteClientNote(noteId: string): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -163,6 +168,7 @@ export async function deleteClientNote(noteId: string): Promise<ActionResponse> 
 // Toggle pin (admin only)
 export async function toggleNotePin(noteId: string): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };

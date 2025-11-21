@@ -8,6 +8,7 @@ import User from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
+import { requireAdmin } from '@/lib/auth/admin';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -121,6 +122,7 @@ export async function getAllActivities(filters?: {
     endDate?: Date;
 }, limit: number = 100): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };

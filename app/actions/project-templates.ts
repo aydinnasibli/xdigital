@@ -11,6 +11,7 @@ import User from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
+import { requireAdmin } from '@/lib/auth/admin';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -159,6 +160,7 @@ export async function createTemplate(data: {
     isDefault?: boolean;
 }): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -202,6 +204,7 @@ export async function updateTemplate(templateId: string, data: Partial<{
     isDefault: boolean;
 }>): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -231,6 +234,7 @@ export async function updateTemplate(templateId: string, data: Partial<{
 // Delete template (admin only)
 export async function deleteTemplate(templateId: string): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -363,6 +367,7 @@ export async function cloneProjectAsTemplate(
     }
 ): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
