@@ -129,18 +129,12 @@ export default function NotificationBell() {
                             </div>
                         ) : (
                             notifications.map((notification) => (
-                                <div
+                                <Link
                                     key={notification._id}
-                                    className={`p-4 border-b hover:bg-gray-50 cursor-pointer ${!notification.isRead ? 'bg-blue-50' : ''
+                                    href={`/dashboard/notifications/${notification._id}`}
+                                    className={`block p-4 border-b hover:bg-gray-50 cursor-pointer ${!notification.isRead ? 'bg-blue-50' : ''
                                         }`}
-                                    onClick={() => {
-                                        if (!notification.isRead) {
-                                            handleMarkAsRead(notification._id);
-                                        }
-                                        if (notification.link) {
-                                            window.location.href = notification.link;
-                                        }
-                                    }}
+                                    onClick={() => setIsOpen(false)}
                                 >
                                     <div className="flex gap-3">
                                         <span className="text-2xl">
@@ -150,7 +144,7 @@ export default function NotificationBell() {
                                             <h4 className="font-medium text-sm">
                                                 {notification.title}
                                             </h4>
-                                            <p className="text-sm text-gray-600 mt-1">
+                                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                                                 {notification.message}
                                             </p>
                                             <p className="text-xs text-gray-400 mt-2">
@@ -161,7 +155,7 @@ export default function NotificationBell() {
                                             <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
                                         )}
                                     </div>
-                                </div>
+                                </Link>
                             ))
                         )}
                     </div>
