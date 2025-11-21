@@ -324,7 +324,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [editText, setEditText] = useState('');
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const typingTimeoutRef = useRef<NodeJS.Timeout>();
+    const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
     // Helper function to deduplicate messages and ensure unique IDs
     const deduplicateMessages = useCallback((messageList: Message[]): Message[] => {
