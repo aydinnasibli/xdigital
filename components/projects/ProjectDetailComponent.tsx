@@ -11,6 +11,7 @@ import { getProjectAnalytics } from '@/app/actions/monitoring';
 import dynamic from 'next/dynamic';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { toast } from 'sonner';
+import { logInfo, logWarning } from '@/lib/sentry-logger';
 
 // Dynamically import heavy dashboard components
 const SEODashboard = dynamic(() => import('@/components/dashboard/SEODashboard'), {
@@ -314,15 +315,24 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
     // Real-time message listener
     const handleNewMessage = useCallback((data: any) => {
-        console.log('📨 New message received via Pusher:', data);
+        logInfo('New message received via Pusher', {
+            messageId: data._id,
+            sender: data.sender,
+            projectId
+        });
+
         setMessages(prev => {
             // Check if message already exists (prevent duplicates)
             const exists = prev.some(msg => msg._id === data._id);
             if (exists) {
-                console.log('📨 Message already exists, skipping:', data._id);
+                logInfo('Duplicate message detected and prevented', {
+                    messageId: data._id,
+                    projectId
+                });
                 return prev;
             }
-            // Add new message and deduplicate
+
+            // Add new message and ensure chronological order
             const updatedMessages = [...prev, {
                 _id: data._id,
                 sender: data.sender,
@@ -331,11 +341,12 @@ function MessagesTab({ projectId }: { projectId: string }) {
             }];
             return deduplicateMessages(updatedMessages);
         });
+
         // Show toast if message is from admin
         if (data.sender === 'admin') {
             toast.info('New message from admin');
         }
-    }, [deduplicateMessages]);
+    }, [deduplicateMessages, projectId]);
 
     usePusherChannel(`project-${projectId}`, 'new-message', handleNewMessage);
 
@@ -365,11 +376,16 @@ function MessagesTab({ projectId }: { projectId: string }) {
         setSending(true);
         const result = await sendMessage(projectId, newMessage);
         if (result.success && result.data) {
-            // Optimistically add message to local state with deduplication
+            // Optimistically add message to local state
+            // Note: Pusher will broadcast this back, but deduplication will handle it
             setMessages(prev => {
                 const exists = prev.some(msg => msg._id === result.data._id);
                 if (exists) {
-                    console.log('📨 Message already exists after send, skipping:', result.data._id);
+                    // This shouldn't happen but log if it does
+                    logWarning('Duplicate message after send', {
+                        messageId: result.data._id,
+                        projectId
+                    });
                     return prev;
                 }
                 const updatedMessages = [...prev, {
