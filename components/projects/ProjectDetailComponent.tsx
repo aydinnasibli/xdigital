@@ -322,6 +322,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [replyingTo, setReplyingTo] = useState<Message | null>(null);
     const [editingMessage, setEditingMessage] = useState<Message | null>(null);
     const [editText, setEditText] = useState('');
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -412,11 +413,16 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const handleTypingIndicator = useCallback((data: any) => {
         logInfo('Typing indicator received', data);
 
+        // Don't show own typing indicator
+        if (data.userId === currentUserId) {
+            return;
+        }
+
         setTypingIndicators(prev => {
             const newMap = new Map(prev);
             const key = `${data.projectId}-${data.userId}`;
 
-            if (data.isTyping && data.userId !== 'client') {
+            if (data.isTyping) {
                 newMap.set(key, {
                     userName: data.userName,
                     isTyping: true,
@@ -427,7 +433,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
             return newMap;
         });
-    }, []);
+    }, [currentUserId]);
 
     usePusherChannel(`project-${projectId}`, 'new-message', handleNewMessage);
     usePusherChannel(`project-${projectId}`, 'typing', handleTypingIndicator);
@@ -444,7 +450,8 @@ function MessagesTab({ projectId }: { projectId: string }) {
         setLoading(true);
         const result = await getMessages(projectId);
         if (result.success && result.data) {
-            setMessages(deduplicateMessages(result.data));
+            setMessages(deduplicateMessages(result.data.messages));
+            setCurrentUserId(result.data.currentUserId);
         }
         setLoading(false);
     };
@@ -652,13 +659,16 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                             {/* Action Buttons */}
                                             <div className={`flex items-center justify-between gap-2 mt-2 ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-500'}`}>
                                                 <div className="flex items-center gap-1">
-                                                    <button
-                                                        onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
-                                                        className="opacity-50 hover:opacity-100 transition-opacity p-1"
-                                                        title="React"
-                                                    >
-                                                        <Smile className="w-3 h-3" />
-                                                    </button>
+                                                    {/* Only show reaction button for admin messages */}
+                                                    {msg.sender === 'admin' && (
+                                                        <button
+                                                            onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
+                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                                            title="React"
+                                                        >
+                                                            <Smile className="w-3 h-3" />
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => handleReply(msg)}
                                                         className="opacity-50 hover:opacity-100 transition-opacity p-1"

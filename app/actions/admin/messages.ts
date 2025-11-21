@@ -307,12 +307,24 @@ export async function sendAdminTypingIndicator(
     isTyping: boolean
 ): Promise<ActionResponse> {
     try {
-        await requireAdmin();
+        const { userId: clerkUserId } = await getAdminSession();
+        await dbConnect();
+
+        // Get the admin user from database using Clerk ID
+        const User = mongoose.model('User');
+        const adminUser = await User.findOne({ clerkId: clerkUserId }).lean();
+
+        if (!adminUser) {
+            logError(new Error('Admin user not found'), { context: 'sendAdminTypingIndicator', clerkUserId });
+            return { success: false, error: 'Admin user not found' };
+        }
+
+        const adminUserName = `${adminUser.firstName || ''} ${adminUser.lastName || ''}`.trim() || adminUser.email || 'xDigital Team';
 
         // Send typing indicator via Pusher
         try {
             const { sendTypingIndicator } = await import('@/lib/services/pusher.service');
-            await sendTypingIndicator(projectId, 'admin', 'xDigital Team', isTyping);
+            await sendTypingIndicator(projectId, adminUser._id.toString(), adminUserName, isTyping);
         } catch (error) {
             logError(error as Error, { context: 'sendAdminTypingIndicator-pusher', projectId });
         }
@@ -338,28 +350,43 @@ export async function addMessageReaction(
 
         await dbConnect();
 
+        // Get the admin user from database using Clerk ID
+        const User = mongoose.model('User');
+        const adminUser = await User.findOne({ clerkId: clerkUserId }).lean();
+
+        if (!adminUser) {
+            logError(new Error('Admin user not found in database'), {
+                context: 'addMessageReaction',
+                clerkUserId
+            });
+            return { success: false, error: 'Admin user not found' };
+        }
+
         const message = await Message.findById(messageId);
         if (!message) {
             return { success: false, error: 'Message not found' };
         }
 
+        const adminUserObjectId = adminUser._id;
+        const adminUserName = `${adminUser.firstName || ''} ${adminUser.lastName || ''}`.trim() || adminUser.email || 'xDigital Team';
+
         // Check if admin already reacted with this emoji
         const existingReaction = message.reactions?.find(
-            r => r.emoji === emoji && r.userId.toString() === clerkUserId
+            r => r.emoji === emoji && r.userId.toString() === adminUserObjectId.toString()
         );
 
         if (existingReaction) {
-            // Remove reaction if already exists
+            // Remove reaction if already exists (toggle off)
             message.reactions = message.reactions?.filter(
-                r => !(r.emoji === emoji && r.userId.toString() === clerkUserId)
+                r => !(r.emoji === emoji && r.userId.toString() === adminUserObjectId.toString())
             );
         } else {
             // Add new reaction
             if (!message.reactions) message.reactions = [];
             message.reactions.push({
                 emoji,
-                userId: new mongoose.Types.ObjectId(clerkUserId),
-                userName: 'Admin',
+                userId: adminUserObjectId,
+                userName: adminUserName,
                 createdAt: new Date()
             } as any);
         }

@@ -49,6 +49,7 @@ interface Project {
 interface MessagesClientProps {
     initialMessages: Message[];
     availableProjects: Project[];
+    currentAdminUserId: string | null;
 }
 
 interface Conversation {
@@ -69,7 +70,7 @@ interface TypingIndicator {
 
 const COMMON_EMOJIS = ['👍', '❤️', '😊', '🎉', '🔥', '👏'];
 
-export default function MessagesClient({ initialMessages, availableProjects }: MessagesClientProps) {
+export default function MessagesClient({ initialMessages, availableProjects, currentAdminUserId }: MessagesClientProps) {
     const [allMessages, setAllMessages] = useState<Message[]>(initialMessages);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState('');
@@ -198,12 +199,12 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                 const exists = prev.some(msg => msg._id === data._id);
                 if (exists) return prev;
 
-                // Create properly formatted reply message
+                // Create properly formatted reply message with current timestamp to ensure it's latest
                 const newMsg: Message = {
                     _id: data._id,
                     sender: data.sender,
                     message: data.message,
-                    createdAt: data.createdAt,
+                    createdAt: data.createdAt || new Date().toISOString(),
                     isRead: data.isRead || false,
                     clientName: data.clientName || 'Client',
                     clientEmail: data.clientEmail || '',
@@ -219,12 +220,15 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                     isPinned: data.isPinned,
                 };
 
-                // Add to messages and update parent's threadReplies
-                return prev.map(msg =>
+                // Update parent's threadReplies and add new message at the end
+                const updatedMessages = prev.map(msg =>
                     msg._id === data.parentMessageId
                         ? { ...msg, threadReplies: [...(msg.threadReplies || []), data._id] }
                         : msg
-                ).concat(newMsg);
+                );
+
+                // Add new message at the end (it will be sorted by useMemo)
+                return [...updatedMessages, newMsg];
             });
             return;
         }
@@ -239,7 +243,7 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                 _id: data._id,
                 sender: data.sender,
                 message: data.message,
-                createdAt: data.createdAt,
+                createdAt: data.createdAt || new Date().toISOString(),
                 isRead: data.isRead || false,
                 clientName: data.clientName || 'Client',
                 clientEmail: data.clientEmail || '',
@@ -268,6 +272,11 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
     const handleTypingIndicator = useCallback((data: any) => {
         logInfo('Typing indicator received', data);
 
+        // Don't show admin's own typing indicator
+        if (data.userId === currentAdminUserId) {
+            return;
+        }
+
         setTypingIndicators(prev => {
             const newMap = new Map(prev);
             const key = `${data.projectId}-${data.userId}`;
@@ -284,7 +293,7 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
 
             return newMap;
         });
-    }, []);
+    }, [currentAdminUserId]);
 
     // Subscribe to global admin Pusher channel
     usePusherChannel('admin-messages', 'new-message', handleNewMessage);
@@ -411,22 +420,32 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
     };
 
     const handlePin = async (messageId: string) => {
-        const result = await togglePinMessage(messageId);
-        if (result.success) {
-            toast.success(result.data.isPinned ? 'Message pinned' : 'Message unpinned');
-            // Update will come via Pusher
-        } else {
-            toast.error(result.error || 'Failed to toggle pin');
+        try {
+            const result = await togglePinMessage(messageId);
+            if (result.success) {
+                toast.success(result.data?.isPinned ? 'Message pinned' : 'Message unpinned');
+                // Update will come via Pusher
+            } else {
+                toast.error(result.error || 'Failed to toggle pin');
+            }
+        } catch (error) {
+            toast.error('Failed to toggle pin');
+            console.error('Pin error:', error);
         }
     };
 
     const handleReaction = async (messageId: string, emoji: string) => {
-        const result = await addMessageReaction(messageId, emoji);
-        if (result.success) {
-            // Update will come via Pusher
+        try {
             setShowEmojiPicker(null);
-        } else {
+
+            const result = await addMessageReaction(messageId, emoji);
+            if (!result.success) {
+                toast.error(result.error || 'Failed to add reaction');
+            }
+            // Update will come via Pusher
+        } catch (error) {
             toast.error('Failed to add reaction');
+            console.error('Reaction error:', error);
         }
     };
 
@@ -660,13 +679,16 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                                                             {/* Action Buttons */}
                                                             <div className="flex items-center justify-between mt-2 gap-2">
                                                                 <div className="flex items-center gap-1">
-                                                                    <button
-                                                                        onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
-                                                                        className="opacity-50 hover:opacity-100 transition-opacity p-1"
-                                                                        title="React"
-                                                                    >
-                                                                        <Smile className="w-3 h-3" />
-                                                                    </button>
+                                                                    {/* Only show reaction button for client messages */}
+                                                                    {msg.sender === 'client' && (
+                                                                        <button
+                                                                            onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
+                                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                                                            title="React"
+                                                                        >
+                                                                            <Smile className="w-3 h-3" />
+                                                                        </button>
+                                                                    )}
                                                                     <button
                                                                         onClick={() => handleReply(msg)}
                                                                         className="opacity-50 hover:opacity-100 transition-opacity p-1"
@@ -734,6 +756,7 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                                                     <div className="ml-12 space-y-2">
                                                         {selectedConversation.messages
                                                             .filter(m => m.parentMessageId === msg._id)
+                                                            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
                                                             .map(reply => (
                                                                 <div
                                                                     key={reply._id}
