@@ -22,7 +22,6 @@ const eslintConfig = [
   ...compat.config({
     extends: ["next/core-web-vitals", "next/typescript"],
     rules: {
-      "prefer-const": "off",
       "react/no-unescaped-entities": "off",
     },
   }),
