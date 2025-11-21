@@ -85,13 +85,11 @@ const ResourceSchema = new Schema<IResource>(
             required: true,
             trim: true,
             maxlength: 200,
-            index: 'text',
         },
         description: {
             type: String,
             trim: true,
             maxlength: 1000,
-            index: 'text',
         },
         content: {
             type: String,
