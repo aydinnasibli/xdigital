@@ -1,24 +1,29 @@
 // app/admin/messages/page.tsx
 import { getAllMessages } from '@/app/actions/admin/messages';
+import { getAllProjects } from '@/app/actions/admin/projects';
 import MessagesClient from './MessagesClient';
 
-interface PageProps {
-    searchParams: Promise<{ unreadOnly?: string }>;
-}
+export default async function AdminMessagesPage() {
+    const [messagesResult, projectsResult] = await Promise.all([
+        getAllMessages({}),
+        getAllProjects({}),
+    ]);
 
-export default async function AdminMessagesPage({ searchParams }: PageProps) {
-    const params = await searchParams;
+    const messages = messagesResult.success ? messagesResult.data : [];
+    const projects = projectsResult.success ? projectsResult.data : [];
 
-    const result = await getAllMessages({
-        unreadOnly: params.unreadOnly === 'true',
-    });
-
-    const messages = result.success ? result.data : [];
+    // Transform projects to the format needed by the client
+    const availableProjects = projects.map((project: any) => ({
+        _id: project._id,
+        projectName: project.projectName,
+        clientName: project.clientName,
+        clientEmail: project.clientEmail,
+    }));
 
     return (
         <MessagesClient
             initialMessages={messages}
-            unreadOnly={params.unreadOnly === 'true'}
+            availableProjects={availableProjects}
         />
     );
 }

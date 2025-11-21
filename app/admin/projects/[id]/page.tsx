@@ -1,13 +1,11 @@
 // app/admin/projects/[id]/page.tsx
 import Link from 'next/link';
 import { getAdminProject } from '@/app/actions/admin/projects';
-import { getAdminProjectMessages } from '@/app/actions/admin/messages';
 import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectTasks } from '@/app/actions/tasks';
 import { getProjectFiles } from '@/app/actions/files';
 import { ArrowLeft, User, Mail, Calendar, Package } from 'lucide-react';
 import UpdateStatusForm from './UpdateStatusForm';
-import MessageSection from './MessageSection';
 import MilestonesSection from './MilestonesSection';
 import DeploymentSection from './DeploymentSection';
 import TimelineSection from './TimelineSection';
@@ -23,9 +21,8 @@ export default async function AdminProjectDetailPage({
 
 }) {
     const resolvedParams = await params;
-    const [projectResult, messagesResult, invoicesResult, tasksResult, filesResult] = await Promise.all([
+    const [projectResult, invoicesResult, tasksResult, filesResult] = await Promise.all([
         getAdminProject(resolvedParams.id),
-        getAdminProjectMessages(resolvedParams.id),
         getProjectInvoices(resolvedParams.id),
         getProjectTasks(resolvedParams.id),
         getProjectFiles(resolvedParams.id),
@@ -40,7 +37,6 @@ export default async function AdminProjectDetailPage({
     }
 
     const project = projectResult.data;
-    const messages = messagesResult.success ? messagesResult.data : [];
     const invoices = invoicesResult.success ? invoicesResult.data : [];
     const tasks = tasksResult.success ? tasksResult.data : [];
     const files = filesResult.success ? filesResult.data : [];
@@ -114,12 +110,6 @@ export default async function AdminProjectDetailPage({
                     <FilesSection
                         projectId={project._id}
                         files={files}
-                    />
-
-                    {/* Messages */}
-                    <MessageSection
-                        projectId={project._id}
-                        messages={messages}
                     />
                 </div>
 
