@@ -3,7 +3,7 @@ import { getAllMessages } from '@/app/actions/admin/messages';
 import { getAllProjects } from '@/app/actions/admin/projects';
 import { getAdminSession } from '@/lib/auth/admin';
 import dbConnect from '@/lib/database/mongodb';
-import mongoose from 'mongoose';
+import User from '@/models/User';
 import MessagesClient from './MessagesClient';
 
 export default async function AdminMessagesPage() {
@@ -18,7 +18,6 @@ export default async function AdminMessagesPage() {
     // Get current admin user ID
     const { userId: clerkUserId } = await getAdminSession();
     await dbConnect();
-    const User = mongoose.model('User');
     const adminUser = await User.findOne({ clerkId: clerkUserId }).lean();
     const currentAdminUserId = adminUser?._id?.toString() || null;
 
