@@ -17,7 +17,6 @@ import Activity from '@/models/Activity';
 import Analytics from '@/models/Analytics';
 import Feedback from '@/models/Feedback';
 import SavedFilter from '@/models/SavedFilter';
-import TimeEntry from '@/models/TimeEntry';
 import { logError, logInfo } from '@/lib/sentry-logger';
 
 export async function POST(req: Request) {
@@ -221,7 +220,6 @@ export async function POST(req: Request) {
                 // Delete saved filters for this user (uses userId ObjectId field)
                 SavedFilter.deleteMany({ userId: userId }),
                 // Delete time entries for this user (uses userId ObjectId field)
-                TimeEntry.deleteMany({ userId: userId }),
             ]);
 
             logInfo('User and all related data deleted successfully', { userId: userId.toString(), clerkId });
