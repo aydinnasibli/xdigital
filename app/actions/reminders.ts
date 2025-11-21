@@ -4,8 +4,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/database/mongodb';
-import Reminder, { ReminderPriority } from '@/models/Reminder';
-import User from '@/models/User';
+import Reminder, { ReminderPriority, IPopulatedReminder } from '@/models/Reminder';
+import User, { UserRole } from '@/models/User';
 import mongoose from 'mongoose';
 import { requireAdmin } from '@/lib/auth/admin';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
@@ -61,7 +61,7 @@ export async function getAllReminders(filters?: {
             .populate('clientId', 'firstName lastName email')
             .populate('createdBy', 'firstName lastName email')
             .sort({ reminderDate: 1 })
-            .lean();
+            .lean() as unknown as IPopulatedReminder[];
 
         const serializedReminders = reminders.map(reminder => {
             type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string };
@@ -303,7 +303,7 @@ export async function checkAndSendReminderEmail(): Promise<ActionResponse> {
         })
             .populate('clientId', 'firstName lastName email')
             .sort({ reminderDate: 1 })
-            .lean();
+            .lean() as unknown as IPopulatedReminder[];
 
         // If no reminders, don't send email
         if (reminders.length === 0) {
