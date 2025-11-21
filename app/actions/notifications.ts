@@ -30,6 +30,38 @@ export async function createNotification(params: {
     return createNotificationService(params);
 }
 
+// Get single notification by ID
+export async function getNotificationById(notificationId: string): Promise<ActionResponse> {
+    try {
+        const { userId: clerkUserId } = await auth();
+
+        if (!clerkUserId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        await dbConnect();
+
+        const user = await User.findOne({ clerkId: clerkUserId });
+        if (!user) {
+            return { success: false, error: 'User not found' };
+        }
+
+        const notification = await Notification.findOne({
+            _id: notificationId,
+            userId: user._id,
+        }).lean();
+
+        if (!notification) {
+            return { success: false, error: 'Notification not found' };
+        }
+
+        return { success: true, data: toSerializedObject(notification) };
+    } catch (error) {
+        logError(error as Error, { context: 'getNotificationById', notificationId });
+        return { success: false, error: 'Failed to fetch notification' };
+    }
+}
+
 // Get all notifications for current user
 export async function getNotifications(): Promise<ActionResponse> {
     try {

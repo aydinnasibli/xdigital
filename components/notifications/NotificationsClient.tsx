@@ -126,7 +126,7 @@ export default function NotificationsClient() {
                                             <h3 className="font-semibold text-lg">
                                                 {notification.title}
                                             </h3>
-                                            <p className="text-gray-600 mt-1">
+                                            <p className="text-gray-600 mt-1 line-clamp-2">
                                                 {notification.message}
                                             </p>
                                             <p className="text-sm text-gray-400 mt-2">
@@ -145,14 +145,12 @@ export default function NotificationsClient() {
                                             </div>
                                         )}
                                     </div>
-                                    {notification.link && (
-                                        <Link
-                                            href={notification.link}
-                                            className="inline-block mt-3 text-blue-600 hover:underline"
-                                        >
-                                            View details →
-                                        </Link>
-                                    )}
+                                    <Link
+                                        href={`/dashboard/notifications/${notification._id}`}
+                                        className="inline-block mt-3 text-blue-600 hover:underline"
+                                    >
+                                        View details →
+                                    </Link>
                                 </div>
                             </div>
                         </div>
