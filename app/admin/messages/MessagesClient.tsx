@@ -1,7 +1,7 @@
 // app/admin/messages/MessagesClient.tsx
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { MessageSquare, Send, Check, CheckCheck, Search, Plus, Smile, Reply, Edit2, Pin, X } from 'lucide-react';
 import { sendAdminMessage, markAdminMessagesAsRead, addMessageReaction, sendAdminTypingIndicator, adminReplyToMessage, adminEditMessage, togglePinMessage } from '@/app/actions/admin/messages';
 import { toast } from 'sonner';
@@ -82,57 +82,65 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
     const [editText, setEditText] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout>();
+    const hasMarkedAsReadRef = useRef<Set<string>>(new Set());
 
-    // Group messages by project to create conversations
-    const conversations: Conversation[] = [];
-    const projectMap = new Map<string, Conversation>();
+    // Memoize conversation grouping to prevent infinite loops
+    const { conversations, projectMap } = useMemo(() => {
+        const conversationsArray: Conversation[] = [];
+        const map = new Map<string, Conversation>();
 
-    allMessages.forEach(msg => {
-        // Safety check for populated fields
-        if (!msg.projectId || !msg.projectId._id) {
-            console.error('Message missing projectId', msg);
-            return;
-        }
-        const projId = msg.projectId._id;
-        if (!projectMap.has(projId)) {
-            projectMap.set(projId, {
-                projectId: projId,
-                projectName: msg.projectId.projectName,
-                clientName: msg.clientName,
-                clientEmail: msg.clientEmail,
-                messages: [],
-                unreadCount: 0,
-                lastMessageAt: msg.createdAt,
-            });
-        }
-        const conv = projectMap.get(projId)!;
-        conv.messages.push(msg);
-        if (!msg.isRead && msg.sender === 'client') {
-            conv.unreadCount++;
-        }
-        if (new Date(msg.createdAt) > new Date(conv.lastMessageAt)) {
-            conv.lastMessageAt = msg.createdAt;
-        }
-    });
+        allMessages.forEach(msg => {
+            // Safety check for populated fields
+            if (!msg.projectId || !msg.projectId._id) {
+                console.error('Message missing projectId', msg);
+                return;
+            }
+            const projId = msg.projectId._id;
+            if (!map.has(projId)) {
+                map.set(projId, {
+                    projectId: projId,
+                    projectName: msg.projectId.projectName,
+                    clientName: msg.clientName,
+                    clientEmail: msg.clientEmail,
+                    messages: [],
+                    unreadCount: 0,
+                    lastMessageAt: msg.createdAt,
+                });
+            }
+            const conv = map.get(projId)!;
+            conv.messages.push(msg);
+            if (!msg.isRead && msg.sender === 'client') {
+                conv.unreadCount++;
+            }
+            if (new Date(msg.createdAt) > new Date(conv.lastMessageAt)) {
+                conv.lastMessageAt = msg.createdAt;
+            }
+        });
 
-    projectMap.forEach(conv => {
-        conv.messages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        conversations.push(conv);
-    });
+        map.forEach(conv => {
+            conv.messages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+            conversationsArray.push(conv);
+        });
 
-    // Sort conversations by last message time
-    conversations.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
+        // Sort conversations by last message time
+        conversationsArray.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
+
+        return { conversations: conversationsArray, projectMap: map };
+    }, [allMessages]);
 
     // Filter conversations by search term
-    const filteredConversations = conversations.filter(conv =>
-        conv.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        conv.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        conv.clientEmail.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredConversations = useMemo(() =>
+        conversations.filter(conv =>
+            conv.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            conv.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            conv.clientEmail.toLowerCase().includes(searchTerm.toLowerCase())
+        ), [conversations, searchTerm]
     );
 
     // Get projects that don't have conversations yet
-    const projectsWithoutConversations = availableProjects.filter(
-        proj => !projectMap.has(proj._id)
+    const projectsWithoutConversations = useMemo(() =>
+        availableProjects.filter(proj => !projectMap.has(proj._id)),
+        [availableProjects, projectMap]
     );
 
     // Real-time message handler via Pusher
@@ -143,6 +151,16 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
             projectId: data.projectId,
             type: data.type
         });
+
+        // Handle read status update
+        if (data.type === 'read') {
+            setAllMessages(prev => prev.map(msg =>
+                data.messageIds.includes(msg._id)
+                    ? { ...msg, isRead: true }
+                    : msg
+            ));
+            return;
+        }
 
         // Handle reaction update
         if (data.type === 'reaction') {
@@ -168,13 +186,50 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
         if (data.type === 'pin') {
             setAllMessages(prev => prev.map(msg =>
                 msg._id === data.messageId
-                    ? { ...msg, isPinned: data.isPinned }
+                    ? { ...msg, isPinned: data.isPinned, pinnedAt: data.pinnedAt, pinnedBy: data.pinnedBy }
                     : msg
             ));
             return;
         }
 
-        // Add new message or reply
+        // Handle reply - update thread replies
+        if (data.parentMessageId) {
+            setAllMessages(prev => {
+                const exists = prev.some(msg => msg._id === data._id);
+                if (exists) return prev;
+
+                // Create properly formatted reply message
+                const newMsg: Message = {
+                    _id: data._id,
+                    sender: data.sender,
+                    message: data.message,
+                    createdAt: data.createdAt,
+                    isRead: data.isRead || false,
+                    clientName: data.clientName || 'Client',
+                    clientEmail: data.clientEmail || '',
+                    projectId: {
+                        _id: typeof data.projectId === 'string' ? data.projectId : data.projectId._id,
+                        projectName: data.projectName || 'Unknown Project',
+                    },
+                    reactions: data.reactions || [],
+                    parentMessageId: data.parentMessageId,
+                    threadReplies: [],
+                    isEdited: data.isEdited,
+                    editedAt: data.editedAt,
+                    isPinned: data.isPinned,
+                };
+
+                // Add to messages and update parent's threadReplies
+                return prev.map(msg =>
+                    msg._id === data.parentMessageId
+                        ? { ...msg, threadReplies: [...(msg.threadReplies || []), data._id] }
+                        : msg
+                ).concat(newMsg);
+            });
+            return;
+        }
+
+        // Add new message
         setAllMessages(prev => {
             const exists = prev.some(msg => msg._id === data._id);
             if (exists) return prev;
@@ -244,25 +299,35 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
 
     // Auto-mark messages as read when viewing a conversation
     useEffect(() => {
-        if (selectedProjectId) {
-            const conv = projectMap.get(selectedProjectId);
-            if (conv && conv.unreadCount > 0) {
-                const unreadIds = conv.messages
-                    .filter(m => !m.isRead && m.sender === 'client')
-                    .map(m => m._id);
+        if (!selectedProjectId) return;
 
-                if (unreadIds.length > 0) {
-                    markAdminMessagesAsRead(unreadIds).then(result => {
-                        if (result.success) {
-                            setAllMessages(prev => prev.map(msg =>
-                                unreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
-                            ));
-                        }
-                    });
-                }
+        const conv = projectMap.get(selectedProjectId);
+        if (!conv || conv.unreadCount === 0) return;
+
+        const unreadIds = conv.messages
+            .filter(m => !m.isRead && m.sender === 'client')
+            .map(m => m._id);
+
+        if (unreadIds.length === 0) return;
+
+        // Check if we've already marked these messages
+        const newUnreadIds = unreadIds.filter(id => !hasMarkedAsReadRef.current.has(id));
+        if (newUnreadIds.length === 0) return;
+
+        // Mark them in the ref to prevent duplicate calls
+        newUnreadIds.forEach(id => hasMarkedAsReadRef.current.add(id));
+
+        markAdminMessagesAsRead(newUnreadIds).then(result => {
+            if (result.success) {
+                setAllMessages(prev => prev.map(msg =>
+                    newUnreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
+                ));
+            } else {
+                // Remove from ref if failed
+                newUnreadIds.forEach(id => hasMarkedAsReadRef.current.delete(id));
             }
-        }
-    }, [selectedProjectId]);
+        });
+    }, [selectedProjectId, projectMap]);
 
     // Handle typing indicator for admin
     const handleTyping = useCallback(() => {
@@ -288,51 +353,31 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
 
         setLoading(true);
 
-        // Check if replying
-        if (replyingTo) {
-            const result = await adminReplyToMessage(replyingTo._id, selectedProjectId, newMessage);
-            if (result.success && result.data) {
-                toast.success('Reply sent');
-                setNewMessage('');
-                setReplyingTo(null);
+        try {
+            // Check if replying
+            if (replyingTo) {
+                const result = await adminReplyToMessage(replyingTo._id, selectedProjectId, newMessage);
+                if (result.success && result.data) {
+                    toast.success('Reply sent');
+                    setNewMessage('');
+                    setReplyingTo(null);
+                    // Message will be added via Pusher
+                } else {
+                    toast.error(result.error || 'Failed to send reply');
+                }
             } else {
-                toast.error(result.error || 'Failed to send reply');
+                const result = await sendAdminMessage(selectedProjectId, newMessage);
+                if (result.success && result.data) {
+                    toast.success('Message sent');
+                    setNewMessage('');
+                    // Message will be added via Pusher
+                } else {
+                    toast.error(result.error || 'Failed to send message');
+                }
             }
-        } else {
-            const result = await sendAdminMessage(selectedProjectId, newMessage);
-            if (result.success && result.data) {
-                toast.success('Message sent');
-
-                // Message will be added via Pusher real-time
-                const conv = projectMap.get(selectedProjectId);
-                const newMsg: Message = {
-                    _id: result.data._id,
-                    sender: 'admin',
-                    message: result.data.message,
-                    createdAt: result.data.createdAt,
-                    isRead: false,
-                    clientName: conv?.clientName || '',
-                    clientEmail: conv?.clientEmail || '',
-                    projectId: {
-                        _id: selectedProjectId,
-                        projectName: conv?.projectName || '',
-                    },
-                    reactions: [],
-                };
-
-                setAllMessages(prev => {
-                    const exists = prev.some(msg => msg._id === newMsg._id);
-                    if (exists) return prev;
-                    return [...prev, newMsg];
-                });
-
-                setNewMessage('');
-            } else {
-                toast.error(result.error || 'Failed to send message');
-            }
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     const handleReply = (message: Message) => {
@@ -354,6 +399,7 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
             toast.success('Message edited');
             setEditingMessage(null);
             setEditText('');
+            // Update will come via Pusher
         } else {
             toast.error(result.error || 'Failed to edit message');
         }
@@ -368,6 +414,7 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
         const result = await togglePinMessage(messageId);
         if (result.success) {
             toast.success(result.data.isPinned ? 'Message pinned' : 'Message unpinned');
+            // Update will come via Pusher
         } else {
             toast.error(result.error || 'Failed to toggle pin');
         }
@@ -392,12 +439,18 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
     };
 
     const selectedConversation = selectedProjectId ? projectMap.get(selectedProjectId) : null;
-    const totalUnreadCount = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
+    const totalUnreadCount = useMemo(() =>
+        conversations.reduce((sum, conv) => sum + conv.unreadCount, 0),
+        [conversations]
+    );
 
     // Get typing indicators for selected project
-    const currentTypingIndicators = selectedProjectId
-        ? Array.from(typingIndicators.values()).filter(t => t.projectId === selectedProjectId)
-        : [];
+    const currentTypingIndicators = useMemo(() =>
+        selectedProjectId
+            ? Array.from(typingIndicators.values()).filter(t => t.projectId === selectedProjectId)
+            : [],
+        [selectedProjectId, typingIndicators]
+    );
 
     return (
         <div className="space-y-6">
