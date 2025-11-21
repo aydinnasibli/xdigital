@@ -113,11 +113,23 @@ export async function sendAdminMessage(
             isRead: false,
         });
 
+        // Get project and user details for Pusher payload
+        const populatedMessage = await Message.findById(newMessage._id)
+            .populate('projectId', 'projectName')
+            .populate('userId', 'email firstName lastName')
+            .lean();
+
+        const user = populatedMessage?.userId as any;
+        const proj = populatedMessage?.projectId as any;
+
         const serializedMessage = {
             ...toSerializedObject(newMessage),
             _id: newMessage._id.toString(),
             projectId: newMessage.projectId.toString(),
             userId: newMessage.userId.toString(),
+            clientName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : '',
+            clientEmail: user?.email || '',
+            projectName: proj?.projectName || '',
         };
 
         // Trigger real-time notification via Pusher
@@ -275,5 +287,68 @@ export async function getAdminProjectMessages(
     } catch (error) {
         logError(error as Error, { context: 'getAdminProjectMessages', projectId });
         return { success: false, error: 'Failed to fetch project messages' };
+    }
+}
+
+// Add reaction to message
+export async function addMessageReaction(
+    messageId: string,
+    emoji: string
+): Promise<ActionResponse> {
+    try {
+        const { userId: clerkUserId } = await getAdminSession();
+
+        if (!mongoose.Types.ObjectId.isValid(messageId)) {
+            return { success: false, error: 'Invalid message ID' };
+        }
+
+        await dbConnect();
+
+        const message = await Message.findById(messageId);
+        if (!message) {
+            return { success: false, error: 'Message not found' };
+        }
+
+        // Check if admin already reacted with this emoji
+        const existingReaction = message.reactions?.find(
+            r => r.emoji === emoji && r.userId.toString() === clerkUserId
+        );
+
+        if (existingReaction) {
+            // Remove reaction if already exists
+            message.reactions = message.reactions?.filter(
+                r => !(r.emoji === emoji && r.userId.toString() === clerkUserId)
+            );
+        } else {
+            // Add new reaction
+            if (!message.reactions) message.reactions = [];
+            message.reactions.push({
+                emoji,
+                userId: new mongoose.Types.ObjectId(clerkUserId),
+                userName: 'Admin',
+                createdAt: new Date()
+            } as any);
+        }
+
+        await message.save();
+
+        revalidatePath('/admin/messages');
+        revalidatePath(`/dashboard/projects/${message.projectId}`);
+
+        // Notify via Pusher
+        try {
+            await sendRealtimeMessage(message.projectId.toString(), {
+                type: 'reaction',
+                messageId: message._id.toString(),
+                reactions: message.reactions
+            });
+        } catch (error) {
+            logError(error as Error, { context: 'addMessageReaction-pusher' });
+        }
+
+        return { success: true, data: { reactions: message.reactions } };
+    } catch (error) {
+        logError(error as Error, { context: 'addMessageReaction', messageId });
+        return { success: false, error: 'Failed to add reaction' };
     }
 }
