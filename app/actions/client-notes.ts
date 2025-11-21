@@ -32,16 +32,13 @@ export async function getClientNotes(clientId: string): Promise<ActionResponse> 
             .lean();
 
         const serializedNotes = notes.map(note => {
-            const baseNote = toSerializedObject(note);
-            const baseAuthor = toSerializedObject(note.authorId);
+            type PopulatedAuthor = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string; imageUrl?: string };
+            const author = note.authorId as unknown as PopulatedAuthor;
+
             return {
-                ...baseNote,
-                _id: note._id.toString(),
+                ...toSerializedObject<Record<string, unknown>>(note),
                 clientId: note.clientId.toString(),
-                authorId: {
-                    ...baseAuthor,
-                    _id: note.authorId._id.toString(),
-                },
+                authorId: toSerializedObject(author),
             };
         });
 

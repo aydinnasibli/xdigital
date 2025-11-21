@@ -63,16 +63,22 @@ export async function getAllReminders(filters?: {
             .sort({ reminderDate: 1 })
             .lean();
 
-        const serializedReminders = reminders.map(reminder => ({
-            ...reminder,
-            _id: reminder._id.toString(),
-            clientId: reminder.clientId ? reminder.clientId._id.toString() : null,
-            clientName: reminder.clientId
-                ? `${reminder.clientId.firstName || ''} ${reminder.clientId.lastName || ''}`.trim() || reminder.clientId.email
-                : null,
-            createdBy: reminder.createdBy._id.toString(),
-            createdByName: `${reminder.createdBy.firstName || ''} ${reminder.createdBy.lastName || ''}`.trim() || reminder.createdBy.email,
-        }));
+        const serializedReminders = reminders.map(reminder => {
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string };
+
+            const clientId = reminder.clientId as unknown as PopulatedUser | null;
+            const createdBy = reminder.createdBy as unknown as PopulatedUser;
+
+            return {
+                ...toSerializedObject<Record<string, unknown>>(reminder),
+                clientId: clientId ? clientId._id.toString() : null,
+                clientName: clientId
+                    ? `${clientId.firstName || ''} ${clientId.lastName || ''}`.trim() || clientId.email
+                    : null,
+                createdBy: createdBy._id.toString(),
+                createdByName: `${createdBy.firstName || ''} ${createdBy.lastName || ''}`.trim() || createdBy.email,
+            };
+        });
 
         return { success: true, data: serializedReminders };
     } catch (error) {
@@ -252,6 +258,8 @@ export async function deleteReminder(reminderId: string): Promise<ActionResponse
 // Check and send daily reminder email to admin (admin only)
 export async function checkAndSendReminderEmail(): Promise<ActionResponse> {
     try {
+        await requireAdmin();
+
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -260,8 +268,8 @@ export async function checkAndSendReminderEmail(): Promise<ActionResponse> {
         await dbConnect();
 
         const user = await User.findOne({ clerkId: clerkUserId });
-        if (!user || user.role !== 'admin') {
-            return { success: false, error: 'Admin access required' };
+        if (!user) {
+            return { success: false, error: 'User not found' };
         }
 
         const adminEmail = user.email;
@@ -309,6 +317,9 @@ export async function checkAndSendReminderEmail(): Promise<ActionResponse> {
         const upcoming: any[] = [];
 
         reminders.forEach(reminder => {
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string };
+            const clientId = reminder.clientId as unknown as PopulatedUser | null;
+
             const reminderDate = new Date(reminder.reminderDate);
             const diff = reminderDate.getTime() - now.getTime();
             const daysDiff = Math.ceil(diff / (1000 * 60 * 60 * 24));
@@ -318,8 +329,8 @@ export async function checkAndSendReminderEmail(): Promise<ActionResponse> {
                 description: reminder.description,
                 priority: reminder.priority,
                 reminderDate: reminderDate,
-                clientName: reminder.clientId
-                    ? `${reminder.clientId.firstName || ''} ${reminder.clientId.lastName || ''}`.trim() || reminder.clientId.email
+                clientName: clientId
+                    ? `${clientId.firstName || ''} ${clientId.lastName || ''}`.trim() || clientId.email
                     : 'No client',
             };
 

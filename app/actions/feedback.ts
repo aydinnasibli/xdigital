@@ -44,22 +44,24 @@ export async function getAllFeedback(filters?: {
             .lean();
 
         const serializedFeedback = feedbacks.map(fb => {
-            // Handle populated userId (becomes object with _id, firstName, etc.)
-            const userIdValue = typeof fb.userId === 'object' && fb.userId !== null
-                ? (fb.userId as any)._id?.toString() || (fb.userId as any).toString()
-                : (fb.userId as any)?.toString();
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string; imageUrl?: string };
+            type PopulatedProject = { _id: mongoose.Types.ObjectId; projectName: string };
 
-            // Handle populated projectId
-            const projectIdValue = typeof fb.projectId === 'object' && fb.projectId !== null
-                ? (fb.projectId as any)._id?.toString() || (fb.projectId as any).toString()
-                : (fb.projectId as any)?.toString();
+            // Type-safe handling of potentially populated fields
+            const userId = typeof fb.userId === 'object' && fb.userId !== null && '_id' in fb.userId
+                ? (fb.userId as unknown as PopulatedUser)._id.toString()
+                : (fb.userId as mongoose.Types.ObjectId).toString();
 
-            const baseFeedback = toSerializedObject(fb);
+            const projectId = fb.projectId
+                ? (typeof fb.projectId === 'object' && fb.projectId !== null && '_id' in fb.projectId
+                    ? (fb.projectId as unknown as PopulatedProject)._id.toString()
+                    : (fb.projectId as mongoose.Types.ObjectId).toString())
+                : undefined;
+
             return {
-                ...baseFeedback,
-                _id: fb._id.toString(),
-                userId: userIdValue,
-                projectId: projectIdValue,
+                ...toSerializedObject<Record<string, unknown>>(fb),
+                userId,
+                projectId,
             };
         });
 
@@ -91,17 +93,18 @@ export async function getUserFeedback(): Promise<ActionResponse> {
             .lean();
 
         const serializedFeedback = feedbacks.map(fb => {
-            // Handle populated projectId
-            const projectIdValue = typeof fb.projectId === 'object' && fb.projectId !== null
-                ? (fb.projectId as any)._id?.toString() || (fb.projectId as any).toString()
-                : (fb.projectId as any)?.toString();
+            type PopulatedProject = { _id: mongoose.Types.ObjectId; projectName: string };
 
-            const baseFeedback = toSerializedObject(fb);
+            // Handle populated projectId - userId is not populated here
+            const projectId = fb.projectId
+                ? (typeof fb.projectId === 'object' && fb.projectId !== null && '_id' in fb.projectId
+                    ? (fb.projectId as unknown as PopulatedProject)._id.toString()
+                    : (fb.projectId as mongoose.Types.ObjectId).toString())
+                : undefined;
+
             return {
-                ...baseFeedback,
-                _id: fb._id.toString(),
-                userId: fb.userId.toString(), // userId is not populated here, safe to use .toString()
-                projectId: projectIdValue,
+                ...toSerializedObject<Record<string, unknown>>(fb),
+                projectId,
             };
         });
 
@@ -291,16 +294,18 @@ export async function getPublicTestimonials(limit: number = 10): Promise<ActionR
             .lean();
 
         const serializedTestimonials = testimonials.map(t => {
-            // Handle populated projectId
-            const projectIdValue = typeof t.projectId === 'object' && t.projectId !== null
-                ? (t.projectId as any)._id?.toString() || (t.projectId as any).toString()
-                : (t.projectId as any)?.toString();
+            type PopulatedProject = { _id: mongoose.Types.ObjectId; projectName: string; serviceType: string };
 
-            const baseTestimonial = toSerializedObject(t);
+            // Handle populated projectId
+            const projectId = t.projectId
+                ? (typeof t.projectId === 'object' && t.projectId !== null && '_id' in t.projectId
+                    ? (t.projectId as unknown as PopulatedProject)._id.toString()
+                    : (t.projectId as mongoose.Types.ObjectId).toString())
+                : undefined;
+
             return {
-                ...baseTestimonial,
-                _id: t._id.toString(),
-                projectId: projectIdValue,
+                ...toSerializedObject<Record<string, unknown>>(t),
+                projectId,
             };
         });
 
