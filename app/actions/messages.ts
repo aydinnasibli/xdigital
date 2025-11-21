@@ -266,3 +266,221 @@ export async function sendClientTypingIndicator(
         return { success: false, error: 'Failed to send typing indicator' };
     }
 }
+
+// Send message with attachments
+export async function sendMessageWithAttachments(
+    projectId: string,
+    message: string,
+    attachments: Array<{ fileName: string; fileUrl: string; fileType: string; fileSize: number }>
+): Promise<ActionResponse> {
+    try {
+        const { userId: clerkUserId } = await auth();
+
+        if (!clerkUserId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(projectId)) {
+            return { success: false, error: 'Invalid project ID' };
+        }
+
+        await dbConnect();
+
+        const user = await User.findOne({ clerkId: clerkUserId });
+        if (!user) {
+            return { success: false, error: 'User not found' };
+        }
+
+        const newMessage = await Message.create({
+            projectId,
+            userId: user._id,
+            clerkUserId,
+            sender: MessageSender.CLIENT,
+            message: message.trim() || '📎 Attachment',
+            attachments,
+            isRead: false,
+        });
+
+        // Get project details for Pusher payload
+        const populatedMessage = await Message.findById(newMessage._id)
+            .populate('projectId', 'projectName')
+            .populate('userId', 'email firstName lastName')
+            .lean();
+
+        const userPopulated = populatedMessage?.userId as any;
+        const project = populatedMessage?.projectId as any;
+
+        const serializedMessage = {
+            ...toSerializedObject(newMessage),
+            _id: newMessage._id.toString(),
+            projectId: newMessage.projectId.toString(),
+            userId: newMessage.userId.toString(),
+            clientName: userPopulated ? `${userPopulated.firstName || ''} ${userPopulated.lastName || ''}`.trim() || userPopulated.email : '',
+            clientEmail: userPopulated?.email || '',
+            projectName: project?.projectName || '',
+            attachments,
+        };
+
+        // Trigger real-time notification via Pusher
+        try {
+            await sendRealtimeMessage(projectId, serializedMessage);
+        } catch (error) {
+            logError(error as Error, { context: 'sendMessageWithAttachments-pusher', projectId });
+        }
+
+        revalidatePath(`/dashboard/projects/${projectId}`);
+        revalidatePath(`/admin/projects/${projectId}`);
+        revalidatePath(`/admin/messages`);
+
+        return {
+            success: true,
+            data: serializedMessage,
+        };
+    } catch (error) {
+        logError(error as Error, { context: 'sendMessageWithAttachments', projectId });
+        return { success: false, error: 'Failed to send message with attachments' };
+    }
+}
+
+// Reply to a message (threading)
+export async function replyToMessage(
+    parentMessageId: string,
+    projectId: string,
+    message: string
+): Promise<ActionResponse> {
+    try {
+        const { userId: clerkUserId } = await auth();
+
+        if (!clerkUserId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(parentMessageId) || !mongoose.Types.ObjectId.isValid(projectId)) {
+            return { success: false, error: 'Invalid ID' };
+        }
+
+        await dbConnect();
+
+        const user = await User.findOne({ clerkId: clerkUserId });
+        if (!user) {
+            return { success: false, error: 'User not found' };
+        }
+
+        // Create reply
+        const reply = await Message.create({
+            projectId,
+            userId: user._id,
+            clerkUserId,
+            sender: MessageSender.CLIENT,
+            message: message.trim(),
+            parentMessageId: new mongoose.Types.ObjectId(parentMessageId),
+            isRead: false,
+        });
+
+        // Update parent message with reply reference
+        await Message.findByIdAndUpdate(parentMessageId, {
+            $push: { threadReplies: reply._id }
+        });
+
+        const populatedMessage = await Message.findById(reply._id)
+            .populate('projectId', 'projectName')
+            .populate('userId', 'email firstName lastName')
+            .lean();
+
+        const userPopulated = populatedMessage?.userId as any;
+        const project = populatedMessage?.projectId as any;
+
+        const serializedMessage = {
+            ...toSerializedObject(reply),
+            _id: reply._id.toString(),
+            projectId: reply.projectId.toString(),
+            userId: reply.userId.toString(),
+            parentMessageId: parentMessageId,
+            clientName: userPopulated ? `${userPopulated.firstName || ''} ${userPopulated.lastName || ''}`.trim() || userPopulated.email : '',
+            clientEmail: userPopulated?.email || '',
+            projectName: project?.projectName || '',
+        };
+
+        // Trigger real-time notification
+        try {
+            await sendRealtimeMessage(projectId, {
+                ...serializedMessage,
+                type: 'reply'
+            });
+        } catch (error) {
+            logError(error as Error, { context: 'replyToMessage-pusher', projectId });
+        }
+
+        revalidatePath(`/dashboard/projects/${projectId}`);
+        revalidatePath(`/admin/messages`);
+
+        return { success: true, data: serializedMessage };
+    } catch (error) {
+        logError(error as Error, { context: 'replyToMessage', parentMessageId });
+        return { success: false, error: 'Failed to reply to message' };
+    }
+}
+
+// Edit a message
+export async function editMessage(
+    messageId: string,
+    newMessage: string
+): Promise<ActionResponse> {
+    try {
+        const { userId: clerkUserId } = await auth();
+
+        if (!clerkUserId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(messageId)) {
+            return { success: false, error: 'Invalid message ID' };
+        }
+
+        await dbConnect();
+
+        const message = await Message.findById(messageId);
+        if (!message) {
+            return { success: false, error: 'Message not found' };
+        }
+
+        // Verify ownership
+        if (message.clerkUserId !== clerkUserId) {
+            return { success: false, error: 'Unauthorized to edit this message' };
+        }
+
+        // Store old message in history
+        if (!message.editHistory) message.editHistory = [];
+        message.editHistory.push({
+            previousMessage: message.message,
+            editedAt: new Date()
+        } as any);
+
+        // Update message
+        message.message = newMessage.trim();
+        message.isEdited = true;
+        message.editedAt = new Date();
+        await message.save();
+
+        // Notify via Pusher
+        try {
+            await sendRealtimeMessage(message.projectId.toString(), {
+                type: 'edit',
+                messageId: message._id.toString(),
+                message: newMessage.trim(),
+                isEdited: true,
+                editedAt: message.editedAt
+            });
+        } catch (error) {
+            logError(error as Error, { context: 'editMessage-pusher' });
+        }
+
+        revalidatePath(`/dashboard/projects/${message.projectId}`);
+        revalidatePath('/admin/messages');
+
+        return { success: true, data: toSerializedObject(message) };
+    } catch (error) {
+        logError(error as Error, { context: 'editMessage', messageId });
+        return { success: false, error: 'Failed to edit message' };
+    }
+}

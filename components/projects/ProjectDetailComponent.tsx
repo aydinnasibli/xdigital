@@ -5,14 +5,14 @@ import { useState, useTransition, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { deleteProject } from '@/app/actions/projects';
-import { getMessages, sendMessage, addClientMessageReaction, sendClientTypingIndicator } from '@/app/actions/messages';
+import { getMessages, sendMessage, addClientMessageReaction, sendClientTypingIndicator, replyToMessage, editMessage } from '@/app/actions/messages';
 import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectAnalytics } from '@/app/actions/monitoring';
 import dynamic from 'next/dynamic';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { toast } from 'sonner';
 import { logInfo, logWarning } from '@/lib/sentry-logger';
-import { Check, CheckCheck, Smile } from 'lucide-react';
+import { Check, CheckCheck, Smile, Paperclip, Reply, Edit2, Pin, X } from 'lucide-react';
 
 // Dynamically import heavy dashboard components
 const SEODashboard = dynamic(() => import('@/components/dashboard/SEODashboard'), {
@@ -60,6 +60,17 @@ interface Message {
         fileType: string;
         fileSize: number;
     }>;
+    parentMessageId?: string;
+    threadReplies?: string[];
+    isEdited?: boolean;
+    editedAt?: string;
+    editHistory?: Array<{
+        previousMessage: string;
+        editedAt: string;
+    }>;
+    isPinned?: boolean;
+    pinnedAt?: string;
+    pinnedBy?: string;
 }
 
 interface Project {
@@ -314,6 +325,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [sending, setSending] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
     const [typingIndicators, setTypingIndicators] = useState<Map<string, any>>(new Map());
+    const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+    const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+    const [editText, setEditText] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -335,7 +349,8 @@ function MessagesTab({ projectId }: { projectId: string }) {
         logInfo('New message received via Pusher', {
             messageId: data._id,
             sender: data.sender,
-            projectId
+            projectId,
+            type: data.type
         });
 
         // Handle reaction updates
@@ -343,6 +358,26 @@ function MessagesTab({ projectId }: { projectId: string }) {
             setMessages(prev => prev.map(msg =>
                 msg._id === data.messageId
                     ? { ...msg, reactions: data.reactions }
+                    : msg
+            ));
+            return;
+        }
+
+        // Handle edit updates
+        if (data.type === 'edit') {
+            setMessages(prev => prev.map(msg =>
+                msg._id === data.messageId
+                    ? { ...msg, message: data.message, isEdited: data.isEdited, editedAt: data.editedAt }
+                    : msg
+            ));
+            return;
+        }
+
+        // Handle pin updates
+        if (data.type === 'pin') {
+            setMessages(prev => prev.map(msg =>
+                msg._id === data.messageId
+                    ? { ...msg, isPinned: data.isPinned }
                     : msg
             ));
             return;
@@ -366,6 +401,11 @@ function MessagesTab({ projectId }: { projectId: string }) {
                 isRead: data.isRead,
                 reactions: data.reactions || [],
                 attachments: data.attachments || [],
+                parentMessageId: data.parentMessageId,
+                threadReplies: data.threadReplies || [],
+                isEdited: data.isEdited,
+                editedAt: data.editedAt,
+                isPinned: data.isPinned,
             }];
             return deduplicateMessages(updatedMessages);
         });
@@ -435,34 +475,75 @@ function MessagesTab({ projectId }: { projectId: string }) {
         setSending(true);
         sendClientTypingIndicator(projectId, false);
 
-        const result = await sendMessage(projectId, newMessage);
-        if (result.success && result.data) {
-            setMessages(prev => {
-                const exists = prev.some(msg => msg._id === result.data._id);
-                if (exists) {
-                    logWarning('Duplicate message after send', {
-                        messageId: result.data._id,
-                        projectId
-                    });
-                    return prev;
-                }
-                const updatedMessages = [...prev, {
-                    _id: result.data._id,
-                    sender: result.data.sender,
-                    message: result.data.message,
-                    createdAt: result.data.createdAt,
-                    isRead: result.data.isRead,
-                    reactions: [],
-                    attachments: [],
-                }];
-                return deduplicateMessages(updatedMessages);
-            });
-            setNewMessage('');
-            toast.success('Message sent');
+        // Check if replying
+        if (replyingTo) {
+            const result = await replyToMessage(replyingTo._id, projectId, newMessage);
+            if (result.success && result.data) {
+                toast.success('Reply sent');
+                setNewMessage('');
+                setReplyingTo(null);
+            } else {
+                toast.error(result.error || 'Failed to send reply');
+            }
         } else {
-            toast.error(result.error || 'Failed to send message');
+            const result = await sendMessage(projectId, newMessage);
+            if (result.success && result.data) {
+                setMessages(prev => {
+                    const exists = prev.some(msg => msg._id === result.data._id);
+                    if (exists) {
+                        logWarning('Duplicate message after send', {
+                            messageId: result.data._id,
+                            projectId
+                        });
+                        return prev;
+                    }
+                    const updatedMessages = [...prev, {
+                        _id: result.data._id,
+                        sender: result.data.sender,
+                        message: result.data.message,
+                        createdAt: result.data.createdAt,
+                        isRead: result.data.isRead,
+                        reactions: [],
+                        attachments: [],
+                    }];
+                    return deduplicateMessages(updatedMessages);
+                });
+                setNewMessage('');
+                toast.success('Message sent');
+            } else {
+                toast.error(result.error || 'Failed to send message');
+            }
         }
         setSending(false);
+    };
+
+    const handleReply = (message: Message) => {
+        setReplyingTo(message);
+        setEditingMessage(null);
+    };
+
+    const handleEdit = (message: Message) => {
+        setEditingMessage(message);
+        setEditText(message.message);
+        setReplyingTo(null);
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editingMessage || !editText.trim()) return;
+
+        const result = await editMessage(editingMessage._id, editText);
+        if (result.success) {
+            toast.success('Message edited');
+            setEditingMessage(null);
+            setEditText('');
+        } else {
+            toast.error(result.error || 'Failed to edit message');
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingMessage(null);
+        setEditText('');
     };
 
     const handleReaction = async (messageId: string, emoji: string) => {
@@ -486,80 +567,217 @@ function MessagesTab({ projectId }: { projectId: string }) {
                 {messages.length === 0 ? (
                     <p className="text-gray-500 text-center">No messages yet. Start the conversation!</p>
                 ) : (
-                    messages.map((msg) => (
-                        <div
-                            key={msg._id}
-                            className={`flex ${msg.sender === 'client' ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div
-                                className={`max-w-[70%] rounded-lg px-4 py-3 ${msg.sender === 'client'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-900'
-                                    }`}
-                            >
-                                <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
-
-                                {/* Reactions */}
-                                {msg.reactions && msg.reactions.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-2">
-                                        {msg.reactions.map((reaction, idx) => (
-                                            <span
-                                                key={idx}
-                                                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-white bg-opacity-20"
-                                                title={reaction.userName}
-                                            >
-                                                {reaction.emoji}
-                                            </span>
+                    <>
+                        {/* Pinned Messages Section */}
+                        {messages.some(m => m.isPinned) && (
+                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Pin className="w-4 h-4 text-yellow-600" />
+                                    <span className="text-sm font-semibold text-yellow-800">Pinned Messages</span>
+                                </div>
+                                <div className="space-y-2">
+                                    {messages
+                                        .filter(m => m.isPinned)
+                                        .map(msg => (
+                                            <div key={msg._id} className="text-sm text-gray-700 bg-white p-2 rounded">
+                                                <span className="font-semibold">
+                                                    {msg.sender === 'client' ? 'You' : 'Admin'}:
+                                                </span> {msg.message}
+                                            </div>
                                         ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Regular Messages */}
+                        {messages.filter(m => !m.parentMessageId).map((msg) => (
+                            <div key={msg._id} className="space-y-2">
+                                {editingMessage?._id === msg._id ? (
+                                    // Edit Mode
+                                    <div className="flex justify-end">
+                                        <div className="max-w-[70%] bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                            <p className="text-xs font-semibold mb-2 text-gray-600">Editing message</p>
+                                            <textarea
+                                                value={editText}
+                                                onChange={(e) => setEditText(e.target.value)}
+                                                className="w-full border rounded px-2 py-1 text-sm"
+                                                rows={3}
+                                            />
+                                            <div className="flex gap-2 mt-2">
+                                                <button
+                                                    onClick={handleSaveEdit}
+                                                    className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                                                >
+                                                    Save
+                                                </button>
+                                                <button
+                                                    onClick={handleCancelEdit}
+                                                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    // Normal Message Display
+                                    <div
+                                        className={`flex ${msg.sender === 'client' ? 'justify-end' : 'justify-start'}`}
+                                    >
+                                        <div
+                                            className={`max-w-[70%] rounded-lg px-4 py-3 ${
+                                                msg.sender === 'client'
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-gray-100 text-gray-900'
+                                            } ${msg.isPinned ? 'border-2 border-yellow-400' : ''}`}
+                                        >
+                                            {msg.isPinned && (
+                                                <div className="flex items-center justify-end mb-1">
+                                                    <Pin className="w-3 h-3 text-yellow-400" />
+                                                </div>
+                                            )}
+                                            <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+
+                                            {msg.isEdited && (
+                                                <p className="text-xs opacity-60 mt-1">(edited)</p>
+                                            )}
+
+                                            {/* Attachments */}
+                                            {msg.attachments && msg.attachments.length > 0 && (
+                                                <div className="mt-2 space-y-1">
+                                                    {msg.attachments.map((att, idx) => (
+                                                        <a
+                                                            key={idx}
+                                                            href={att.fileUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex items-center gap-2 text-xs bg-white bg-opacity-20 p-2 rounded hover:bg-opacity-30"
+                                                        >
+                                                            <Paperclip className="w-3 h-3" />
+                                                            <span>{att.fileName}</span>
+                                                            <span className="opacity-60">({(att.fileSize / 1024).toFixed(1)}KB)</span>
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Reactions */}
+                                            {msg.reactions && msg.reactions.length > 0 && (
+                                                <div className="flex flex-wrap gap-1 mt-2">
+                                                    {msg.reactions.map((reaction, idx) => (
+                                                        <span
+                                                            key={idx}
+                                                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-white bg-opacity-20"
+                                                            title={reaction.userName}
+                                                        >
+                                                            {reaction.emoji}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Action Buttons */}
+                                            <div className={`flex items-center justify-between gap-2 mt-2 ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-500'}`}>
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
+                                                        className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                                        title="React"
+                                                    >
+                                                        <Smile className="w-3 h-3" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleReply(msg)}
+                                                        className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                                        title="Reply"
+                                                    >
+                                                        <Reply className="w-3 h-3" />
+                                                    </button>
+                                                    {msg.sender === 'client' && (
+                                                        <button
+                                                            onClick={() => handleEdit(msg)}
+                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                                            title="Edit"
+                                                        >
+                                                            <Edit2 className="w-3 h-3" />
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex items-center gap-1">
+                                                    <p className="text-xs">
+                                                        {new Date(msg.createdAt).toLocaleString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    </p>
+                                                    {msg.sender === 'client' && (
+                                                        <span title={msg.isRead ? 'Read' : 'Sent'}>
+                                                            {msg.isRead ? (
+                                                                <CheckCheck className="w-4 h-4" />
+                                                            ) : (
+                                                                <Check className="w-4 h-4" />
+                                                            )}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Emoji Picker */}
+                                            {showEmojiPicker === msg._id && (
+                                                <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
+                                                    {COMMON_EMOJIS.map((emoji) => (
+                                                        <button
+                                                            key={emoji}
+                                                            onClick={() => handleReaction(msg._id, emoji)}
+                                                            className="hover:scale-125 transition-transform text-lg"
+                                                        >
+                                                            {emoji}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
 
-                                <div className={`flex items-center justify-between gap-2 mt-2 ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-500'}`}>
-                                    <button
-                                        onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
-                                        className="opacity-50 hover:opacity-100 transition-opacity"
-                                    >
-                                        <Smile className="w-3 h-3" />
-                                    </button>
-
-                                    <div className="flex items-center gap-1">
-                                        <p className="text-xs">
-                                            {new Date(msg.createdAt).toLocaleString('en-US', {
-                                                month: 'short',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </p>
-                                        {msg.sender === 'client' && (
-                                            <span title={msg.isRead ? 'Read' : 'Sent'}>
-                                                {msg.isRead ? (
-                                                    <CheckCheck className="w-4 h-4" />
-                                                ) : (
-                                                    <Check className="w-4 h-4" />
-                                                )}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Emoji Picker */}
-                                {showEmojiPicker === msg._id && (
-                                    <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
-                                        {COMMON_EMOJIS.map((emoji) => (
-                                            <button
-                                                key={emoji}
-                                                onClick={() => handleReaction(msg._id, emoji)}
-                                                className="hover:scale-125 transition-transform text-lg"
-                                            >
-                                                {emoji}
-                                            </button>
-                                        ))}
+                                {/* Thread Replies */}
+                                {msg.threadReplies && msg.threadReplies.length > 0 && (
+                                    <div className="ml-12 space-y-2">
+                                        {messages
+                                            .filter(m => m.parentMessageId === msg._id)
+                                            .map(reply => (
+                                                <div
+                                                    key={reply._id}
+                                                    className={`flex ${reply.sender === 'client' ? 'justify-end' : 'justify-start'}`}
+                                                >
+                                                    <div
+                                                        className={`max-w-[70%] rounded-lg p-2 text-sm ${
+                                                            reply.sender === 'client'
+                                                                ? 'bg-blue-500 text-white'
+                                                                : 'bg-gray-50 text-gray-900 border border-gray-200'
+                                                        }`}
+                                                    >
+                                                        <p className="text-xs font-semibold mb-1 opacity-75">
+                                                            {reply.sender === 'client' ? 'You' : 'xDigital Team'}
+                                                        </p>
+                                                        <p className="whitespace-pre-wrap break-words">{reply.message}</p>
+                                                        <p className="text-xs opacity-60 mt-1">
+                                                            {new Date(reply.createdAt).toLocaleString('en-US', {
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    ))
+                        ))}
+                    </>
                 )}
 
                 {/* Typing Indicators */}
@@ -576,6 +794,27 @@ function MessagesTab({ projectId }: { projectId: string }) {
             </div>
 
             <form onSubmit={handleSend} className="border-t p-4">
+                {/* Reply Context */}
+                {replyingTo && (
+                    <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg flex items-start justify-between">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Reply className="w-3 h-3 text-blue-600" />
+                                <span className="text-xs font-semibold text-blue-800">
+                                    Replying to {replyingTo.sender === 'client' ? 'yourself' : 'xDigital Team'}
+                                </span>
+                            </div>
+                            <p className="text-sm text-gray-700 truncate">{replyingTo.message}</p>
+                        </div>
+                        <button
+                            onClick={() => setReplyingTo(null)}
+                            className="text-gray-500 hover:text-gray-700 p-1"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
+
                 <div className="flex gap-2">
                     <textarea
                         value={newMessage}
@@ -583,7 +822,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                             setNewMessage(e.target.value);
                             handleTyping();
                         }}
-                        placeholder="Type your message..."
+                        placeholder={replyingTo ? "Type your reply..." : "Type your message..."}
                         rows={2}
                         className="flex-1 px-4 py-2 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         disabled={sending}
@@ -599,7 +838,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                         disabled={sending || !newMessage.trim()}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
                     >
-                        {sending ? 'Sending...' : 'Send'}
+                        {sending ? 'Sending...' : replyingTo ? 'Reply' : 'Send'}
                     </button>
                 </div>
             </form>
