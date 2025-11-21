@@ -23,6 +23,20 @@ export interface IReminder extends Document {
     updatedAt: Date;
 }
 
+// Type for populated user fields
+export interface PopulatedUserFields {
+    _id: Types.ObjectId;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+}
+
+// Type for Reminder with populated fields
+export interface IPopulatedReminder extends Omit<IReminder, 'clientId' | 'createdBy'> {
+    clientId?: PopulatedUserFields;
+    createdBy: PopulatedUserFields;
+}
+
 const ReminderSchema = new Schema<IReminder>(
     {
         title: {

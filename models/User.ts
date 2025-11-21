@@ -6,6 +6,11 @@ export enum OnboardingStatus {
     COMPLETED = 'completed',
 }
 
+export enum UserRole {
+    USER = 'user',
+    ADMIN = 'admin',
+}
+
 interface IClientMetrics {
     totalProjects: number;
     activeProjects: number;
@@ -26,6 +31,9 @@ export interface IUser extends Document {
     lastName?: string;
     userName?: string;
     imageUrl?: string;
+
+    // Role
+    role: UserRole;
 
     // Phone and company info
     phone?: string;
@@ -78,6 +86,12 @@ const UserSchema = new Schema<IUser>(
         },
         imageUrl: {
             type: String,
+        },
+        role: {
+            type: String,
+            enum: Object.values(UserRole),
+            default: UserRole.USER,
+            index: true,
         },
         phone: {
             type: String,

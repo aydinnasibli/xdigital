@@ -86,7 +86,7 @@ export default async function AdminInvoicesPage({
                         </label>
                         <select
                             className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                            defaultValue={searchParams.status || ''}
+                            defaultValue={params.status || ''}
                         >
                             <option value="">All Statuses</option>
                             <option value="draft">Draft</option>

@@ -7,6 +7,7 @@ export enum NoteType {
     RISK = 'risk',
     OPPORTUNITY = 'opportunity',
     FEEDBACK = 'feedback',
+    REMINDER = 'reminder',
 }
 
 export interface IClientNote extends Document {
