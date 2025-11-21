@@ -218,6 +218,10 @@ const MessageSchema = new Schema<IMessage>(
 MessageSchema.index({ projectId: 1, createdAt: -1 });
 MessageSchema.index({ userId: 1, createdAt: -1 });
 MessageSchema.index({ clerkUserId: 1, createdAt: -1 });
+// Compound indexes for common query patterns
+MessageSchema.index({ projectId: 1, isRead: 1, sender: 1 }); // For markMessagesAsRead operation
+MessageSchema.index({ sender: 1, isRead: 1, createdAt: -1 }); // For sender-based filtering
+MessageSchema.index({ parentMessageId: 1, createdAt: -1 }); // For threaded message queries
 
 const Message = (mongoose.models?.Message as Model<IMessage>) || mongoose.model<IMessage>('Message', MessageSchema);
 

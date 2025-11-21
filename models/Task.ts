@@ -151,6 +151,10 @@ TaskSchema.index({ projectId: 1, status: 1 });
 TaskSchema.index({ assignedTo: 1, status: 1 });
 TaskSchema.index({ projectId: 1, order: 1 });
 TaskSchema.index({ dueDate: 1, status: 1 });
+// Additional compound indexes for common query patterns
+TaskSchema.index({ assignedTo: 1, createdAt: -1 }); // For user activity feed queries
+TaskSchema.index({ projectId: 1, createdAt: -1 }); // For project task timeline
+TaskSchema.index({ status: 1, priority: 1, dueDate: 1 }); // For multi-field filtering and reporting
 
 // Virtual for completion percentage based on subtasks
 TaskSchema.virtual('completionPercentage').get(function() {
