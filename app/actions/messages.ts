@@ -128,7 +128,7 @@ export async function sendMessage(
     }
 }
 
-// Mark messages as read
+// Mark messages as read (client reading admin messages)
 export async function markMessagesAsRead(projectId: string): Promise<ActionResponse> {
     try {
         const { userId: clerkUserId } = await auth();
@@ -144,6 +144,7 @@ export async function markMessagesAsRead(projectId: string): Promise<ActionRespo
             return { success: false, error: 'User not found' };
         }
 
+        // Simple update - just set isRead and readAt
         await Message.updateMany(
             { projectId, isRead: false, sender: MessageSender.ADMIN },
             { isRead: true, readAt: new Date() }

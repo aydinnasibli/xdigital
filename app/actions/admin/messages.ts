@@ -169,20 +169,15 @@ export async function markAdminMessagesAsRead(
 
         await dbConnect();
 
-        await Message.updateMany(
-            {
-                _id: { $in: validIds },
-                sender: MessageSender.CLIENT,
-            },
-            {
-                isRead: true,
-                readAt: new Date(),
-            }
+        // Simple update - just set isRead and readAt
+        const result = await Message.updateMany(
+            { _id: { $in: validIds }, sender: MessageSender.CLIENT },
+            { isRead: true, readAt: new Date() }
         );
 
         revalidatePath('/admin/messages');
 
-        return { success: true, data: { marked: validIds.length } };
+        return { success: true, data: { marked: result.modifiedCount } };
     } catch (error) {
         logError(error as Error, { context: 'markAdminMessagesAsRead', messageIds });
         return { success: false, error: 'Failed to mark messages as read' };
