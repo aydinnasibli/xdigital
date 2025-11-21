@@ -290,6 +290,29 @@ export async function getAdminProjectMessages(
     }
 }
 
+// Send typing indicator (admin side)
+export async function sendAdminTypingIndicator(
+    projectId: string,
+    isTyping: boolean
+): Promise<ActionResponse> {
+    try {
+        await requireAdmin();
+
+        // Send typing indicator via Pusher
+        try {
+            const { sendTypingIndicator } = await import('@/lib/services/pusher.service');
+            await sendTypingIndicator(projectId, 'admin', 'xDigital Team', isTyping);
+        } catch (error) {
+            logError(error as Error, { context: 'sendAdminTypingIndicator-pusher', projectId });
+        }
+
+        return { success: true };
+    } catch (error) {
+        logError(error as Error, { context: 'sendAdminTypingIndicator', projectId });
+        return { success: false, error: 'Failed to send typing indicator' };
+    }
+}
+
 // Add reaction to message
 export async function addMessageReaction(
     messageId: string,

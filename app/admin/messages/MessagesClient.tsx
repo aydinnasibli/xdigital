@@ -3,7 +3,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { MessageSquare, Send, Check, CheckCheck, Search, Plus, Smile } from 'lucide-react';
-import { sendAdminMessage, markAdminMessagesAsRead, addMessageReaction } from '@/app/actions/admin/messages';
+import { sendAdminMessage, markAdminMessagesAsRead, addMessageReaction, sendAdminTypingIndicator } from '@/app/actions/admin/messages';
 import { toast } from 'sonner';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { logInfo } from '@/lib/sentry-logger';
@@ -241,12 +241,11 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
         }
 
         // Send typing start
-        // Note: This would require a server action to trigger Pusher
-        // For now, we'll skip this to avoid complexity
+        sendAdminTypingIndicator(selectedProjectId, true);
 
         // Set timeout to clear typing indicator
         typingTimeoutRef.current = setTimeout(() => {
-            // Send typing stop
+            sendAdminTypingIndicator(selectedProjectId, false);
         }, 3000);
     }, [selectedProjectId]);
 

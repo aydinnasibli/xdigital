@@ -5,14 +5,14 @@ import { useState, useTransition, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { deleteProject } from '@/app/actions/projects';
-import { getMessages, sendMessage } from '@/app/actions/messages';
+import { getMessages, sendMessage, addClientMessageReaction, sendClientTypingIndicator } from '@/app/actions/messages';
 import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectAnalytics } from '@/app/actions/monitoring';
 import dynamic from 'next/dynamic';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { toast } from 'sonner';
 import { logInfo, logWarning } from '@/lib/sentry-logger';
-import { Check, CheckCheck } from 'lucide-react';
+import { Check, CheckCheck, Smile } from 'lucide-react';
 
 // Dynamically import heavy dashboard components
 const SEODashboard = dynamic(() => import('@/components/dashboard/SEODashboard'), {
@@ -48,6 +48,18 @@ interface Message {
     message: string;
     createdAt: string;
     isRead?: boolean;
+    reactions?: Array<{
+        emoji: string;
+        userId: string;
+        userName: string;
+        createdAt: string;
+    }>;
+    attachments?: Array<{
+        fileName: string;
+        fileUrl: string;
+        fileType: string;
+        fileSize: number;
+    }>;
 }
 
 interface Project {
@@ -292,24 +304,27 @@ function InvoicesTab({ projectId }: { projectId: string }) {
         </div>
     );
 }
+const COMMON_EMOJIS = ['👍', '❤️', '😊', '🎉', '🔥', '👏', '😂', '😍'];
+
 // Add this component before the main ProjectDetailClient component
 function MessagesTab({ projectId }: { projectId: string }) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
+    const [typingIndicators, setTypingIndicators] = useState<Map<string, any>>(new Map());
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
     // Helper function to deduplicate messages and ensure unique IDs
     const deduplicateMessages = useCallback((messageList: Message[]): Message[] => {
         const uniqueMessages = new Map<string, Message>();
         messageList.forEach(msg => {
-            // Only keep the first occurrence of each message ID
             if (!uniqueMessages.has(msg._id)) {
                 uniqueMessages.set(msg._id, msg);
             }
         });
-        // Return sorted by createdAt to maintain chronological order
         return Array.from(uniqueMessages.values()).sort(
             (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
@@ -323,8 +338,17 @@ function MessagesTab({ projectId }: { projectId: string }) {
             projectId
         });
 
+        // Handle reaction updates
+        if (data.type === 'reaction') {
+            setMessages(prev => prev.map(msg =>
+                msg._id === data.messageId
+                    ? { ...msg, reactions: data.reactions }
+                    : msg
+            ));
+            return;
+        }
+
         setMessages(prev => {
-            // Check if message already exists (prevent duplicates)
             const exists = prev.some(msg => msg._id === data._id);
             if (exists) {
                 logInfo('Duplicate message detected and prevented', {
@@ -334,30 +358,51 @@ function MessagesTab({ projectId }: { projectId: string }) {
                 return prev;
             }
 
-            // Add new message and ensure chronological order
             const updatedMessages = [...prev, {
                 _id: data._id,
                 sender: data.sender,
                 message: data.message,
                 createdAt: data.createdAt,
                 isRead: data.isRead,
+                reactions: data.reactions || [],
+                attachments: data.attachments || [],
             }];
             return deduplicateMessages(updatedMessages);
         });
 
-        // Show toast if message is from admin
         if (data.sender === 'admin') {
-            toast.info('New message from admin');
+            toast.info('New message from xDigital Team');
         }
     }, [deduplicateMessages, projectId]);
 
+    // Real-time typing indicator handler
+    const handleTypingIndicator = useCallback((data: any) => {
+        logInfo('Typing indicator received', data);
+
+        setTypingIndicators(prev => {
+            const newMap = new Map(prev);
+            const key = `${data.projectId}-${data.userId}`;
+
+            if (data.isTyping && data.userId !== 'client') {
+                newMap.set(key, {
+                    userName: data.userName,
+                    isTyping: true,
+                });
+            } else {
+                newMap.delete(key);
+            }
+
+            return newMap;
+        });
+    }, []);
+
     usePusherChannel(`project-${projectId}`, 'new-message', handleNewMessage);
+    usePusherChannel(`project-${projectId}`, 'typing', handleTypingIndicator);
 
     useEffect(() => {
         loadMessages();
     }, [projectId]);
 
-    // Auto-scroll to bottom when messages change
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
@@ -366,25 +411,35 @@ function MessagesTab({ projectId }: { projectId: string }) {
         setLoading(true);
         const result = await getMessages(projectId);
         if (result.success && result.data) {
-            // Deduplicate messages from server
             setMessages(deduplicateMessages(result.data));
         }
         setLoading(false);
     };
+
+    const handleTyping = useCallback(() => {
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        sendClientTypingIndicator(projectId, true);
+
+        typingTimeoutRef.current = setTimeout(() => {
+            sendClientTypingIndicator(projectId, false);
+        }, 3000);
+    }, [projectId]);
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newMessage.trim()) return;
 
         setSending(true);
+        sendClientTypingIndicator(projectId, false);
+
         const result = await sendMessage(projectId, newMessage);
         if (result.success && result.data) {
-            // Optimistically add message to local state
-            // Note: Pusher will broadcast this back, but deduplication will handle it
             setMessages(prev => {
                 const exists = prev.some(msg => msg._id === result.data._id);
                 if (exists) {
-                    // This shouldn't happen but log if it does
                     logWarning('Duplicate message after send', {
                         messageId: result.data._id,
                         projectId
@@ -397,6 +452,8 @@ function MessagesTab({ projectId }: { projectId: string }) {
                     message: result.data.message,
                     createdAt: result.data.createdAt,
                     isRead: result.data.isRead,
+                    reactions: [],
+                    attachments: [],
                 }];
                 return deduplicateMessages(updatedMessages);
             });
@@ -408,13 +465,23 @@ function MessagesTab({ projectId }: { projectId: string }) {
         setSending(false);
     };
 
+    const handleReaction = async (messageId: string, emoji: string) => {
+        const result = await addClientMessageReaction(messageId, emoji);
+        if (result.success) {
+            setShowEmojiPicker(null);
+        } else {
+            toast.error('Failed to add reaction');
+        }
+    };
+
     if (loading) {
         return <div className="text-center py-8">Loading messages...</div>;
     }
 
+    const currentTypingIndicators = Array.from(typingIndicators.values());
+
     return (
         <div className="bg-white rounded-lg border flex flex-col h-[600px]">
-            {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {messages.length === 0 ? (
                     <p className="text-gray-500 text-center">No messages yet. Start the conversation!</p>
@@ -430,48 +497,107 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                     : 'bg-gray-100 text-gray-900'
                                     }`}
                             >
-                                <p className="text-sm">{msg.message}</p>
+                                <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+
+                                {/* Reactions */}
+                                {msg.reactions && msg.reactions.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                        {msg.reactions.map((reaction, idx) => (
+                                            <span
+                                                key={idx}
+                                                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-white bg-opacity-20"
+                                                title={reaction.userName}
+                                            >
+                                                {reaction.emoji}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+
                                 <div className={`flex items-center justify-between gap-2 mt-2 ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-500'}`}>
-                                    <p className="text-xs">
-                                        {new Date(msg.createdAt).toLocaleString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </p>
-                                    {msg.sender === 'client' && (
-                                        <span title={msg.isRead ? 'Read' : 'Sent'}>
-                                            {msg.isRead ? (
-                                                <CheckCheck className="w-4 h-4 text-blue-200" />
-                                            ) : (
-                                                <Check className="w-4 h-4 text-blue-300" />
-                                            )}
-                                        </span>
-                                    )}
+                                    <button
+                                        onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
+                                        className="opacity-50 hover:opacity-100 transition-opacity"
+                                    >
+                                        <Smile className="w-3 h-3" />
+                                    </button>
+
+                                    <div className="flex items-center gap-1">
+                                        <p className="text-xs">
+                                            {new Date(msg.createdAt).toLocaleString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </p>
+                                        {msg.sender === 'client' && (
+                                            <span title={msg.isRead ? 'Read' : 'Sent'}>
+                                                {msg.isRead ? (
+                                                    <CheckCheck className="w-4 h-4" />
+                                                ) : (
+                                                    <Check className="w-4 h-4" />
+                                                )}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
+
+                                {/* Emoji Picker */}
+                                {showEmojiPicker === msg._id && (
+                                    <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
+                                        {COMMON_EMOJIS.map((emoji) => (
+                                            <button
+                                                key={emoji}
+                                                onClick={() => handleReaction(msg._id, emoji)}
+                                                className="hover:scale-125 transition-transform text-lg"
+                                            >
+                                                {emoji}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))
                 )}
+
+                {/* Typing Indicators */}
+                {currentTypingIndicators.length > 0 && (
+                    <div className="flex justify-start">
+                        <div className="bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-600">
+                            {currentTypingIndicators[0].userName} is typing
+                            <span className="animate-pulse">...</span>
+                        </div>
+                    </div>
+                )}
+
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Message Input */}
             <form onSubmit={handleSend} className="border-t p-4">
                 <div className="flex gap-2">
-                    <input
-                        type="text"
+                    <textarea
                         value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
+                        onChange={(e) => {
+                            setNewMessage(e.target.value);
+                            handleTyping();
+                        }}
                         placeholder="Type your message..."
-                        className="flex-1 px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        rows={2}
+                        className="flex-1 px-4 py-2 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         disabled={sending}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSend(e);
+                            }
+                        }}
                     />
                     <button
                         type="submit"
                         disabled={sending || !newMessage.trim()}
-                        className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
                     >
                         {sending ? 'Sending...' : 'Send'}
                     </button>
