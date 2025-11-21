@@ -198,12 +198,12 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                 const exists = prev.some(msg => msg._id === data._id);
                 if (exists) return prev;
 
-                // Create properly formatted reply message
+                // Create properly formatted reply message with current timestamp to ensure it's latest
                 const newMsg: Message = {
                     _id: data._id,
                     sender: data.sender,
                     message: data.message,
-                    createdAt: data.createdAt,
+                    createdAt: data.createdAt || new Date().toISOString(),
                     isRead: data.isRead || false,
                     clientName: data.clientName || 'Client',
                     clientEmail: data.clientEmail || '',
@@ -219,12 +219,15 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                     isPinned: data.isPinned,
                 };
 
-                // Add to messages and update parent's threadReplies
-                return prev.map(msg =>
+                // Update parent's threadReplies and add new message at the end
+                const updatedMessages = prev.map(msg =>
                     msg._id === data.parentMessageId
                         ? { ...msg, threadReplies: [...(msg.threadReplies || []), data._id] }
                         : msg
-                ).concat(newMsg);
+                );
+
+                // Add new message at the end (it will be sorted by useMemo)
+                return [...updatedMessages, newMsg];
             });
             return;
         }
@@ -239,7 +242,7 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                 _id: data._id,
                 sender: data.sender,
                 message: data.message,
-                createdAt: data.createdAt,
+                createdAt: data.createdAt || new Date().toISOString(),
                 isRead: data.isRead || false,
                 clientName: data.clientName || 'Client',
                 clientEmail: data.clientEmail || '',
@@ -411,22 +414,50 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
     };
 
     const handlePin = async (messageId: string) => {
-        const result = await togglePinMessage(messageId);
-        if (result.success) {
-            toast.success(result.data.isPinned ? 'Message pinned' : 'Message unpinned');
-            // Update will come via Pusher
-        } else {
-            toast.error(result.error || 'Failed to toggle pin');
+        try {
+            // Optimistic update
+            setAllMessages(prev => prev.map(msg =>
+                msg._id === messageId
+                    ? { ...msg, isPinned: !msg.isPinned, pinnedAt: !msg.isPinned ? new Date().toISOString() : undefined }
+                    : msg
+            ));
+
+            const result = await togglePinMessage(messageId);
+            if (result.success) {
+                toast.success(result.data?.isPinned ? 'Message pinned' : 'Message unpinned');
+            } else {
+                // Revert on failure
+                setAllMessages(prev => prev.map(msg =>
+                    msg._id === messageId
+                        ? { ...msg, isPinned: !msg.isPinned, pinnedAt: msg.isPinned ? new Date().toISOString() : undefined }
+                        : msg
+                ));
+                toast.error(result.error || 'Failed to toggle pin');
+            }
+        } catch (error) {
+            // Revert on error
+            setAllMessages(prev => prev.map(msg =>
+                msg._id === messageId
+                    ? { ...msg, isPinned: !msg.isPinned }
+                    : msg
+            ));
+            toast.error('Failed to toggle pin');
+            console.error('Pin error:', error);
         }
     };
 
     const handleReaction = async (messageId: string, emoji: string) => {
-        const result = await addMessageReaction(messageId, emoji);
-        if (result.success) {
-            // Update will come via Pusher
+        try {
             setShowEmojiPicker(null);
-        } else {
+
+            const result = await addMessageReaction(messageId, emoji);
+            if (!result.success) {
+                toast.error(result.error || 'Failed to add reaction');
+            }
+            // Update will come via Pusher
+        } catch (error) {
             toast.error('Failed to add reaction');
+            console.error('Reaction error:', error);
         }
     };
 
@@ -734,6 +765,7 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                                                     <div className="ml-12 space-y-2">
                                                         {selectedConversation.messages
                                                             .filter(m => m.parentMessageId === msg._id)
+                                                            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
                                                             .map(reply => (
                                                                 <div
                                                                     key={reply._id}
