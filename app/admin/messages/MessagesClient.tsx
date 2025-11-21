@@ -271,6 +271,11 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
     const handleTypingIndicator = useCallback((data: any) => {
         logInfo('Typing indicator received', data);
 
+        // Don't show admin's own typing indicator
+        if (data.userId === 'admin') {
+            return;
+        }
+
         setTypingIndicators(prev => {
             const newMap = new Map(prev);
             const key = `${data.projectId}-${data.userId}`;
@@ -415,32 +420,14 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
 
     const handlePin = async (messageId: string) => {
         try {
-            // Optimistic update
-            setAllMessages(prev => prev.map(msg =>
-                msg._id === messageId
-                    ? { ...msg, isPinned: !msg.isPinned, pinnedAt: !msg.isPinned ? new Date().toISOString() : undefined }
-                    : msg
-            ));
-
             const result = await togglePinMessage(messageId);
             if (result.success) {
                 toast.success(result.data?.isPinned ? 'Message pinned' : 'Message unpinned');
+                // Update will come via Pusher
             } else {
-                // Revert on failure
-                setAllMessages(prev => prev.map(msg =>
-                    msg._id === messageId
-                        ? { ...msg, isPinned: !msg.isPinned, pinnedAt: msg.isPinned ? new Date().toISOString() : undefined }
-                        : msg
-                ));
                 toast.error(result.error || 'Failed to toggle pin');
             }
         } catch (error) {
-            // Revert on error
-            setAllMessages(prev => prev.map(msg =>
-                msg._id === messageId
-                    ? { ...msg, isPinned: !msg.isPinned }
-                    : msg
-            ));
             toast.error('Failed to toggle pin');
             console.error('Pin error:', error);
         }
@@ -691,13 +678,16 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                                                             {/* Action Buttons */}
                                                             <div className="flex items-center justify-between mt-2 gap-2">
                                                                 <div className="flex items-center gap-1">
-                                                                    <button
-                                                                        onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
-                                                                        className="opacity-50 hover:opacity-100 transition-opacity p-1"
-                                                                        title="React"
-                                                                    >
-                                                                        <Smile className="w-3 h-3" />
-                                                                    </button>
+                                                                    {/* Only show reaction button for client messages */}
+                                                                    {msg.sender === 'client' && (
+                                                                        <button
+                                                                            onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
+                                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                                                            title="React"
+                                                                        >
+                                                                            <Smile className="w-3 h-3" />
+                                                                        </button>
+                                                                    )}
                                                                     <button
                                                                         onClick={() => handleReply(msg)}
                                                                         className="opacity-50 hover:opacity-100 transition-opacity p-1"

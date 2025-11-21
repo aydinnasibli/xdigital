@@ -343,23 +343,26 @@ export async function addMessageReaction(
             return { success: false, error: 'Message not found' };
         }
 
+        // For admin, use a consistent identifier 'admin' as the userId
+        const adminUserId = 'admin';
+
         // Check if admin already reacted with this emoji
         const existingReaction = message.reactions?.find(
-            r => r.emoji === emoji && r.userId.toString() === clerkUserId
+            r => r.emoji === emoji && r.userId.toString() === adminUserId
         );
 
         if (existingReaction) {
             // Remove reaction if already exists
             message.reactions = message.reactions?.filter(
-                r => !(r.emoji === emoji && r.userId.toString() === clerkUserId)
+                r => !(r.emoji === emoji && r.userId.toString() === adminUserId)
             );
         } else {
             // Add new reaction
             if (!message.reactions) message.reactions = [];
             message.reactions.push({
                 emoji,
-                userId: new mongoose.Types.ObjectId(clerkUserId),
-                userName: 'Admin',
+                userId: adminUserId as any,
+                userName: 'xDigital Team',
                 createdAt: new Date()
             } as any);
         }

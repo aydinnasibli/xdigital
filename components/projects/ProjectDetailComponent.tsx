@@ -412,11 +412,17 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const handleTypingIndicator = useCallback((data: any) => {
         logInfo('Typing indicator received', data);
 
+        // Only show typing indicator if it's from admin
+        // Client's own typing has userId as their MongoDB ObjectId, admin typing has userId as 'admin'
+        if (data.userId !== 'admin') {
+            return;
+        }
+
         setTypingIndicators(prev => {
             const newMap = new Map(prev);
             const key = `${data.projectId}-${data.userId}`;
 
-            if (data.isTyping && data.userId !== 'client') {
+            if (data.isTyping) {
                 newMap.set(key, {
                     userName: data.userName,
                     isTyping: true,
@@ -652,13 +658,16 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                             {/* Action Buttons */}
                                             <div className={`flex items-center justify-between gap-2 mt-2 ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-500'}`}>
                                                 <div className="flex items-center gap-1">
-                                                    <button
-                                                        onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
-                                                        className="opacity-50 hover:opacity-100 transition-opacity p-1"
-                                                        title="React"
-                                                    >
-                                                        <Smile className="w-3 h-3" />
-                                                    </button>
+                                                    {/* Only show reaction button for admin messages */}
+                                                    {msg.sender === 'admin' && (
+                                                        <button
+                                                            onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
+                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                                            title="React"
+                                                        >
+                                                            <Smile className="w-3 h-3" />
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => handleReply(msg)}
                                                         className="opacity-50 hover:opacity-100 transition-opacity p-1"
