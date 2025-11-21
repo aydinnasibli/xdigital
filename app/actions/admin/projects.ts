@@ -9,6 +9,8 @@ import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
+import { createNotification } from '@/lib/services/notification.service';
+import { NotificationType } from '@/models/Notification';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -137,16 +139,26 @@ export async function updateProjectStatus(
             return { success: false, error: 'Project not found' };
         }
 
+        // Send notification to client about status change
+        await createNotification({
+            userId: updatedProject.clerkUserId,
+            projectId: projectId,
+            type: NotificationType.PROJECT_UPDATE,
+            title: 'Project Status Updated',
+            message: `Your project "${updatedProject.projectName}" status has been updated to: ${status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`,
+            link: `/dashboard/projects/${projectId}`,
+            sendEmail: true,
+            emailSubject: `Project Status Update - ${updatedProject.projectName}`,
+        });
+
         revalidatePath('/admin/projects');
         revalidatePath(`/admin/projects/${projectId}`);
+        revalidatePath('/dashboard/projects');
+        revalidatePath(`/dashboard/projects/${projectId}`);
 
         return {
             success: true,
-            data: {
-                ...updatedProject,
-                _id: updatedProject._id.toString(),
-                userId: updatedProject.userId.toString(),
-            },
+            data: toSerializedObject(updatedProject),
         };
     } catch (error) {
         logError(error as Error, { context: 'updateProjectStatus', projectId, status });
@@ -189,16 +201,28 @@ export async function updateAdminProject(
             return { success: false, error: 'Project not found' };
         }
 
+        // If status was updated, notify the client
+        if (updates.status) {
+            await createNotification({
+                userId: updatedProject.clerkUserId,
+                projectId: projectId,
+                type: NotificationType.PROJECT_UPDATE,
+                title: 'Project Updated',
+                message: `Your project "${updatedProject.projectName}" has been updated by the admin.`,
+                link: `/dashboard/projects/${projectId}`,
+                sendEmail: true,
+                emailSubject: `Project Update - ${updatedProject.projectName}`,
+            });
+        }
+
         revalidatePath('/admin/projects');
         revalidatePath(`/admin/projects/${projectId}`);
+        revalidatePath('/dashboard/projects');
+        revalidatePath(`/dashboard/projects/${projectId}`);
 
         return {
             success: true,
-            data: {
-                ...updatedProject,
-                _id: updatedProject._id.toString(),
-                userId: updatedProject.userId.toString(),
-            },
+            data: toSerializedObject(updatedProject),
         };
     } catch (error) {
         logError(error as Error, { context: 'updateAdminProject', projectId });
@@ -242,8 +266,9 @@ export async function addMilestone(
         }
 
         revalidatePath(`/admin/projects/${projectId}`);
+        revalidatePath(`/dashboard/projects/${projectId}`);
 
-        return { success: true, data: updatedProject };
+        return { success: true, data: toSerializedObject(updatedProject) };
     } catch (error) {
         logError(error as Error, { context: 'addMilestone', projectId, milestoneTitle: milestone.title });
         return { success: false, error: 'Failed to add milestone' };
