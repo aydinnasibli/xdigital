@@ -5,6 +5,7 @@ import dbConnect from '@/lib/database/mongodb';
 import Analytics from '@/models/Analytics';
 import User from '@/models/User';
 import mongoose from 'mongoose';
+import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
 
 type ActionResponse<T = any> = {
@@ -39,12 +40,9 @@ export async function getStoredProjectAnalytics(projectId: string): Promise<Acti
             .sort({ recordedDate: -1 })
             .lean();
 
-        const serializedAnalytics = analytics.map(item => ({
-            ...item,
-            _id: item._id.toString(),
-            projectId: item.projectId.toString(),
-            userId: item.userId.toString(),
-        }));
+        const serializedAnalytics = analytics.map(item =>
+            toSerializedObject(item)
+        );
 
         // Calculate summary stats
         const summary = {

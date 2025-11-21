@@ -32,11 +32,9 @@ export async function getAdminResources(): Promise<ActionResponse> {
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedResources = resources.map(r => ({
-            ...r,
-            _id: r._id.toString(),
-            authorId: r.authorId.toString(),
-        }));
+        const serializedResources = resources.map(r =>
+            toSerializedObject(r)
+        );
 
         return { success: true, data: serializedResources };
     } catch (error) {
@@ -85,11 +83,9 @@ export async function getResources(filters?: {
             .sort({ isFeatured: -1, publishedAt: -1 })
             .lean();
 
-        const serializedResources = resources.map(r => ({
-            ...r,
-            _id: r._id.toString(),
-            authorId: r.authorId.toString(),
-        }));
+        const serializedResources = resources.map(r =>
+            toSerializedObject(r)
+        );
 
         return { success: true, data: serializedResources };
     } catch (error) {
@@ -116,15 +112,14 @@ export async function getResource(slug: string): Promise<ActionResponse> {
             $inc: { viewCount: 1 },
         });
 
+        type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string; imageUrl?: string };
+        const author = resource.authorId as unknown as PopulatedUser;
+
         return {
             success: true,
             data: {
-                ...resource,
-                _id: resource._id.toString(),
-                authorId: {
-                    ...resource.authorId,
-                    _id: resource.authorId._id.toString(),
-                },
+                ...toSerializedObject<Record<string, unknown>>(resource),
+                authorId: toSerializedObject(author),
             },
         };
     } catch (error) {
@@ -373,11 +368,9 @@ export async function getFeaturedResources(limit: number = 5): Promise<ActionRes
             .limit(limit)
             .lean();
 
-        const serializedResources = resources.map(r => ({
-            ...r,
-            _id: r._id.toString(),
-            authorId: r.authorId.toString(),
-        }));
+        const serializedResources = resources.map(r =>
+            toSerializedObject(r)
+        );
 
         return { success: true, data: serializedResources };
     } catch (error) {
@@ -400,11 +393,9 @@ export async function searchResources(searchTerm: string): Promise<ActionRespons
             .limit(20)
             .lean();
 
-        const serializedResources = resources.map(r => ({
-            ...r,
-            _id: r._id.toString(),
-            authorId: r.authorId.toString(),
-        }));
+        const serializedResources = resources.map(r =>
+            toSerializedObject(r)
+        );
 
         return { success: true, data: serializedResources };
     } catch (error) {

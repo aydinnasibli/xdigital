@@ -6,11 +6,13 @@ import { Eye, Mail } from 'lucide-react';
 export default async function AdminClientsPage({
     searchParams,
 }: {
-    searchParams: { search?: string; activeOnly?: string };
+    searchParams: Promise<{ search?: string; activeOnly?: string }>;
 }) {
+    const resolvedParams = await searchParams;
+
     const result = await getAllClients({
-        search: searchParams.search,
-        hasActiveProjects: searchParams.activeOnly === 'true',
+        search: resolvedParams.search,
+        hasActiveProjects: resolvedParams.activeOnly === 'true',
     });
 
     const clients = result.success ? result.data : [];
@@ -37,7 +39,7 @@ export default async function AdminClientsPage({
                             type="text"
                             placeholder="Search by name or email..."
                             className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                            defaultValue={searchParams.search || ''}
+                            defaultValue={resolvedParams.search || ''}
                         />
                     </div>
                     <div>
@@ -46,7 +48,7 @@ export default async function AdminClientsPage({
                         </label>
                         <select
                             className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                            defaultValue={searchParams.activeOnly || ''}
+                            defaultValue={resolvedParams.activeOnly || ''}
                         >
                             <option value="">All Clients</option>
                             <option value="true">With Active Projects</option>

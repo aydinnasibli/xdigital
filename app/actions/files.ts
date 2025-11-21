@@ -40,15 +40,15 @@ export async function getProjectFiles(projectId: string, folderId?: string): Pro
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedFiles = files.map(file => ({
-            ...file,
-            _id: file._id.toString(),
-            projectId: file.projectId.toString(),
-            uploadedBy: {
-                ...file.uploadedBy,
-                _id: file.uploadedBy._id.toString(),
-            },
-        }));
+        const serializedFiles = files.map(file => {
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string; imageUrl?: string };
+            const uploadedBy = file.uploadedBy as unknown as PopulatedUser;
+
+            return {
+                ...toSerializedObject<Record<string, unknown>>(file),
+                uploadedBy: toSerializedObject(uploadedBy),
+            };
+        });
 
         return { success: true, data: serializedFiles };
     } catch (error) {

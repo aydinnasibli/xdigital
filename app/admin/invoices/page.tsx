@@ -6,12 +6,14 @@ import { Eye, Plus, Send, DollarSign } from 'lucide-react';
 export default async function AdminInvoicesPage({
     searchParams,
 }: {
-    searchParams: { status?: string; clientId?: string; projectId?: string };
+    searchParams: Promise<{ status?: string; clientId?: string; projectId?: string }>;
 }) {
+    const params = await searchParams;
+
     const result = await getAllInvoices({
-        status: searchParams.status,
-        clientId: searchParams.clientId,
-        projectId: searchParams.projectId,
+        status: params.status,
+        clientId: params.clientId,
+        projectId: params.projectId,
     });
 
     const invoices = result.success ? result.data : [];
@@ -84,7 +86,7 @@ export default async function AdminInvoicesPage({
                         </label>
                         <select
                             className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                            defaultValue={searchParams.status || ''}
+                            defaultValue={params.status || ''}
                         >
                             <option value="">All Statuses</option>
                             <option value="draft">Draft</option>

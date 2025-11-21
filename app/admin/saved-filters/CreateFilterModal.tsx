@@ -139,7 +139,6 @@ export default function CreateFilterModal({ onClose }: { onClose: () => void }) 
                             <option value={FilterEntity.FILES}>Files</option>
                             <option value={FilterEntity.MESSAGES}>Messages</option>
                             <option value={FilterEntity.INVOICES}>Invoices</option>
-                            <option value={FilterEntity.DELIVERABLES}>Deliverables</option>
                             <option value={FilterEntity.CLIENTS}>Clients</option>
                             <option value={FilterEntity.ACTIVITIES}>Activities</option>
                         </select>

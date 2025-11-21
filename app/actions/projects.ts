@@ -70,11 +70,9 @@ export async function getProjects(): Promise<ActionResponse> {
             .lean();
 
         // Convert _id to string for serialization
-        const serializedProjects = projects.map(project => ({
-            ...project,
-            _id: project._id.toString(),
-            userId: project.userId.toString(),
-        }));
+        const serializedProjects = projects.map(project =>
+            toSerializedObject(project)
+        );
 
         return { success: true, data: serializedProjects };
     } catch (error) {
@@ -113,13 +111,7 @@ export async function getProject(projectId: string): Promise<ActionResponse> {
         }
 
         // Serialize the project
-        const serializedProject = {
-            ...project,
-            _id: project._id.toString(),
-            userId: project.userId.toString(),
-        };
-
-        return { success: true, data: serializedProject };
+        return { success: true, data: toSerializedObject(project) };
     } catch (error) {
         logError(error as Error, { context: 'getProject', projectId });
         return { success: false, error: 'Failed to fetch project' };
@@ -227,11 +219,7 @@ export async function updateProject(
 
         return {
             success: true,
-            data: {
-                ...updatedProject,
-                _id: updatedProject._id.toString(),
-                userId: updatedProject.userId.toString(),
-            },
+            data: toSerializedObject(updatedProject),
         };
     } catch (error) {
         logError(error as Error, { context: 'updateProject', projectId });
@@ -304,11 +292,9 @@ export async function getProjectStats() {
             completed: projects.filter(p => p.status === 'completed').length,
         };
 
-        const recentProjects = projects.slice(0, 5).map(project => ({
-            ...project,
-            _id: project._id.toString(),
-            userId: project.userId.toString(),
-        }));
+        const recentProjects = projects.slice(0, 5).map(project =>
+            toSerializedObject(project)
+        );
 
         return { success: true, data: { stats, recentProjects } };
     } catch (error) {

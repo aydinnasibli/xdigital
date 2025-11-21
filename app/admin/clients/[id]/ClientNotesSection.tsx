@@ -192,7 +192,6 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
                                     <option value={NoteType.RISK}>Risk</option>
                                     <option value={NoteType.OPPORTUNITY}>Opportunity</option>
                                     <option value={NoteType.FEEDBACK}>Feedback</option>
-                                    <option value={NoteType.REMINDER}>Reminder</option>
                                 </select>
                             </div>
                             <div>

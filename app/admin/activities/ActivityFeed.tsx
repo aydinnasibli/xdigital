@@ -11,7 +11,6 @@ import {
     FileText,
     MessageSquare,
     CheckSquare,
-    Package,
     Settings,
     RefreshCw,
 } from 'lucide-react';
@@ -63,7 +62,6 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
         'file',
         'message',
         'invoice',
-        'deliverable',
         'user',
         'template',
         'note',
@@ -107,8 +105,6 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
                 return FileText;
             case 'message':
                 return MessageSquare;
-            case 'deliverable':
-                return Package;
             case 'invoice':
                 return FileText;
             default:

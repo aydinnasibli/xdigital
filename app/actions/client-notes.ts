@@ -31,15 +31,16 @@ export async function getClientNotes(clientId: string): Promise<ActionResponse> 
             .sort({ isPinned: -1, createdAt: -1 })
             .lean();
 
-        const serializedNotes = notes.map(note => ({
-            ...note,
-            _id: note._id.toString(),
-            clientId: note.clientId.toString(),
-            authorId: {
-                ...note.authorId,
-                _id: note.authorId._id.toString(),
-            },
-        }));
+        const serializedNotes = notes.map(note => {
+            type PopulatedAuthor = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string; imageUrl?: string };
+            const author = note.authorId as unknown as PopulatedAuthor;
+
+            return {
+                ...toSerializedObject<Record<string, unknown>>(note),
+                clientId: note.clientId.toString(),
+                authorId: toSerializedObject(author),
+            };
+        });
 
         return { success: true, data: serializedNotes };
     } catch (error) {

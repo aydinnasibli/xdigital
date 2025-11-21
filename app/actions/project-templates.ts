@@ -37,14 +37,16 @@ export async function getTemplates(serviceType?: string, packageType?: string): 
             .sort({ isDefault: -1, usageCount: -1 })
             .lean();
 
-        const serializedTemplates = templates.map(template => ({
-            ...template,
-            _id: template._id.toString(),
-            createdBy: template.createdBy ? {
-                ...template.createdBy,
-                _id: template.createdBy._id.toString(),
-            } : null,
-        }));
+        const serializedTemplates = templates.map(template => {
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string };
+
+            return {
+                ...toSerializedObject<Record<string, unknown>>(template),
+                createdBy: template.createdBy
+                    ? toSerializedObject(template.createdBy as unknown as PopulatedUser)
+                    : null,
+            };
+        });
 
         return { success: true, data: serializedTemplates };
     } catch (error) {
@@ -86,14 +88,16 @@ export async function getTemplatesByPackage(serviceType: string, packageType: st
             .sort({ isDefault: -1, usageCount: -1 })
             .lean();
 
-        const serializedTemplates = templates.map(template => ({
-            ...template,
-            _id: template._id.toString(),
-            createdBy: template.createdBy ? {
-                ...template.createdBy,
-                _id: template.createdBy._id.toString(),
-            } : null,
-        }));
+        const serializedTemplates = templates.map(template => {
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string };
+
+            return {
+                ...toSerializedObject<Record<string, unknown>>(template),
+                createdBy: template.createdBy
+                    ? toSerializedObject(template.createdBy as unknown as PopulatedUser)
+                    : null,
+            };
+        });
 
         return { success: true, data: serializedTemplates };
     } catch (error) {
@@ -120,15 +124,15 @@ export async function getTemplate(templateId: string): Promise<ActionResponse> {
             return { success: false, error: 'Template not found' };
         }
 
+        type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string };
+
         return {
             success: true,
             data: {
-                ...template,
-                _id: template._id.toString(),
-                createdBy: template.createdBy ? {
-                    ...template.createdBy,
-                    _id: template.createdBy._id.toString(),
-                } : null,
+                ...toSerializedObject<Record<string, unknown>>(template),
+                createdBy: template.createdBy
+                    ? toSerializedObject(template.createdBy as unknown as PopulatedUser)
+                    : null,
             },
         };
     } catch (error) {

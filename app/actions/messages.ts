@@ -39,12 +39,9 @@ export async function getMessages(projectId: string): Promise<ActionResponse> {
             .sort({ createdAt: 1 })
             .lean();
 
-        const serializedMessages = messages.map(msg => ({
-            ...msg,
-            _id: msg._id.toString(),
-            projectId: msg.projectId.toString(),
-            userId: msg.userId.toString(),
-        }));
+        const serializedMessages = messages.map(msg =>
+            toSerializedObject(msg)
+        );
 
         return { success: true, data: serializedMessages };
     } catch (error) {

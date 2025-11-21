@@ -42,19 +42,18 @@ export async function getProjectTasks(projectId: string): Promise<ActionResponse
             .sort({ order: 1 })
             .lean();
 
-        const serializedTasks = tasks.map(task => ({
-            ...task,
-            _id: task._id.toString(),
-            projectId: task.projectId.toString(),
-            assignedTo: task.assignedTo ? {
-                ...task.assignedTo,
-                _id: task.assignedTo._id.toString(),
-            } : null,
-            createdBy: {
-                ...task.createdBy,
-                _id: task.createdBy._id.toString(),
-            },
-        }));
+        const serializedTasks = tasks.map(task => {
+            type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string; imageUrl?: string };
+
+            const assignedTo = task.assignedTo as unknown as PopulatedUser | null;
+            const createdBy = task.createdBy as unknown as PopulatedUser;
+
+            return {
+                ...toSerializedObject<Record<string, unknown>>(task),
+                assignedTo: assignedTo ? toSerializedObject(assignedTo) : null,
+                createdBy: toSerializedObject(createdBy),
+            };
+        });
 
         return { success: true, data: serializedTasks };
     } catch (error) {
