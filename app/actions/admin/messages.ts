@@ -48,22 +48,30 @@ export async function getAllMessages(filters?: {
             .sort({ createdAt: -1 })
             .lean();
 
-        const serializedMessages = messages.map(msg => {
-            const user = msg.userId as any;
-            const project = msg.projectId as any;
+        // Filter out messages with deleted projects or users
+        const serializedMessages = messages
+            .filter(msg => {
+                const user = msg.userId as any;
+                const project = msg.projectId as any;
+                // Skip messages where project or user has been deleted
+                return user && project && user._id && project._id;
+            })
+            .map(msg => {
+                const user = msg.userId as any;
+                const project = msg.projectId as any;
 
-            return {
-                ...msg,
-                _id: msg._id.toString(),
-                projectId: {
-                    _id: project._id.toString(),
-                    projectName: project.projectName,
-                },
-                userId: user._id.toString(),
-                clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
-                clientEmail: user.email,
-            };
-        });
+                return {
+                    ...msg,
+                    _id: msg._id.toString(),
+                    projectId: {
+                        _id: project._id.toString(),
+                        projectName: project.projectName,
+                    },
+                    userId: user._id.toString(),
+                    clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+                    clientEmail: user.email,
+                };
+            });
 
         return { success: true, data: serializedMessages };
     } catch (error) {
@@ -166,6 +174,52 @@ export async function markAdminMessagesAsRead(
     } catch (error) {
         logError(error as Error, { context: 'markAdminMessagesAsRead', messageIds });
         return { success: false, error: 'Failed to mark messages as read' };
+    }
+}
+
+// Get a single message with populated fields
+export async function getAdminMessage(messageId: string): Promise<ActionResponse> {
+    try {
+        await requireAdmin();
+
+        if (!mongoose.Types.ObjectId.isValid(messageId)) {
+            return { success: false, error: 'Invalid message ID' };
+        }
+
+        await dbConnect();
+
+        const message = await Message.findById(messageId)
+            .populate('projectId', 'projectName')
+            .populate('userId', 'email firstName lastName')
+            .lean();
+
+        if (!message) {
+            return { success: false, error: 'Message not found' };
+        }
+
+        const user = message.userId as any;
+        const project = message.projectId as any;
+
+        if (!user || !project) {
+            return { success: false, error: 'Message has deleted project or user' };
+        }
+
+        const serializedMessage = {
+            ...message,
+            _id: message._id.toString(),
+            projectId: {
+                _id: project._id.toString(),
+                projectName: project.projectName,
+            },
+            userId: user._id.toString(),
+            clientName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+            clientEmail: user.email,
+        };
+
+        return { success: true, data: serializedMessage };
+    } catch (error) {
+        logError(error as Error, { context: 'getAdminMessage', messageId });
+        return { success: false, error: 'Failed to fetch message' };
     }
 }
 

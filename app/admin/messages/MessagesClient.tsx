@@ -2,11 +2,10 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { MessageSquare, Send, Check, CheckCheck, Search, Plus } from 'lucide-react';
+import { MessageSquare, Send, Check, CheckCheck, Search, Plus, RefreshCw } from 'lucide-react';
 import { sendAdminMessage, markAdminMessagesAsRead } from '@/app/actions/admin/messages';
-import { usePusherChannel } from '@/lib/hooks/usePusher';
-import { logInfo } from '@/lib/sentry-logger';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface Message {
     _id: string;
@@ -50,13 +49,31 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [refreshing, setRefreshing] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
+
+    const handleRefresh = useCallback(() => {
+        setRefreshing(true);
+        router.refresh();
+        setTimeout(() => setRefreshing(false), 1000);
+    }, [router]);
+
+    // Update messages when initial messages change (after refresh)
+    useEffect(() => {
+        setAllMessages(initialMessages);
+    }, [initialMessages]);
 
     // Group messages by project to create conversations
     const conversations: Conversation[] = [];
     const projectMap = new Map<string, Conversation>();
 
     allMessages.forEach(msg => {
+        // Safety check for populated fields
+        if (!msg.projectId || !msg.projectId._id) {
+            console.error('Message missing projectId', msg);
+            return;
+        }
         const projId = msg.projectId._id;
         if (!projectMap.has(projId)) {
             projectMap.set(projId, {
@@ -99,28 +116,10 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
         proj => !projectMap.has(proj._id)
     );
 
-    // Handle new messages via Pusher
-    const handleNewMessage = useCallback((data: any) => {
-        logInfo('Admin messages page received new message via Pusher', {
-            messageId: data._id,
-            sender: data.sender,
-            projectId: data.projectId
-        });
+    // For now, we'll rely on page revalidation for new messages
+    // TODO: Implement a global admin Pusher channel for real-time updates across all projects
+    // This would require backend changes to create an "admin-messages" channel
 
-        setAllMessages(prev => {
-            const exists = prev.some(msg => msg._id === data._id);
-            if (exists) return prev;
-            return [data, ...prev];
-        });
-
-        // Show toast for new client messages
-        if (data.sender === 'client') {
-            toast.info('New message from client');
-        }
-    }, []);
-
-    // Subscribe to all project channels (in a real app, you'd use a global admin channel)
-    // For now, we'll rely on the optimistic updates and page refresh
     useEffect(() => {
         // Auto-scroll to bottom when viewing a conversation
         if (selectedProjectId) {
@@ -202,11 +201,21 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
-                <p className="text-gray-600 mt-2">
-                    Communicate with clients about their projects
-                </p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
+                    <p className="text-gray-600 mt-2">
+                        Communicate with clients about their projects
+                    </p>
+                </div>
+                <button
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                >
+                    <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                    Refresh
+                </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
