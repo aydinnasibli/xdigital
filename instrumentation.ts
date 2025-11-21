@@ -20,9 +20,9 @@ export const onRequestError = async (
     routePath: string; // the route file path, e.g. /app/blog/[slug]/page.js
     routeType: "render" | "route" | "action" | "middleware"; // the context in which the error occurred
     renderSource:
-      | "react-server-components"
-      | "react-server-components-payload"
-      | "server-rendering";
+    | "react-server-components"
+    | "react-server-components-payload"
+    | "server-rendering";
     revalidateReason: "on-demand" | "stale" | undefined; // undefined is a normal request without revalidation
     renderType: "dynamic" | "dynamic-resume"; // 'dynamic-resume' for PPR
   }
