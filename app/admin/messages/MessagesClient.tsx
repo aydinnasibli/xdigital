@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { MessageSquare, Send, Check, CheckCheck, Search, Plus, Smile, Paperclip, Reply, Edit2, Pin, X } from 'lucide-react';
+import { MessageSquare, Send, Check, CheckCheck, Search, Plus, Smile, Reply, Edit2, Pin, X } from 'lucide-react';
 import { sendAdminMessage, markAdminMessagesAsRead, addMessageReaction, sendAdminTypingIndicator, adminReplyToMessage, adminEditMessage, togglePinMessage } from '@/app/actions/admin/messages';
 import { toast } from 'sonner';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
@@ -25,12 +25,6 @@ interface Message {
         userId: string;
         userName: string;
         createdAt: string;
-    }>;
-    attachments?: Array<{
-        fileName: string;
-        fileUrl: string;
-        fileType: string;
-        fileSize: number;
     }>;
     parentMessageId?: string;
     threadReplies?: string[];
@@ -199,7 +193,6 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                     projectName: data.projectName || 'Unknown Project',
                 },
                 reactions: data.reactions || [],
-                attachments: data.attachments || [],
                 parentMessageId: data.parentMessageId,
                 threadReplies: data.threadReplies || [],
                 isEdited: data.isEdited,
@@ -325,7 +318,6 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
                         projectName: conv?.projectName || '',
                     },
                     reactions: [],
-                    attachments: [],
                 };
 
                 setAllMessages(prev => {
@@ -595,25 +587,6 @@ export default function MessagesClient({ initialMessages, availableProjects }: M
 
                                                             {msg.isEdited && (
                                                                 <p className="text-xs opacity-60 mt-1">(edited)</p>
-                                                            )}
-
-                                                            {/* Attachments */}
-                                                            {msg.attachments && msg.attachments.length > 0 && (
-                                                                <div className="mt-2 space-y-1">
-                                                                    {msg.attachments.map((att, idx) => (
-                                                                        <a
-                                                                            key={idx}
-                                                                            href={att.fileUrl}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="flex items-center gap-2 text-xs bg-white bg-opacity-20 p-2 rounded hover:bg-opacity-30"
-                                                                        >
-                                                                            <Paperclip className="w-3 h-3" />
-                                                                            <span>{att.fileName}</span>
-                                                                            <span className="opacity-60">({(att.fileSize / 1024).toFixed(1)}KB)</span>
-                                                                        </a>
-                                                                    ))}
-                                                                </div>
                                                             )}
 
                                                             {/* Reactions */}

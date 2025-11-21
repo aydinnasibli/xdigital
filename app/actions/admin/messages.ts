@@ -371,67 +371,6 @@ export async function addMessageReaction(
     }
 }
 
-// Admin send message with attachments
-export async function sendAdminMessageWithAttachments(
-    projectId: string,
-    message: string,
-    attachments: Array<{ fileName: string; fileUrl: string; fileType: string; fileSize: number }>
-): Promise<ActionResponse> {
-    try {
-        const { userId } = await getAdminSession();
-        await dbConnect();
-
-        const project = await mongoose.model('Project').findById(projectId);
-        if (!project) {
-            return { success: false, error: 'Project not found' };
-        }
-
-        const newMessage = await Message.create({
-            projectId,
-            userId: project.userId,
-            clerkUserId: userId,
-            sender: MessageSender.ADMIN,
-            message: message.trim() || '📎 Attachment',
-            attachments,
-            isRead: false,
-        });
-
-        const populatedMessage = await Message.findById(newMessage._id)
-            .populate('projectId', 'projectName')
-            .populate('userId', 'email firstName lastName')
-            .lean();
-
-        const user = populatedMessage?.userId as any;
-        const proj = populatedMessage?.projectId as any;
-
-        const serializedMessage = {
-            ...toSerializedObject(newMessage),
-            _id: newMessage._id.toString(),
-            projectId: newMessage.projectId.toString(),
-            userId: newMessage.userId.toString(),
-            clientName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : '',
-            clientEmail: user?.email || '',
-            projectName: proj?.projectName || '',
-            attachments,
-        };
-
-        try {
-            await sendRealtimeMessage(projectId, serializedMessage);
-        } catch (error) {
-            logError(error as Error, { context: 'sendAdminMessageWithAttachments-pusher', projectId });
-        }
-
-        revalidatePath(`/admin/projects/${projectId}`);
-        revalidatePath(`/admin/messages`);
-        revalidatePath(`/dashboard/projects/${projectId}`);
-
-        return { success: true, data: serializedMessage };
-    } catch (error) {
-        logError(error as Error, { context: 'sendAdminMessageWithAttachments', projectId });
-        return { success: false, error: 'Failed to send message with attachments' };
-    }
-}
-
 // Admin reply to message (threading)
 export async function adminReplyToMessage(
     parentMessageId: string,
