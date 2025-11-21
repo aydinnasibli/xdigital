@@ -16,7 +16,6 @@ import NotificationPreference from '@/models/NotificationPreference';
 import Activity from '@/models/Activity';
 import Analytics from '@/models/Analytics';
 import Feedback from '@/models/Feedback';
-import SavedFilter from '@/models/SavedFilter';
 import { logError, logInfo } from '@/lib/sentry-logger';
 
 export async function POST(req: Request) {
@@ -217,9 +216,6 @@ export async function POST(req: Request) {
                 Analytics.deleteMany({ clerkUserId: clerkId }),
                 // Delete feedback given by this user (uses userId ObjectId field)
                 Feedback.deleteMany({ userId: userId }),
-                // Delete saved filters for this user (uses userId ObjectId field)
-                SavedFilter.deleteMany({ userId: userId }),
-                // Delete time entries for this user (uses userId ObjectId field)
             ]);
 
             logInfo('User and all related data deleted successfully', { userId: userId.toString(), clerkId });
