@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { toast } from 'sonner';
 import { logInfo, logWarning } from '@/lib/sentry-logger';
+import { Check, CheckCheck } from 'lucide-react';
 
 // Dynamically import heavy dashboard components
 const SEODashboard = dynamic(() => import('@/components/dashboard/SEODashboard'), {
@@ -46,6 +47,7 @@ interface Message {
     sender: 'client' | 'admin';
     message: string;
     createdAt: string;
+    isRead?: boolean;
 }
 
 interface Project {
@@ -338,6 +340,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                 sender: data.sender,
                 message: data.message,
                 createdAt: data.createdAt,
+                isRead: data.isRead,
             }];
             return deduplicateMessages(updatedMessages);
         });
@@ -393,6 +396,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                     sender: result.data.sender,
                     message: result.data.message,
                     createdAt: result.data.createdAt,
+                    isRead: result.data.isRead,
                 }];
                 return deduplicateMessages(updatedMessages);
             });
@@ -427,17 +431,25 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                     }`}
                             >
                                 <p className="text-sm">{msg.message}</p>
-                                <p
-                                    className={`text-xs mt-2 ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-500'
-                                        }`}
-                                >
-                                    {new Date(msg.createdAt).toLocaleString('en-US', {
-                                        month: 'short',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                </p>
+                                <div className={`flex items-center justify-between gap-2 mt-2 ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-500'}`}>
+                                    <p className="text-xs">
+                                        {new Date(msg.createdAt).toLocaleString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </p>
+                                    {msg.sender === 'client' && (
+                                        <span title={msg.isRead ? 'Read' : 'Sent'}>
+                                            {msg.isRead ? (
+                                                <CheckCheck className="w-4 h-4 text-blue-200" />
+                                            ) : (
+                                                <Check className="w-4 h-4 text-blue-300" />
+                                            )}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))
