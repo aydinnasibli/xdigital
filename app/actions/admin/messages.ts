@@ -169,20 +169,15 @@ export async function markAdminMessagesAsRead(
 
         await dbConnect();
 
-        await Message.updateMany(
-            {
-                _id: { $in: validIds },
-                sender: MessageSender.CLIENT,
-            },
-            {
-                isRead: true,
-                readAt: new Date(),
-            }
+        // Simple update - just set isRead and readAt
+        const result = await Message.updateMany(
+            { _id: { $in: validIds }, sender: MessageSender.CLIENT },
+            { isRead: true, readAt: new Date() }
         );
 
         revalidatePath('/admin/messages');
 
-        return { success: true, data: { marked: validIds.length } };
+        return { success: true, data: { marked: result.modifiedCount } };
     } catch (error) {
         logError(error as Error, { context: 'markAdminMessagesAsRead', messageIds });
         return { success: false, error: 'Failed to mark messages as read' };
@@ -290,6 +285,29 @@ export async function getAdminProjectMessages(
     }
 }
 
+// Send typing indicator (admin side)
+export async function sendAdminTypingIndicator(
+    projectId: string,
+    isTyping: boolean
+): Promise<ActionResponse> {
+    try {
+        await requireAdmin();
+
+        // Send typing indicator via Pusher
+        try {
+            const { sendTypingIndicator } = await import('@/lib/services/pusher.service');
+            await sendTypingIndicator(projectId, 'admin', 'xDigital Team', isTyping);
+        } catch (error) {
+            logError(error as Error, { context: 'sendAdminTypingIndicator-pusher', projectId });
+        }
+
+        return { success: true };
+    } catch (error) {
+        logError(error as Error, { context: 'sendAdminTypingIndicator', projectId });
+        return { success: false, error: 'Failed to send typing indicator' };
+    }
+}
+
 // Add reaction to message
 export async function addMessageReaction(
     messageId: string,
@@ -350,5 +368,172 @@ export async function addMessageReaction(
     } catch (error) {
         logError(error as Error, { context: 'addMessageReaction', messageId });
         return { success: false, error: 'Failed to add reaction' };
+    }
+}
+
+// Admin reply to message (threading)
+export async function adminReplyToMessage(
+    parentMessageId: string,
+    projectId: string,
+    message: string
+): Promise<ActionResponse> {
+    try {
+        const { userId } = await getAdminSession();
+        await dbConnect();
+
+        const project = await mongoose.model('Project').findById(projectId);
+        if (!project) {
+            return { success: false, error: 'Project not found' };
+        }
+
+        const reply = await Message.create({
+            projectId,
+            userId: project.userId,
+            clerkUserId: userId,
+            sender: MessageSender.ADMIN,
+            message: message.trim(),
+            parentMessageId: new mongoose.Types.ObjectId(parentMessageId),
+            isRead: false,
+        });
+
+        await Message.findByIdAndUpdate(parentMessageId, {
+            $push: { threadReplies: reply._id }
+        });
+
+        const populatedMessage = await Message.findById(reply._id)
+            .populate('projectId', 'projectName')
+            .populate('userId', 'email firstName lastName')
+            .lean();
+
+        const user = populatedMessage?.userId as any;
+        const proj = populatedMessage?.projectId as any;
+
+        const serializedMessage = {
+            ...toSerializedObject(reply),
+            _id: reply._id.toString(),
+            projectId: reply.projectId.toString(),
+            userId: reply.userId.toString(),
+            parentMessageId: parentMessageId,
+            clientName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : '',
+            clientEmail: user?.email || '',
+            projectName: proj?.projectName || '',
+        };
+
+        try {
+            await sendRealtimeMessage(projectId, {
+                ...serializedMessage,
+                type: 'reply'
+            });
+        } catch (error) {
+            logError(error as Error, { context: 'adminReplyToMessage-pusher', projectId });
+        }
+
+        revalidatePath(`/admin/messages`);
+        revalidatePath(`/dashboard/projects/${projectId}`);
+
+        return { success: true, data: serializedMessage };
+    } catch (error) {
+        logError(error as Error, { context: 'adminReplyToMessage', parentMessageId });
+        return { success: false, error: 'Failed to reply to message' };
+    }
+}
+
+// Admin edit message
+export async function adminEditMessage(
+    messageId: string,
+    newMessage: string
+): Promise<ActionResponse> {
+    try {
+        await requireAdmin();
+
+        if (!mongoose.Types.ObjectId.isValid(messageId)) {
+            return { success: false, error: 'Invalid message ID' };
+        }
+
+        await dbConnect();
+
+        const message = await Message.findById(messageId);
+        if (!message) {
+            return { success: false, error: 'Message not found' };
+        }
+
+        // Only allow editing admin messages
+        if (message.sender !== MessageSender.ADMIN) {
+            return { success: false, error: 'Can only edit admin messages' };
+        }
+
+        // Store old message in history
+        if (!message.editHistory) message.editHistory = [];
+        message.editHistory.push({
+            previousMessage: message.message,
+            editedAt: new Date()
+        } as any);
+
+        message.message = newMessage.trim();
+        message.isEdited = true;
+        message.editedAt = new Date();
+        await message.save();
+
+        try {
+            await sendRealtimeMessage(message.projectId.toString(), {
+                type: 'edit',
+                messageId: message._id.toString(),
+                message: newMessage.trim(),
+                isEdited: true,
+                editedAt: message.editedAt
+            });
+        } catch (error) {
+            logError(error as Error, { context: 'adminEditMessage-pusher' });
+        }
+
+        revalidatePath('/admin/messages');
+        revalidatePath(`/dashboard/projects/${message.projectId}`);
+
+        return { success: true, data: toSerializedObject(message) };
+    } catch (error) {
+        logError(error as Error, { context: 'adminEditMessage', messageId });
+        return { success: false, error: 'Failed to edit message' };
+    }
+}
+
+// Pin/Unpin message
+export async function togglePinMessage(messageId: string): Promise<ActionResponse> {
+    try {
+        const { userId } = await getAdminSession();
+
+        if (!mongoose.Types.ObjectId.isValid(messageId)) {
+            return { success: false, error: 'Invalid message ID' };
+        }
+
+        await dbConnect();
+
+        const message = await Message.findById(messageId);
+        if (!message) {
+            return { success: false, error: 'Message not found' };
+        }
+
+        // Toggle pin
+        message.isPinned = !message.isPinned;
+        message.pinnedAt = message.isPinned ? new Date() : undefined;
+        message.pinnedBy = message.isPinned ? userId : undefined;
+        await message.save();
+
+        try {
+            await sendRealtimeMessage(message.projectId.toString(), {
+                type: 'pin',
+                messageId: message._id.toString(),
+                isPinned: message.isPinned
+            });
+        } catch (error) {
+            logError(error as Error, { context: 'togglePinMessage-pusher' });
+        }
+
+        revalidatePath('/admin/messages');
+        revalidatePath(`/dashboard/projects/${message.projectId}`);
+
+        return { success: true, data: { isPinned: message.isPinned } };
+    } catch (error) {
+        logError(error as Error, { context: 'togglePinMessage', messageId });
+        return { success: false, error: 'Failed to toggle pin' };
     }
 }
