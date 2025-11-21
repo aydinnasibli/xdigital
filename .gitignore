@@ -24,8 +24,7 @@
 .DS_Store
 *.pem
 
-# uploaded files (local storage)
-/public/uploads
+
 
 # debug
 npm-debug.log*
