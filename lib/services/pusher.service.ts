@@ -47,14 +47,35 @@ export async function triggerPusherEvent(
 }
 
 /**
- * Send real-time message
+ * Send real-time message to both project channel and global admin channel
  */
 export async function sendRealtimeMessage(
     projectId: string,
     message: any
 ): Promise<void> {
+    // Send to project-specific channel (for clients viewing that project)
     await triggerPusherEvent(
         `project-${projectId}`,
+        'new-message',
+        message
+    );
+
+    // Also send to global admin channel (for admin dashboard)
+    await triggerPusherEvent(
+        'admin-messages',
+        'new-message',
+        message
+    );
+}
+
+/**
+ * Send message directly to admin channel only
+ */
+export async function sendAdminNotification(
+    message: any
+): Promise<void> {
+    await triggerPusherEvent(
+        'admin-messages',
         'new-message',
         message
     );
@@ -69,10 +90,20 @@ export async function sendTypingIndicator(
     userName: string,
     isTyping: boolean
 ): Promise<void> {
+    const data = { projectId, userId, userName, isTyping };
+
+    // Send to project channel
     await triggerPusherEvent(
         `project-${projectId}`,
         'typing',
-        { userId, userName, isTyping }
+        data
+    );
+
+    // Also send to admin channel
+    await triggerPusherEvent(
+        'admin-messages',
+        'typing',
+        data
     );
 }
 

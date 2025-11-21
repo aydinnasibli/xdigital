@@ -87,11 +87,23 @@ export async function sendMessage(
             isRead: false,
         });
 
+        // Get project details for Pusher payload
+        const populatedMessage = await Message.findById(newMessage._id)
+            .populate('projectId', 'projectName')
+            .populate('userId', 'email firstName lastName')
+            .lean();
+
+        const userPopulated = populatedMessage?.userId as any;
+        const project = populatedMessage?.projectId as any;
+
         const serializedMessage = {
             ...toSerializedObject(newMessage),
             _id: newMessage._id.toString(),
             projectId: newMessage.projectId.toString(),
             userId: newMessage.userId.toString(),
+            clientName: userPopulated ? `${userPopulated.firstName || ''} ${userPopulated.lastName || ''}`.trim() || userPopulated.email : '',
+            clientEmail: userPopulated?.email || '',
+            projectName: project?.projectName || '',
         };
 
         // Trigger real-time notification via Pusher
