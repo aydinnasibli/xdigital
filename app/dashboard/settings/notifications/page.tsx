@@ -19,6 +19,7 @@ interface Preferences {
     tasks: NotificationSetting;
     mentions: NotificationSetting;
     general: NotificationSetting;
+    [key: string]: NotificationSetting; // Index signature for type compatibility
 }
 
 export default function NotificationSettingsPage() {
