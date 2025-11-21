@@ -3,6 +3,76 @@
 
 import { logError } from '@/lib/sentry-logger';
 
+/**
+ * Validate URL to prevent SSRF attacks
+ */
+function validateUrl(url: string): void {
+    let parsedUrl: URL;
+
+    try {
+        parsedUrl = new URL(url);
+    } catch {
+        throw new Error('Invalid URL format');
+    }
+
+    // Only allow HTTP and HTTPS protocols
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        throw new Error('Only HTTP and HTTPS protocols are allowed');
+    }
+
+    // Block private IP ranges and localhost
+    const hostname = parsedUrl.hostname.toLowerCase();
+
+    // Block localhost variations
+    if (hostname === 'localhost' || hostname === '0.0.0.0') {
+        throw new Error('Access to localhost is not allowed');
+    }
+
+    // Block loopback addresses
+    if (hostname === '127.0.0.1' || hostname.startsWith('127.')) {
+        throw new Error('Access to loopback addresses is not allowed');
+    }
+
+    // Block private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+    const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+    const match = hostname.match(ipv4Regex);
+
+    if (match) {
+        const octets = match.slice(1, 5).map(Number);
+
+        // 10.0.0.0/8
+        if (octets[0] === 10) {
+            throw new Error('Access to private IP range 10.0.0.0/8 is not allowed');
+        }
+
+        // 172.16.0.0/12
+        if (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) {
+            throw new Error('Access to private IP range 172.16.0.0/12 is not allowed');
+        }
+
+        // 192.168.0.0/16
+        if (octets[0] === 192 && octets[1] === 168) {
+            throw new Error('Access to private IP range 192.168.0.0/16 is not allowed');
+        }
+
+        // Block cloud metadata endpoint (AWS, GCP, Azure)
+        if (octets[0] === 169 && octets[1] === 254) {
+            throw new Error('Access to cloud metadata endpoint is not allowed');
+        }
+    }
+
+    // Block IPv6 localhost
+    if (hostname === '::1' || hostname === '[::1]') {
+        throw new Error('Access to IPv6 localhost is not allowed');
+    }
+
+    // Block internal/reserved domains
+    const blockedDomains = ['.local', '.internal', '.localhost'];
+    if (blockedDomains.some(domain => hostname.endsWith(domain))) {
+        throw new Error('Access to internal domains is not allowed');
+    }
+}
+
 export interface SEOScore {
     overall: number; // 0-100
     breakdown: {
@@ -40,6 +110,8 @@ export class SEOService {
     private siteUrl: string;
 
     constructor(siteUrl: string) {
+        // Validate URL to prevent SSRF attacks
+        validateUrl(siteUrl);
         this.siteUrl = siteUrl;
     }
 
@@ -105,13 +177,38 @@ export class SEOService {
      */
     private async fetchPage(url: string): Promise<string> {
         try {
+            // Validate URL again before fetching (defense in depth)
+            validateUrl(url);
+
+            // Create abort controller for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
             const response = await fetch(url, {
                 headers: {
                     'User-Agent': 'SEO-Analyzer/1.0',
                 },
+                signal: controller.signal,
+                redirect: 'manual', // Don't follow redirects automatically to prevent redirect-based SSRF
             });
+
+            clearTimeout(timeoutId);
+
+            // Check for redirects and validate redirect URL
+            if (response.status >= 300 && response.status < 400) {
+                const redirectUrl = response.headers.get('location');
+                if (redirectUrl) {
+                    // Validate redirect URL before following
+                    validateUrl(redirectUrl);
+                    return await this.fetchPage(redirectUrl);
+                }
+            }
+
             return await response.text();
         } catch (error) {
+            if ((error as Error).name === 'AbortError') {
+                throw new Error('Request timeout: The website took too long to respond');
+            }
             logError(error as Error, {
                 context: 'fetchPage',
                 url
