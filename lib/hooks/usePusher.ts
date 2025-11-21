@@ -1,7 +1,7 @@
 // lib/hooks/usePusher.ts
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Pusher from 'pusher-js';
 import * as Sentry from '@sentry/nextjs';
 
@@ -26,6 +26,12 @@ function getPusherInstance() {
 
 export function usePusherChannel(channelName: string, eventName: string, callback: (data: any) => void) {
     const [isConnected, setIsConnected] = useState(false);
+    const callbackRef = useRef(callback);
+
+    // Update callback ref when callback changes (without re-subscribing)
+    useEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
 
     useEffect(() => {
         const pusher = getPusherInstance();
@@ -45,13 +51,18 @@ export function usePusherChannel(channelName: string, eventName: string, callbac
             Sentry.captureException(error, { tags: { context: 'pusherSubscription', channelName } });
         });
 
-        channel.bind(eventName, callback);
+        // Use wrapper function that calls the ref
+        const eventHandler = (data: any) => {
+            callbackRef.current(data);
+        };
+
+        channel.bind(eventName, eventHandler);
 
         return () => {
-            channel.unbind(eventName, callback);
+            channel.unbind(eventName, eventHandler);
             pusher.unsubscribe(channelName);
         };
-    }, [channelName, eventName, callback]);
+    }, [channelName, eventName]); // Removed callback from dependencies
 
     return { isConnected };
 }

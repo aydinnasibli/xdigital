@@ -8,6 +8,7 @@ import User from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
+import { sendRealtimeMessage } from '@/lib/services/pusher.service';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -86,16 +87,28 @@ export async function sendMessage(
             isRead: false,
         });
 
+        const serializedMessage = {
+            ...toSerializedObject(newMessage),
+            _id: newMessage._id.toString(),
+            projectId: newMessage.projectId.toString(),
+            userId: newMessage.userId.toString(),
+        };
+
+        // Trigger real-time notification via Pusher
+        try {
+            await sendRealtimeMessage(projectId, serializedMessage);
+        } catch (error) {
+            // Log but don't fail if Pusher fails (graceful degradation)
+            logError(error as Error, { context: 'sendMessage-pusher', projectId });
+        }
+
         revalidatePath(`/dashboard/projects/${projectId}`);
+        revalidatePath(`/admin/projects/${projectId}`);
+        revalidatePath(`/admin/messages`);
 
         return {
             success: true,
-            data: {
-                ...toSerializedObject(newMessage),
-                _id: newMessage._id.toString(),
-                projectId: newMessage.projectId.toString(),
-                userId: newMessage.userId.toString(),
-            },
+            data: serializedMessage,
         };
     } catch (error) {
         logError(error as Error, { context: 'sendMessage', projectId });

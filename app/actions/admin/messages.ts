@@ -9,6 +9,7 @@ import { requireAdmin, getAdminSession } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
+import { sendRealtimeMessage } from '@/lib/services/pusher.service';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -104,18 +105,28 @@ export async function sendAdminMessage(
             isRead: false,
         });
 
+        const serializedMessage = {
+            ...toSerializedObject(newMessage),
+            _id: newMessage._id.toString(),
+            projectId: newMessage.projectId.toString(),
+            userId: newMessage.userId.toString(),
+        };
+
+        // Trigger real-time notification via Pusher
+        try {
+            await sendRealtimeMessage(projectId, serializedMessage);
+        } catch (error) {
+            // Log but don't fail if Pusher fails (graceful degradation)
+            logError(error as Error, { context: 'sendAdminMessage-pusher', projectId });
+        }
+
         revalidatePath(`/admin/projects/${projectId}`);
         revalidatePath(`/admin/messages`);
         revalidatePath(`/dashboard/projects/${projectId}`); // Also revalidate client view
 
         return {
             success: true,
-            data: {
-                ...toSerializedObject(newMessage),
-                _id: newMessage._id.toString(),
-                projectId: newMessage.projectId.toString(),
-                userId: newMessage.userId.toString(),
-            },
+            data: serializedMessage,
         };
     } catch (error) {
         logError(error as Error, { context: 'sendAdminMessage', projectId });
