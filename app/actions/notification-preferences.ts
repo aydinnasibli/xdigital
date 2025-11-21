@@ -33,7 +33,7 @@ export async function getNotificationPreferences(): Promise<ActionResponse> {
                 return { success: false, error: 'User not found' };
             }
 
-            preferences = await NotificationPreference.create({
+            await NotificationPreference.create({
                 userId: user._id,
                 clerkUserId,
                 isEnabled: true,
@@ -70,6 +70,9 @@ export async function getNotificationPreferences(): Promise<ActionResponse> {
                 },
                 quietHoursEnabled: false,
             });
+
+            // Re-fetch with lean to get plain object
+            preferences = await NotificationPreference.findOne({ clerkUserId }).lean();
         }
 
         return { success: true, data: toSerializedObject(preferences) };
