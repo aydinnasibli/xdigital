@@ -477,9 +477,11 @@ export async function adminReplyToMessage(
         };
 
         try {
-            // Send as regular message, not as type: 'reply'
-            // The client will detect it's a reply via parentMessageId
-            await sendRealtimeMessage(projectId, serializedMessage);
+            // Send with type: 'reply' so client handles it as a threaded message
+            await sendRealtimeMessage(projectId, {
+                ...serializedMessage,
+                type: 'reply'
+            });
         } catch (error) {
             logError(error as Error, { context: 'adminReplyToMessage-pusher', projectId });
         }
