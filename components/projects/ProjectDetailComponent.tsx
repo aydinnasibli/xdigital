@@ -5,7 +5,7 @@ import { useState, useTransition, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { deleteProject } from '@/app/actions/projects';
-import { getMessages, sendMessage, addClientMessageReaction, sendClientTypingIndicator, replyToMessage, editMessage } from '@/app/actions/messages';
+import { getMessages, sendMessage, addClientMessageReaction, sendClientTypingIndicator, replyToMessage, editMessage, markMessagesAsRead } from '@/app/actions/messages';
 import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectAnalytics } from '@/app/actions/monitoring';
 import dynamic from 'next/dynamic';
@@ -407,6 +407,16 @@ function MessagesTab({ projectId }: { projectId: string }) {
             return;
         }
 
+        // Handle read status updates (when admin views client messages)
+        if (data.type === 'read') {
+            setMessages(prev => prev.map(msg =>
+                data.messageIds.includes(msg._id)
+                    ? { ...msg, isRead: true }
+                    : msg
+            ));
+            return;
+        }
+
         // Handle reply messages - update both the new reply and the parent's threadReplies
         if (data.type === 'reply' && data.parentMessageId) {
             setMessages(prev => {
@@ -488,6 +498,34 @@ function MessagesTab({ projectId }: { projectId: string }) {
         loadMessages();
     }, [projectId]);
 
+    // Auto-mark admin messages as read when viewing (including new messages arriving in real-time)
+    useEffect(() => {
+        if (messages.length === 0) return;
+
+        // Check if document is visible (user is actually viewing the page)
+        if (document.hidden) return;
+
+        const unreadAdminMessages = messages.filter(m => !m.isRead && m.sender === 'admin');
+
+        if (unreadAdminMessages.length > 0) {
+            // Debounce to avoid too many calls when messages arrive quickly
+            const timer = setTimeout(() => {
+                markMessagesAsRead(projectId).then(result => {
+                    if (result.success) {
+                        // Update local state to reflect read status
+                        setMessages(prev => prev.map(msg =>
+                            msg.sender === 'admin' && !msg.isRead
+                                ? { ...msg, isRead: true }
+                                : msg
+                        ));
+                    }
+                });
+            }, 500); // 500ms debounce
+
+            return () => clearTimeout(timer);
+        }
+    }, [messages, projectId]);
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
@@ -534,19 +572,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
         } else {
             const result = await sendMessage(projectId, newMessage);
             if (result.success && result.data) {
-                setMessages(prev => {
-                    const exists = prev.some(msg => msg._id === result.data._id);
-                    if (exists) {
-                        logWarning('Duplicate message after send', {
-                            messageId: result.data._id,
-                            projectId
-                        });
-                        return prev;
-                    }
-                    return deduplicateMessages([...prev, result.data]);
-                });
                 setNewMessage('');
                 toast.success('Message sent');
+                // Message will be added via Pusher real-time
             } else {
                 toast.error(result.error || 'Failed to send message');
             }

@@ -144,11 +144,33 @@ export async function markMessagesAsRead(projectId: string): Promise<ActionRespo
             return { success: false, error: 'User not found' };
         }
 
-        // Simple update - just set isRead and readAt
+        // Get IDs of messages being marked as read
+        const unreadMessages = await Message.find(
+            { projectId, isRead: false, sender: MessageSender.ADMIN },
+            { _id: 1 }
+        );
+
+        const messageIds = unreadMessages.map(m => m._id.toString());
+
+        if (messageIds.length === 0) {
+            return { success: true };
+        }
+
+        // Update messages to read
         await Message.updateMany(
             { projectId, isRead: false, sender: MessageSender.ADMIN },
             { isRead: true, readAt: new Date() }
         );
+
+        // Notify via Pusher BEFORE revalidatePath
+        try {
+            await sendRealtimeMessage(projectId, {
+                type: 'read',
+                messageIds: messageIds,
+            });
+        } catch (error) {
+            logError(error as Error, { context: 'markMessagesAsRead-pusher' });
+        }
 
         revalidatePath(`/dashboard/projects/${projectId}`);
 
