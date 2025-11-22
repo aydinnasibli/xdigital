@@ -5,12 +5,7 @@ export enum MessageSender {
     ADMIN = 'admin',
 }
 
-interface IAttachment {
-    fileName: string;
-    fileUrl: string;
-    fileType: string;
-    fileSize: number;
-}
+
 
 interface IReaction {
     emoji: string;
@@ -39,7 +34,6 @@ export interface IMessage extends Document {
     sender: MessageSender;
     message: string; // Plain text or rich text HTML
     messageRaw?: string; // Raw markdown or plain text before rendering
-    attachments?: IAttachment[];
 
     // Threading
     parentMessageId?: Types.ObjectId; // For threaded replies
@@ -104,26 +98,6 @@ const MessageSchema = new Schema<IMessage>(
             trim: true,
             maxlength: 5000,
         },
-        attachments: [
-            {
-                fileName: {
-                    type: String,
-                    required: true,
-                },
-                fileUrl: {
-                    type: String,
-                    required: true,
-                },
-                fileType: {
-                    type: String,
-                    required: true,
-                },
-                fileSize: {
-                    type: Number,
-                    required: true,
-                },
-            },
-        ],
         // Threading
         parentMessageId: {
             type: Schema.Types.ObjectId,
