@@ -638,7 +638,8 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                 ) : (
                                                     // Normal Message Display
                                                     <div
-                                                        className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
+                                                        id={`message-${msg._id}`}
+                                                        className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'} transition-all rounded-lg`}
                                                     >
                                                         <div
                                                             className={`max-w-[70%] rounded-lg p-3 ${
@@ -765,31 +766,64 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                         {selectedConversation.messages
                                                             .filter(m => m.parentMessageId === msg._id)
                                                             .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-                                                            .map(reply => (
-                                                                <div
-                                                                    key={reply._id}
-                                                                    className={`flex ${reply.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
-                                                                >
+                                                            .map(reply => {
+                                                                // Find the parent message for display
+                                                                const parentMsg = selectedConversation.messages.find(m => m._id === reply.parentMessageId);
+                                                                return (
                                                                     <div
-                                                                        className={`max-w-[70%] rounded-lg p-2 text-sm ${
-                                                                            reply.sender === 'admin'
-                                                                                ? 'bg-blue-500 text-white'
-                                                                                : 'bg-gray-50 text-gray-900 border border-gray-200'
-                                                                        }`}
+                                                                        key={reply._id}
+                                                                        className={`flex ${reply.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
                                                                     >
-                                                                        <p className="text-xs font-semibold mb-1 opacity-75">
-                                                                            {reply.sender === 'admin' ? 'xDigital Team' : reply.clientName}
-                                                                        </p>
-                                                                        <p className="whitespace-pre-wrap break-words">{reply.message}</p>
-                                                                        <p className="text-xs opacity-60 mt-1">
-                                                                            {new Date(reply.createdAt).toLocaleString('en-US', {
-                                                                                hour: '2-digit',
-                                                                                minute: '2-digit'
-                                                                            })}
-                                                                        </p>
+                                                                        <div
+                                                                            className={`max-w-[70%] rounded-lg p-2 text-sm ${
+                                                                                reply.sender === 'admin'
+                                                                                    ? 'bg-blue-500 text-white'
+                                                                                    : 'bg-gray-50 text-gray-900 border border-gray-200'
+                                                                            }`}
+                                                                        >
+                                                                            {/* Clickable parent message preview */}
+                                                                            {parentMsg && (
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        const element = document.getElementById(`message-${parentMsg._id}`);
+                                                                                        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                                                        // Highlight effect
+                                                                                        element?.classList.add('ring-2', 'ring-blue-400');
+                                                                                        setTimeout(() => {
+                                                                                            element?.classList.remove('ring-2', 'ring-blue-400');
+                                                                                        }, 2000);
+                                                                                    }}
+                                                                                    className={`w-full text-left mb-2 p-2 rounded text-xs ${
+                                                                                        reply.sender === 'admin'
+                                                                                            ? 'bg-blue-600 bg-opacity-50 hover:bg-opacity-70'
+                                                                                            : 'bg-gray-200 hover:bg-gray-300'
+                                                                                    } transition-colors cursor-pointer`}
+                                                                                >
+                                                                                    <div className="flex items-center gap-1 mb-1 font-semibold opacity-75">
+                                                                                        <Reply className="w-3 h-3" />
+                                                                                        <span>Replying to {parentMsg.sender === 'admin' ? 'xDigital Team' : parentMsg.clientName}</span>
+                                                                                    </div>
+                                                                                    <p className="opacity-70 truncate">
+                                                                                        {parentMsg.message.length > 50
+                                                                                            ? `${parentMsg.message.substring(0, 50)}...`
+                                                                                            : parentMsg.message}
+                                                                                    </p>
+                                                                                </button>
+                                                                            )}
+                                                                            <p className="text-xs font-semibold mb-1 opacity-75">
+                                                                                {reply.sender === 'admin' ? 'xDigital Team' : reply.clientName}
+                                                                            </p>
+                                                                            <p className="whitespace-pre-wrap break-words">{reply.message}</p>
+                                                                            <p className="text-xs opacity-60 mt-1">
+                                                                                {new Date(reply.createdAt).toLocaleString('en-US', {
+                                                                                    hour: '2-digit',
+                                                                                    minute: '2-digit'
+                                                                                })}
+                                                                            </p>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            ))}
+                                                                );
+                                                            })}
                                                     </div>
                                                 )}
                                             </div>
