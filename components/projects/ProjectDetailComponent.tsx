@@ -600,38 +600,37 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
     return (
         <div className="bg-white rounded-lg border flex flex-col h-[600px]">
-            {/* Sticky Pinned Messages Header */}
+            {/* Sticky Pinned Message Header (Single Pin) */}
             {messages.some(m => m.isPinned && !m.parentMessageId) && (
                 <div className="sticky top-0 z-10 bg-gradient-to-r from-yellow-50 to-amber-50 border-b-2 border-yellow-300 shadow-md">
                     <div className="p-3">
                         <div className="flex items-center gap-2 mb-2">
                             <Pin className="w-4 h-4 text-yellow-600" />
-                            <span className="text-sm font-bold text-yellow-800">Pinned Messages</span>
+                            <span className="text-sm font-bold text-yellow-800">Pinned Message</span>
                         </div>
-                        <div className="space-y-2 max-h-32 overflow-y-auto">
-                            {messages
-                                .filter(m => m._id && !m.parentMessageId && m.isPinned)
-                                .map((msg) => (
+                        {(() => {
+                            const pinnedMsg = messages.find(m => m._id && !m.parentMessageId && m.isPinned);
+                            if (!pinnedMsg) return null;
+                            return (
                                 <button
-                                    key={msg._id}
                                     onClick={() => {
-                                        const element = document.getElementById(`message-${msg._id}`);
+                                        const element = document.getElementById(`message-${pinnedMsg._id}`);
                                         element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                     }}
-                                    className="w-full bg-white rounded-lg p-2 border-l-4 border-yellow-400 shadow-sm hover:shadow-md transition-shadow text-left"
+                                    className="w-full bg-white rounded-lg p-3 border-l-4 border-yellow-400 shadow-sm hover:shadow-md transition-shadow text-left"
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex-1 min-w-0">
                                             <p className="text-xs font-semibold text-gray-600 mb-1">
-                                                {msg.sender === 'client' ? 'You' : 'xDigital Team'}
+                                                {pinnedMsg.sender === 'client' ? 'You' : 'xDigital Team'}
                                             </p>
-                                            <p className="text-sm text-gray-800 truncate">{msg.message}</p>
+                                            <p className="text-sm text-gray-800 truncate">{pinnedMsg.message}</p>
                                         </div>
-                                        <Pin className="w-3 h-3 text-yellow-500 flex-shrink-0 mt-1" />
+                                        <Pin className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-1" />
                                     </div>
                                 </button>
-                            ))}
-                        </div>
+                            );
+                        })()}
                     </div>
                 </div>
             )}
@@ -867,12 +866,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                             </div>
                         ))}
 
-                        {/* Separator between pinned and regular messages */}
-                        {messages.some(m => m.isPinned && !m.parentMessageId) && messages.some(m => !m.isPinned && !m.parentMessageId) && (
-                            <div className="border-t-2 border-gray-200 my-4"></div>
-                        )}
-
-                        {/* Regular (Non-Pinned) Messages */}
+                        {/* All Messages (pinned messages shown in sticky header only) */}
                         {messages
                             .filter(m => m._id && !m.parentMessageId && !m.isPinned)
                             .map((msg) => (
