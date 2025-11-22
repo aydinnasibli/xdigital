@@ -551,6 +551,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
                         createdAt: result.data.createdAt,
                         isRead: result.data.isRead,
                         reactions: [],
+                        threadReplies: [],
+                        isEdited: false,
+                        isPinned: false,
                     }];
                     return deduplicateMessages(updatedMessages);
                 });
@@ -766,9 +769,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                             {/* Emoji Picker */}
                                             {showEmojiPicker === msg._id && (
                                                 <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
-                                                    {COMMON_EMOJIS.map((emoji) => (
+                                                    {COMMON_EMOJIS.map((emoji, index) => (
                                                         <button
-                                                            key={emoji}
+                                                            key={`${msg._id}-emoji-${index}`}
                                                             onClick={() => handleReaction(msg._id, emoji)}
                                                             className="hover:scale-125 transition-transform text-lg"
                                                         >
