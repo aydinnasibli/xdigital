@@ -678,7 +678,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                             {msg.reactions && msg.reactions.length > 0 && (
                                                 <div className="flex flex-wrap gap-1 mt-2">
                                                     {msg.reactions.map((reaction) => {
-                                                        const isMyReaction = reaction.userId === clerkUserId;
+                                                        const isMyReaction = reaction.userId === currentUserId;
                                                         return (
                                                             <button
                                                                 key={`${msg._id}-${reaction.emoji}-${reaction.userId}`}
