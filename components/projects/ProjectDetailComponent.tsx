@@ -572,19 +572,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
         } else {
             const result = await sendMessage(projectId, newMessage);
             if (result.success && result.data) {
-                setMessages(prev => {
-                    const exists = prev.some(msg => msg._id === result.data._id);
-                    if (exists) {
-                        logWarning('Duplicate message after send', {
-                            messageId: result.data._id,
-                            projectId
-                        });
-                        return prev;
-                    }
-                    return deduplicateMessages([...prev, result.data]);
-                });
                 setNewMessage('');
                 toast.success('Message sent');
+                // Message will be added via Pusher real-time
             } else {
                 toast.error(result.error || 'Failed to send message');
             }
