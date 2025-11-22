@@ -626,7 +626,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                 </div>
                                 <div className="space-y-2">
                                     {messages
-                                        .filter(m => m.isPinned)
+                                        .filter(m => m._id && m.isPinned)
                                         .map(msg => (
                                             <div key={msg._id} className="text-sm text-gray-700 bg-white p-2 rounded">
                                                 <span className="font-semibold">
@@ -639,7 +639,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
                         )}
 
                         {/* Regular Messages */}
-                        {messages.filter(m => !m.parentMessageId).map((msg) => (
+                        {messages
+                            .filter(m => m._id && !m.parentMessageId)
+                            .map((msg) => (
                             <div key={msg._id} className="space-y-2">
                                 {editingMessage?._id === msg._id ? (
                                     // Edit Mode
@@ -792,7 +794,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                             <span>{msg.threadReplies.length} {msg.threadReplies.length === 1 ? 'reply' : 'replies'}</span>
                                         </div>
                                         {messages
-                                            .filter(m => m.parentMessageId === msg._id)
+                                            .filter(m => m._id && m.parentMessageId === msg._id)
                                             .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
                                             .map(reply => (
                                                 <div
