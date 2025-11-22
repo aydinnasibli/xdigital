@@ -326,18 +326,42 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
+    // Normalize message to ensure all required fields exist
+    const normalizeMessage = useCallback((msg: any): Message | null => {
+        // Skip messages without valid ID
+        if (!msg || !msg._id) {
+            logWarning('Message without ID detected, skipping', { msg });
+            return null;
+        }
+
+        return {
+            _id: msg._id,
+            sender: msg.sender || 'client',
+            message: msg.message || '',
+            createdAt: msg.createdAt || new Date().toISOString(),
+            isRead: msg.isRead ?? false,
+            reactions: Array.isArray(msg.reactions) ? msg.reactions : [],
+            threadReplies: Array.isArray(msg.threadReplies) ? msg.threadReplies : [],
+            parentMessageId: msg.parentMessageId,
+            isEdited: msg.isEdited ?? false,
+            editedAt: msg.editedAt,
+            isPinned: msg.isPinned ?? false,
+        };
+    }, []);
+
     // Helper function to deduplicate messages and ensure unique IDs
-    const deduplicateMessages = useCallback((messageList: Message[]): Message[] => {
+    const deduplicateMessages = useCallback((messageList: any[]): Message[] => {
         const uniqueMessages = new Map<string, Message>();
         messageList.forEach(msg => {
-            if (!uniqueMessages.has(msg._id)) {
-                uniqueMessages.set(msg._id, msg);
+            const normalized = normalizeMessage(msg);
+            if (normalized && !uniqueMessages.has(normalized._id)) {
+                uniqueMessages.set(normalized._id, normalized);
             }
         });
         return Array.from(uniqueMessages.values()).sort(
             (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
-    }, []);
+    }, [normalizeMessage]);
 
     // Real-time message listener
     const handleNewMessage = useCallback((data: any) => {
@@ -395,21 +419,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
                     return prev;
                 }
 
-                // Add the new reply message
-                const withNewReply = [...prev, {
-                    _id: data._id,
-                    sender: data.sender,
-                    message: data.message,
-                    createdAt: data.createdAt,
-                    isRead: data.isRead,
-                    reactions: data.reactions || [],
-                    parentMessageId: data.parentMessageId,
-                    threadReplies: [],
-                    isEdited: false,
-                    isPinned: false,
-                }];
+                // Add the new reply message and update parent's threadReplies
+                const withNewReply = [...prev, data];
 
-                // Update parent message to include this reply in threadReplies
                 const withUpdatedParent = withNewReply.map(msg => {
                     if (msg._id === data.parentMessageId) {
                         const currentReplies = msg.threadReplies || [];
@@ -435,20 +447,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                 return prev;
             }
 
-            const updatedMessages = [...prev, {
-                _id: data._id,
-                sender: data.sender,
-                message: data.message,
-                createdAt: data.createdAt,
-                isRead: data.isRead,
-                reactions: data.reactions || [],
-                parentMessageId: data.parentMessageId,
-                threadReplies: data.threadReplies || [],
-                isEdited: data.isEdited,
-                editedAt: data.editedAt,
-                isPinned: data.isPinned,
-            }];
-            return deduplicateMessages(updatedMessages);
+            return deduplicateMessages([...prev, data]);
         });
 
         if (data.sender === 'admin') {
@@ -544,15 +543,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                         });
                         return prev;
                     }
-                    const updatedMessages = [...prev, {
-                        _id: result.data._id,
-                        sender: result.data.sender,
-                        message: result.data.message,
-                        createdAt: result.data.createdAt,
-                        isRead: result.data.isRead,
-                        reactions: [],
-                    }];
-                    return deduplicateMessages(updatedMessages);
+                    return deduplicateMessages([...prev, result.data]);
                 });
                 setNewMessage('');
                 toast.success('Message sent');
@@ -623,7 +614,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                 </div>
                                 <div className="space-y-2">
                                     {messages
-                                        .filter(m => m.isPinned)
+                                        .filter(m => m._id && m.isPinned)
                                         .map(msg => (
                                             <div key={msg._id} className="text-sm text-gray-700 bg-white p-2 rounded">
                                                 <span className="font-semibold">
@@ -636,7 +627,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
                         )}
 
                         {/* Regular Messages */}
-                        {messages.filter(m => !m.parentMessageId).map((msg) => (
+                        {messages
+                            .filter(m => m._id && !m.parentMessageId)
+                            .map((msg) => (
                             <div key={msg._id} className="space-y-2">
                                 {editingMessage?._id === msg._id ? (
                                     // Edit Mode
@@ -766,9 +759,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                             {/* Emoji Picker */}
                                             {showEmojiPicker === msg._id && (
                                                 <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
-                                                    {COMMON_EMOJIS.map((emoji) => (
+                                                    {COMMON_EMOJIS.map((emoji, index) => (
                                                         <button
-                                                            key={emoji}
+                                                            key={`${msg._id}-emoji-${index}`}
                                                             onClick={() => handleReaction(msg._id, emoji)}
                                                             className="hover:scale-125 transition-transform text-lg"
                                                         >
@@ -789,7 +782,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                             <span>{msg.threadReplies.length} {msg.threadReplies.length === 1 ? 'reply' : 'replies'}</span>
                                         </div>
                                         {messages
-                                            .filter(m => m.parentMessageId === msg._id)
+                                            .filter(m => m._id && m.parentMessageId === msg._id)
                                             .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
                                             .map(reply => (
                                                 <div
