@@ -5,7 +5,7 @@ import { useState, useTransition, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { deleteProject } from '@/app/actions/projects';
-import { getMessages, sendMessage, addClientMessageReaction, sendClientTypingIndicator, replyToMessage, editMessage } from '@/app/actions/messages';
+import { getMessages, sendMessage, addClientMessageReaction, sendClientTypingIndicator, replyToMessage, editMessage, markMessagesAsRead } from '@/app/actions/messages';
 import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectAnalytics } from '@/app/actions/monitoring';
 import dynamic from 'next/dynamic';
@@ -325,6 +325,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+    const hasMarkedAsReadRef = useRef(false);
 
     // Normalize message to ensure all required fields exist
     const normalizeMessage = useCallback((msg: any): Message | null => {
@@ -402,6 +403,16 @@ function MessagesTab({ projectId }: { projectId: string }) {
             setMessages(prev => prev.map(msg =>
                 msg._id === data.messageId
                     ? { ...msg, isPinned: data.isPinned }
+                    : msg
+            ));
+            return;
+        }
+
+        // Handle read status updates (when admin views client messages)
+        if (data.type === 'read') {
+            setMessages(prev => prev.map(msg =>
+                data.messageIds.includes(msg._id)
+                    ? { ...msg, isRead: true }
                     : msg
             ));
             return;
@@ -486,7 +497,31 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
     useEffect(() => {
         loadMessages();
+        hasMarkedAsReadRef.current = false;
     }, [projectId]);
+
+    // Auto-mark admin messages as read when viewing
+    useEffect(() => {
+        if (messages.length === 0 || hasMarkedAsReadRef.current) return;
+
+        const unreadAdminMessages = messages.filter(m => !m.isRead && m.sender === 'admin');
+
+        if (unreadAdminMessages.length > 0) {
+            hasMarkedAsReadRef.current = true;
+            markMessagesAsRead(projectId).then(result => {
+                if (result.success) {
+                    // Update local state to reflect read status
+                    setMessages(prev => prev.map(msg =>
+                        msg.sender === 'admin' && !msg.isRead
+                            ? { ...msg, isRead: true }
+                            : msg
+                    ));
+                } else {
+                    hasMarkedAsReadRef.current = false;
+                }
+            });
+        }
+    }, [messages, projectId]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
