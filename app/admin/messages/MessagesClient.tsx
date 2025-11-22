@@ -421,6 +421,14 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
     const handlePin = async (messageId: string) => {
         try {
+            // Check if there's already a pinned message
+            const currentlyPinned = allMessages.find(m => m.isPinned && m._id !== messageId);
+
+            // If there's a different pinned message, unpin it first
+            if (currentlyPinned) {
+                await togglePinMessage(currentlyPinned._id);
+            }
+
             const result = await togglePinMessage(messageId);
             if (result.success) {
                 toast.success(result.data?.isPinned ? 'Message pinned' : 'Message unpinned');
@@ -580,38 +588,43 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                 </p>
                             </div>
 
-                            {/* Sticky Pinned Messages Header */}
+                            {/* Sticky Pinned Message Header (Single Pin) */}
                             {selectedConversation && selectedConversation.messages.some(m => m.isPinned && !m.parentMessageId) && (
                                 <div className="sticky top-0 z-10 bg-gradient-to-r from-yellow-50 to-amber-50 border-b-2 border-yellow-300 shadow-md">
                                     <div className="p-3">
                                         <div className="flex items-center gap-2 mb-2">
                                             <Pin className="w-4 h-4 text-yellow-600" />
-                                            <span className="text-sm font-bold text-yellow-800">Pinned Messages</span>
+                                            <span className="text-sm font-bold text-yellow-800">Pinned Message</span>
                                         </div>
-                                        <div className="space-y-2 max-h-32 overflow-y-auto">
-                                            {selectedConversation.messages
-                                                .filter(m => !m.parentMessageId && m.isPinned)
-                                                .map((msg) => (
-                                                <button
-                                                    key={msg._id}
-                                                    onClick={() => {
-                                                        const element = document.getElementById(`message-${msg._id}`);
-                                                        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                    }}
-                                                    className="w-full bg-white rounded-lg p-2 border-l-4 border-yellow-400 shadow-sm hover:shadow-md transition-shadow text-left"
-                                                >
+                                        {(() => {
+                                            const pinnedMsg = selectedConversation.messages.find(m => !m.parentMessageId && m.isPinned);
+                                            if (!pinnedMsg) return null;
+                                            return (
+                                                <div className="bg-white rounded-lg p-3 border-l-4 border-yellow-400 shadow-sm">
                                                     <div className="flex items-start justify-between gap-2">
-                                                        <div className="flex-1 min-w-0">
+                                                        <button
+                                                            onClick={() => {
+                                                                const element = document.getElementById(`message-${pinnedMsg._id}`);
+                                                                element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                            }}
+                                                            className="flex-1 min-w-0 text-left hover:opacity-80 transition-opacity"
+                                                        >
                                                             <p className="text-xs font-semibold text-gray-600 mb-1">
-                                                                {msg.sender === 'admin' ? 'xDigital Team' : msg.clientName}
+                                                                {pinnedMsg.sender === 'admin' ? 'xDigital Team' : pinnedMsg.clientName}
                                                             </p>
-                                                            <p className="text-sm text-gray-800 truncate">{msg.message}</p>
-                                                        </div>
-                                                        <Pin className="w-3 h-3 text-yellow-500 flex-shrink-0 mt-1" />
+                                                            <p className="text-sm text-gray-800 truncate">{pinnedMsg.message}</p>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handlePin(pinnedMsg._id)}
+                                                            className="flex-shrink-0 p-1 hover:bg-red-100 rounded transition-colors group"
+                                                            title="Unpin message"
+                                                        >
+                                                            <X className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
+                                                        </button>
                                                     </div>
-                                                </button>
-                                            ))}
-                                        </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
                             )}
@@ -849,12 +862,7 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                             </div>
                                         ))}
 
-                                        {/* Separator between pinned and regular messages */}
-                                        {selectedConversation.messages.some(m => m.isPinned && !m.parentMessageId) && selectedConversation.messages.some(m => !m.isPinned && !m.parentMessageId) && (
-                                            <div className="border-t-2 border-gray-200 my-4"></div>
-                                        )}
-
-                                        {/* Regular (Non-Pinned) Messages */}
+                                        {/* All Messages (pinned message shown in sticky header only) */}
                                         {selectedConversation.messages.filter(m => !m.parentMessageId && !m.isPinned).map((msg) => (
                                             <div key={msg._id} className="space-y-2">
                                                 {editingMessage?._id === msg._id ? (
