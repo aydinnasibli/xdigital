@@ -400,10 +400,7 @@ export async function addMessageReaction(
             createdAt: r.createdAt.toISOString ? r.createdAt.toISOString() : r.createdAt
         })) || [];
 
-        revalidatePath('/admin/messages');
-        revalidatePath(`/dashboard/projects/${message.projectId}`);
-
-        // Notify via Pusher
+        // Notify via Pusher BEFORE revalidatePath to prevent connection abort
         try {
             await sendRealtimeMessage(message.projectId.toString(), {
                 type: 'reaction',
@@ -413,6 +410,10 @@ export async function addMessageReaction(
         } catch (error) {
             logError(error as Error, { context: 'addMessageReaction-pusher' });
         }
+
+        // Revalidate paths after Pusher completes
+        revalidatePath('/admin/messages');
+        revalidatePath(`/dashboard/projects/${message.projectId}`);
 
         return { success: true, data: { reactions: serializedReactions } };
     } catch (error) {
@@ -477,9 +478,11 @@ export async function adminReplyToMessage(
         };
 
         try {
-            // Send as regular message, not as type: 'reply'
-            // The client will detect it's a reply via parentMessageId
-            await sendRealtimeMessage(projectId, serializedMessage);
+            // Send with type: 'reply' so client handles it as a threaded message
+            await sendRealtimeMessage(projectId, {
+                ...serializedMessage,
+                type: 'reply'
+            });
         } catch (error) {
             logError(error as Error, { context: 'adminReplyToMessage-pusher', projectId });
         }
