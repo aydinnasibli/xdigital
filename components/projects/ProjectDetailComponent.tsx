@@ -325,7 +325,6 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-    const hasMarkedAsReadRef = useRef(false);
 
     // Normalize message to ensure all required fields exist
     const normalizeMessage = useCallback((msg: any): Message | null => {
@@ -497,29 +496,33 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
     useEffect(() => {
         loadMessages();
-        hasMarkedAsReadRef.current = false;
     }, [projectId]);
 
-    // Auto-mark admin messages as read when viewing
+    // Auto-mark admin messages as read when viewing (including new messages arriving in real-time)
     useEffect(() => {
-        if (messages.length === 0 || hasMarkedAsReadRef.current) return;
+        if (messages.length === 0) return;
+
+        // Check if document is visible (user is actually viewing the page)
+        if (document.hidden) return;
 
         const unreadAdminMessages = messages.filter(m => !m.isRead && m.sender === 'admin');
 
         if (unreadAdminMessages.length > 0) {
-            hasMarkedAsReadRef.current = true;
-            markMessagesAsRead(projectId).then(result => {
-                if (result.success) {
-                    // Update local state to reflect read status
-                    setMessages(prev => prev.map(msg =>
-                        msg.sender === 'admin' && !msg.isRead
-                            ? { ...msg, isRead: true }
-                            : msg
-                    ));
-                } else {
-                    hasMarkedAsReadRef.current = false;
-                }
-            });
+            // Debounce to avoid too many calls when messages arrive quickly
+            const timer = setTimeout(() => {
+                markMessagesAsRead(projectId).then(result => {
+                    if (result.success) {
+                        // Update local state to reflect read status
+                        setMessages(prev => prev.map(msg =>
+                            msg.sender === 'admin' && !msg.isRead
+                                ? { ...msg, isRead: true }
+                                : msg
+                        ));
+                    }
+                });
+            }, 500); // 500ms debounce
+
+            return () => clearTimeout(timer);
         }
     }, [messages, projectId]);
 

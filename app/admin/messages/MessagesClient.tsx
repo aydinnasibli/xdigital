@@ -306,9 +306,12 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         }
     }, [selectedProjectId, allMessages]);
 
-    // Auto-mark messages as read when viewing a conversation
+    // Auto-mark messages as read when viewing a conversation (including new messages arriving in real-time)
     useEffect(() => {
         if (!selectedProjectId) return;
+
+        // Check if document is visible (user is actually viewing the page)
+        if (document.hidden) return;
 
         const conv = projectMap.get(selectedProjectId);
         if (!conv || conv.unreadCount === 0) return;
@@ -323,19 +326,24 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         const newUnreadIds = unreadIds.filter(id => !hasMarkedAsReadRef.current.has(id));
         if (newUnreadIds.length === 0) return;
 
-        // Mark them in the ref to prevent duplicate calls
-        newUnreadIds.forEach(id => hasMarkedAsReadRef.current.add(id));
+        // Debounce to avoid too many calls when messages arrive quickly
+        const timer = setTimeout(() => {
+            // Mark them in the ref to prevent duplicate calls
+            newUnreadIds.forEach(id => hasMarkedAsReadRef.current.add(id));
 
-        markAdminMessagesAsRead(newUnreadIds).then(result => {
-            if (result.success) {
-                setAllMessages(prev => prev.map(msg =>
-                    newUnreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
-                ));
-            } else {
-                // Remove from ref if failed
-                newUnreadIds.forEach(id => hasMarkedAsReadRef.current.delete(id));
-            }
-        });
+            markAdminMessagesAsRead(newUnreadIds).then(result => {
+                if (result.success) {
+                    setAllMessages(prev => prev.map(msg =>
+                        newUnreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
+                    ));
+                } else {
+                    // Remove from ref if failed
+                    newUnreadIds.forEach(id => hasMarkedAsReadRef.current.delete(id));
+                }
+            });
+        }, 500); // 500ms debounce
+
+        return () => clearTimeout(timer);
     }, [selectedProjectId, projectMap]);
 
     // Handle typing indicator for admin
