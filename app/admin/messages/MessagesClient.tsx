@@ -580,22 +580,48 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                 </p>
                             </div>
 
+                            {/* Sticky Pinned Messages Header */}
+                            {selectedConversation && selectedConversation.messages.some(m => m.isPinned && !m.parentMessageId) && (
+                                <div className="sticky top-0 z-10 bg-gradient-to-r from-yellow-50 to-amber-50 border-b-2 border-yellow-300 shadow-md">
+                                    <div className="p-3">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Pin className="w-4 h-4 text-yellow-600" />
+                                            <span className="text-sm font-bold text-yellow-800">Pinned Messages</span>
+                                        </div>
+                                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                                            {selectedConversation.messages
+                                                .filter(m => !m.parentMessageId && m.isPinned)
+                                                .map((msg) => (
+                                                <button
+                                                    key={msg._id}
+                                                    onClick={() => {
+                                                        const element = document.getElementById(`message-${msg._id}`);
+                                                        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                    }}
+                                                    className="w-full bg-white rounded-lg p-2 border-l-4 border-yellow-400 shadow-sm hover:shadow-md transition-shadow text-left"
+                                                >
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-xs font-semibold text-gray-600 mb-1">
+                                                                {msg.sender === 'admin' ? 'xDigital Team' : msg.clientName}
+                                                            </p>
+                                                            <p className="text-sm text-gray-800 truncate">{msg.message}</p>
+                                                        </div>
+                                                        <Pin className="w-3 h-3 text-yellow-500 flex-shrink-0 mt-1" />
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Messages List */}
                             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                                 {selectedConversation && selectedConversation.messages.length > 0 ? (
                                     <>
-                                        {/* Pinned Messages Section Header */}
-                                        {selectedConversation.messages.some(m => m.isPinned && !m.parentMessageId) && (
-                                            <div className="p-2 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-                                                <div className="flex items-center gap-2">
-                                                    <Pin className="w-4 h-4 text-yellow-600" />
-                                                    <span className="text-sm font-semibold text-yellow-800">Pinned Messages</span>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Pinned Messages (shown at top) */}
-                                        {selectedConversation.messages.filter(m => !m.parentMessageId && m.isPinned).map((msg) => (
+                                        {/* Regular (Non-Pinned) Messages */}
+                                        {selectedConversation.messages.filter(m => !m.parentMessageId && !m.isPinned).map((msg) => (
                                             <div key={msg._id} className="space-y-2">
                                                 {editingMessage?._id === msg._id ? (
                                                     // Edit Mode
@@ -749,7 +775,14 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
                                                 {/* Thread Replies */}
                                                 {msg.threadReplies && msg.threadReplies.length > 0 && (
-                                                    <div className="ml-12 space-y-2">
+                                                    <div className="ml-8 pl-4 border-l-4 border-blue-200 space-y-3 pt-2 relative">
+                                                        {/* Thread count badge */}
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+                                                                <Reply className="w-3 h-3" />
+                                                                <span>{msg.threadReplies.length} {msg.threadReplies.length === 1 ? 'reply' : 'replies'}</span>
+                                                            </div>
+                                                        </div>
                                                         {selectedConversation.messages
                                                             .filter(m => m.parentMessageId === msg._id)
                                                             .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
@@ -762,10 +795,10 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                                         className={`flex ${reply.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
                                                                     >
                                                                         <div
-                                                                            className={`max-w-[70%] rounded-lg p-2 text-sm ${
+                                                                            className={`max-w-[85%] rounded-lg p-3 text-sm shadow-sm ${
                                                                                 reply.sender === 'admin'
                                                                                     ? 'bg-blue-500 text-white'
-                                                                                    : 'bg-gray-50 text-gray-900 border border-gray-200'
+                                                                                    : 'bg-white text-gray-900 border-2 border-gray-200'
                                                                             }`}
                                                                         >
                                                                             {/* Clickable parent message preview */}
@@ -775,29 +808,29 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                                                         const element = document.getElementById(`message-${parentMsg._id}`);
                                                                                         element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                                                         // Highlight effect
-                                                                                        element?.classList.add('ring-2', 'ring-blue-400');
+                                                                                        element?.classList.add('ring-4', 'ring-blue-400', 'ring-opacity-50');
                                                                                         setTimeout(() => {
-                                                                                            element?.classList.remove('ring-2', 'ring-blue-400');
+                                                                                            element?.classList.remove('ring-4', 'ring-blue-400', 'ring-opacity-50');
                                                                                         }, 2000);
                                                                                     }}
-                                                                                    className={`w-full text-left mb-2 p-2 rounded text-xs ${
+                                                                                    className={`w-full text-left mb-2 p-2 rounded-md text-xs border-l-2 ${
                                                                                         reply.sender === 'admin'
-                                                                                            ? 'bg-blue-600 bg-opacity-50 hover:bg-opacity-70'
-                                                                                            : 'bg-gray-200 hover:bg-gray-300'
-                                                                                    } transition-colors cursor-pointer`}
+                                                                                            ? 'bg-blue-600 bg-opacity-40 border-blue-300 hover:bg-opacity-60'
+                                                                                            : 'bg-gray-100 border-gray-400 hover:bg-gray-200'
+                                                                                    } transition-all cursor-pointer`}
                                                                                 >
-                                                                                    <div className="flex items-center gap-1 mb-1 font-semibold opacity-75">
+                                                                                    <div className="flex items-center gap-1 mb-1 font-semibold opacity-90">
                                                                                         <Reply className="w-3 h-3" />
-                                                                                        <span>Replying to {parentMsg.sender === 'admin' ? 'xDigital Team' : parentMsg.clientName}</span>
+                                                                                        <span>↑ {parentMsg.sender === 'admin' ? 'xDigital Team' : parentMsg.clientName}</span>
                                                                                     </div>
-                                                                                    <p className="opacity-70 truncate">
-                                                                                        {parentMsg.message.length > 50
-                                                                                            ? `${parentMsg.message.substring(0, 50)}...`
+                                                                                    <p className={`${reply.sender === 'admin' ? 'opacity-90' : 'opacity-70'} truncate text-xs`}>
+                                                                                        {parentMsg.message.length > 60
+                                                                                            ? `${parentMsg.message.substring(0, 60)}...`
                                                                                             : parentMsg.message}
                                                                                     </p>
                                                                                 </button>
                                                                             )}
-                                                                            <p className="text-xs font-semibold mb-1 opacity-75">
+                                                                            <p className="text-xs font-semibold mb-2 opacity-75">
                                                                                 {reply.sender === 'admin' ? 'xDigital Team' : reply.clientName}
                                                                             </p>
                                                                             <p className="whitespace-pre-wrap break-words">{reply.message}</p>
@@ -978,7 +1011,14 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
                                                 {/* Thread Replies */}
                                                 {msg.threadReplies && msg.threadReplies.length > 0 && (
-                                                    <div className="ml-12 space-y-2">
+                                                    <div className="ml-8 pl-4 border-l-4 border-blue-200 space-y-3 pt-2 relative">
+                                                        {/* Thread count badge */}
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+                                                                <Reply className="w-3 h-3" />
+                                                                <span>{msg.threadReplies.length} {msg.threadReplies.length === 1 ? 'reply' : 'replies'}</span>
+                                                            </div>
+                                                        </div>
                                                         {selectedConversation.messages
                                                             .filter(m => m.parentMessageId === msg._id)
                                                             .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
@@ -991,10 +1031,10 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                                         className={`flex ${reply.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
                                                                     >
                                                                         <div
-                                                                            className={`max-w-[70%] rounded-lg p-2 text-sm ${
+                                                                            className={`max-w-[85%] rounded-lg p-3 text-sm shadow-sm ${
                                                                                 reply.sender === 'admin'
                                                                                     ? 'bg-blue-500 text-white'
-                                                                                    : 'bg-gray-50 text-gray-900 border border-gray-200'
+                                                                                    : 'bg-white text-gray-900 border-2 border-gray-200'
                                                                             }`}
                                                                         >
                                                                             {/* Clickable parent message preview */}
@@ -1004,29 +1044,29 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                                                         const element = document.getElementById(`message-${parentMsg._id}`);
                                                                                         element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                                                         // Highlight effect
-                                                                                        element?.classList.add('ring-2', 'ring-blue-400');
+                                                                                        element?.classList.add('ring-4', 'ring-blue-400', 'ring-opacity-50');
                                                                                         setTimeout(() => {
-                                                                                            element?.classList.remove('ring-2', 'ring-blue-400');
+                                                                                            element?.classList.remove('ring-4', 'ring-blue-400', 'ring-opacity-50');
                                                                                         }, 2000);
                                                                                     }}
-                                                                                    className={`w-full text-left mb-2 p-2 rounded text-xs ${
+                                                                                    className={`w-full text-left mb-2 p-2 rounded-md text-xs border-l-2 ${
                                                                                         reply.sender === 'admin'
-                                                                                            ? 'bg-blue-600 bg-opacity-50 hover:bg-opacity-70'
-                                                                                            : 'bg-gray-200 hover:bg-gray-300'
-                                                                                    } transition-colors cursor-pointer`}
+                                                                                            ? 'bg-blue-600 bg-opacity-40 border-blue-300 hover:bg-opacity-60'
+                                                                                            : 'bg-gray-100 border-gray-400 hover:bg-gray-200'
+                                                                                    } transition-all cursor-pointer`}
                                                                                 >
-                                                                                    <div className="flex items-center gap-1 mb-1 font-semibold opacity-75">
+                                                                                    <div className="flex items-center gap-1 mb-1 font-semibold opacity-90">
                                                                                         <Reply className="w-3 h-3" />
-                                                                                        <span>Replying to {parentMsg.sender === 'admin' ? 'xDigital Team' : parentMsg.clientName}</span>
+                                                                                        <span>↑ {parentMsg.sender === 'admin' ? 'xDigital Team' : parentMsg.clientName}</span>
                                                                                     </div>
-                                                                                    <p className="opacity-70 truncate">
-                                                                                        {parentMsg.message.length > 50
-                                                                                            ? `${parentMsg.message.substring(0, 50)}...`
+                                                                                    <p className={`${reply.sender === 'admin' ? 'opacity-90' : 'opacity-70'} truncate text-xs`}>
+                                                                                        {parentMsg.message.length > 60
+                                                                                            ? `${parentMsg.message.substring(0, 60)}...`
                                                                                             : parentMsg.message}
                                                                                     </p>
                                                                                 </button>
                                                                             )}
-                                                                            <p className="text-xs font-semibold mb-1 opacity-75">
+                                                                            <p className="text-xs font-semibold mb-2 opacity-75">
                                                                                 {reply.sender === 'admin' ? 'xDigital Team' : reply.clientName}
                                                                             </p>
                                                                             <p className="whitespace-pre-wrap break-words">{reply.message}</p>
