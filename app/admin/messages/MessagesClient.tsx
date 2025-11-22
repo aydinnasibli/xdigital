@@ -584,29 +584,245 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                                 {selectedConversation && selectedConversation.messages.length > 0 ? (
                                     <>
-                                        {/* Pinned Messages Section */}
-                                        {selectedConversation.messages.some(m => m.isPinned) && (
-                                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                                <div className="flex items-center gap-2 mb-2">
+                                        {/* Pinned Messages Section Header */}
+                                        {selectedConversation.messages.some(m => m.isPinned && !m.parentMessageId) && (
+                                            <div className="p-2 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                                                <div className="flex items-center gap-2">
                                                     <Pin className="w-4 h-4 text-yellow-600" />
                                                     <span className="text-sm font-semibold text-yellow-800">Pinned Messages</span>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    {selectedConversation.messages
-                                                        .filter(m => m.isPinned)
-                                                        .map(msg => (
-                                                            <div key={msg._id} className="text-sm text-gray-700 bg-white p-2 rounded">
-                                                                <span className="font-semibold">
-                                                                    {msg.sender === 'admin' ? 'Admin' : msg.clientName}:
-                                                                </span> {msg.message}
-                                                            </div>
-                                                        ))}
                                                 </div>
                                             </div>
                                         )}
 
-                                        {/* Regular Messages */}
-                                        {selectedConversation.messages.filter(m => !m.parentMessageId).map((msg) => (
+                                        {/* Pinned Messages (shown at top) */}
+                                        {selectedConversation.messages.filter(m => !m.parentMessageId && m.isPinned).map((msg) => (
+                                            <div key={msg._id} className="space-y-2">
+                                                {editingMessage?._id === msg._id ? (
+                                                    // Edit Mode
+                                                    <div className="flex justify-end">
+                                                        <div className="max-w-[70%] bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                                            <p className="text-xs font-semibold mb-2 text-gray-600">Editing message</p>
+                                                            <textarea
+                                                                value={editText}
+                                                                onChange={(e) => setEditText(e.target.value)}
+                                                                className="w-full border rounded px-2 py-1 text-sm"
+                                                                rows={3}
+                                                            />
+                                                            <div className="flex gap-2 mt-2">
+                                                                <button
+                                                                    onClick={handleSaveEdit}
+                                                                    className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                                                                >
+                                                                    Save
+                                                                </button>
+                                                                <button
+                                                                    onClick={handleCancelEdit}
+                                                                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    // Normal Message Display
+                                                    <div
+                                                        id={`message-${msg._id}`}
+                                                        className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'} transition-all rounded-lg`}
+                                                    >
+                                                        <div
+                                                            className={`max-w-[70%] rounded-lg p-3 border-2 border-yellow-400 ${
+                                                                msg.sender === 'admin'
+                                                                    ? 'bg-blue-600 text-white'
+                                                                    : 'bg-gray-100 text-gray-900'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-start justify-between gap-2 mb-1">
+                                                                <p className="text-xs font-semibold opacity-75">
+                                                                    {msg.sender === 'admin' ? 'xDigital Team' : msg.clientName}
+                                                                </p>
+                                                                <Pin className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+                                                            </div>
+                                                            <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+
+                                                            {msg.isEdited && (
+                                                                <p className="text-xs opacity-60 mt-1">(edited)</p>
+                                                            )}
+
+                                                            {/* Reactions */}
+                                                            {msg.reactions && msg.reactions.length > 0 && (
+                                                                <div className="flex flex-wrap gap-1 mt-2">
+                                                                    {msg.reactions.map((reaction) => {
+                                                                        const isMyReaction = reaction.userId === currentAdminUserId;
+                                                                        return (
+                                                                            <button
+                                                                                key={`${msg._id}-${reaction.emoji}-${reaction.userId}`}
+                                                                                onClick={() => handleReaction(msg._id, reaction.emoji)}
+                                                                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs transition-all ${
+                                                                                    isMyReaction
+                                                                                        ? 'bg-white bg-opacity-40 ring-1 ring-white ring-opacity-50 scale-110'
+                                                                                        : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                                                                                }`}
+                                                                                title={`${reaction.userName}${isMyReaction ? ' (click to remove)' : ''}`}
+                                                                            >
+                                                                                {reaction.emoji}
+                                                                            </button>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
+
+                                                            {/* Action Buttons */}
+                                                            <div className="flex items-center justify-between mt-2 gap-2">
+                                                                <div className="flex items-center gap-1">
+                                                                    {/* Only show reaction button for client messages */}
+                                                                    {msg.sender === 'client' && (
+                                                                        <button
+                                                                            onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
+                                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                                                            title="React"
+                                                                        >
+                                                                            <Smile className="w-3 h-3" />
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={() => handleReply(msg)}
+                                                                        className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                                                        title="Reply"
+                                                                    >
+                                                                        <Reply className="w-3 h-3" />
+                                                                    </button>
+                                                                    {msg.sender === 'admin' && (
+                                                                        <button
+                                                                            onClick={() => handleEdit(msg)}
+                                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                                                            title="Edit"
+                                                                        >
+                                                                            <Edit2 className="w-3 h-3" />
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={() => handlePin(msg._id)}
+                                                                        className={`opacity-50 hover:opacity-100 transition-opacity p-1 ${msg.isPinned ? 'text-yellow-400' : ''}`}
+                                                                        title={msg.isPinned ? 'Unpin' : 'Pin'}
+                                                                    >
+                                                                        <Pin className="w-3 h-3" />
+                                                                    </button>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-1">
+                                                                    <span className="text-xs opacity-75">
+                                                                        {new Date(msg.createdAt).toLocaleString('en-US', {
+                                                                            hour: '2-digit',
+                                                                            minute: '2-digit'
+                                                                        })}
+                                                                    </span>
+                                                                    {msg.sender === 'admin' && (
+                                                                        <span title={msg.isRead ? 'Read' : 'Sent'}>
+                                                                            {msg.isRead ? (
+                                                                                <CheckCheck className="w-4 h-4" />
+                                                                            ) : (
+                                                                                <Check className="w-4 h-4" />
+                                                                            )}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Emoji Picker */}
+                                                            {showEmojiPicker === msg._id && (
+                                                                <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
+                                                                    {COMMON_EMOJIS.map((emoji) => (
+                                                                        <button
+                                                                            key={emoji}
+                                                                            onClick={() => handleReaction(msg._id, emoji)}
+                                                                            className="hover:scale-125 transition-transform text-lg"
+                                                                        >
+                                                                            {emoji}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Thread Replies */}
+                                                {msg.threadReplies && msg.threadReplies.length > 0 && (
+                                                    <div className="ml-12 space-y-2">
+                                                        {selectedConversation.messages
+                                                            .filter(m => m.parentMessageId === msg._id)
+                                                            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                                                            .map(reply => {
+                                                                // Find the parent message for display
+                                                                const parentMsg = selectedConversation.messages.find(m => m._id === reply.parentMessageId);
+                                                                return (
+                                                                    <div
+                                                                        key={reply._id}
+                                                                        className={`flex ${reply.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
+                                                                    >
+                                                                        <div
+                                                                            className={`max-w-[70%] rounded-lg p-2 text-sm ${
+                                                                                reply.sender === 'admin'
+                                                                                    ? 'bg-blue-500 text-white'
+                                                                                    : 'bg-gray-50 text-gray-900 border border-gray-200'
+                                                                            }`}
+                                                                        >
+                                                                            {/* Clickable parent message preview */}
+                                                                            {parentMsg && (
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        const element = document.getElementById(`message-${parentMsg._id}`);
+                                                                                        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                                                        // Highlight effect
+                                                                                        element?.classList.add('ring-2', 'ring-blue-400');
+                                                                                        setTimeout(() => {
+                                                                                            element?.classList.remove('ring-2', 'ring-blue-400');
+                                                                                        }, 2000);
+                                                                                    }}
+                                                                                    className={`w-full text-left mb-2 p-2 rounded text-xs ${
+                                                                                        reply.sender === 'admin'
+                                                                                            ? 'bg-blue-600 bg-opacity-50 hover:bg-opacity-70'
+                                                                                            : 'bg-gray-200 hover:bg-gray-300'
+                                                                                    } transition-colors cursor-pointer`}
+                                                                                >
+                                                                                    <div className="flex items-center gap-1 mb-1 font-semibold opacity-75">
+                                                                                        <Reply className="w-3 h-3" />
+                                                                                        <span>Replying to {parentMsg.sender === 'admin' ? 'xDigital Team' : parentMsg.clientName}</span>
+                                                                                    </div>
+                                                                                    <p className="opacity-70 truncate">
+                                                                                        {parentMsg.message.length > 50
+                                                                                            ? `${parentMsg.message.substring(0, 50)}...`
+                                                                                            : parentMsg.message}
+                                                                                    </p>
+                                                                                </button>
+                                                                            )}
+                                                                            <p className="text-xs font-semibold mb-1 opacity-75">
+                                                                                {reply.sender === 'admin' ? 'xDigital Team' : reply.clientName}
+                                                                            </p>
+                                                                            <p className="whitespace-pre-wrap break-words">{reply.message}</p>
+                                                                            <p className="text-xs opacity-60 mt-1">
+                                                                                {new Date(reply.createdAt).toLocaleString('en-US', {
+                                                                                    hour: '2-digit',
+                                                                                    minute: '2-digit'
+                                                                                })}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+
+                                        {/* Separator between pinned and regular messages */}
+                                        {selectedConversation.messages.some(m => m.isPinned && !m.parentMessageId) && selectedConversation.messages.some(m => !m.isPinned && !m.parentMessageId) && (
+                                            <div className="border-t-2 border-gray-200 my-4"></div>
+                                        )}
+
+                                        {/* Regular (Non-Pinned) Messages */}
+                                        {selectedConversation.messages.filter(m => !m.parentMessageId && !m.isPinned).map((msg) => (
                                             <div key={msg._id} className="space-y-2">
                                                 {editingMessage?._id === msg._id ? (
                                                     // Edit Mode
