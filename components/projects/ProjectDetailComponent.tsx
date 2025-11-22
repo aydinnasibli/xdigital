@@ -365,6 +365,11 @@ function MessagesTab({ projectId }: { projectId: string }) {
                     ? { ...msg, message: data.message, isEdited: data.isEdited, editedAt: data.editedAt }
                     : msg
             ));
+            // Close edit mode if this message was being edited
+            if (editingMessage && editingMessage._id === data.messageId) {
+                setEditingMessage(null);
+                setEditText('');
+            }
             return;
         }
 
@@ -449,7 +454,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
         if (data.sender === 'admin') {
             toast.info('New message from xDigital Team');
         }
-    }, [deduplicateMessages, projectId]);
+    }, [deduplicateMessages, projectId, editingMessage]);
 
     // Real-time typing indicator handler
     const handleTypingIndicator = useCallback((data: any) => {
