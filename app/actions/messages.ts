@@ -210,6 +210,14 @@ export async function addClientMessageReaction(
 
         await message.save();
 
+        // Serialize reactions to remove MongoDB ObjectIds and prevent circular references
+        const serializedReactions = message.reactions?.map(r => ({
+            emoji: r.emoji,
+            userId: r.userId.toString(),
+            userName: r.userName,
+            createdAt: r.createdAt.toISOString ? r.createdAt.toISOString() : r.createdAt
+        })) || [];
+
         revalidatePath(`/dashboard/projects/${message.projectId}`);
         revalidatePath('/admin/messages');
 
@@ -218,13 +226,13 @@ export async function addClientMessageReaction(
             await sendRealtimeMessage(message.projectId.toString(), {
                 type: 'reaction',
                 messageId: message._id.toString(),
-                reactions: message.reactions
+                reactions: serializedReactions
             });
         } catch (error) {
             logError(error as Error, { context: 'addClientMessageReaction-pusher' });
         }
 
-        return { success: true, data: { reactions: message.reactions } };
+        return { success: true, data: { reactions: serializedReactions } };
     } catch (error) {
         logError(error as Error, { context: 'addClientMessageReaction', messageId });
         return { success: false, error: 'Failed to add reaction' };
