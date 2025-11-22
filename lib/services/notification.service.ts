@@ -120,27 +120,3 @@ export async function notifyNewInvoice(userId: string, projectId: string, invoic
         emailSubject: `New Invoice: ${invoiceNumber}`,
     });
 }
-
-export async function notifyMilestoneCompleted(userId: string, projectId: string, milestoneName: string) {
-    return createNotification({
-        userId,
-        projectId,
-        type: NotificationType.MILESTONE,
-        title: 'Milestone Completed',
-        message: `${milestoneName} has been completed`,
-        link: `/dashboard/projects/${projectId}`,
-        sendEmail: false, // Don't email for milestone completions
-    });
-}
-
-export async function notifyNewMessage(userId: string, projectId: string, senderName: string) {
-    return createNotification({
-        userId,
-        projectId,
-        type: NotificationType.MESSAGE,
-        title: 'New Message',
-        message: `${senderName} sent you a message`,
-        link: `/dashboard/projects/${projectId}`,
-        sendEmail: false, // Messages handled by Pusher real-time
-    });
-}

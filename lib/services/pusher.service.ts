@@ -69,19 +69,6 @@ export async function sendRealtimeMessage(
 }
 
 /**
- * Send message directly to admin channel only
- */
-export async function sendAdminNotification(
-    message: any
-): Promise<void> {
-    await triggerPusherEvent(
-        'admin-messages',
-        'new-message',
-        message
-    );
-}
-
-/**
  * Send typing indicator
  */
 export async function sendTypingIndicator(
@@ -104,21 +91,5 @@ export async function sendTypingIndicator(
         'admin-messages',
         'typing',
         data
-    );
-}
-
-/**
- * Update online presence
- */
-export async function updatePresence(
-    projectId: string,
-    userId: string,
-    userName: string,
-    isOnline: boolean
-): Promise<void> {
-    await triggerPusherEvent(
-        `project-${projectId}`,
-        'presence',
-        { userId, userName, isOnline }
     );
 }

@@ -17,6 +17,9 @@ const ReminderEmailLogSchema = new Schema<IReminderEmailLog>(
             required: true,
             unique: true,
             index: true,
+            lowercase: true,
+            trim: true,
+            match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please provide a valid email address'],
         },
         lastSentDate: {
             type: Date,

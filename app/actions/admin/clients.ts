@@ -9,6 +9,7 @@ import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
 import { logError } from '@/lib/sentry-logger';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
+import { escapeRegex } from '@/lib/utils';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -28,10 +29,11 @@ export async function getAllClients(filters?: {
         const query: any = {};
 
         if (filters?.search) {
+            const escapedSearch = escapeRegex(filters.search);
             query.$or = [
-                { email: { $regex: filters.search, $options: 'i' } },
-                { firstName: { $regex: filters.search, $options: 'i' } },
-                { lastName: { $regex: filters.search, $options: 'i' } },
+                { email: { $regex: escapedSearch, $options: 'i' } },
+                { firstName: { $regex: escapedSearch, $options: 'i' } },
+                { lastName: { $regex: escapedSearch, $options: 'i' } },
             ];
         }
 

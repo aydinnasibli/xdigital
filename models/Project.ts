@@ -219,6 +219,10 @@ ProjectSchema.index({ userId: 1, createdAt: -1 });
 ProjectSchema.index({ clerkUserId: 1, createdAt: -1 });
 ProjectSchema.index({ status: 1 });
 ProjectSchema.index({ serviceType: 1 });
+// Compound indexes for common query patterns
+ProjectSchema.index({ userId: 1, status: 1 }); // For user's projects filtered by status
+ProjectSchema.index({ clerkUserId: 1, status: 1 }); // For Clerk-based queries with status
+ProjectSchema.index({ status: 1, createdAt: -1 }); // For admin dashboard status filtering
 
 // FIX: Safely check if mongoose.models exists before accessing properties
 const Project = (mongoose.models?.Project as Model<IProject>) || mongoose.model<IProject>('Project', ProjectSchema);

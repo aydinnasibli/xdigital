@@ -310,6 +310,10 @@ const InvoiceSchema = new Schema<IInvoice>(
 InvoiceSchema.index({ userId: 1, status: 1, createdAt: -1 });
 InvoiceSchema.index({ clerkUserId: 1, status: 1, createdAt: -1 });
 InvoiceSchema.index({ projectId: 1, createdAt: -1 });
+// Compound indexes for common query patterns
+InvoiceSchema.index({ projectId: 1, userId: 1 }); // For project-specific invoice queries
+InvoiceSchema.index({ status: 1, dueDate: 1 }); // For overdue and upcoming invoice tracking
+InvoiceSchema.index({ isOverdue: 1, status: 1, createdAt: -1 }); // For overdue invoice management
 
 
 const Invoice = (mongoose.models?.Invoice as Model<IInvoice>) || mongoose.model<IInvoice>('Invoice', InvoiceSchema);

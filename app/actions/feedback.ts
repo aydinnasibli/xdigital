@@ -11,6 +11,7 @@ import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
 import { createNotifications, createNotification } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
+import { requireAdmin } from '@/lib/auth/admin';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -202,6 +203,7 @@ export async function submitFeedback(data: {
 // Approve testimonial (admin only)
 export async function approveTestimonial(feedbackId: string): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -251,6 +253,7 @@ export async function approveTestimonial(feedbackId: string): Promise<ActionResp
 // Reject testimonial (admin only)
 export async function rejectTestimonial(feedbackId: string): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };
@@ -283,6 +286,7 @@ export async function rejectTestimonial(feedbackId: string): Promise<ActionRespo
 // Add admin response to feedback
 export async function addAdminResponse(feedbackId: string, response: string): Promise<ActionResponse> {
     try {
+        await requireAdmin();
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
             return { success: false, error: 'Unauthorized' };

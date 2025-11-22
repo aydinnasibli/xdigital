@@ -82,7 +82,7 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
     const [editingMessage, setEditingMessage] = useState<Message | null>(null);
     const [editText, setEditText] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const typingTimeoutRef = useRef<NodeJS.Timeout>();
+    const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const hasMarkedAsReadRef = useRef<Set<string>>(new Set());
 
     // Memoize conversation grouping to prevent infinite loops

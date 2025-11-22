@@ -9,6 +9,7 @@ import User from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/sentry-logger';
+import { sanitizeHtml } from '@/lib/utils';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -167,8 +168,15 @@ export async function createResource(data: {
             return { success: false, error: 'Slug already exists' };
         }
 
-        const resource = await Resource.create({
+        // Sanitize HTML content to prevent XSS attacks
+        const sanitizedData = {
             ...data,
+            content: data.content ? sanitizeHtml(data.content) : undefined,
+            videoEmbedCode: data.videoEmbedCode ? sanitizeHtml(data.videoEmbedCode) : undefined,
+        };
+
+        const resource = await Resource.create({
+            ...sanitizedData,
             authorId: user._id,
             authorName: `${user.firstName} ${user.lastName}`.trim() || user.email,
             isPublished: false,
@@ -228,9 +236,16 @@ export async function updateResource(resourceId: string, data: Partial<{
             }
         }
 
+        // Sanitize HTML content to prevent XSS attacks
+        const sanitizedData = {
+            ...data,
+            content: data.content ? sanitizeHtml(data.content) : data.content,
+            videoEmbedCode: data.videoEmbedCode ? sanitizeHtml(data.videoEmbedCode) : data.videoEmbedCode,
+        };
+
         const resource = await Resource.findByIdAndUpdate(
             resourceId,
-            data,
+            sanitizedData,
             { new: true }
         );
 
