@@ -378,6 +378,48 @@ function MessagesTab({ projectId }: { projectId: string }) {
             return;
         }
 
+        // Handle reply messages - update both the new reply and the parent's threadReplies
+        if (data.type === 'reply' && data.parentMessageId) {
+            setMessages(prev => {
+                const exists = prev.some(msg => msg._id === data._id);
+                if (exists) {
+                    logInfo('Duplicate reply detected and prevented', {
+                        messageId: data._id,
+                        projectId
+                    });
+                    return prev;
+                }
+
+                // Add the new reply message
+                const withNewReply = [...prev, {
+                    _id: data._id,
+                    sender: data.sender,
+                    message: data.message,
+                    createdAt: data.createdAt,
+                    isRead: data.isRead,
+                    reactions: data.reactions || [],
+                    parentMessageId: data.parentMessageId,
+                    threadReplies: [],
+                    isEdited: false,
+                    isPinned: false,
+                }];
+
+                // Update parent message to include this reply in threadReplies
+                const withUpdatedParent = withNewReply.map(msg => {
+                    if (msg._id === data.parentMessageId) {
+                        const currentReplies = msg.threadReplies || [];
+                        if (!currentReplies.includes(data._id)) {
+                            return { ...msg, threadReplies: [...currentReplies, data._id] };
+                        }
+                    }
+                    return msg;
+                });
+
+                return deduplicateMessages(withUpdatedParent);
+            });
+            return;
+        }
+
         setMessages(prev => {
             const exists = prev.some(msg => msg._id === data._id);
             if (exists) {
@@ -736,9 +778,14 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
                                 {/* Thread Replies */}
                                 {msg.threadReplies && msg.threadReplies.length > 0 && (
-                                    <div className="ml-12 space-y-2">
+                                    <div className="ml-8 pl-4 border-l-2 border-gray-300 space-y-2 pt-2">
+                                        <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
+                                            <Reply className="w-3 h-3" />
+                                            <span>{msg.threadReplies.length} {msg.threadReplies.length === 1 ? 'reply' : 'replies'}</span>
+                                        </div>
                                         {messages
                                             .filter(m => m.parentMessageId === msg._id)
+                                            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
                                             .map(reply => (
                                                 <div
                                                     key={reply._id}
@@ -751,7 +798,8 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                                                 : 'bg-gray-50 text-gray-900 border border-gray-200'
                                                         }`}
                                                     >
-                                                        <p className="text-xs font-semibold mb-1 opacity-75">
+                                                        <p className="text-xs font-semibold mb-1 opacity-75 flex items-center gap-1">
+                                                            <Reply className="w-3 h-3" />
                                                             {reply.sender === 'client' ? 'You' : 'xDigital Team'}
                                                         </p>
                                                         <p className="whitespace-pre-wrap break-words">{reply.message}</p>
