@@ -409,6 +409,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
         // Handle read status updates (when admin views client messages)
         if (data.type === 'read') {
+            console.log('[Read Receipts] Received read event from admin:', data.messageIds);
             setMessages(prev => prev.map(msg =>
                 data.messageIds.includes(msg._id)
                     ? { ...msg, isRead: true }
@@ -508,16 +509,22 @@ function MessagesTab({ projectId }: { projectId: string }) {
         const unreadAdminMessages = messages.filter(m => !m.isRead && m.sender === 'admin');
 
         if (unreadAdminMessages.length > 0) {
+            console.log('[Read Receipts] Found unread admin messages:', unreadAdminMessages.length, unreadAdminMessages.map(m => m._id));
+
             // Debounce to avoid too many calls when messages arrive quickly
             const timer = setTimeout(() => {
+                console.log('[Read Receipts] Marking messages as read after debounce');
                 markMessagesAsRead(projectId).then(result => {
                     if (result.success) {
+                        console.log('[Read Receipts] Successfully marked as read');
                         // Update local state to reflect read status
                         setMessages(prev => prev.map(msg =>
                             msg.sender === 'admin' && !msg.isRead
                                 ? { ...msg, isRead: true }
                                 : msg
                         ));
+                    } else {
+                        console.error('[Read Receipts] Failed to mark as read:', result.error);
                     }
                 });
             }, 500); // 500ms debounce

@@ -152,23 +152,31 @@ export async function markMessagesAsRead(projectId: string): Promise<ActionRespo
 
         const messageIds = unreadMessages.map(m => m._id.toString());
 
+        console.log('[Server] Client marking admin messages as read:', messageIds.length, 'messages');
+
         if (messageIds.length === 0) {
+            console.log('[Server] No unread admin messages to mark');
             return { success: true };
         }
 
         // Update messages to read
-        await Message.updateMany(
+        const updateResult = await Message.updateMany(
             { projectId, isRead: false, sender: MessageSender.ADMIN },
             { isRead: true, readAt: new Date() }
         );
 
+        console.log('[Server] Updated', updateResult.modifiedCount, 'messages to read');
+
         // Notify via Pusher BEFORE revalidatePath
         try {
+            console.log('[Server] Sending Pusher read event for projectId:', projectId, 'messageIds:', messageIds);
             await sendRealtimeMessage(projectId, {
                 type: 'read',
                 messageIds: messageIds,
             });
+            console.log('[Server] Pusher read event sent successfully');
         } catch (error) {
+            console.error('[Server] Pusher error:', error);
             logError(error as Error, { context: 'markMessagesAsRead-pusher' });
         }
 
