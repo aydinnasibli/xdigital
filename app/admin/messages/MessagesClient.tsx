@@ -478,7 +478,11 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         setSelectedProjectId(projectId);
     };
 
-    const selectedConversation = selectedProjectId ? projectMap.get(selectedProjectId) : null;
+    const selectedConversation = useMemo(() =>
+        selectedProjectId ? projectMap.get(selectedProjectId) : null,
+        [selectedProjectId, projectMap]
+    );
+
     const totalUnreadCount = useMemo(() =>
         conversations.reduce((sum, conv) => sum + conv.unreadCount, 0),
         [conversations]
