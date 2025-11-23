@@ -155,11 +155,16 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
         // Handle read status update
         if (data.type === 'read') {
-            setAllMessages(prev => prev.map(msg =>
-                data.messageIds.includes(msg._id)
-                    ? { ...msg, isRead: true }
-                    : msg
-            ));
+            console.log('[Admin] Received read event from client, messageIds:', data.messageIds);
+            setAllMessages(prev => {
+                const updated = prev.map(msg =>
+                    data.messageIds.includes(msg._id)
+                        ? { ...msg, isRead: true }
+                        : msg
+                );
+                console.log('[Admin] Updated messages state after read event');
+                return updated;
+            });
             return;
         }
 
