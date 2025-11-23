@@ -84,6 +84,7 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const hasMarkedAsReadRef = useRef<Set<string>>(new Set());
+    const lastReadReceiptRef = useRef<string>('');
 
     // Memoize conversation grouping to prevent infinite loops
     const { conversations, projectMap } = useMemo(() => {
@@ -153,17 +154,39 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
             type: data.type
         });
 
-        // Handle read status update
+        // Handle read status update - when client marks admin messages as read
         if (data.type === 'read') {
+            const receiptKey = data.messageIds.sort().join(',');
+
+            // Prevent duplicate processing of the same read receipt
+            if (lastReadReceiptRef.current === receiptKey) {
+                console.log('[Admin] Duplicate read receipt, ignoring');
+                return;
+            }
+            lastReadReceiptRef.current = receiptKey;
+
             console.log('[Admin] Received read event from client, messageIds:', data.messageIds);
+
+            // Force a new array to ensure React detects the change
             setAllMessages(prev => {
-                const updated = prev.map(msg =>
-                    data.messageIds.includes(msg._id)
-                        ? { ...msg, isRead: true }
-                        : msg
-                );
-                console.log('[Admin] Updated messages state after read event');
-                return updated;
+                let hasChanges = false;
+                const updated = prev.map(msg => {
+                    if (data.messageIds.includes(msg._id) && !msg.isRead) {
+                        hasChanges = true;
+                        console.log('[Admin] Marking message as read:', msg._id);
+                        return { ...msg, isRead: true };
+                    }
+                    return msg;
+                });
+
+                if (hasChanges) {
+                    console.log('[Admin] Updated', data.messageIds.length, 'messages to read');
+                    // Return new array reference to force re-render
+                    return [...updated];
+                } else {
+                    console.log('[Admin] No changes needed, messages already marked as read');
+                    return prev;
+                }
             });
             return;
         }
@@ -478,10 +501,13 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         setSelectedProjectId(projectId);
     };
 
-    const selectedConversation = useMemo(() =>
-        selectedProjectId ? projectMap.get(selectedProjectId) : null,
-        [selectedProjectId, projectMap]
-    );
+    // Force re-computation when allMessages changes to ensure read receipts update the UI
+    const selectedConversation = useMemo(() => {
+        if (!selectedProjectId) return null;
+        const conv = projectMap.get(selectedProjectId);
+        // Return a new object reference to ensure React detects changes
+        return conv ? { ...conv } : null;
+    }, [selectedProjectId, projectMap, allMessages]);
 
     const totalUnreadCount = useMemo(() =>
         conversations.reduce((sum, conv) => sum + conv.unreadCount, 0),
