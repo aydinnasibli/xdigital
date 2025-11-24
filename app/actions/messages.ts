@@ -97,10 +97,7 @@ export async function sendMessage(
         const project = populatedMessage?.projectId as any;
 
         const serializedMessage = {
-            ...toSerializedObject(newMessage),
-            _id: newMessage._id.toString(),
-            projectId: newMessage.projectId.toString(),
-            userId: newMessage.userId.toString(),
+            ...toSerializedObject(populatedMessage),
             clientName: userPopulated ? `${userPopulated.firstName || ''} ${userPopulated.lastName || ''}`.trim() || userPopulated.email : '',
             clientEmail: userPopulated?.email || '',
             projectName: project?.projectName || '',
@@ -181,19 +178,16 @@ export async function addClientMessageReaction(
 
         await message.save();
 
-        // Serialize reactions to remove MongoDB ObjectIds and prevent circular references
-        const serializedReactions = message.reactions?.map(r => ({
-            emoji: r.emoji,
-            userId: r.userId.toString(),
-            userName: r.userName,
-            createdAt: r.createdAt.toISOString ? r.createdAt.toISOString() : r.createdAt
-        })) || [];
+        // Serialize reactions using utility
+        const serializedReactions = message.reactions ? toSerializedObject(message.reactions) : [];
 
         // Notify via Pusher BEFORE revalidatePath to prevent connection abort
         try {
-            await sendRealtimeMessage(message.projectId.toString(), {
+            const messageId = message._id;
+            const projectId = message.projectId;
+            await sendRealtimeMessage(toSerializedObject(projectId), {
                 type: 'reaction',
-                messageId: message._id.toString(),
+                messageId: toSerializedObject(messageId),
                 reactions: serializedReactions
             });
         } catch (error) {
@@ -296,11 +290,7 @@ export async function replyToMessage(
         const project = populatedMessage?.projectId as any;
 
         const serializedMessage = {
-            ...toSerializedObject(reply),
-            _id: reply._id.toString(),
-            projectId: reply.projectId.toString(),
-            userId: reply.userId.toString(),
-            parentMessageId: parentMessageId,
+            ...toSerializedObject(populatedMessage),
             clientName: userPopulated ? `${userPopulated.firstName || ''} ${userPopulated.lastName || ''}`.trim() || userPopulated.email : '',
             clientEmail: userPopulated?.email || '',
             projectName: project?.projectName || '',
