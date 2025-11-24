@@ -336,43 +336,79 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
     // Auto-mark messages as read when viewing a conversation (including new messages arriving in real-time)
     useEffect(() => {
-        if (!selectedProjectId) return;
+        console.log('[Admin Auto-Mark] Effect triggered, selectedProjectId:', selectedProjectId);
+
+        if (!selectedProjectId) {
+            console.log('[Admin Auto-Mark] No project selected, skipping');
+            return;
+        }
 
         // Check if document is visible (user is actually viewing the page)
-        if (document.hidden) return;
+        if (document.hidden) {
+            console.log('[Admin Auto-Mark] Document hidden, skipping');
+            return;
+        }
 
         const conv = projectMap.get(selectedProjectId);
-        if (!conv || conv.unreadCount === 0) return;
+        if (!conv) {
+            console.log('[Admin Auto-Mark] Conversation not found, skipping');
+            return;
+        }
 
-        const unreadIds = conv.messages
-            .filter(m => !m.isRead && m.sender === 'client')
-            .map(m => m._id);
+        const unreadClientMessages = conv.messages.filter(m => !m.isRead && m.sender === 'client');
+        console.log('[Admin Auto-Mark] Found', unreadClientMessages.length, 'unread client messages');
 
-        if (unreadIds.length === 0) return;
+        if (unreadClientMessages.length === 0) {
+            console.log('[Admin Auto-Mark] No unread client messages');
+            return;
+        }
+
+        const unreadIds = unreadClientMessages.map(m => m._id);
+        console.log('[Admin Auto-Mark] Unread message IDs:', unreadIds);
 
         // Check if we've already marked these messages
         const newUnreadIds = unreadIds.filter(id => !hasMarkedAsReadRef.current.has(id));
-        if (newUnreadIds.length === 0) return;
+        console.log('[Admin Auto-Mark] New unread IDs (not in ref):', newUnreadIds);
 
-        // Debounce to avoid too many calls when messages arrive quickly
+        if (newUnreadIds.length === 0) {
+            console.log('[Admin Auto-Mark] All messages already in ref, skipping');
+            return;
+        }
+
+        // Shorter debounce for faster response
         const timer = setTimeout(() => {
+            console.log('[Admin Auto-Mark] Calling markAdminMessagesAsRead API with IDs:', newUnreadIds);
+
             // Mark them in the ref to prevent duplicate calls
             newUnreadIds.forEach(id => hasMarkedAsReadRef.current.add(id));
 
             markAdminMessagesAsRead(newUnreadIds).then(result => {
                 if (result.success) {
-                    setAllMessages(prev => prev.map(msg =>
-                        newUnreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
-                    ));
+                    console.log('[Admin Auto-Mark] ✅ API success, updating local state');
+                    setAllMessages(prev => {
+                        const updated = prev.map(msg =>
+                            newUnreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
+                        );
+                        console.log('[Admin Auto-Mark] Local state updated');
+                        return updated;
+                    });
                 } else {
+                    console.error('[Admin Auto-Mark] ❌ API failed:', result.error);
                     // Remove from ref if failed
                     newUnreadIds.forEach(id => hasMarkedAsReadRef.current.delete(id));
                 }
+            }).catch(error => {
+                console.error('[Admin Auto-Mark] ❌ API error:', error);
+                // Remove from ref if failed
+                newUnreadIds.forEach(id => hasMarkedAsReadRef.current.delete(id));
             });
-        }, 500); // 500ms debounce
+        }, 300); // Reduced to 300ms for faster response
 
-        return () => clearTimeout(timer);
-    }, [selectedProjectId, projectMap]);
+        return () => {
+            console.log('[Admin Auto-Mark] Cleanup: clearing timeout');
+            clearTimeout(timer);
+        };
+    }, [selectedProjectId, projectMap, allMessages]);
 
     // Handle typing indicator for admin
     const handleTyping = useCallback(() => {
