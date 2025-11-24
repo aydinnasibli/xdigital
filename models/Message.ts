@@ -20,12 +20,6 @@ interface IMention {
     position: number; // Character position in message
 }
 
-interface IReadReceipt {
-    userId: Types.ObjectId;
-    userName: string;
-    readAt: Date;
-}
-
 export interface IMessage extends Document {
     _id: mongoose.Types.ObjectId;
     projectId: Types.ObjectId;
@@ -45,10 +39,9 @@ export interface IMessage extends Document {
     // Mentions
     mentions?: IMention[];
 
-    // Read receipts
+    // Read status
     isRead: boolean;
     readAt?: Date;
-    readReceipts?: IReadReceipt[];
 
     // Pinning
     isPinned: boolean;
@@ -144,27 +137,12 @@ const MessageSchema = new Schema<IMessage>(
                 required: true,
             },
         }],
-        // Read receipts
+        // Read status
         isRead: {
             type: Boolean,
             default: false,
         },
         readAt: Date,
-        readReceipts: [{
-            userId: {
-                type: Schema.Types.ObjectId,
-                ref: 'User',
-                required: true,
-            },
-            userName: {
-                type: String,
-                required: true,
-            },
-            readAt: {
-                type: Date,
-                default: Date.now,
-            },
-        }],
         // Pinning
         isPinned: {
             type: Boolean,
@@ -193,7 +171,7 @@ MessageSchema.index({ projectId: 1, createdAt: -1 });
 MessageSchema.index({ userId: 1, createdAt: -1 });
 MessageSchema.index({ clerkUserId: 1, createdAt: -1 });
 // Compound indexes for common query patterns
-MessageSchema.index({ projectId: 1, isRead: 1, sender: 1 }); // For markMessagesAsRead operation
+MessageSchema.index({ projectId: 1, isRead: 1, sender: 1 }); // For filtering unread messages
 MessageSchema.index({ sender: 1, isRead: 1, createdAt: -1 }); // For sender-based filtering
 MessageSchema.index({ parentMessageId: 1, createdAt: -1 }); // For threaded message queries
 
