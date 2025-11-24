@@ -325,6 +325,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+    const markingAsReadRef = useRef<Set<string>>(new Set());
 
     // Normalize message to ensure all required fields exist
     const normalizeMessage = useCallback((msg: any): Message | null => {
@@ -498,10 +499,18 @@ function MessagesTab({ projectId }: { projectId: string }) {
         // Don't mark as read if document is hidden
         if (document.hidden || messages.length === 0) return;
 
-        const unreadAdminMessages = messages.filter(m => !m.isRead && m.sender === 'admin');
+        // Find unread messages that aren't already being marked
+        const unreadAdminMessages = messages.filter(
+            m => !m.isRead && m.sender === 'admin' && !markingAsReadRef.current.has(m._id)
+        );
 
         if (unreadAdminMessages.length > 0) {
-            // Mark as read immediately - no debouncing for instant WhatsApp-like experience
+            const unreadIds = unreadAdminMessages.map(m => m._id);
+
+            // Add to ref to prevent duplicate calls
+            unreadIds.forEach(id => markingAsReadRef.current.add(id));
+
+            // Mark as read immediately
             markMessagesAsRead(projectId).then(result => {
                 if (result.success) {
                     // Update local state immediately for instant UI feedback
@@ -509,6 +518,11 @@ function MessagesTab({ projectId }: { projectId: string }) {
                         msg.sender === 'admin' && !msg.isRead ? { ...msg, isRead: true } : msg
                     ));
                 }
+                // Remove from ref after completion
+                unreadIds.forEach(id => markingAsReadRef.current.delete(id));
+            }).catch(() => {
+                // Remove from ref on error
+                unreadIds.forEach(id => markingAsReadRef.current.delete(id));
             });
         }
     }, [messages, projectId]);
