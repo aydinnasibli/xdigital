@@ -36,6 +36,17 @@ export async function getMessages(projectId: string): Promise<ActionResponse> {
             return { success: false, error: 'User not found' };
         }
 
+        // Security: Verify user owns this project
+        const Project = (await import('@/models/Project')).default;
+        const project = await Project.findOne({
+            _id: projectId,
+            userId: user._id
+        });
+
+        if (!project) {
+            return { success: false, error: 'Project not found or access denied' };
+        }
+
         const messages = await Message.find({ projectId })
             .sort({ createdAt: 1 })
             .lean();
@@ -71,11 +82,27 @@ export async function sendMessage(
             return { success: false, error: 'Message cannot be empty' };
         }
 
+        // Input validation: Check message length
+        if (message.trim().length > 5000) {
+            return { success: false, error: 'Message too long (max 5000 characters)' };
+        }
+
         await dbConnect();
 
         const user = await User.findOne({ clerkId: clerkUserId });
         if (!user) {
             return { success: false, error: 'User not found' };
+        }
+
+        // Security: Verify user owns this project before allowing message send
+        const Project = (await import('@/models/Project')).default;
+        const project = await Project.findOne({
+            _id: projectId,
+            userId: user._id
+        });
+
+        if (!project) {
+            return { success: false, error: 'Project not found or access denied' };
         }
 
         const newMessage = await Message.create({
@@ -143,6 +170,11 @@ export async function addClientMessageReaction(
             return { success: false, error: 'Invalid message ID' };
         }
 
+        // Input validation: Validate emoji (should be short, typically 1-4 characters)
+        if (!emoji || emoji.length > 10) {
+            return { success: false, error: 'Invalid emoji' };
+        }
+
         await dbConnect();
 
         const user = await User.findOne({ clerkId: clerkUserId });
@@ -153,6 +185,17 @@ export async function addClientMessageReaction(
         const message = await Message.findById(messageId);
         if (!message) {
             return { success: false, error: 'Message not found' };
+        }
+
+        // Security: Verify user owns the project this message belongs to
+        const Project = (await import('@/models/Project')).default;
+        const project = await Project.findOne({
+            _id: message.projectId,
+            userId: user._id
+        });
+
+        if (!project) {
+            return { success: false, error: 'Access denied' };
         }
 
         // Check if user already reacted with this emoji
@@ -258,11 +301,31 @@ export async function replyToMessage(
             return { success: false, error: 'Invalid ID' };
         }
 
+        // Input validation
+        if (!message.trim()) {
+            return { success: false, error: 'Message cannot be empty' };
+        }
+
+        if (message.trim().length > 5000) {
+            return { success: false, error: 'Message too long (max 5000 characters)' };
+        }
+
         await dbConnect();
 
         const user = await User.findOne({ clerkId: clerkUserId });
         if (!user) {
             return { success: false, error: 'User not found' };
+        }
+
+        // Security: Verify user owns this project before allowing reply
+        const Project = (await import('@/models/Project')).default;
+        const project = await Project.findOne({
+            _id: projectId,
+            userId: user._id
+        });
+
+        if (!project) {
+            return { success: false, error: 'Project not found or access denied' };
         }
 
         // Create reply
@@ -330,6 +393,15 @@ export async function editMessage(
 
         if (!mongoose.Types.ObjectId.isValid(messageId)) {
             return { success: false, error: 'Invalid message ID' };
+        }
+
+        // Input validation
+        if (!newMessage.trim()) {
+            return { success: false, error: 'Message cannot be empty' };
+        }
+
+        if (newMessage.trim().length > 5000) {
+            return { success: false, error: 'Message too long (max 5000 characters)' };
         }
 
         await dbConnect();
