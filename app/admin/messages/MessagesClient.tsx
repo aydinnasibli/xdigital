@@ -334,17 +334,18 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         }
     }, [selectedProjectId, allMessages]);
 
-    // Auto-mark client messages as read - WhatsApp style: instant and simple
+    // Auto-mark client messages as read - copied from client side logic
     useEffect(() => {
         // Don't mark as read if no project selected or document is hidden
-        if (!selectedProjectId || document.hidden) return;
+        if (!selectedProjectId || document.hidden || allMessages.length === 0) return;
 
-        const conv = projectMap.get(selectedProjectId);
-        if (!conv) return;
-
-        // Find unread messages that aren't already being marked
-        const unreadClientMessages = conv.messages.filter(
-            m => !m.isRead && m.sender === 'client' && !markingAsReadRef.current.has(m._id)
+        // Filter directly from allMessages - exactly like client side does
+        const unreadClientMessages = allMessages.filter(
+            m => !m.isRead &&
+                 m.sender === 'client' &&
+                 m.projectId &&
+                 m.projectId._id === selectedProjectId &&
+                 !markingAsReadRef.current.has(m._id)
         );
 
         if (unreadClientMessages.length > 0) {
@@ -358,10 +359,10 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                 if (result.success) {
                     // Update local state immediately for instant UI feedback
                     setAllMessages(prev => prev.map(msg =>
-                        unreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
+                        msg.sender === 'client' && !msg.isRead ? { ...msg, isRead: true } : msg
                     ));
                 }
-                // Remove from ref after completion (whether success or failure)
+                // Remove from ref after completion
                 unreadIds.forEach(id => markingAsReadRef.current.delete(id));
             }).catch(() => {
                 // Remove from ref on error
