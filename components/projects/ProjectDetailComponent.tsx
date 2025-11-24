@@ -13,6 +13,7 @@ import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { toast } from 'sonner';
 import { logInfo, logWarning } from '@/lib/sentry-logger';
 import { Smile, Reply, Edit2, Pin, X } from 'lucide-react';
+import { formatMessageDate, formatMessageTime } from '@/lib/utils/date';
 
 // Dynamically import heavy dashboard components
 const SEODashboard = dynamic(() => import('@/components/dashboard/SEODashboard'), {
@@ -743,12 +744,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
                                                 <div className="flex items-center gap-1">
                                                     <p className="text-xs">
-                                                        {new Date(msg.createdAt).toLocaleString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })}
+                                                        {formatMessageDate(msg.createdAt)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -958,12 +954,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
                                                 <div className="flex items-center gap-1">
                                                     <p className="text-xs">
-                                                        {new Date(msg.createdAt).toLocaleString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })}
+                                                        {formatMessageDate(msg.createdAt)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -1043,10 +1034,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                                             </p>
                                                             <p className="whitespace-pre-wrap break-words">{reply.message}</p>
                                                             <p className="text-xs opacity-60 mt-1">
-                                                                {new Date(reply.createdAt).toLocaleString('en-US', {
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit'
-                                                                })}
+                                                                {formatMessageTime(reply.createdAt)}
                                                             </p>
                                                         </div>
                                                     </div>

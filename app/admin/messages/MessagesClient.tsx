@@ -7,6 +7,7 @@ import { sendAdminMessage, addMessageReaction, sendAdminTypingIndicator, adminRe
 import { toast } from 'sonner';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { logInfo } from '@/lib/sentry-logger';
+import { formatMessageTime, formatConversationDate } from '@/lib/utils/date';
 
 interface Message {
     _id: string;
@@ -498,12 +499,7 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                     </div>
                                     <p className="text-sm text-gray-600 truncate">{conv.clientName}</p>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        {new Date(conv.lastMessageAt).toLocaleString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
+                                        {formatConversationDate(conv.lastMessageAt)}
                                     </p>
                                 </button>
                             ))
@@ -720,10 +716,7 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
                                                                 <div className="flex items-center gap-1">
                                                                     <span className="text-xs opacity-75">
-                                                                        {new Date(msg.createdAt).toLocaleString('en-US', {
-                                                                            hour: '2-digit',
-                                                                            minute: '2-digit'
-                                                                        })}
+                                                                        {formatMessageTime(msg.createdAt)}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -808,10 +801,7 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                                             </p>
                                                                             <p className="whitespace-pre-wrap break-words">{reply.message}</p>
                                                                             <p className="text-xs opacity-60 mt-1">
-                                                                                {new Date(reply.createdAt).toLocaleString('en-US', {
-                                                                                    hour: '2-digit',
-                                                                                    minute: '2-digit'
-                                                                                })}
+                                                                                {formatMessageTime(reply.createdAt)}
                                                                             </p>
                                                                         </div>
                                                                     </div>
