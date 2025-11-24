@@ -450,17 +450,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
         setMessages(prev => {
             const exists = prev.some(msg => msg._id === data._id);
-            if (exists) {
-                logInfo('Duplicate message detected and prevented', {
-                    messageId: data._id,
-                    projectId
-                });
-                return prev;
-            }
+            if (exists) return prev;
 
-            const newMessages = deduplicateMessages([...prev, data]);
-            console.log('[Client] Added new message, isRead:', data.isRead, 'sender:', data.sender);
-            return newMessages;
+            return deduplicateMessages([...prev, data]);
         });
 
         if (data.sender === 'admin') {
@@ -501,54 +493,23 @@ function MessagesTab({ projectId }: { projectId: string }) {
         loadMessages();
     }, [projectId]);
 
-    // Auto-mark admin messages as read when viewing (including new messages arriving in real-time)
+    // Auto-mark admin messages as read - WhatsApp style: instant and simple
     useEffect(() => {
-        console.log('[Read Receipts] Effect triggered, messages count:', messages.length);
-
-        if (messages.length === 0) {
-            console.log('[Read Receipts] No messages, skipping');
-            return;
-        }
-
-        // Check if document is visible (user is actually viewing the page)
-        if (document.hidden) {
-            console.log('[Read Receipts] Document hidden, skipping');
-            return;
-        }
+        // Don't mark as read if document is hidden
+        if (document.hidden || messages.length === 0) return;
 
         const unreadAdminMessages = messages.filter(m => !m.isRead && m.sender === 'admin');
 
         if (unreadAdminMessages.length > 0) {
-            console.log('[Read Receipts] Found', unreadAdminMessages.length, 'unread admin messages:', unreadAdminMessages.map(m => ({ id: m._id, isRead: m.isRead })));
-
-            // Shorter debounce for faster response
-            const timer = setTimeout(() => {
-                console.log('[Read Receipts] Calling markMessagesAsRead API...');
-                markMessagesAsRead(projectId).then(result => {
-                    if (result.success) {
-                        console.log('[Read Receipts] ✅ API call successful, updating local state');
-                        // Update local state immediately
-                        setMessages(prev => {
-                            const updated = prev.map(msg =>
-                                msg.sender === 'admin' && !msg.isRead
-                                    ? { ...msg, isRead: true }
-                                    : msg
-                            );
-                            console.log('[Read Receipts] Local state updated, marked as read');
-                            return updated;
-                        });
-                    } else {
-                        console.error('[Read Receipts] ❌ API call failed:', result.error);
-                    }
-                });
-            }, 300); // Reduced to 300ms for faster response
-
-            return () => {
-                console.log('[Read Receipts] Cleanup: clearing timeout');
-                clearTimeout(timer);
-            };
-        } else {
-            console.log('[Read Receipts] No unread admin messages');
+            // Mark as read immediately - no debouncing for instant WhatsApp-like experience
+            markMessagesAsRead(projectId).then(result => {
+                if (result.success) {
+                    // Update local state immediately for instant UI feedback
+                    setMessages(prev => prev.map(msg =>
+                        msg.sender === 'admin' && !msg.isRead ? { ...msg, isRead: true } : msg
+                    ));
+                }
+            });
         }
     }, [messages, projectId]);
 

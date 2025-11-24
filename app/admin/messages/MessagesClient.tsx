@@ -83,7 +83,6 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
     const [editText, setEditText] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-    const hasMarkedAsReadRef = useRef<Set<string>>(new Set());
     const lastReadReceiptRef = useRef<string>('');
 
     // Memoize conversation grouping to prevent infinite loops
@@ -334,81 +333,30 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         }
     }, [selectedProjectId, allMessages]);
 
-    // Auto-mark messages as read when viewing a conversation (including new messages arriving in real-time)
+    // Auto-mark client messages as read - WhatsApp style: instant and simple
     useEffect(() => {
-        console.log('[Admin Auto-Mark] Effect triggered, selectedProjectId:', selectedProjectId);
-
-        if (!selectedProjectId) {
-            console.log('[Admin Auto-Mark] No project selected, skipping');
-            return;
-        }
-
-        // Check if document is visible (user is actually viewing the page)
-        if (document.hidden) {
-            console.log('[Admin Auto-Mark] Document hidden, skipping');
-            return;
-        }
+        // Don't mark as read if no project selected or document is hidden
+        if (!selectedProjectId || document.hidden) return;
 
         const conv = projectMap.get(selectedProjectId);
-        if (!conv) {
-            console.log('[Admin Auto-Mark] Conversation not found, skipping');
-            return;
-        }
+        if (!conv) return;
 
         const unreadClientMessages = conv.messages.filter(m => !m.isRead && m.sender === 'client');
-        console.log('[Admin Auto-Mark] Found', unreadClientMessages.length, 'unread client messages');
 
-        if (unreadClientMessages.length === 0) {
-            console.log('[Admin Auto-Mark] No unread client messages');
-            return;
-        }
+        if (unreadClientMessages.length > 0) {
+            const unreadIds = unreadClientMessages.map(m => m._id);
 
-        const unreadIds = unreadClientMessages.map(m => m._id);
-        console.log('[Admin Auto-Mark] Unread message IDs:', unreadIds);
-
-        // Check if we've already marked these messages
-        const newUnreadIds = unreadIds.filter(id => !hasMarkedAsReadRef.current.has(id));
-        console.log('[Admin Auto-Mark] New unread IDs (not in ref):', newUnreadIds);
-
-        if (newUnreadIds.length === 0) {
-            console.log('[Admin Auto-Mark] All messages already in ref, skipping');
-            return;
-        }
-
-        // Shorter debounce for faster response
-        const timer = setTimeout(() => {
-            console.log('[Admin Auto-Mark] Calling markAdminMessagesAsRead API with IDs:', newUnreadIds);
-
-            // Mark them in the ref to prevent duplicate calls
-            newUnreadIds.forEach(id => hasMarkedAsReadRef.current.add(id));
-
-            markAdminMessagesAsRead(newUnreadIds).then(result => {
+            // Mark as read immediately - no debouncing for instant WhatsApp-like experience
+            markAdminMessagesAsRead(unreadIds).then(result => {
                 if (result.success) {
-                    console.log('[Admin Auto-Mark] ✅ API success, updating local state');
-                    setAllMessages(prev => {
-                        const updated = prev.map(msg =>
-                            newUnreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
-                        );
-                        console.log('[Admin Auto-Mark] Local state updated');
-                        return updated;
-                    });
-                } else {
-                    console.error('[Admin Auto-Mark] ❌ API failed:', result.error);
-                    // Remove from ref if failed
-                    newUnreadIds.forEach(id => hasMarkedAsReadRef.current.delete(id));
+                    // Update local state immediately for instant UI feedback
+                    setAllMessages(prev => prev.map(msg =>
+                        unreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
+                    ));
                 }
-            }).catch(error => {
-                console.error('[Admin Auto-Mark] ❌ API error:', error);
-                // Remove from ref if failed
-                newUnreadIds.forEach(id => hasMarkedAsReadRef.current.delete(id));
             });
-        }, 300); // Reduced to 300ms for faster response
-
-        return () => {
-            console.log('[Admin Auto-Mark] Cleanup: clearing timeout');
-            clearTimeout(timer);
-        };
-    }, [selectedProjectId, projectMap, allMessages]);
+        }
+    }, [selectedProjectId, allMessages]);
 
     // Handle typing indicator for admin
     const handleTyping = useCallback(() => {
