@@ -37,13 +37,13 @@ export async function getMessages(projectId: string): Promise<ActionResponse> {
         }
 
         // Security: Verify user owns this project
-        const Project = (await import('@/models/Project')).default;
-        const project = await Project.findOne({
+        const ProjectModel = (await import('@/models/Project')).default;
+        const userProject = await ProjectModel.findOne({
             _id: projectId,
             userId: user._id
         });
 
-        if (!project) {
+        if (!userProject) {
             return { success: false, error: 'Project not found or access denied' };
         }
 
@@ -95,13 +95,13 @@ export async function sendMessage(
         }
 
         // Security: Verify user owns this project before allowing message send
-        const Project = (await import('@/models/Project')).default;
-        const project = await Project.findOne({
+        const ProjectModel = (await import('@/models/Project')).default;
+        const userProject = await ProjectModel.findOne({
             _id: projectId,
             userId: user._id
         });
 
-        if (!project) {
+        if (!userProject) {
             return { success: false, error: 'Project not found or access denied' };
         }
 
@@ -188,13 +188,13 @@ export async function addClientMessageReaction(
         }
 
         // Security: Verify user owns the project this message belongs to
-        const Project = (await import('@/models/Project')).default;
-        const project = await Project.findOne({
+        const ProjectModel = (await import('@/models/Project')).default;
+        const userProject = await ProjectModel.findOne({
             _id: message.projectId,
             userId: user._id
         });
 
-        if (!project) {
+        if (!userProject) {
             return { success: false, error: 'Access denied' };
         }
 
@@ -318,13 +318,13 @@ export async function replyToMessage(
         }
 
         // Security: Verify user owns this project before allowing reply
-        const Project = (await import('@/models/Project')).default;
-        const project = await Project.findOne({
+        const ProjectModel = (await import('@/models/Project')).default;
+        const userProject = await ProjectModel.findOne({
             _id: projectId,
             userId: user._id
         });
 
-        if (!project) {
+        if (!userProject) {
             return { success: false, error: 'Project not found or access denied' };
         }
 
