@@ -311,11 +311,15 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         }
 
         // Send typing start
-        sendAdminTypingIndicator(selectedProjectId, true);
+        sendAdminTypingIndicator(selectedProjectId, true).catch(err => {
+            console.error('Error sending typing indicator:', err);
+        });
 
         // Set timeout to clear typing indicator
         typingTimeoutRef.current = setTimeout(() => {
-            sendAdminTypingIndicator(selectedProjectId, false);
+            sendAdminTypingIndicator(selectedProjectId, false).catch(err => {
+                console.error('Error sending typing indicator:', err);
+            });
         }, 3000);
     }, [selectedProjectId]);
 

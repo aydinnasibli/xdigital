@@ -112,17 +112,24 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
 
     const loadAnalytics = async () => {
         setLoading(true);
-        const result = await getProjectAnalytics(projectId);
-        if (result.success && result.data) {
-            if (result.data.configured === false) {
-                setConfigured(false);
-                setConfigMessage(result.data.message || 'Analytics not configured');
-            } else {
-                setConfigured(true);
-                setSummary(result.data.summary || result.data);
+        try {
+            const result = await getProjectAnalytics(projectId);
+            if (result.success && result.data) {
+                if (result.data.configured === false) {
+                    setConfigured(false);
+                    setConfigMessage(result.data.message || 'Analytics not configured');
+                } else {
+                    setConfigured(true);
+                    setSummary(result.data.summary || result.data);
+                }
             }
+        } catch (error) {
+            console.error('Error loading analytics:', error);
+            setConfigured(false);
+            setConfigMessage('Failed to load analytics');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleDownloadReport = async () => {
@@ -238,11 +245,16 @@ function InvoicesTab({ projectId }: { projectId: string }) {
 
     const loadInvoices = async () => {
         setLoading(true);
-        const result = await getProjectInvoices(projectId);
-        if (result.success && result.data) {
-            setInvoices(result.data);
+        try {
+            const result = await getProjectInvoices(projectId);
+            if (result.success && result.data) {
+                setInvoices(result.data);
+            }
+        } catch (error) {
+            console.error('Error loading invoices:', error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     if (loading) {
@@ -494,12 +506,17 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
     const loadMessages = async () => {
         setLoading(true);
-        const result = await getMessages(projectId);
-        if (result.success && result.data) {
-            setMessages(deduplicateMessages(result.data.messages));
-            setCurrentUserId(result.data.currentUserId);
+        try {
+            const result = await getMessages(projectId);
+            if (result.success && result.data) {
+                setMessages(deduplicateMessages(result.data.messages));
+                setCurrentUserId(result.data.currentUserId);
+            }
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleTyping = useCallback(() => {
@@ -507,10 +524,14 @@ function MessagesTab({ projectId }: { projectId: string }) {
             clearTimeout(typingTimeoutRef.current);
         }
 
-        sendClientTypingIndicator(projectId, true);
+        sendClientTypingIndicator(projectId, true).catch(err => {
+            console.error('Error sending typing indicator:', err);
+        });
 
         typingTimeoutRef.current = setTimeout(() => {
-            sendClientTypingIndicator(projectId, false);
+            sendClientTypingIndicator(projectId, false).catch(err => {
+                console.error('Error sending typing indicator:', err);
+            });
         }, 3000);
     }, [projectId]);
 
