@@ -84,6 +84,7 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const lastReadReceiptRef = useRef<string>('');
+    const markingAsReadRef = useRef<Set<string>>(new Set());
 
     // Memoize conversation grouping to prevent infinite loops
     const { conversations, projectMap } = useMemo(() => {
@@ -341,12 +342,18 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         const conv = projectMap.get(selectedProjectId);
         if (!conv) return;
 
-        const unreadClientMessages = conv.messages.filter(m => !m.isRead && m.sender === 'client');
+        // Find unread messages that aren't already being marked
+        const unreadClientMessages = conv.messages.filter(
+            m => !m.isRead && m.sender === 'client' && !markingAsReadRef.current.has(m._id)
+        );
 
         if (unreadClientMessages.length > 0) {
             const unreadIds = unreadClientMessages.map(m => m._id);
 
-            // Mark as read immediately - no debouncing for instant WhatsApp-like experience
+            // Add to ref to prevent duplicate calls
+            unreadIds.forEach(id => markingAsReadRef.current.add(id));
+
+            // Mark as read immediately
             markAdminMessagesAsRead(unreadIds).then(result => {
                 if (result.success) {
                     // Update local state immediately for instant UI feedback
@@ -354,6 +361,11 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                         unreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
                     ));
                 }
+                // Remove from ref after completion (whether success or failure)
+                unreadIds.forEach(id => markingAsReadRef.current.delete(id));
+            }).catch(() => {
+                // Remove from ref on error
+                unreadIds.forEach(id => markingAsReadRef.current.delete(id));
             });
         }
     }, [selectedProjectId, allMessages]);
