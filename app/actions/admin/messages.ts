@@ -183,17 +183,7 @@ export async function markAdminMessagesAsRead(
             { isRead: true, readAt: new Date() }
         );
 
-        // Send Pusher events for each project
-        for (const projectId of projectIds) {
-            try {
-                await sendRealtimeMessage(projectId, {
-                    type: 'read',
-                    messageIds: validIds
-                });
-            } catch (error) {
-                logError(error as Error, { context: 'markAdminMessagesAsRead-pusher', projectId });
-            }
-        }
+        // Read receipts disabled - no Pusher events sent
 
         revalidatePath('/admin/messages');
 

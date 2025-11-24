@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { MessageSquare, Send, Check, CheckCheck, Search, Plus, Smile, Reply, Edit2, Pin, X } from 'lucide-react';
+import { MessageSquare, Send, Search, Plus, Smile, Reply, Edit2, Pin, X } from 'lucide-react';
 import { sendAdminMessage, markAdminMessagesAsRead, addMessageReaction, sendAdminTypingIndicator, adminReplyToMessage, adminEditMessage, togglePinMessage } from '@/app/actions/admin/messages';
 import { toast } from 'sonner';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
@@ -727,15 +727,6 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                                             minute: '2-digit'
                                                                         })}
                                                                     </span>
-                                                                    {msg.sender === 'admin' && (
-                                                                        <span title={msg.isRead ? 'Read' : 'Sent'}>
-                                                                            {msg.isRead ? (
-                                                                                <CheckCheck className="w-4 h-4" />
-                                                                            ) : (
-                                                                                <Check className="w-4 h-4" />
-                                                                            )}
-                                                                        </span>
-                                                                    )}
                                                                 </div>
                                                             </div>
 

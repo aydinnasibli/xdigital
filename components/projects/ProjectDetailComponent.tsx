@@ -12,7 +12,7 @@ import dynamic from 'next/dynamic';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { toast } from 'sonner';
 import { logInfo, logWarning } from '@/lib/sentry-logger';
-import { Check, CheckCheck, Smile, Reply, Edit2, Pin, X } from 'lucide-react';
+import { Smile, Reply, Edit2, Pin, X } from 'lucide-react';
 
 // Dynamically import heavy dashboard components
 const SEODashboard = dynamic(() => import('@/components/dashboard/SEODashboard'), {
@@ -750,15 +750,6 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                                             minute: '2-digit'
                                                         })}
                                                     </p>
-                                                    {msg.sender === 'client' && (
-                                                        <span title={msg.isRead ? 'Read' : 'Sent'}>
-                                                            {msg.isRead ? (
-                                                                <CheckCheck className="w-4 h-4" />
-                                                            ) : (
-                                                                <Check className="w-4 h-4" />
-                                                            )}
-                                                        </span>
-                                                    )}
                                                 </div>
                                             </div>
 
@@ -974,15 +965,6 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                                             minute: '2-digit'
                                                         })}
                                                     </p>
-                                                    {msg.sender === 'client' && (
-                                                        <span title={msg.isRead ? 'Read' : 'Sent'}>
-                                                            {msg.isRead ? (
-                                                                <CheckCheck className="w-4 h-4" />
-                                                            ) : (
-                                                                <Check className="w-4 h-4" />
-                                                            )}
-                                                        </span>
-                                                    )}
                                                 </div>
                                             </div>
 

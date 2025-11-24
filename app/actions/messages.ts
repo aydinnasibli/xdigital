@@ -167,18 +167,7 @@ export async function markMessagesAsRead(projectId: string): Promise<ActionRespo
 
         console.log('[Server] Updated', updateResult.modifiedCount, 'messages to read');
 
-        // Notify via Pusher BEFORE revalidatePath
-        try {
-            console.log('[Server] Sending Pusher read event for projectId:', projectId, 'messageIds:', messageIds);
-            await sendRealtimeMessage(projectId, {
-                type: 'read',
-                messageIds: messageIds,
-            });
-            console.log('[Server] Pusher read event sent successfully');
-        } catch (error) {
-            console.error('[Server] Pusher error:', error);
-            logError(error as Error, { context: 'markMessagesAsRead-pusher' });
-        }
+        // Read receipts disabled - no Pusher event sent
 
         revalidatePath(`/dashboard/projects/${projectId}`);
 
