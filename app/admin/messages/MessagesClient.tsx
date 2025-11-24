@@ -3,7 +3,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { MessageSquare, Send, Search, Plus, Smile, Reply, Edit2, Pin, X } from 'lucide-react';
-import { sendAdminMessage, markAdminMessagesAsRead, addMessageReaction, sendAdminTypingIndicator, adminReplyToMessage, adminEditMessage, togglePinMessage } from '@/app/actions/admin/messages';
+import { sendAdminMessage, addMessageReaction, sendAdminTypingIndicator, adminReplyToMessage, adminEditMessage, togglePinMessage } from '@/app/actions/admin/messages';
 import { toast } from 'sonner';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { logInfo } from '@/lib/sentry-logger';
@@ -427,11 +427,9 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         setSelectedProjectId(projectId);
     };
 
-    // Force re-computation when allMessages changes to ensure read receipts update the UI
     const selectedConversation = useMemo(() => {
         if (!selectedProjectId) return null;
         const conv = projectMap.get(selectedProjectId);
-        // Return a new object reference to ensure React detects changes
         return conv ? { ...conv } : null;
     }, [selectedProjectId, projectMap, allMessages]);
 

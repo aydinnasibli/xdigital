@@ -154,45 +154,7 @@ export async function sendAdminMessage(
     }
 }
 
-// Mark messages as read (admin reading client messages)
-export async function markAdminMessagesAsRead(
-    messageIds: string[]
-): Promise<ActionResponse> {
-    try {
-        await requireAdmin();
-
-        const validIds = messageIds.filter(id => mongoose.Types.ObjectId.isValid(id));
-
-        if (validIds.length === 0) {
-            return { success: false, error: 'No valid message IDs provided' };
-        }
-
-        await dbConnect();
-
-        // Get project IDs before updating so we can send Pusher events
-        const messages = await Message.find({
-            _id: { $in: validIds },
-            sender: MessageSender.CLIENT
-        }).select('projectId').lean();
-
-        const projectIds = [...new Set(messages.map(m => m.projectId.toString()))];
-
-        // Simple update - just set isRead and readAt
-        const result = await Message.updateMany(
-            { _id: { $in: validIds }, sender: MessageSender.CLIENT },
-            { isRead: true, readAt: new Date() }
-        );
-
-        // Read receipts disabled - no Pusher events sent
-
-        revalidatePath('/admin/messages');
-
-        return { success: true, data: { marked: result.modifiedCount } };
-    } catch (error) {
-        logError(error as Error, { context: 'markAdminMessagesAsRead', messageIds });
-        return { success: false, error: 'Failed to mark messages as read' };
-    }
-}
+// Removed - read receipts disabled
 
 // Get a single message with populated fields
 export async function getAdminMessage(messageId: string): Promise<ActionResponse> {

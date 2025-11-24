@@ -128,55 +128,7 @@ export async function sendMessage(
     }
 }
 
-// Mark messages as read (client reading admin messages)
-export async function markMessagesAsRead(projectId: string): Promise<ActionResponse> {
-    try {
-        const { userId: clerkUserId } = await auth();
-
-        if (!clerkUserId) {
-            return { success: false, error: 'Unauthorized' };
-        }
-
-        await dbConnect();
-
-        const user = await User.findOne({ clerkId: clerkUserId });
-        if (!user) {
-            return { success: false, error: 'User not found' };
-        }
-
-        // Get IDs of messages being marked as read
-        const unreadMessages = await Message.find(
-            { projectId, isRead: false, sender: MessageSender.ADMIN },
-            { _id: 1 }
-        );
-
-        const messageIds = unreadMessages.map(m => m._id.toString());
-
-        console.log('[Server] Client marking admin messages as read:', messageIds.length, 'messages');
-
-        if (messageIds.length === 0) {
-            console.log('[Server] No unread admin messages to mark');
-            return { success: true };
-        }
-
-        // Update messages to read
-        const updateResult = await Message.updateMany(
-            { projectId, isRead: false, sender: MessageSender.ADMIN },
-            { isRead: true, readAt: new Date() }
-        );
-
-        console.log('[Server] Updated', updateResult.modifiedCount, 'messages to read');
-
-        // Read receipts disabled - no Pusher event sent
-
-        revalidatePath(`/dashboard/projects/${projectId}`);
-
-        return { success: true };
-    } catch (error) {
-        logError(error as Error, { context: 'markMessagesAsRead', projectId });
-        return { success: false, error: 'Failed to mark messages as read' };
-    }
-}
+// Removed - read receipts disabled
 
 // Add reaction to message (client side)
 export async function addClientMessageReaction(
