@@ -96,6 +96,11 @@ export async function sendAdminMessage(
             return { success: false, error: 'Message cannot be empty' };
         }
 
+        // Input validation: Check message length
+        if (message.trim().length > 5000) {
+            return { success: false, error: 'Message too long (max 5000 characters)' };
+        }
+
         await dbConnect();
 
         // Get project to find the client userId
@@ -376,6 +381,16 @@ export async function adminReplyToMessage(
 ): Promise<ActionResponse> {
     try {
         const { userId } = await getAdminSession();
+
+        // Input validation
+        if (!message.trim()) {
+            return { success: false, error: 'Message cannot be empty' };
+        }
+
+        if (message.trim().length > 5000) {
+            return { success: false, error: 'Message too long (max 5000 characters)' };
+        }
+
         await dbConnect();
 
         const project = await mongoose.model('Project').findById(projectId);
@@ -442,6 +457,15 @@ export async function adminEditMessage(
 
         if (!mongoose.Types.ObjectId.isValid(messageId)) {
             return { success: false, error: 'Invalid message ID' };
+        }
+
+        // Input validation
+        if (!newMessage.trim()) {
+            return { success: false, error: 'Message cannot be empty' };
+        }
+
+        if (newMessage.trim().length > 5000) {
+            return { success: false, error: 'Message too long (max 5000 characters)' };
         }
 
         await dbConnect();
