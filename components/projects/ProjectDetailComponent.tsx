@@ -325,7 +325,6 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-    const markingAsReadRef = useRef<Set<string>>(new Set());
 
     // Normalize message to ensure all required fields exist
     const normalizeMessage = useCallback((msg: any): Message | null => {
@@ -408,14 +407,8 @@ function MessagesTab({ projectId }: { projectId: string }) {
             return;
         }
 
-        // Handle read status updates (when admin views client messages)
+        // Read receipts disabled
         if (data.type === 'read') {
-            console.log('[Read Receipts] Received read event from admin:', data.messageIds);
-            setMessages(prev => prev.map(msg =>
-                data.messageIds.includes(msg._id)
-                    ? { ...msg, isRead: true }
-                    : msg
-            ));
             return;
         }
 
@@ -493,39 +486,6 @@ function MessagesTab({ projectId }: { projectId: string }) {
     useEffect(() => {
         loadMessages();
     }, [projectId]);
-
-    // Auto-mark admin messages as read - WhatsApp style: instant and simple
-    useEffect(() => {
-        // Don't mark as read if document is hidden
-        if (document.hidden || messages.length === 0) return;
-
-        // Find unread messages that aren't already being marked
-        const unreadAdminMessages = messages.filter(
-            m => !m.isRead && m.sender === 'admin' && !markingAsReadRef.current.has(m._id)
-        );
-
-        if (unreadAdminMessages.length > 0) {
-            const unreadIds = unreadAdminMessages.map(m => m._id);
-
-            // Add to ref to prevent duplicate calls
-            unreadIds.forEach(id => markingAsReadRef.current.add(id));
-
-            // Mark as read immediately
-            markMessagesAsRead(projectId).then(result => {
-                if (result.success) {
-                    // Update local state immediately for instant UI feedback
-                    setMessages(prev => prev.map(msg =>
-                        msg.sender === 'admin' && !msg.isRead ? { ...msg, isRead: true } : msg
-                    ));
-                }
-                // Remove from ref after completion
-                unreadIds.forEach(id => markingAsReadRef.current.delete(id));
-            }).catch(() => {
-                // Remove from ref on error
-                unreadIds.forEach(id => markingAsReadRef.current.delete(id));
-            });
-        }
-    }, [messages, projectId]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
