@@ -83,7 +83,6 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
     const [editText, setEditText] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-    const hasMarkedAsReadRef = useRef<Set<string>>(new Set());
     const lastReadReceiptRef = useRef<string>('');
 
     // Memoize conversation grouping to prevent infinite loops
@@ -334,45 +333,30 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         }
     }, [selectedProjectId, allMessages]);
 
-    // Auto-mark messages as read when viewing a conversation (including new messages arriving in real-time)
+    // Auto-mark client messages as read - WhatsApp style: instant and simple
     useEffect(() => {
-        if (!selectedProjectId) return;
-
-        // Check if document is visible (user is actually viewing the page)
-        if (document.hidden) return;
+        // Don't mark as read if no project selected or document is hidden
+        if (!selectedProjectId || document.hidden) return;
 
         const conv = projectMap.get(selectedProjectId);
-        if (!conv || conv.unreadCount === 0) return;
+        if (!conv) return;
 
-        const unreadIds = conv.messages
-            .filter(m => !m.isRead && m.sender === 'client')
-            .map(m => m._id);
+        const unreadClientMessages = conv.messages.filter(m => !m.isRead && m.sender === 'client');
 
-        if (unreadIds.length === 0) return;
+        if (unreadClientMessages.length > 0) {
+            const unreadIds = unreadClientMessages.map(m => m._id);
 
-        // Check if we've already marked these messages
-        const newUnreadIds = unreadIds.filter(id => !hasMarkedAsReadRef.current.has(id));
-        if (newUnreadIds.length === 0) return;
-
-        // Debounce to avoid too many calls when messages arrive quickly
-        const timer = setTimeout(() => {
-            // Mark them in the ref to prevent duplicate calls
-            newUnreadIds.forEach(id => hasMarkedAsReadRef.current.add(id));
-
-            markAdminMessagesAsRead(newUnreadIds).then(result => {
+            // Mark as read immediately - no debouncing for instant WhatsApp-like experience
+            markAdminMessagesAsRead(unreadIds).then(result => {
                 if (result.success) {
+                    // Update local state immediately for instant UI feedback
                     setAllMessages(prev => prev.map(msg =>
-                        newUnreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
+                        unreadIds.includes(msg._id) ? { ...msg, isRead: true } : msg
                     ));
-                } else {
-                    // Remove from ref if failed
-                    newUnreadIds.forEach(id => hasMarkedAsReadRef.current.delete(id));
                 }
             });
-        }, 500); // 500ms debounce
-
-        return () => clearTimeout(timer);
-    }, [selectedProjectId, projectMap]);
+        }
+    }, [selectedProjectId, allMessages]);
 
     // Handle typing indicator for admin
     const handleTyping = useCallback(() => {
