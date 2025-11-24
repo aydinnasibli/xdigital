@@ -123,10 +123,7 @@ export async function sendAdminMessage(
         const proj = populatedMessage?.projectId as any;
 
         const serializedMessage = {
-            ...toSerializedObject(newMessage),
-            _id: newMessage._id.toString(),
-            projectId: newMessage.projectId.toString(),
-            userId: newMessage.userId.toString(),
+            ...toSerializedObject(populatedMessage),
             clientName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : '',
             clientEmail: user?.email || '',
             projectName: proj?.projectName || '',
@@ -154,55 +151,7 @@ export async function sendAdminMessage(
     }
 }
 
-// Mark messages as read (admin reading client messages)
-export async function markAdminMessagesAsRead(
-    messageIds: string[]
-): Promise<ActionResponse> {
-    try {
-        await requireAdmin();
-
-        const validIds = messageIds.filter(id => mongoose.Types.ObjectId.isValid(id));
-
-        if (validIds.length === 0) {
-            return { success: false, error: 'No valid message IDs provided' };
-        }
-
-        await dbConnect();
-
-        // Get project IDs before updating so we can send Pusher events
-        const messages = await Message.find({
-            _id: { $in: validIds },
-            sender: MessageSender.CLIENT
-        }).select('projectId').lean();
-
-        const projectIds = [...new Set(messages.map(m => m.projectId.toString()))];
-
-        // Simple update - just set isRead and readAt
-        const result = await Message.updateMany(
-            { _id: { $in: validIds }, sender: MessageSender.CLIENT },
-            { isRead: true, readAt: new Date() }
-        );
-
-        // Send Pusher events for each project
-        for (const projectId of projectIds) {
-            try {
-                await sendRealtimeMessage(projectId, {
-                    type: 'read',
-                    messageIds: validIds
-                });
-            } catch (error) {
-                logError(error as Error, { context: 'markAdminMessagesAsRead-pusher', projectId });
-            }
-        }
-
-        revalidatePath('/admin/messages');
-
-        return { success: true, data: { marked: result.modifiedCount } };
-    } catch (error) {
-        logError(error as Error, { context: 'markAdminMessagesAsRead', messageIds });
-        return { success: false, error: 'Failed to mark messages as read' };
-    }
-}
+// Removed - read receipts disabled
 
 // Get a single message with populated fields
 export async function getAdminMessage(messageId: string): Promise<ActionResponse> {
@@ -392,19 +341,16 @@ export async function addMessageReaction(
 
         await message.save();
 
-        // Serialize reactions to remove MongoDB ObjectIds
-        const serializedReactions = message.reactions?.map(r => ({
-            emoji: r.emoji,
-            userId: r.userId.toString(),
-            userName: r.userName,
-            createdAt: r.createdAt.toISOString ? r.createdAt.toISOString() : r.createdAt
-        })) || [];
+        // Serialize reactions using utility
+        const serializedReactions = message.reactions ? toSerializedObject(message.reactions) : [];
 
         // Notify via Pusher BEFORE revalidatePath to prevent connection abort
         try {
-            await sendRealtimeMessage(message.projectId.toString(), {
+            const messageId = message._id;
+            const projectId = message.projectId;
+            await sendRealtimeMessage(toSerializedObject(projectId), {
                 type: 'reaction',
-                messageId: message._id.toString(),
+                messageId: toSerializedObject(messageId),
                 reactions: serializedReactions
             });
         } catch (error) {
@@ -460,21 +406,10 @@ export async function adminReplyToMessage(
         const proj = populatedMessage?.projectId as any;
 
         const serializedMessage = {
-            _id: reply._id.toString(),
-            sender: 'admin',
-            message: reply.message,
-            createdAt: reply.createdAt.toISOString(),
-            isRead: reply.isRead,
-            projectId: reply.projectId.toString(),
-            userId: reply.userId.toString(),
-            parentMessageId: parentMessageId,
+            ...toSerializedObject(populatedMessage),
             clientName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : '',
             clientEmail: user?.email || '',
             projectName: proj?.projectName || '',
-            reactions: reply.reactions || [],
-            threadReplies: [],
-            isEdited: false,
-            isPinned: false,
         };
 
         try {

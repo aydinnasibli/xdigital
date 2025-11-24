@@ -2,11 +2,12 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { MessageSquare, Send, Check, CheckCheck, Search, Plus, Smile, Reply, Edit2, Pin, X } from 'lucide-react';
-import { sendAdminMessage, markAdminMessagesAsRead, addMessageReaction, sendAdminTypingIndicator, adminReplyToMessage, adminEditMessage, togglePinMessage } from '@/app/actions/admin/messages';
+import { MessageSquare, Send, Search, Plus, Smile, Reply, Edit2, Pin, X } from 'lucide-react';
+import { sendAdminMessage, addMessageReaction, sendAdminTypingIndicator, adminReplyToMessage, adminEditMessage, togglePinMessage } from '@/app/actions/admin/messages';
 import { toast } from 'sonner';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { logInfo } from '@/lib/sentry-logger';
+import { formatMessageTime, formatConversationDate } from '@/lib/utils/date';
 
 interface Message {
     _id: string;
@@ -83,8 +84,6 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
     const [editText, setEditText] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-    const lastReadReceiptRef = useRef<string>('');
-    const markingAsReadRef = useRef<Set<string>>(new Set());
 
     // Memoize conversation grouping to prevent infinite loops
     const { conversations, projectMap } = useMemo(() => {
@@ -154,40 +153,8 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
             type: data.type
         });
 
-        // Handle read status update - when client marks admin messages as read
+        // Read receipts disabled
         if (data.type === 'read') {
-            const receiptKey = data.messageIds.sort().join(',');
-
-            // Prevent duplicate processing of the same read receipt
-            if (lastReadReceiptRef.current === receiptKey) {
-                console.log('[Admin] Duplicate read receipt, ignoring');
-                return;
-            }
-            lastReadReceiptRef.current = receiptKey;
-
-            console.log('[Admin] Received read event from client, messageIds:', data.messageIds);
-
-            // Force a new array to ensure React detects the change
-            setAllMessages(prev => {
-                let hasChanges = false;
-                const updated = prev.map(msg => {
-                    if (data.messageIds.includes(msg._id) && !msg.isRead) {
-                        hasChanges = true;
-                        console.log('[Admin] Marking message as read:', msg._id);
-                        return { ...msg, isRead: true };
-                    }
-                    return msg;
-                });
-
-                if (hasChanges) {
-                    console.log('[Admin] Updated', data.messageIds.length, 'messages to read');
-                    // Return new array reference to force re-render
-                    return [...updated];
-                } else {
-                    console.log('[Admin] No changes needed, messages already marked as read');
-                    return prev;
-                }
-            });
             return;
         }
 
@@ -334,43 +301,6 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         }
     }, [selectedProjectId, allMessages]);
 
-    // Auto-mark client messages as read - copied from client side logic
-    useEffect(() => {
-        // Don't mark as read if no project selected or document is hidden
-        if (!selectedProjectId || document.hidden || allMessages.length === 0) return;
-
-        // Filter directly from allMessages - exactly like client side does
-        const unreadClientMessages = allMessages.filter(
-            m => !m.isRead &&
-                 m.sender === 'client' &&
-                 m.projectId &&
-                 m.projectId._id === selectedProjectId &&
-                 !markingAsReadRef.current.has(m._id)
-        );
-
-        if (unreadClientMessages.length > 0) {
-            const unreadIds = unreadClientMessages.map(m => m._id);
-
-            // Add to ref to prevent duplicate calls
-            unreadIds.forEach(id => markingAsReadRef.current.add(id));
-
-            // Mark as read immediately
-            markAdminMessagesAsRead(unreadIds).then(result => {
-                if (result.success) {
-                    // Update local state immediately for instant UI feedback
-                    setAllMessages(prev => prev.map(msg =>
-                        msg.sender === 'client' && !msg.isRead ? { ...msg, isRead: true } : msg
-                    ));
-                }
-                // Remove from ref after completion
-                unreadIds.forEach(id => markingAsReadRef.current.delete(id));
-            }).catch(() => {
-                // Remove from ref on error
-                unreadIds.forEach(id => markingAsReadRef.current.delete(id));
-            });
-        }
-    }, [selectedProjectId, allMessages]);
-
     // Handle typing indicator for admin
     const handleTyping = useCallback(() => {
         if (!selectedProjectId) return;
@@ -498,11 +428,9 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         setSelectedProjectId(projectId);
     };
 
-    // Force re-computation when allMessages changes to ensure read receipts update the UI
     const selectedConversation = useMemo(() => {
         if (!selectedProjectId) return null;
         const conv = projectMap.get(selectedProjectId);
-        // Return a new object reference to ensure React detects changes
         return conv ? { ...conv } : null;
     }, [selectedProjectId, projectMap, allMessages]);
 
@@ -571,12 +499,7 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                     </div>
                                     <p className="text-sm text-gray-600 truncate">{conv.clientName}</p>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        {new Date(conv.lastMessageAt).toLocaleString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
+                                        {formatConversationDate(conv.lastMessageAt)}
                                     </p>
                                 </button>
                             ))
@@ -793,20 +716,8 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
                                                                 <div className="flex items-center gap-1">
                                                                     <span className="text-xs opacity-75">
-                                                                        {new Date(msg.createdAt).toLocaleString('en-US', {
-                                                                            hour: '2-digit',
-                                                                            minute: '2-digit'
-                                                                        })}
+                                                                        {formatMessageTime(msg.createdAt)}
                                                                     </span>
-                                                                    {msg.sender === 'admin' && (
-                                                                        <span title={msg.isRead ? 'Read' : 'Sent'}>
-                                                                            {msg.isRead ? (
-                                                                                <CheckCheck className="w-4 h-4" />
-                                                                            ) : (
-                                                                                <Check className="w-4 h-4" />
-                                                                            )}
-                                                                        </span>
-                                                                    )}
                                                                 </div>
                                                             </div>
 
@@ -890,10 +801,7 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                                             </p>
                                                                             <p className="whitespace-pre-wrap break-words">{reply.message}</p>
                                                                             <p className="text-xs opacity-60 mt-1">
-                                                                                {new Date(reply.createdAt).toLocaleString('en-US', {
-                                                                                    hour: '2-digit',
-                                                                                    minute: '2-digit'
-                                                                                })}
+                                                                                {formatMessageTime(reply.createdAt)}
                                                                             </p>
                                                                         </div>
                                                                     </div>

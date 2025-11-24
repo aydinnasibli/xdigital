@@ -97,10 +97,7 @@ export async function sendMessage(
         const project = populatedMessage?.projectId as any;
 
         const serializedMessage = {
-            ...toSerializedObject(newMessage),
-            _id: newMessage._id.toString(),
-            projectId: newMessage.projectId.toString(),
-            userId: newMessage.userId.toString(),
+            ...toSerializedObject(populatedMessage),
             clientName: userPopulated ? `${userPopulated.firstName || ''} ${userPopulated.lastName || ''}`.trim() || userPopulated.email : '',
             clientEmail: userPopulated?.email || '',
             projectName: project?.projectName || '',
@@ -128,66 +125,7 @@ export async function sendMessage(
     }
 }
 
-// Mark messages as read (client reading admin messages)
-export async function markMessagesAsRead(projectId: string): Promise<ActionResponse> {
-    try {
-        const { userId: clerkUserId } = await auth();
-
-        if (!clerkUserId) {
-            return { success: false, error: 'Unauthorized' };
-        }
-
-        await dbConnect();
-
-        const user = await User.findOne({ clerkId: clerkUserId });
-        if (!user) {
-            return { success: false, error: 'User not found' };
-        }
-
-        // Get IDs of messages being marked as read
-        const unreadMessages = await Message.find(
-            { projectId, isRead: false, sender: MessageSender.ADMIN },
-            { _id: 1 }
-        );
-
-        const messageIds = unreadMessages.map(m => m._id.toString());
-
-        console.log('[Server] Client marking admin messages as read:', messageIds.length, 'messages');
-
-        if (messageIds.length === 0) {
-            console.log('[Server] No unread admin messages to mark');
-            return { success: true };
-        }
-
-        // Update messages to read
-        const updateResult = await Message.updateMany(
-            { projectId, isRead: false, sender: MessageSender.ADMIN },
-            { isRead: true, readAt: new Date() }
-        );
-
-        console.log('[Server] Updated', updateResult.modifiedCount, 'messages to read');
-
-        // Notify via Pusher BEFORE revalidatePath
-        try {
-            console.log('[Server] Sending Pusher read event for projectId:', projectId, 'messageIds:', messageIds);
-            await sendRealtimeMessage(projectId, {
-                type: 'read',
-                messageIds: messageIds,
-            });
-            console.log('[Server] Pusher read event sent successfully');
-        } catch (error) {
-            console.error('[Server] Pusher error:', error);
-            logError(error as Error, { context: 'markMessagesAsRead-pusher' });
-        }
-
-        revalidatePath(`/dashboard/projects/${projectId}`);
-
-        return { success: true };
-    } catch (error) {
-        logError(error as Error, { context: 'markMessagesAsRead', projectId });
-        return { success: false, error: 'Failed to mark messages as read' };
-    }
-}
+// Removed - read receipts disabled
 
 // Add reaction to message (client side)
 export async function addClientMessageReaction(
@@ -240,19 +178,16 @@ export async function addClientMessageReaction(
 
         await message.save();
 
-        // Serialize reactions to remove MongoDB ObjectIds and prevent circular references
-        const serializedReactions = message.reactions?.map(r => ({
-            emoji: r.emoji,
-            userId: r.userId.toString(),
-            userName: r.userName,
-            createdAt: r.createdAt.toISOString ? r.createdAt.toISOString() : r.createdAt
-        })) || [];
+        // Serialize reactions using utility
+        const serializedReactions = message.reactions ? toSerializedObject(message.reactions) : [];
 
         // Notify via Pusher BEFORE revalidatePath to prevent connection abort
         try {
-            await sendRealtimeMessage(message.projectId.toString(), {
+            const messageId = message._id;
+            const projectId = message.projectId;
+            await sendRealtimeMessage(toSerializedObject(projectId), {
                 type: 'reaction',
-                messageId: message._id.toString(),
+                messageId: toSerializedObject(messageId),
                 reactions: serializedReactions
             });
         } catch (error) {
@@ -355,11 +290,7 @@ export async function replyToMessage(
         const project = populatedMessage?.projectId as any;
 
         const serializedMessage = {
-            ...toSerializedObject(reply),
-            _id: reply._id.toString(),
-            projectId: reply.projectId.toString(),
-            userId: reply.userId.toString(),
-            parentMessageId: parentMessageId,
+            ...toSerializedObject(populatedMessage),
             clientName: userPopulated ? `${userPopulated.firstName || ''} ${userPopulated.lastName || ''}`.trim() || userPopulated.email : '',
             clientEmail: userPopulated?.email || '',
             projectName: project?.projectName || '',
