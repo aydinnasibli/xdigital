@@ -170,7 +170,7 @@ const UserSchema = new Schema<IUser>(
 );
 
 // Compound indexes for common query patterns
-UserSchema.index({ createdAt: -1 }); // For sorting users by creation date
+// Note: createdAt index is automatically created by timestamps: true
 UserSchema.index({ isActive: 1, createdAt: -1 }); // For active user queries sorted by date
 UserSchema.index({ role: 1, isActive: 1 }); // For role-based user filtering
 
