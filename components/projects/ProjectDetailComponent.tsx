@@ -458,7 +458,9 @@ function MessagesTab({ projectId }: { projectId: string }) {
                 return prev;
             }
 
-            return deduplicateMessages([...prev, data]);
+            const newMessages = deduplicateMessages([...prev, data]);
+            console.log('[Client] Added new message, isRead:', data.isRead, 'sender:', data.sender);
+            return newMessages;
         });
 
         if (data.sender === 'admin') {
@@ -501,35 +503,52 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
     // Auto-mark admin messages as read when viewing (including new messages arriving in real-time)
     useEffect(() => {
-        if (messages.length === 0) return;
+        console.log('[Read Receipts] Effect triggered, messages count:', messages.length);
+
+        if (messages.length === 0) {
+            console.log('[Read Receipts] No messages, skipping');
+            return;
+        }
 
         // Check if document is visible (user is actually viewing the page)
-        if (document.hidden) return;
+        if (document.hidden) {
+            console.log('[Read Receipts] Document hidden, skipping');
+            return;
+        }
 
         const unreadAdminMessages = messages.filter(m => !m.isRead && m.sender === 'admin');
 
         if (unreadAdminMessages.length > 0) {
-            console.log('[Read Receipts] Found unread admin messages:', unreadAdminMessages.length, unreadAdminMessages.map(m => m._id));
+            console.log('[Read Receipts] Found', unreadAdminMessages.length, 'unread admin messages:', unreadAdminMessages.map(m => ({ id: m._id, isRead: m.isRead })));
 
-            // Debounce to avoid too many calls when messages arrive quickly
+            // Shorter debounce for faster response
             const timer = setTimeout(() => {
-                console.log('[Read Receipts] Marking messages as read after debounce');
+                console.log('[Read Receipts] Calling markMessagesAsRead API...');
                 markMessagesAsRead(projectId).then(result => {
                     if (result.success) {
-                        console.log('[Read Receipts] Successfully marked as read');
-                        // Update local state to reflect read status
-                        setMessages(prev => prev.map(msg =>
-                            msg.sender === 'admin' && !msg.isRead
-                                ? { ...msg, isRead: true }
-                                : msg
-                        ));
+                        console.log('[Read Receipts] ✅ API call successful, updating local state');
+                        // Update local state immediately
+                        setMessages(prev => {
+                            const updated = prev.map(msg =>
+                                msg.sender === 'admin' && !msg.isRead
+                                    ? { ...msg, isRead: true }
+                                    : msg
+                            );
+                            console.log('[Read Receipts] Local state updated, marked as read');
+                            return updated;
+                        });
                     } else {
-                        console.error('[Read Receipts] Failed to mark as read:', result.error);
+                        console.error('[Read Receipts] ❌ API call failed:', result.error);
                     }
                 });
-            }, 500); // 500ms debounce
+            }, 300); // Reduced to 300ms for faster response
 
-            return () => clearTimeout(timer);
+            return () => {
+                console.log('[Read Receipts] Cleanup: clearing timeout');
+                clearTimeout(timer);
+            };
+        } else {
+            console.log('[Read Receipts] No unread admin messages');
         }
     }, [messages, projectId]);
 
