@@ -108,15 +108,3 @@ export async function notifyProjectUpdate(userId: string, projectId: string, pro
     });
 }
 
-export async function notifyNewInvoice(userId: string, projectId: string, invoiceNumber: string, amount: number) {
-    return createNotification({
-        userId,
-        projectId,
-        type: NotificationType.INVOICE,
-        title: 'New Invoice',
-        message: `Invoice ${invoiceNumber} for $${amount} has been created`,
-        link: `/dashboard/projects/${projectId}`,
-        sendEmail: true,
-        emailSubject: `New Invoice: ${invoiceNumber}`,
-    });
-}

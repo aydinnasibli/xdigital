@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 
 interface SearchResult {
-    type: 'project' | 'message' | 'invoice' | 'file' | 'task';
+    type: 'project' | 'message' | 'file' | 'task';
     id: string;
     title: string;
     description?: string;
@@ -22,7 +22,6 @@ const entityOptions = [
     { value: 'tasks', label: 'Tasks', icon: CheckSquare },
     { value: 'files', label: 'Files', icon: FileIcon },
     { value: 'messages', label: 'Messages', icon: MessageSquare },
-    { value: 'invoices', label: 'Invoices', icon: FileText },
 ];
 
 export default function SearchInterface() {
@@ -83,7 +82,6 @@ export default function SearchInterface() {
             case 'task': return CheckSquare;
             case 'file': return FileIcon;
             case 'message': return MessageSquare;
-            case 'invoice': return FileText;
             default: return FileIcon;
         }
     };
@@ -98,8 +96,6 @@ export default function SearchInterface() {
                 return result.projectId ? `/dashboard/projects/${result.projectId}#files` : '#';
             case 'message':
                 return result.projectId ? `/dashboard/projects/${result.projectId}#messages` : '#';
-            case 'invoice':
-                return `/dashboard/invoices/${result.id}`;
             default:
                 return '#';
         }
@@ -111,7 +107,6 @@ export default function SearchInterface() {
             task: 'bg-purple-100 text-purple-800',
             file: 'bg-green-100 text-green-800',
             message: 'bg-yellow-100 text-yellow-800',
-            invoice: 'bg-orange-100 text-orange-800',
         };
         return colors[type] || 'bg-gray-100 text-gray-800';
     };

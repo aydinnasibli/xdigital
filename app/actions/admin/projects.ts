@@ -369,12 +369,38 @@ export async function bulkUpdateProjects(
 
         await dbConnect();
 
+        // Get projects before updating so we can notify clients
+        const projects = await Project.find({ _id: { $in: validIds } }).lean();
+
         await Project.updateMany(
             { _id: { $in: validIds } },
             { $set: updates }
         );
 
+        // Send notifications to clients if status was updated
+        if (updates.status) {
+            const statusFormatted = updates.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+            // Send notification to each affected client
+            const notificationPromises = projects.map(project =>
+                createNotification({
+                    userId: project.clerkUserId,
+                    projectId: project._id.toString(),
+                    type: NotificationType.PROJECT_UPDATE,
+                    title: 'Project Status Updated',
+                    message: `Your project "${project.projectName}" status has been updated to: ${statusFormatted}`,
+                    link: `/dashboard/projects/${project._id}`,
+                    sendEmail: true,
+                    emailSubject: `Project Status Update - ${project.projectName}`,
+                })
+            );
+
+            // Send all notifications in parallel
+            await Promise.allSettled(notificationPromises);
+        }
+
         revalidatePath('/admin/projects');
+        revalidatePath('/dashboard/projects');
 
         return { success: true, data: { updated: validIds.length } };
     } catch (error) {

@@ -5,7 +5,6 @@ import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/database/mongodb';
 import Project from '@/models/Project';
 import Message from '@/models/Message';
-import Invoice from '@/models/Invoice';
 import File from '@/models/File';
 import Task from '@/models/Task';
 import User from '@/models/User';
@@ -19,7 +18,7 @@ type ActionResponse<T = any> = {
 };
 
 interface SearchResult {
-    type: 'project' | 'message' | 'invoice' | 'file' | 'task';
+    type: 'project' | 'message' | 'file' | 'task';
     id: string;
     title: string;
     description?: string;
@@ -52,7 +51,7 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
         const results: SearchResult[] = [];
 
         // Determine which entities to search
-        const searchEntities = entities || ['projects', 'messages', 'invoices', 'files', 'tasks'];
+        const searchEntities = entities || ['projects', 'messages', 'files', 'tasks'];
 
         // Search Projects
         if (searchEntities.includes('projects')) {
@@ -99,34 +98,6 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                     projectId: project?._id?.toString() || '',
                     projectName: project?.projectName || '',
                     createdAt: m.createdAt.toISOString(),
-                });
-            });
-        }
-
-        // Search Invoices
-        if (searchEntities.includes('invoices')) {
-            const invoices = await Invoice.find({
-                userId: user._id,
-                $or: [
-                    { invoiceNumber: searchRegex },
-                    { notes: searchRegex },
-                ],
-            })
-                .populate('projectId', 'projectName')
-                .select('invoiceNumber notes projectId total createdAt')
-                .limit(10)
-                .lean();
-
-            invoices.forEach(i => {
-                const project = i.projectId as any;
-                results.push({
-                    type: 'invoice',
-                    id: i._id.toString(),
-                    title: `Invoice ${i.invoiceNumber}`,
-                    description: i.notes || `Total: $${i.total}`,
-                    projectId: project?._id?.toString() || '',
-                    projectName: project?.projectName || '',
-                    createdAt: i.createdAt.toISOString(),
                 });
             });
         }

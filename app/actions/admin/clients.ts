@@ -4,7 +4,6 @@
 import dbConnect from '@/lib/database/mongodb';
 import User from '@/models/User';
 import Project from '@/models/Project';
-import Invoice from '@/models/Invoice';
 import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
 import { logError } from '@/lib/sentry-logger';
@@ -44,16 +43,12 @@ export async function getAllClients(filters?: {
         // Get project counts and stats for each client
         const clientsWithStats = await Promise.all(
             clients.map(async (client) => {
-                const [totalProjects, activeProjects, totalRevenue] = await Promise.all([
+                const [totalProjects, activeProjects] = await Promise.all([
                     Project.countDocuments({ userId: client._id }),
                     Project.countDocuments({
                         userId: client._id,
                         status: { $in: ['pending', 'in_progress'] },
                     }),
-                    Invoice.aggregate([
-                        { $match: { userId: client._id, status: 'paid' } },
-                        { $group: { _id: null, total: { $sum: '$total' } } },
-                    ]),
                 ]);
 
                 return {
@@ -61,7 +56,6 @@ export async function getAllClients(filters?: {
                     _id: client._id.toString(),
                     totalProjects,
                     activeProjects,
-                    totalRevenue: totalRevenue[0]?.total || 0,
                     name: `${client.firstName || ''} ${client.lastName || ''}`.trim() || 'N/A',
                 };
             })
@@ -97,12 +91,9 @@ export async function getClientDetails(clientId: string): Promise<ActionResponse
             return { success: false, error: 'Client not found' };
         }
 
-        // Get projects, invoices, and stats
-        const [projects, invoices, projectStats, invoiceStats] = await Promise.all([
+        // Get projects and stats
+        const [projects, projectStats] = await Promise.all([
             Project.find({ userId: clientId })
-                .sort({ createdAt: -1 })
-                .lean(),
-            Invoice.find({ userId: clientId })
                 .sort({ createdAt: -1 })
                 .lean(),
             Project.aggregate([
@@ -114,21 +105,9 @@ export async function getClientDetails(clientId: string): Promise<ActionResponse
                     },
                 },
             ]),
-            Invoice.aggregate([
-                { $match: { userId: new mongoose.Types.ObjectId(clientId) } },
-                {
-                    $group: {
-                        _id: '$status',
-                        count: { $sum: 1 },
-                        total: { $sum: '$total' },
-                    },
-                },
-            ]),
         ]);
 
         const serializedProjects = projects.map(p => toSerializedObject(p));
-
-        const serializedInvoices = invoices.map(i => toSerializedObject(i));
 
         const serializedClient = {
             ...toSerializedObject<Record<string, unknown>>(client),
@@ -140,10 +119,8 @@ export async function getClientDetails(clientId: string): Promise<ActionResponse
             data: {
                 client: serializedClient,
                 projects: serializedProjects,
-                invoices: serializedInvoices,
                 stats: {
                     projects: projectStats,
-                    invoices: invoiceStats,
                 },
             },
         };

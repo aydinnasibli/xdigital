@@ -1,7 +1,6 @@
 // app/admin/projects/[id]/page.tsx
 import Link from 'next/link';
 import { getAdminProject } from '@/app/actions/admin/projects';
-import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectTasks } from '@/app/actions/tasks';
 import { getProjectFiles } from '@/app/actions/files';
 import { ArrowLeft, User, Mail, Calendar, Package } from 'lucide-react';
@@ -21,9 +20,8 @@ export default async function AdminProjectDetailPage({
 
 }) {
     const resolvedParams = await params;
-    const [projectResult, invoicesResult, tasksResult, filesResult] = await Promise.all([
+    const [projectResult, tasksResult, filesResult] = await Promise.all([
         getAdminProject(resolvedParams.id),
-        getProjectInvoices(resolvedParams.id),
         getProjectTasks(resolvedParams.id),
         getProjectFiles(resolvedParams.id),
     ]);
@@ -37,7 +35,6 @@ export default async function AdminProjectDetailPage({
     }
 
     const project = projectResult.data;
-    const invoices = invoicesResult.success ? invoicesResult.data : [];
     const tasks = tasksResult.success ? tasksResult.data : [];
     const files = filesResult.success ? filesResult.data : [];
 
@@ -177,47 +174,6 @@ export default async function AdminProjectDetailPage({
                         </div>
                     )}
 
-                    {/* Invoices */}
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                            Invoices ({invoices.length})
-                        </h3>
-                        {invoices.length > 0 ? (
-                            <div className="space-y-2">
-                                {invoices.map((invoice: any) => (
-                                    <div
-                                        key={invoice._id}
-                                        className="p-3 bg-gray-50 rounded flex justify-between items-center"
-                                    >
-                                        <div>
-                                            <p className="font-medium text-gray-900">
-                                                {invoice.invoiceNumber}
-                                            </p>
-                                            <p className="text-sm text-gray-500">
-                                                ${invoice.total}
-                                            </p>
-                                        </div>
-                                        <span
-                                            className={`text-xs px-2 py-1 rounded ${invoice.status === 'paid'
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-yellow-100 text-yellow-800'
-                                                }`}
-                                        >
-                                            {invoice.status}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-gray-500 text-sm">No invoices yet</p>
-                        )}
-                        <Link
-                            href={`/admin/invoices/create?projectId=${project._id}`}
-                            className="mt-4 block text-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                            Create Invoice
-                        </Link>
-                    </div>
                 </div>
             </div>
         </div>

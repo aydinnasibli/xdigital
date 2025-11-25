@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { deleteProject } from '@/app/actions/projects';
 import { getMessages, sendMessage, addClientMessageReaction, sendClientTypingIndicator, replyToMessage, editMessage } from '@/app/actions/messages';
-import { getProjectInvoices } from '@/app/actions/invoices';
 import { getProjectAnalytics } from '@/app/actions/monitoring';
 import dynamic from 'next/dynamic';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
@@ -28,18 +27,6 @@ interface AnalyticsSummary {
     visitors: number;
     conversions: number;
     engagement: number;
-}
-
-
-interface Invoice {
-    _id: string;
-    invoiceNumber: string;
-    status: string;
-    total: number;
-    currency: string;
-    dueDate: string;
-    issueDate: string;
-    paidDate?: string;
 }
 
 
@@ -234,93 +221,7 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
         </div>
     );
 }
-function InvoicesTab({ projectId }: { projectId: string }) {
-    const [invoices, setInvoices] = useState<Invoice[]>([]);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadInvoices();
-    }, [projectId]);
-
-    const loadInvoices = async () => {
-        setLoading(true);
-        try {
-            const result = await getProjectInvoices(projectId);
-            if (result.success && result.data) {
-                setInvoices(result.data);
-            }
-        } catch (error) {
-            console.error('Error loading invoices:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
-        return <div className="text-center py-8">Loading invoices...</div>;
-    }
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'paid':
-                return 'bg-green-100 text-green-800';
-            case 'sent':
-                return 'bg-blue-100 text-blue-800';
-            case 'overdue':
-                return 'bg-red-100 text-red-800';
-            case 'draft':
-                return 'bg-gray-100 text-gray-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
-    };
-
-    return (
-        <div className="bg-white p-6 rounded-lg border">
-            <h2 className="text-xl font-semibold mb-4">Invoices</h2>
-            {invoices.length === 0 ? (
-                <p className="text-gray-500">No invoices yet. Invoices will appear here.</p>
-            ) : (
-                <div className="space-y-4">
-                    {invoices.map((invoice) => (
-                        <div key={invoice._id} className="border rounded-lg p-4">
-                            <div className="flex justify-between items-start mb-3">
-                                <div>
-                                    <h3 className="font-semibold">{invoice.invoiceNumber}</h3>
-                                    <p className="text-sm text-gray-600">
-                                        Issued: {new Date(invoice.issueDate).toLocaleDateString()}
-                                    </p>
-                                </div>
-                                <span className={`px-3 py-1 text-sm rounded-full ${getStatusColor(invoice.status)}`}>
-                                    {invoice.status.toUpperCase()}
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p className="text-2xl font-bold">
-                                        {invoice.currency} {invoice.total.toFixed(2)}
-                                    </p>
-                                    <p className="text-sm text-gray-600">
-                                        Due: {new Date(invoice.dueDate).toLocaleDateString()}
-                                    </p>
-                                </div>
-                                {invoice.status === 'sent' && (
-                                    <button
-                                        onClick={() => alert('Online payment integration is being set up. Please contact the admin for payment instructions.')}
-                                        className="px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed hover:bg-gray-500"
-                                        title="Payment integration coming soon"
-                                    >
-                                        Pay Now (Coming Soon)
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
 const COMMON_EMOJIS = ['👍', '❤️', '😊', '🎉', '🔥', '👏', '😂', '😍'];
 
 // Add this component before the main ProjectDetailClient component
@@ -1135,7 +1036,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'milestones' | 'messages' | 'invoices' | 'analytics' | 'seo' | 'performance'>(
+    const [activeTab, setActiveTab] = useState<'overview' | 'milestones' | 'messages' | 'analytics' | 'seo' | 'performance'>(
         'overview'
     );
     const [isPending, startTransition] = useTransition();
@@ -1271,16 +1172,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             </button>
                         </>
                     )}
-
-                    <button
-                        onClick={() => setActiveTab('invoices')}
-                        className={`pb-3 px-1 border-b-2 ${activeTab === 'invoices'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-600 hover:text-gray-900'
-                            }`}
-                    >
-                        Invoices
-                    </button>
                 </div>
             </div>
 
@@ -1455,7 +1346,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {activeTab === 'analytics' && <AnalyticsTab projectId={project._id} />}
             {activeTab === 'seo' && project.deploymentUrl && <SEODashboard projectId={project._id} />}
             {activeTab === 'performance' && project.deploymentUrl && <PerformanceDashboard projectId={project._id} />}
-            {activeTab === 'invoices' && <InvoicesTab projectId={project._id} />}
         </div>
     );
 }

@@ -170,7 +170,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
                                 How would you like to receive notifications?
                             </p>
 
-                            {['Email notifications', 'Project updates', 'Message alerts', 'Invoice notifications'].map((option) => (
+                            {['Email notifications', 'Project updates', 'Message alerts'].map((option) => (
                                 <label key={option} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -225,7 +225,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
                                 <li>• Communicate with your team</li>
                                 <li>• Upload and share files</li>
                                 <li>• Track project progress</li>
-                                <li>• View invoices and payments</li>
+                                <li>• View payment history</li>
                             </ul>
                         </div>
                     </div>

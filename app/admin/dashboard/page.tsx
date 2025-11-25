@@ -6,12 +6,8 @@ import {
     getAdminClientStats
 } from '@/app/actions/admin/clients';
 import {
-    getAdminInvoiceStats
-} from '@/app/actions/admin/invoices';
-import {
     FolderKanban,
     Users,
-    DollarSign,
     MessageSquare,
     Clock,
     CheckCircle,
@@ -26,15 +22,13 @@ import { DashboardCharts } from '@/components/analytics/DashboardCharts';
 import Link from 'next/link';
 
 export default async function AdminDashboardPage() {
-    const [projectStats, clientStats, invoiceStats] = await Promise.all([
+    const [projectStats, clientStats] = await Promise.all([
         getAdminProjectStats(),
         getAdminClientStats(),
-        getAdminInvoiceStats(),
     ]);
 
     const projects = projectStats.success ? projectStats.data : null;
     const clients = clientStats.success ? clientStats.data : null;
-    const invoices = invoiceStats.success ? invoiceStats.data : null;
 
     // Calculate trends (mock data - you can replace with real calculations)
     const projectTrend = ((projects?.thisMonth || 0) / Math.max((projects?.total || 1) - (projects?.thisMonth || 0), 1) * 100).toFixed(1);
@@ -75,7 +69,7 @@ export default async function AdminDashboardPage() {
             </div>
 
             {/* Modern Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <ModernStatCard
                     title="Total Projects"
                     value={projects?.total || 0}
@@ -95,13 +89,12 @@ export default async function AdminDashboardPage() {
                     trendLabel="vs last period"
                 />
                 <ModernStatCard
-                    title="Total Revenue"
-                    value={`$${invoices?.totalRevenue?.toLocaleString() || 0}`}
-                    subtitle={`$${invoices?.paidThisMonth?.toLocaleString() || 0} this month`}
-                    icon={DollarSign}
+                    title="Active Clients"
+                    value={clients?.clientsWithActiveProjects || 0}
+                    subtitle="With active projects"
+                    icon={Users}
                     gradient="from-purple-500 to-purple-600"
-                    trend={15.3}
-                    trendLabel="vs last month"
+                    trendLabel="Currently engaged"
                 />
             </div>
 
@@ -131,53 +124,11 @@ export default async function AdminDashboardPage() {
             </div>
 
             {/* Two Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Invoice Overview - Takes 2 columns */}
-                <div className="lg:col-span-2">
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 h-full">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-gray-900">Invoice Overview</h2>
-                            <Link
-                                href="/admin/invoices"
-                                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
-                            >
-                                View All
-                                <ArrowUpRight className="w-4 h-4" />
-                            </Link>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div className="relative overflow-hidden p-5 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl border border-yellow-200">
-                                <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-200/30 rounded-full -mr-10 -mt-10"></div>
-                                <p className="text-sm font-medium text-yellow-800 mb-1">Pending</p>
-                                <p className="text-3xl font-bold text-yellow-700">
-                                    {invoices?.pendingInvoices || 0}
-                                </p>
-                                <p className="text-xs text-yellow-600 mt-1">Invoices</p>
-                            </div>
-                            <div className="relative overflow-hidden p-5 bg-gradient-to-br from-red-50 to-rose-50 rounded-xl border border-red-200">
-                                <div className="absolute top-0 right-0 w-20 h-20 bg-red-200/30 rounded-full -mr-10 -mt-10"></div>
-                                <p className="text-sm font-medium text-red-800 mb-1">Overdue</p>
-                                <p className="text-3xl font-bold text-red-700">
-                                    {invoices?.overdueInvoices || 0}
-                                </p>
-                                <p className="text-xs text-red-600 mt-1">Need attention</p>
-                            </div>
-                            <div className="relative overflow-hidden p-5 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
-                                <div className="absolute top-0 right-0 w-20 h-20 bg-green-200/30 rounded-full -mr-10 -mt-10"></div>
-                                <p className="text-sm font-medium text-green-800 mb-1">Paid</p>
-                                <p className="text-2xl font-bold text-green-700">
-                                    ${invoices?.paidThisMonth?.toLocaleString() || 0}
-                                </p>
-                                <p className="text-xs text-green-600 mt-1">This month</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                 {/* Client Activity */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                     <h2 className="text-xl font-bold text-gray-900 mb-6">Client Activity</h2>
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium text-gray-700">Active Projects</span>
@@ -216,7 +167,7 @@ export default async function AdminDashboardPage() {
             )}
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <QuickActionCard
                     href="/admin/projects"
                     icon="📁"
@@ -230,13 +181,6 @@ export default async function AdminDashboardPage() {
                     title="Manage Clients"
                     description="View client details and notes"
                     gradient="from-purple-500 to-pink-500"
-                />
-                <QuickActionCard
-                    href="/admin/invoices"
-                    icon="💰"
-                    title="Manage Invoices"
-                    description="Create and track invoices"
-                    gradient="from-emerald-500 to-teal-500"
                 />
             </div>
         </div>

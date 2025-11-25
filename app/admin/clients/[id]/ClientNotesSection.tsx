@@ -20,7 +20,6 @@ interface Note {
     content: string;
     tags?: string[];
     isPinned: boolean;
-    reminderDate?: string;
     authorId: {
         firstName: string;
         lastName: string;
@@ -43,7 +42,6 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
         content: '',
         tags: [] as string[],
         isPinned: false,
-        reminderDate: '',
     });
 
     const [tagInput, setTagInput] = useState('');
@@ -55,7 +53,6 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
             content: '',
             tags: [],
             isPinned: false,
-            reminderDate: '',
         });
         setTagInput('');
         setIsAdding(false);
@@ -87,14 +84,9 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
 
         setLoading(true);
 
-        const data = {
-            ...formData,
-            reminderDate: formData.reminderDate ? new Date(formData.reminderDate) : undefined,
-        };
-
         const result = editingId
-            ? await updateClientNote(editingId, data)
-            : await createClientNote({ ...data, clientId });
+            ? await updateClientNote(editingId, formData)
+            : await createClientNote({ ...formData, clientId });
 
         if (result.success) {
             toast.success(editingId ? 'Note updated successfully' : 'Note created successfully');
@@ -113,7 +105,6 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
             content: note.content,
             tags: note.tags || [],
             isPinned: note.isPinned,
-            reminderDate: note.reminderDate ? new Date(note.reminderDate).toISOString().split('T')[0] : '',
         });
         setEditingId(note._id);
         setIsAdding(true);
@@ -177,34 +168,21 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
                         {editingId ? 'Edit Note' : 'New Note'}
                     </h3>
                     <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Type
-                                </label>
-                                <select
-                                    value={formData.type}
-                                    onChange={(e) => setFormData({ ...formData, type: e.target.value as NoteType })}
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                                >
-                                    <option value={NoteType.GENERAL}>General</option>
-                                    <option value={NoteType.IMPORTANT}>Important</option>
-                                    <option value={NoteType.RISK}>Risk</option>
-                                    <option value={NoteType.OPPORTUNITY}>Opportunity</option>
-                                    <option value={NoteType.FEEDBACK}>Feedback</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Reminder Date (Optional)
-                                </label>
-                                <input
-                                    type="date"
-                                    value={formData.reminderDate}
-                                    onChange={(e) => setFormData({ ...formData, reminderDate: e.target.value })}
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                                />
-                            </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Type
+                            </label>
+                            <select
+                                value={formData.type}
+                                onChange={(e) => setFormData({ ...formData, type: e.target.value as NoteType })}
+                                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                            >
+                                <option value={NoteType.GENERAL}>General</option>
+                                <option value={NoteType.IMPORTANT}>Important</option>
+                                <option value={NoteType.RISK}>Risk</option>
+                                <option value={NoteType.OPPORTUNITY}>Opportunity</option>
+                                <option value={NoteType.FEEDBACK}>Feedback</option>
+                            </select>
                         </div>
 
                         <div>
@@ -340,11 +318,6 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
                                                 </span>
                                             ))}
                                         </div>
-                                    )}
-                                    {note.reminderDate && (
-                                        <p className="text-xs text-purple-600 mt-2">
-                                            Reminder: {new Date(note.reminderDate).toLocaleDateString()}
-                                        </p>
                                     )}
                                     <div className="flex items-center gap-2 mt-3 text-xs text-gray-500">
                                         <span>{note.authorName}</span>

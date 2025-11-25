@@ -59,7 +59,6 @@ export async function createClientNote(data: {
     content: string;
     tags?: string[];
     isPinned?: boolean;
-    reminderDate?: Date;
 }): Promise<ActionResponse> {
     try {
         await requireAdmin();
@@ -109,7 +108,6 @@ export async function updateClientNote(noteId: string, data: Partial<{
     content: string;
     tags: string[];
     isPinned: boolean;
-    reminderDate: Date;
 }>): Promise<ActionResponse> {
     try {
         await requireAdmin();

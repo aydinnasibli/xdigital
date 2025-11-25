@@ -67,9 +67,6 @@ export function GlobalSearchDialog() {
             case 'message':
                 url = `/dashboard/projects/${result.projectId}`;
                 break;
-            case 'invoice':
-                url = `/dashboard/projects/${result.projectId}`;
-                break;
             case 'file':
                 url = `/dashboard/projects/${result.projectId}/files`;
                 break;
@@ -87,7 +84,6 @@ export function GlobalSearchDialog() {
         switch (type) {
             case 'project': return '📁';
             case 'message': return '💬';
-            case 'invoice': return '💰';
             case 'file': return '📄';
             case 'task': return '✅';
             default: return '🔍';

@@ -105,7 +105,6 @@ interface StatsCardsProps {
         totalProjects: number;
         activeProjects: number;
         totalRevenue: number;
-        pendingInvoices: number;
     };
 }
 
@@ -128,12 +127,6 @@ export function StatsCards({ stats }: StatsCardsProps) {
             value: `$${stats.totalRevenue.toLocaleString()}`,
             icon: '💰',
             color: 'bg-purple-500',
-        },
-        {
-            title: 'Pending Invoices',
-            value: stats.pendingInvoices,
-            icon: '📄',
-            color: 'bg-orange-500',
         },
     ];
 

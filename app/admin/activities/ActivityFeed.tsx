@@ -61,7 +61,6 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
         'task',
         'file',
         'message',
-        'invoice',
         'user',
         'template',
         'note',
@@ -105,8 +104,6 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
                 return FileText;
             case 'message':
                 return MessageSquare;
-            case 'invoice':
-                return FileText;
             default:
                 return Activity;
         }

@@ -68,53 +68,6 @@ export async function sendEmail(params: SendEmailParams): Promise<{ success: boo
  * Email templates
  */
 
-export async function sendInvoiceEmail(
-    to: string,
-    invoiceNumber: string,
-    amount: number,
-    projectName: string,
-    invoiceLink: string
-) {
-    return sendEmail({
-        to,
-        subject: `New Invoice: ${invoiceNumber}`,
-        html: `
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
-        .content { background: #f9fafb; padding: 30px; }
-        .button { display: inline-block; background: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; }
-        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>New Invoice</h1>
-        </div>
-        <div class="content">
-            <h2>Invoice ${invoiceNumber}</h2>
-            <p><strong>Project:</strong> ${projectName}</p>
-            <p><strong>Amount:</strong> $${amount}</p>
-            <p>A new invoice has been created for your project. Please review and process payment at your earliest convenience.</p>
-            <p style="text-align: center; margin: 30px 0;">
-                <a href="${invoiceLink}" class="button">View Invoice</a>
-            </p>
-        </div>
-        <div class="footer">
-            <p>XDigital SaaS Platform</p>
-        </div>
-    </div>
-</body>
-</html>
-        `,
-    });
-}
-
 export async function sendTaskAssignedEmail(
     to: string,
     taskTitle: string,
