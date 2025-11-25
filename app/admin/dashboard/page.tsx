@@ -9,9 +9,6 @@ import {
     getAdminInvoiceStats
 } from '@/app/actions/admin/invoices';
 import {
-    getUnreadMessageCount
-} from '@/app/actions/admin/messages';
-import {
     FolderKanban,
     Users,
     DollarSign,
@@ -29,17 +26,15 @@ import { DashboardCharts } from '@/components/analytics/DashboardCharts';
 import Link from 'next/link';
 
 export default async function AdminDashboardPage() {
-    const [projectStats, clientStats, invoiceStats, messageCount] = await Promise.all([
+    const [projectStats, clientStats, invoiceStats] = await Promise.all([
         getAdminProjectStats(),
         getAdminClientStats(),
         getAdminInvoiceStats(),
-        getUnreadMessageCount(),
     ]);
 
     const projects = projectStats.success ? projectStats.data : null;
     const clients = clientStats.success ? clientStats.data : null;
     const invoices = invoiceStats.success ? invoiceStats.data : null;
-    const unreadMessages = messageCount.success ? messageCount.data.count : 0;
 
     // Calculate trends (mock data - you can replace with real calculations)
     const projectTrend = ((projects?.thisMonth || 0) / Math.max((projects?.total || 1) - (projects?.thisMonth || 0), 1) * 100).toFixed(1);
@@ -107,14 +102,6 @@ export default async function AdminDashboardPage() {
                     gradient="from-purple-500 to-purple-600"
                     trend={15.3}
                     trendLabel="vs last month"
-                />
-                <ModernStatCard
-                    title="Unread Messages"
-                    value={unreadMessages}
-                    subtitle="Requires attention"
-                    icon={MessageSquare}
-                    gradient="from-orange-500 to-orange-600"
-                    urgent={unreadMessages > 5}
                 />
             </div>
 

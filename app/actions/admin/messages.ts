@@ -22,7 +22,6 @@ type ActionResponse<T = any> = {
 export async function getAllMessages(filters?: {
     projectId?: string;
     clientId?: string;
-    unreadOnly?: boolean;
 }): Promise<ActionResponse> {
     try {
         await requireAdmin();
@@ -36,11 +35,6 @@ export async function getAllMessages(filters?: {
 
         if (filters?.clientId && mongoose.Types.ObjectId.isValid(filters.clientId)) {
             query.userId = filters.clientId;
-        }
-
-        if (filters?.unreadOnly) {
-            query.isRead = false;
-            query.sender = MessageSender.CLIENT; // Only client messages need to be read by admin
         }
 
         const messages = await Message.find(query)
@@ -96,6 +90,11 @@ export async function sendAdminMessage(
             return { success: false, error: 'Message cannot be empty' };
         }
 
+        // Input validation: Check message length
+        if (message.trim().length > 5000) {
+            return { success: false, error: 'Message too long (max 5000 characters)' };
+        }
+
         await dbConnect();
 
         // Get project to find the client userId
@@ -110,7 +109,6 @@ export async function sendAdminMessage(
             clerkUserId: userId, // Admin's clerkId
             sender: MessageSender.ADMIN,
             message: message.trim(),
-            isRead: false,
         });
 
         // Get project and user details for Pusher payload
@@ -198,23 +196,7 @@ export async function getAdminMessage(messageId: string): Promise<ActionResponse
     }
 }
 
-// Get unread message count for admin
-export async function getUnreadMessageCount(): Promise<ActionResponse> {
-    try {
-        await requireAdmin();
-        await dbConnect();
-
-        const count = await Message.countDocuments({
-            sender: MessageSender.CLIENT,
-            isRead: false,
-        });
-
-        return { success: true, data: { count } };
-    } catch (error) {
-        logError(error as Error, { context: 'getUnreadMessageCount' });
-        return { success: false, error: 'Failed to fetch unread count' };
-    }
-}
+// Removed - read receipts disabled
 
 // Get messages by project (for admin project view)
 export async function getAdminProjectMessages(
@@ -376,6 +358,16 @@ export async function adminReplyToMessage(
 ): Promise<ActionResponse> {
     try {
         const { userId } = await getAdminSession();
+
+        // Input validation
+        if (!message.trim()) {
+            return { success: false, error: 'Message cannot be empty' };
+        }
+
+        if (message.trim().length > 5000) {
+            return { success: false, error: 'Message too long (max 5000 characters)' };
+        }
+
         await dbConnect();
 
         const project = await mongoose.model('Project').findById(projectId);
@@ -390,7 +382,6 @@ export async function adminReplyToMessage(
             sender: MessageSender.ADMIN,
             message: message.trim(),
             parentMessageId: new mongoose.Types.ObjectId(parentMessageId),
-            isRead: false,
         });
 
         await Message.findByIdAndUpdate(parentMessageId, {
@@ -442,6 +433,15 @@ export async function adminEditMessage(
 
         if (!mongoose.Types.ObjectId.isValid(messageId)) {
             return { success: false, error: 'Invalid message ID' };
+        }
+
+        // Input validation
+        if (!newMessage.trim()) {
+            return { success: false, error: 'Message cannot be empty' };
+        }
+
+        if (newMessage.trim().length > 5000) {
+            return { success: false, error: 'Message too long (max 5000 characters)' };
         }
 
         await dbConnect();

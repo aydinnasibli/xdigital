@@ -4,7 +4,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { sendAdminMessage } from '@/app/actions/admin/messages';
 import { useRouter } from 'next/navigation';
-import { Send, Check, CheckCheck } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { logInfo, logWarning } from '@/lib/sentry-logger';
@@ -14,7 +14,6 @@ interface Message {
     sender: 'client' | 'admin';
     message: string;
     createdAt: string;
-    isRead?: boolean;
     clientName?: string;
 }
 
@@ -67,7 +66,6 @@ export default function MessageSection({
                 sender: data.sender,
                 message: data.message,
                 createdAt: data.createdAt,
-                isRead: data.isRead,
                 clientName: data.clientName,
             }];
             return deduplicateMessages(updatedMessages);
@@ -116,7 +114,6 @@ export default function MessageSection({
                     sender: result.data.sender,
                     message: result.data.message,
                     createdAt: result.data.createdAt,
-                    isRead: result.data.isRead,
                 }];
                 return deduplicateMessages(updatedMessages);
             });
@@ -163,15 +160,6 @@ export default function MessageSection({
                                                 minute: '2-digit'
                                             })}
                                         </span>
-                                        {msg.sender === 'admin' && (
-                                            <span className="text-gray-400" title={msg.isRead ? 'Read' : 'Sent'}>
-                                                {msg.isRead ? (
-                                                    <CheckCheck className="w-4 h-4 text-blue-500" />
-                                                ) : (
-                                                    <Check className="w-4 h-4" />
-                                                )}
-                                            </span>
-                                        )}
                                     </div>
                                 </div>
                                 <p className="text-gray-700 whitespace-pre-wrap">{msg.message}</p>

@@ -39,10 +39,6 @@ export interface IMessage extends Document {
     // Mentions
     mentions?: IMention[];
 
-    // Read status
-    isRead: boolean;
-    readAt?: Date;
-
     // Pinning
     isPinned: boolean;
     pinnedAt?: Date;
@@ -137,12 +133,6 @@ const MessageSchema = new Schema<IMessage>(
                 required: true,
             },
         }],
-        // Read status
-        isRead: {
-            type: Boolean,
-            default: false,
-        },
-        readAt: Date,
         // Pinning
         isPinned: {
             type: Boolean,
@@ -171,8 +161,6 @@ MessageSchema.index({ projectId: 1, createdAt: -1 });
 MessageSchema.index({ userId: 1, createdAt: -1 });
 MessageSchema.index({ clerkUserId: 1, createdAt: -1 });
 // Compound indexes for common query patterns
-MessageSchema.index({ projectId: 1, isRead: 1, sender: 1 }); // For filtering unread messages
-MessageSchema.index({ sender: 1, isRead: 1, createdAt: -1 }); // For sender-based filtering
 MessageSchema.index({ parentMessageId: 1, createdAt: -1 }); // For threaded message queries
 
 const Message = (mongoose.models?.Message as Model<IMessage>) || mongoose.model<IMessage>('Message', MessageSchema);

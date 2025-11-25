@@ -14,7 +14,6 @@ interface Message {
     sender: 'client' | 'admin';
     message: string;
     createdAt: string;
-    isRead: boolean;
     clientName: string;
     clientEmail: string;
     projectId: {
@@ -59,7 +58,6 @@ interface Conversation {
     clientName: string;
     clientEmail: string;
     messages: Message[];
-    unreadCount: number;
     lastMessageAt: string;
 }
 
@@ -104,15 +102,11 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                     clientName: msg.clientName,
                     clientEmail: msg.clientEmail,
                     messages: [],
-                    unreadCount: 0,
                     lastMessageAt: msg.createdAt,
                 });
             }
             const conv = map.get(projId)!;
             conv.messages.push(msg);
-            if (!msg.isRead && msg.sender === 'client') {
-                conv.unreadCount++;
-            }
             if (new Date(msg.createdAt) > new Date(conv.lastMessageAt)) {
                 conv.lastMessageAt = msg.createdAt;
             }
@@ -200,7 +194,6 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                     sender: data.sender,
                     message: data.message,
                     createdAt: data.createdAt || new Date().toISOString(),
-                    isRead: data.isRead || false,
                     clientName: data.clientName || 'Client',
                     clientEmail: data.clientEmail || '',
                     projectId: {
@@ -239,7 +232,6 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                 sender: data.sender,
                 message: data.message,
                 createdAt: data.createdAt || new Date().toISOString(),
-                isRead: data.isRead || false,
                 clientName: data.clientName || 'Client',
                 clientEmail: data.clientEmail || '',
                 projectId: {
@@ -311,11 +303,15 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         }
 
         // Send typing start
-        sendAdminTypingIndicator(selectedProjectId, true);
+        sendAdminTypingIndicator(selectedProjectId, true).catch(err => {
+            console.error('Error sending typing indicator:', err);
+        });
 
         // Set timeout to clear typing indicator
         typingTimeoutRef.current = setTimeout(() => {
-            sendAdminTypingIndicator(selectedProjectId, false);
+            sendAdminTypingIndicator(selectedProjectId, false).catch(err => {
+                console.error('Error sending typing indicator:', err);
+            });
         }, 3000);
     }, [selectedProjectId]);
 
@@ -434,11 +430,6 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
         return conv ? { ...conv } : null;
     }, [selectedProjectId, projectMap, allMessages]);
 
-    const totalUnreadCount = useMemo(() =>
-        conversations.reduce((sum, conv) => sum + conv.unreadCount, 0),
-        [conversations]
-    );
-
     // Get typing indicators for selected project
     const currentTypingIndicators = useMemo(() =>
         selectedProjectId
@@ -470,12 +461,6 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
-                        {totalUnreadCount > 0 && (
-                            <div className="mt-3 px-3 py-2 bg-orange-50 text-orange-800 rounded-lg text-sm font-medium flex items-center justify-between">
-                                <span>{totalUnreadCount} unread message{totalUnreadCount !== 1 ? 's' : ''}</span>
-                                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                            </div>
-                        )}
                     </div>
 
                     <div className="overflow-y-auto max-h-[600px]">
@@ -491,11 +476,6 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                 >
                                     <div className="flex justify-between items-start mb-1">
                                         <p className="font-semibold text-gray-900 truncate">{conv.projectName}</p>
-                                        {conv.unreadCount > 0 && (
-                                            <span className="inline-flex items-center justify-center px-2 py-0.5 ml-2 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
-                                                {conv.unreadCount}
-                                            </span>
-                                        )}
                                     </div>
                                     <p className="text-sm text-gray-600 truncate">{conv.clientName}</p>
                                     <p className="text-xs text-gray-500 mt-1">

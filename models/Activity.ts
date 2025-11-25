@@ -119,7 +119,7 @@ const ActivitySchema = new Schema<IActivity>(
         createdAt: {
             type: Date,
             default: Date.now,
-            index: true,
+            // Note: index handled by TTL index below (line 137)
         },
     },
     {
