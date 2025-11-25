@@ -76,9 +76,6 @@ export default async function AdminClientsPage({
                                     Active Projects
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Total Revenue
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Joined
                                 </th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -89,7 +86,7 @@ export default async function AdminClientsPage({
                         <tbody className="bg-white divide-y divide-gray-200">
                             {clients.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center">
+                                    <td colSpan={6} className="px-6 py-12 text-center">
                                         <p className="text-gray-500">No clients found</p>
                                     </td>
                                 </tr>
@@ -129,9 +126,6 @@ export default async function AdminClientsPage({
                                                 {client.activeProjects}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-900">
-                                            ${client.totalRevenue.toLocaleString()}
-                                        </td>
                                         <td className="px-6 py-4 text-sm text-gray-500">
                                             {new Date(client.createdAt).toLocaleDateString()}
                                         </td>
@@ -154,7 +148,7 @@ export default async function AdminClientsPage({
 
             {/* Summary */}
             <div className="bg-blue-50 rounded-lg p-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <p className="text-sm text-blue-800">Total Clients</p>
                         <p className="text-2xl font-bold text-blue-900">{clients.length}</p>
@@ -163,12 +157,6 @@ export default async function AdminClientsPage({
                         <p className="text-sm text-blue-800">With Active Projects</p>
                         <p className="text-2xl font-bold text-blue-900">
                             {clients.filter((c: any) => c.activeProjects > 0).length}
-                        </p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-blue-800">Total Revenue</p>
-                        <p className="text-2xl font-bold text-blue-900">
-                            ${clients.reduce((sum: number, c: any) => sum + c.totalRevenue, 0).toLocaleString()}
                         </p>
                     </div>
                 </div>
