@@ -137,14 +137,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             Feedback
                         </NavLink>
                         <NavLink
-                            href="/admin/invoices"
-                            icon={FileText}
-                            active={isActive('/admin/invoices')}
-                            onClick={() => setSidebarOpen(false)}
-                        >
-                            Invoices
-                        </NavLink>
-                        <NavLink
                             href="/admin/analytics"
                             icon={BarChart3}
                             active={isActive('/admin/analytics')}

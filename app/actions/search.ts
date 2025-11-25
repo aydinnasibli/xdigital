@@ -5,7 +5,6 @@ import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/database/mongodb';
 import Project from '@/models/Project';
 import Message from '@/models/Message';
-import Invoice from '@/models/Invoice';
 import File from '@/models/File';
 import Task from '@/models/Task';
 import User from '@/models/User';
@@ -99,34 +98,6 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
                     projectId: project?._id?.toString() || '',
                     projectName: project?.projectName || '',
                     createdAt: m.createdAt.toISOString(),
-                });
-            });
-        }
-
-        // Search Invoices
-        if (searchEntities.includes('invoices')) {
-            const invoices = await Invoice.find({
-                userId: user._id,
-                $or: [
-                    { invoiceNumber: searchRegex },
-                    { notes: searchRegex },
-                ],
-            })
-                .populate('projectId', 'projectName')
-                .select('invoiceNumber notes projectId total createdAt')
-                .limit(10)
-                .lean();
-
-            invoices.forEach(i => {
-                const project = i.projectId as any;
-                results.push({
-                    type: 'invoice',
-                    id: i._id.toString(),
-                    title: `Invoice ${i.invoiceNumber}`,
-                    description: i.notes || `Total: $${i.total}`,
-                    projectId: project?._id?.toString() || '',
-                    projectName: project?.projectName || '',
-                    createdAt: i.createdAt.toISOString(),
                 });
             });
         }
