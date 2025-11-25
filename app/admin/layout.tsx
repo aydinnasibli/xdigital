@@ -18,7 +18,8 @@ import {
     Activity,
     Bell,
     Menu,
-    X
+    X,
+    DollarSign,
 } from 'lucide-react';
 import { useState } from 'react';
 import ReminderEmailChecker from '@/components/admin/ReminderEmailChecker';
@@ -119,6 +120,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             onClick={() => setSidebarOpen(false)}
                         >
                             Reminders
+                        </NavLink>
+                        <NavLink
+                            href="/admin/payments"
+                            icon={DollarSign}
+                            active={isActive('/admin/payments')}
+                            onClick={() => setSidebarOpen(false)}
+                        >
+                            Payments
                         </NavLink>
                         <NavLink
                             href="/admin/messages"
