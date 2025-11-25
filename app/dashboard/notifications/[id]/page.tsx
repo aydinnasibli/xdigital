@@ -2,7 +2,8 @@
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
-import { getNotificationById, markAsRead } from '@/app/actions/notifications';
+import { getNotificationById } from '@/app/actions/notifications';
+import MarkAsReadClient from '@/components/notifications/MarkAsReadClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,13 +60,11 @@ export default async function NotificationDetailPage({ params }: PageProps) {
 
     const notification = result.data;
 
-    // Mark as read when viewing
-    if (!notification.isRead) {
-        await markAsRead(id);
-    }
-
     return (
         <div className="max-w-4xl mx-auto">
+            {/* Mark as read on client side */}
+            <MarkAsReadClient notificationId={id} isRead={notification.isRead} />
+
             {/* Back Button */}
             <div className="mb-6">
                 <Link
