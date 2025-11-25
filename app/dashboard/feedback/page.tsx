@@ -1,11 +1,11 @@
 // app/dashboard/feedback/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { MessageSquare, Send, CheckCircle, X, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { MessageSquare, Send, CheckCircle, X, ThumbsUp, ThumbsDown, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import { getUserFeedback, submitFeedback } from '@/app/actions/feedback';
 import { getProjects } from '@/app/actions/projects';
-import { FeedbackType } from '@/models/Feedback';
+import { FeedbackType, FeedbackStatus } from '@/models/Feedback';
 
 interface Project {
     _id: string;
@@ -16,11 +16,23 @@ interface Project {
 interface Feedback {
     _id: string;
     type: FeedbackType;
+    status: FeedbackStatus;
     projectId?: string;
     projectName?: string;
     overallRating?: number;
+    ratings?: {
+        communication?: number;
+        quality?: number;
+        timeliness?: number;
+        professionalism?: number;
+        valueForMoney?: number;
+    };
     comment?: string;
+    wouldRecommend?: boolean;
+    testimonial?: string;
+    npsScore?: number;
     createdAt: string;
+    submittedAt?: string;
     adminResponse?: {
         userId: string;
         userName: string;
@@ -37,6 +49,7 @@ export default function FeedbackPage() {
     const [showForm, setShowForm] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [expandedId, setExpandedId] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         projectId: '',
@@ -53,11 +66,7 @@ export default function FeedbackPage() {
         isPublicTestimonial: false,
     });
 
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const [projectsResult, feedbackResult] = await Promise.all([
@@ -75,7 +84,11 @@ export default function FeedbackPage() {
             setErrorMessage('Failed to load data');
         }
         setLoading(false);
-    };
+    }, []);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -416,12 +429,17 @@ export default function FeedbackPage() {
                     <div className="divide-y divide-gray-200">
                         {feedbacks.map((feedback) => (
                             <div key={feedback._id} className="p-6 hover:bg-gray-50 transition-colors">
-                                <div className="flex items-start justify-between mb-3">
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900">
-                                            {feedback.projectName || 'General Feedback'}
-                                        </h3>
-                                        <p className="text-sm text-gray-500 mt-1">
+                                {/* Header */}
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <h3 className="font-semibold text-gray-900">
+                                                {feedback.projectName || 'General Feedback'}
+                                            </h3>
+                                            <TypeBadge type={feedback.type} />
+                                            <StatusBadge status={feedback.status} />
+                                        </div>
+                                        <p className="text-sm text-gray-500">
                                             {new Date(feedback.createdAt).toLocaleDateString('en-US', {
                                                 year: 'numeric',
                                                 month: 'long',
@@ -429,33 +447,102 @@ export default function FeedbackPage() {
                                             })}
                                         </p>
                                     </div>
+                                    <button
+                                        onClick={() => setExpandedId(expandedId === feedback._id ? null : feedback._id)}
+                                        className="p-2 hover:bg-gray-100 rounded-lg transition ml-4"
+                                    >
+                                        {expandedId === feedback._id ? (
+                                            <ChevronUp className="w-5 h-5 text-gray-600" />
+                                        ) : (
+                                            <ChevronDown className="w-5 h-5 text-gray-600" />
+                                        )}
+                                    </button>
+                                </div>
+
+                                {/* Preview */}
+                                <div className="mt-3 space-y-2">
                                     {feedback.overallRating && (
-                                        <div className="text-right">
-                                            <div className="text-2xl font-bold text-blue-600">
-                                                {feedback.overallRating}/5
-                                            </div>
-                                            <div className="text-xs text-gray-500">Overall</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium text-gray-700">Overall Rating:</span>
+                                            <StarRating rating={feedback.overallRating} />
+                                            <span className="text-sm text-gray-600">({feedback.overallRating}/5)</span>
                                         </div>
+                                    )}
+                                    {feedback.wouldRecommend !== undefined && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium text-gray-700">Would Recommend:</span>
+                                            {feedback.wouldRecommend ? (
+                                                <span className="flex items-center gap-1 text-green-600">
+                                                    <ThumbsUp className="w-4 h-4" />
+                                                    <span className="text-sm">Yes</span>
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-1 text-red-600">
+                                                    <ThumbsDown className="w-4 h-4" />
+                                                    <span className="text-sm">No</span>
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {feedback.comment && !expandedId && (
+                                        <p className="text-gray-700 line-clamp-2 text-sm">{feedback.comment}</p>
                                     )}
                                 </div>
 
-                                {feedback.comment && (
-                                    <p className="text-gray-700 mb-4 whitespace-pre-line">{feedback.comment}</p>
-                                )}
-
-                                {feedback.adminResponse && (
-                                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                        <div className="flex items-start gap-2">
-                                            <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                {/* Expanded Details */}
+                                {expandedId === feedback._id && (
+                                    <div className="mt-4 pt-4 border-t space-y-4">
+                                        {/* Detailed Ratings */}
+                                        {feedback.ratings && (
                                             <div>
-                                                <p className="text-sm font-medium text-blue-900 mb-1">Admin Response</p>
-                                                <p className="text-sm text-blue-800">{feedback.adminResponse.response}</p>
-                                                <p className="text-xs text-blue-600 mt-2">
-                                                    {feedback.adminResponse.userName} •{' '}
-                                                    {new Date(feedback.adminResponse.respondedAt).toLocaleDateString()}
+                                                <h4 className="text-sm font-semibold text-gray-900 mb-3">Detailed Ratings</h4>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg">
+                                                    {Object.entries(feedback.ratings).map(([key, value]) => (
+                                                        value !== undefined && value > 0 && (
+                                                            <div key={key}>
+                                                                <span className="text-sm text-gray-600 capitalize block mb-1">
+                                                                    {key.replace(/([A-Z])/g, ' $1').trim()}:
+                                                                </span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <StarRating rating={value} />
+                                                                    <span className="text-sm text-gray-600">({value}/5)</span>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Full Comment */}
+                                        {feedback.comment && (
+                                            <div>
+                                                <h4 className="text-sm font-semibold text-gray-900 mb-2">Feedback Details</h4>
+                                                <p className="text-gray-700 whitespace-pre-line bg-gray-50 p-4 rounded-lg">
+                                                    {feedback.comment}
                                                 </p>
                                             </div>
-                                        </div>
+                                        )}
+
+                                        {/* Admin Response */}
+                                        {feedback.adminResponse && (
+                                            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                                <div className="flex items-start gap-2">
+                                                    <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-semibold text-blue-900 mb-2">
+                                                            Admin Response from {feedback.adminResponse.userName}
+                                                        </p>
+                                                        <p className="text-sm text-blue-800 mb-2">
+                                                            {feedback.adminResponse.response}
+                                                        </p>
+                                                        <p className="text-xs text-blue-600">
+                                                            {new Date(feedback.adminResponse.respondedAt).toLocaleString()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -463,6 +550,60 @@ export default function FeedbackPage() {
                     </div>
                 )}
             </div>
+        </div>
+    );
+}
+
+// Helper Components
+function TypeBadge({ type }: { type: FeedbackType }) {
+    const typeConfig: Record<string, { bg: string; text: string; label: string }> = {
+        [FeedbackType.PROJECT_SURVEY]: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Project Survey' },
+        [FeedbackType.MILESTONE_FEEDBACK]: { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Milestone' },
+        [FeedbackType.NPS_SURVEY]: { bg: 'bg-green-100', text: 'text-green-800', label: 'NPS' },
+        [FeedbackType.TESTIMONIAL]: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Testimonial' },
+        [FeedbackType.GENERAL_FEEDBACK]: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'General' },
+        [FeedbackType.BUG_REPORT]: { bg: 'bg-red-100', text: 'text-red-800', label: 'Bug Report' },
+        [FeedbackType.FEATURE_REQUEST]: { bg: 'bg-indigo-100', text: 'text-indigo-800', label: 'Feature' },
+    };
+
+    const config = typeConfig[type] || typeConfig[FeedbackType.GENERAL_FEEDBACK];
+
+    return (
+        <span className={`text-xs px-2 py-1 rounded-full font-medium ${config.bg} ${config.text}`}>
+            {config.label}
+        </span>
+    );
+}
+
+function StatusBadge({ status }: { status: FeedbackStatus }) {
+    const statusConfig: Record<string, { bg: string; text: string }> = {
+        [FeedbackStatus.PENDING]: { bg: 'bg-gray-100', text: 'text-gray-800' },
+        [FeedbackStatus.SUBMITTED]: { bg: 'bg-blue-100', text: 'text-blue-800' },
+        [FeedbackStatus.REVIEWED]: { bg: 'bg-purple-100', text: 'text-purple-800' },
+        [FeedbackStatus.APPROVED]: { bg: 'bg-green-100', text: 'text-green-800' },
+        [FeedbackStatus.REJECTED]: { bg: 'bg-red-100', text: 'text-red-800' },
+    };
+
+    const config = statusConfig[status] || statusConfig[FeedbackStatus.PENDING];
+
+    return (
+        <span className={`text-xs px-2 py-1 rounded-full capitalize font-medium ${config.bg} ${config.text}`}>
+            {status.toLowerCase().replace('_', ' ')}
+        </span>
+    );
+}
+
+function StarRating({ rating }: { rating: number }) {
+    return (
+        <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                    key={star}
+                    className={`w-4 h-4 ${
+                        star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+                    }`}
+                />
+            ))}
         </div>
     );
 }
