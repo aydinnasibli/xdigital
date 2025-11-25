@@ -29,11 +29,8 @@ export default function DashboardLayout({
                                 <Link href="/dashboard/projects" className="text-gray-700 hover:text-gray-900 hover:underline">
                                     Projects
                                 </Link>
-                                <Link href="/dashboard/payments" className="text-gray-700 hover:text-gray-900 hover:underline">
-                                    Payments
-                                </Link>
                                 <Link href="/dashboard/feedback" className="text-gray-700 hover:text-gray-900 hover:underline">
-                                    Feedback
+                                    Give Feedback
                                 </Link>
                                 <Link href="/dashboard/resources" className="text-gray-700 hover:text-gray-900 hover:underline">
                                     Resources
