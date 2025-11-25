@@ -10,7 +10,6 @@ import Task from '@/models/Task';
 import Message from '@/models/Message';
 import File from '@/models/File';
 import FileFolder from '@/models/FileFolder';
-import Invoice from '@/models/Invoice';
 import Notification from '@/models/Notification';
 import NotificationPreference from '@/models/NotificationPreference';
 import Activity from '@/models/Activity';
@@ -204,8 +203,6 @@ export async function POST(req: Request) {
                 File.deleteMany({ uploadedBy: userId }),
                 // Delete file folders created by this user (uses createdBy ObjectId field)
                 FileFolder.deleteMany({ createdBy: userId }),
-                // Delete invoices created by this user (uses clerkUserId string field)
-                Invoice.deleteMany({ clerkUserId: clerkId }),
                 // Delete notifications for this user (uses clerkUserId string field)
                 Notification.deleteMany({ clerkUserId: clerkId }),
                 // Delete notification preferences for this user (uses clerkUserId string field)
