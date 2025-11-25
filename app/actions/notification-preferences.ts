@@ -47,10 +47,6 @@ export async function getNotificationPreferences(): Promise<ActionResponse> {
                         enabled: true,
                         channels: [NotificationChannel.BOTH],
                     },
-                    invoices: {
-                        enabled: true,
-                        channels: [NotificationChannel.BOTH],
-                    },
                     milestones: {
                         enabled: true,
                         channels: [NotificationChannel.IN_APP],
@@ -181,10 +177,6 @@ export async function resetNotificationPreferences(): Promise<ActionResponse> {
                         channels: [NotificationChannel.BOTH],
                     },
                     messages: {
-                        enabled: true,
-                        channels: [NotificationChannel.BOTH],
-                    },
-                    invoices: {
                         enabled: true,
                         channels: [NotificationChannel.BOTH],
                     },

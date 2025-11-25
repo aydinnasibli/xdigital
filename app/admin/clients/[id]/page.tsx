@@ -25,7 +25,7 @@ export default async function AdminClientDetailPage({
         );
     }
 
-    const { client, projects, invoices, stats } = result.data;
+    const { client, projects, stats } = result.data;
     const notes = notesResult.success ? notesResult.data : [];
 
     // Calculate stats
@@ -33,15 +33,6 @@ export default async function AdminClientDetailPage({
         acc[item._id] = item.count;
         return acc;
     }, {});
-
-    const invoiceStats = stats.invoices.reduce((acc: any, item: any) => {
-        acc[item._id] = { count: item.count, total: item.total };
-        return acc;
-    }, {});
-
-    const totalRevenue = stats.invoices
-        .filter((s: any) => s._id === 'paid')
-        .reduce((sum: number, s: any) => sum + s.total, 0);
 
     return (
         <div className="space-y-6">
@@ -75,18 +66,6 @@ export default async function AdminClientDetailPage({
                         projectStats['in_progress'] || 0
                     }
                     color="green"
-                />
-                <StatCard
-                    icon={FileText}
-                    label="Total Invoices"
-                    value={invoices.length}
-                    color="purple"
-                />
-                <StatCard
-                    icon={DollarSign}
-                    label="Total Revenue"
-                    value={`$${totalRevenue.toLocaleString()}`}
-                    color="orange"
                 />
             </div>
 
@@ -144,56 +123,6 @@ export default async function AdminClientDetailPage({
                         </div>
                     </div>
 
-                    {/* Invoices */}
-                    <div className="bg-white rounded-lg shadow">
-                        <div className="p-6 border-b border-gray-200">
-                            <h2 className="text-xl font-semibold text-gray-900">
-                                Invoices ({invoices.length})
-                            </h2>
-                        </div>
-                        <div className="divide-y divide-gray-200">
-                            {invoices.length === 0 ? (
-                                <div className="p-6 text-center text-gray-500">
-                                    No invoices yet
-                                </div>
-                            ) : (
-                                invoices.map((invoice: any) => (
-                                    <Link
-                                        key={invoice._id}
-                                        href={`/admin/invoices/${invoice._id}`}
-                                        className="block p-6 hover:bg-gray-50 transition-colors"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="font-semibold text-gray-900">
-                                                    {invoice.invoiceNumber}
-                                                </p>
-                                                <p className="text-sm text-gray-600 mt-1">
-                                                    Issued:{' '}
-                                                    {new Date(
-                                                        invoice.issueDate
-                                                    ).toLocaleDateString()}
-                                                </p>
-                                                <p className="text-sm text-gray-600">
-                                                    Due:{' '}
-                                                    {new Date(
-                                                        invoice.dueDate
-                                                    ).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-lg font-bold text-gray-900">
-                                                    ${invoice.total.toLocaleString()}
-                                                </p>
-                                                <InvoiceStatusBadge status={invoice.status} />
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
                     {/* Client Notes */}
                     <ClientNotesSection clientId={resolvedParams.id} notes={notes} />
                 </div>
@@ -232,32 +161,6 @@ export default async function AdminClientDetailPage({
                                     <span className="font-semibold text-gray-900">{count}</span>
                                 </div>
                             ))}
-                        </div>
-                    </div>
-
-                    {/* Invoice Status Breakdown */}
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                            Invoice Status
-                        </h3>
-                        <div className="space-y-3">
-                            {Object.entries(invoiceStats).map(
-                                ([status, data]: [string, any]) => (
-                                    <div key={status}>
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className="text-sm text-gray-600 capitalize">
-                                                {status}
-                                            </span>
-                                            <span className="font-semibold text-gray-900">
-                                                {data.count}
-                                            </span>
-                                        </div>
-                                        <p className="text-xs text-gray-500">
-                                            ${data.total.toLocaleString()}
-                                        </p>
-                                    </div>
-                                )
-                            )}
                         </div>
                     </div>
                 </div>
@@ -323,24 +226,6 @@ function StatusBadge({ status }: { status: string }) {
     return (
         <span
             className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${config.bg} ${config.text}`}
-        >
-            {config.label}
-        </span>
-    );
-}
-
-function InvoiceStatusBadge({ status }: { status: string }) {
-    const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
-        draft: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Draft' },
-        sent: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Sent' },
-        paid: { bg: 'bg-green-100', text: 'text-green-800', label: 'Paid' },
-    };
-
-    const config = statusConfig[status] || statusConfig.draft;
-
-    return (
-        <span
-            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${config.bg} ${config.text} mt-1`}
         >
             {config.label}
         </span>

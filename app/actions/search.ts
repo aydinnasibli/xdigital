@@ -18,7 +18,7 @@ type ActionResponse<T = any> = {
 };
 
 interface SearchResult {
-    type: 'project' | 'message' | 'invoice' | 'file' | 'task';
+    type: 'project' | 'message' | 'file' | 'task';
     id: string;
     title: string;
     description?: string;
@@ -51,7 +51,7 @@ export async function globalSearch(searchTerm: string, entities?: string[]): Pro
         const results: SearchResult[] = [];
 
         // Determine which entities to search
-        const searchEntities = entities || ['projects', 'messages', 'invoices', 'files', 'tasks'];
+        const searchEntities = entities || ['projects', 'messages', 'files', 'tasks'];
 
         // Search Projects
         if (searchEntities.includes('projects')) {

@@ -14,7 +14,6 @@ interface NotificationSetting {
 interface Preferences {
     projectUpdates: NotificationSetting;
     messages: NotificationSetting;
-    invoices: NotificationSetting;
     milestones: NotificationSetting;
     tasks: NotificationSetting;
     mentions: NotificationSetting;
@@ -127,11 +126,6 @@ export default function NotificationSettingsPage() {
             key: 'messages',
             label: 'Messages',
             description: 'When you receive a new message from admin',
-        },
-        {
-            key: 'invoices',
-            label: 'Invoices',
-            description: 'New invoices and payment reminders',
         },
         {
             key: 'milestones',

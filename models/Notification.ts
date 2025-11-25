@@ -3,7 +3,6 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 export enum NotificationType {
     PROJECT_UPDATE = 'project_update',
     MESSAGE = 'message',
-    INVOICE = 'invoice',
     MILESTONE = 'milestone',
     GENERAL = 'general',
 }

@@ -16,7 +16,6 @@ interface IClientMetrics {
     activeProjects: number;
     completedProjects: number;
     totalRevenue: number;
-    overdueInvoices: number;
     lastActivityDate?: Date;
     lastLoginDate?: Date;
     healthScore: number; // 0-100
@@ -131,10 +130,6 @@ const UserSchema = new Schema<IUser>(
                 default: 0,
             },
             totalRevenue: {
-                type: Number,
-                default: 0,
-            },
-            overdueInvoices: {
                 type: Number,
                 default: 0,
             },

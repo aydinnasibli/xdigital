@@ -67,8 +67,6 @@ export default function NotificationBell() {
                 return '📋';
             case 'message':
                 return '💬';
-            case 'invoice':
-                return '💰';
             case 'milestone':
                 return '🎯';
             default:

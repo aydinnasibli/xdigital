@@ -48,8 +48,6 @@ export default function NotificationsClient() {
                 return '📋';
             case 'message':
                 return '💬';
-            case 'invoice':
-                return '💰';
             case 'milestone':
                 return '🎯';
             default:
