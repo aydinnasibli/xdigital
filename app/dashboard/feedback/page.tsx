@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Star, MessageSquare, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { getUserFeedback, submitFeedback } from '@/app/actions/feedback';
-import { getAllProjects } from '@/app/actions/projects';
+import { getProjects } from '@/app/actions/projects';
 import { toast } from 'sonner';
 
 export default function FeedbackPage() {
@@ -36,7 +36,7 @@ export default function FeedbackPage() {
     const loadData = async () => {
         setLoading(true);
         const [projectsResult, feedbackResult] = await Promise.all([
-            getAllProjects(),
+            getProjects(),
             getUserFeedback(),
         ]);
 
