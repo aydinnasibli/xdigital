@@ -122,14 +122,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             Reminders
                         </NavLink>
                         <NavLink
-                            href="/admin/payments"
-                            icon={DollarSign}
-                            active={isActive('/admin/payments')}
-                            onClick={() => setSidebarOpen(false)}
-                        >
-                            Payments
-                        </NavLink>
-                        <NavLink
                             href="/admin/messages"
                             icon={MessageSquare}
                             active={isActive('/admin/messages')}
