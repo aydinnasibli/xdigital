@@ -5,10 +5,33 @@ import { useState, useEffect } from 'react';
 import { MessageSquare, Send, CheckCircle, X, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { getUserFeedback, submitFeedback } from '@/app/actions/feedback';
 import { getProjects } from '@/app/actions/projects';
+import { FeedbackType } from '@/models/Feedback';
+
+interface Project {
+    _id: string;
+    projectName: string;
+    serviceType?: string;
+}
+
+interface Feedback {
+    _id: string;
+    type: FeedbackType;
+    projectId?: string;
+    projectName?: string;
+    overallRating?: number;
+    comment?: string;
+    createdAt: string;
+    adminResponse?: {
+        userId: string;
+        userName: string;
+        response: string;
+        respondedAt: string;
+    };
+}
 
 export default function FeedbackPage() {
-    const [projects, setProjects] = useState<any[]>([]);
-    const [feedbacks, setFeedbacks] = useState<any[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [showForm, setShowForm] = useState(false);
@@ -17,7 +40,7 @@ export default function FeedbackPage() {
 
     const [formData, setFormData] = useState({
         projectId: '',
-        type: 'general' as 'general' | 'project_completion' | 'milestone_feedback',
+        type: FeedbackType.PROJECT_SURVEY as FeedbackType,
         wouldRecommend: null as boolean | null,
         whatWorkedWell: '',
         whatNeedsImprovement: '',
@@ -81,9 +104,11 @@ export default function FeedbackPage() {
         setSubmitting(true);
         try {
             const result = await submitFeedback({
-                ...formData,
+                type: formData.type,
+                projectId: formData.projectId,
                 overallRating: formData.overallSatisfaction,
                 comment: `What worked well: ${formData.whatWorkedWell}\n\nNeeds improvement: ${formData.whatNeedsImprovement}\n\nAdditional: ${formData.additionalComments}`,
+                wouldRecommend: formData.wouldRecommend ?? undefined,
                 ratings: {
                     communication: formData.communicationRating,
                     quality: formData.qualityRating,
@@ -111,7 +136,7 @@ export default function FeedbackPage() {
     const resetForm = () => {
         setFormData({
             projectId: '',
-            type: 'general',
+            type: FeedbackType.PROJECT_SURVEY,
             wouldRecommend: null,
             whatWorkedWell: '',
             whatNeedsImprovement: '',
@@ -389,7 +414,7 @@ export default function FeedbackPage() {
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-200">
-                        {feedbacks.map((feedback: any) => (
+                        {feedbacks.map((feedback) => (
                             <div key={feedback._id} className="p-6 hover:bg-gray-50 transition-colors">
                                 <div className="flex items-start justify-between mb-3">
                                     <div>
