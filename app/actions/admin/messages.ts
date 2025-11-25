@@ -22,7 +22,6 @@ type ActionResponse<T = any> = {
 export async function getAllMessages(filters?: {
     projectId?: string;
     clientId?: string;
-    unreadOnly?: boolean;
 }): Promise<ActionResponse> {
     try {
         await requireAdmin();
@@ -36,11 +35,6 @@ export async function getAllMessages(filters?: {
 
         if (filters?.clientId && mongoose.Types.ObjectId.isValid(filters.clientId)) {
             query.userId = filters.clientId;
-        }
-
-        if (filters?.unreadOnly) {
-            query.isRead = false;
-            query.sender = MessageSender.CLIENT; // Only client messages need to be read by admin
         }
 
         const messages = await Message.find(query)
@@ -115,7 +109,6 @@ export async function sendAdminMessage(
             clerkUserId: userId, // Admin's clerkId
             sender: MessageSender.ADMIN,
             message: message.trim(),
-            isRead: false,
         });
 
         // Get project and user details for Pusher payload
@@ -203,23 +196,7 @@ export async function getAdminMessage(messageId: string): Promise<ActionResponse
     }
 }
 
-// Get unread message count for admin
-export async function getUnreadMessageCount(): Promise<ActionResponse> {
-    try {
-        await requireAdmin();
-        await dbConnect();
-
-        const count = await Message.countDocuments({
-            sender: MessageSender.CLIENT,
-            isRead: false,
-        });
-
-        return { success: true, data: { count } };
-    } catch (error) {
-        logError(error as Error, { context: 'getUnreadMessageCount' });
-        return { success: false, error: 'Failed to fetch unread count' };
-    }
-}
+// Removed - read receipts disabled
 
 // Get messages by project (for admin project view)
 export async function getAdminProjectMessages(
@@ -405,7 +382,6 @@ export async function adminReplyToMessage(
             sender: MessageSender.ADMIN,
             message: message.trim(),
             parentMessageId: new mongoose.Types.ObjectId(parentMessageId),
-            isRead: false,
         });
 
         await Message.findByIdAndUpdate(parentMessageId, {

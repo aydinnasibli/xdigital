@@ -111,7 +111,6 @@ export async function sendMessage(
             clerkUserId,
             sender: MessageSender.CLIENT,
             message: message.trim(),
-            isRead: false,
         });
 
         // Get project details for Pusher payload
@@ -336,7 +335,6 @@ export async function replyToMessage(
             sender: MessageSender.CLIENT,
             message: message.trim(),
             parentMessageId: new mongoose.Types.ObjectId(parentMessageId),
-            isRead: false,
         });
 
         // Update parent message with reply reference

@@ -48,7 +48,6 @@ interface Message {
     sender: 'client' | 'admin';
     message: string;
     createdAt: string;
-    isRead?: boolean;
     reactions?: Array<{
         emoji: string;
         userId: string;
@@ -352,7 +351,6 @@ function MessagesTab({ projectId }: { projectId: string }) {
             sender: msg.sender || 'client',
             message: msg.message || '',
             createdAt: msg.createdAt || new Date().toISOString(),
-            isRead: msg.isRead ?? false,
             reactions: Array.isArray(msg.reactions) ? msg.reactions : [],
             threadReplies: Array.isArray(msg.threadReplies) ? msg.threadReplies : [],
             parentMessageId: msg.parentMessageId,
