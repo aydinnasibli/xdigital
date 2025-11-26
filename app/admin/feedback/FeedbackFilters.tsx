@@ -2,7 +2,6 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Filter } from 'lucide-react';
 
 export default function FeedbackFilters() {
     const router = useRouter();
@@ -28,14 +27,13 @@ export default function FeedbackFilters() {
     const hasActiveFilters = currentType || currentStatus;
 
     return (
-        <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center gap-4 mb-4">
-                <Filter className="w-5 h-5 text-gray-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-900">Filters</h3>
                 {hasActiveFilters && (
                     <button
                         onClick={clearFilters}
-                        className="ml-auto text-sm text-blue-600 hover:underline"
+                        className="text-sm text-blue-600 hover:underline font-medium"
                     >
                         Clear All
                     </button>
@@ -51,16 +49,12 @@ export default function FeedbackFilters() {
                     <select
                         value={currentType}
                         onChange={(e) => handleFilterChange('type', e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">All Types</option>
-                        <option value="project_survey">Project Survey</option>
-                        <option value="milestone_feedback">Milestone Feedback</option>
-                        <option value="nps_survey">NPS Survey</option>
-                        <option value="testimonial">Testimonial</option>
                         <option value="general_feedback">General Feedback</option>
-                        <option value="bug_report">Bug Report</option>
-                        <option value="feature_request">Feature Request</option>
+                        <option value="bug_report">Bug Reports</option>
+                        <option value="feature_request">Feature Requests</option>
                     </select>
                 </div>
 
@@ -72,14 +66,12 @@ export default function FeedbackFilters() {
                     <select
                         value={currentStatus}
                         onChange={(e) => handleFilterChange('status', e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">All Statuses</option>
-                        <option value="pending">Pending</option>
                         <option value="submitted">Submitted</option>
                         <option value="reviewed">Reviewed</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
+                        <option value="approved">Resolved</option>
                     </select>
                 </div>
             </div>
