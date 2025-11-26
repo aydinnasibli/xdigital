@@ -54,16 +54,29 @@ export default function FeedbackPage() {
     const [formData, setFormData] = useState({
         projectId: '',
         type: FeedbackType.PROJECT_SURVEY as FeedbackType,
+        // Project Survey fields
         wouldRecommend: null as boolean | null,
         whatWorkedWell: '',
         whatNeedsImprovement: '',
-        communicationRating: 0, // 1-5
-        deliveryRating: 0, // 1-5
-        qualityRating: 0, // 1-5
-        overallSatisfaction: 0, // 1-5
+        communicationRating: 0,
+        deliveryRating: 0,
+        qualityRating: 0,
+        overallSatisfaction: 0,
         additionalComments: '',
+        // Testimonial fields
         testimonial: '',
         isPublicTestimonial: false,
+        // NPS Survey fields
+        npsScore: undefined as number | undefined,
+        // Bug Report fields
+        title: '',
+        bugDescription: '',
+        stepsToReproduce: '',
+        // Feature Request fields
+        featureDescription: '',
+        useCase: '',
+        // General Feedback fields
+        generalComment: '',
     });
 
     const loadData = useCallback(async () => {
@@ -94,42 +107,99 @@ export default function FeedbackPage() {
         e.preventDefault();
         setErrorMessage('');
 
-        if (!formData.projectId) {
-            setErrorMessage('Please select a project');
+        // Type-specific validation
+        if (formData.type === FeedbackType.PROJECT_SURVEY ||
+            formData.type === FeedbackType.MILESTONE_FEEDBACK ||
+            formData.type === FeedbackType.TESTIMONIAL) {
+            if (!formData.projectId) {
+                setErrorMessage('Please select a project');
+                return;
+            }
+        }
+
+        if (formData.type === FeedbackType.PROJECT_SURVEY) {
+            if (formData.wouldRecommend === null) {
+                setErrorMessage('Please indicate if you would recommend our services');
+                return;
+            }
+            if (!formData.whatWorkedWell.trim() || !formData.whatNeedsImprovement.trim()) {
+                setErrorMessage('Please fill in both "What worked well" and "Areas for improvement"');
+                return;
+            }
+            if (formData.overallSatisfaction === 0) {
+                setErrorMessage('Please provide an overall satisfaction rating');
+                return;
+            }
+        }
+
+        if (formData.type === FeedbackType.NPS_SURVEY && formData.npsScore === undefined) {
+            setErrorMessage('Please provide an NPS score');
             return;
         }
 
-        if (formData.wouldRecommend === null) {
-            setErrorMessage('Please indicate if you would recommend our services');
+        if (formData.type === FeedbackType.TESTIMONIAL && !formData.testimonial.trim()) {
+            setErrorMessage('Please write your testimonial');
             return;
         }
 
-        if (!formData.whatWorkedWell.trim() || !formData.whatNeedsImprovement.trim()) {
-            setErrorMessage('Please fill in both "What worked well" and "Areas for improvement"');
-            return;
+        if (formData.type === FeedbackType.BUG_REPORT) {
+            if (!formData.title.trim() || !formData.bugDescription.trim()) {
+                setErrorMessage('Please provide a bug title and description');
+                return;
+            }
         }
 
-        if (formData.overallSatisfaction === 0) {
-            setErrorMessage('Please provide an overall satisfaction rating');
+        if (formData.type === FeedbackType.FEATURE_REQUEST) {
+            if (!formData.title.trim() || !formData.featureDescription.trim()) {
+                setErrorMessage('Please provide a feature title and description');
+                return;
+            }
+        }
+
+        if (formData.type === FeedbackType.GENERAL_FEEDBACK && !formData.generalComment.trim()) {
+            setErrorMessage('Please provide your feedback');
             return;
         }
 
         setSubmitting(true);
         try {
-            const result = await submitFeedback({
+            // Build submission data based on feedback type
+            const submissionData: any = {
                 type: formData.type,
-                projectId: formData.projectId,
-                overallRating: formData.overallSatisfaction,
-                comment: `What worked well: ${formData.whatWorkedWell}\n\nNeeds improvement: ${formData.whatNeedsImprovement}\n\nAdditional: ${formData.additionalComments}`,
-                wouldRecommend: formData.wouldRecommend ?? undefined,
-                ratings: {
+                projectId: formData.projectId || undefined,
+            };
+
+            // Add type-specific fields
+            if (formData.type === FeedbackType.PROJECT_SURVEY) {
+                submissionData.overallRating = formData.overallSatisfaction;
+                submissionData.comment = `What worked well: ${formData.whatWorkedWell}\n\nNeeds improvement: ${formData.whatNeedsImprovement}${formData.additionalComments ? `\n\nAdditional: ${formData.additionalComments}` : ''}`;
+                submissionData.wouldRecommend = formData.wouldRecommend ?? undefined;
+                submissionData.ratings = {
                     communication: formData.communicationRating,
                     quality: formData.qualityRating,
                     timeliness: formData.deliveryRating,
                     professionalism: formData.overallSatisfaction,
                     valueForMoney: formData.overallSatisfaction,
-                },
-            });
+                };
+                submissionData.highlights = formData.whatWorkedWell;
+                submissionData.improvements = formData.whatNeedsImprovement;
+            } else if (formData.type === FeedbackType.NPS_SURVEY) {
+                submissionData.npsScore = formData.npsScore;
+                submissionData.comment = formData.additionalComments;
+            } else if (formData.type === FeedbackType.TESTIMONIAL) {
+                submissionData.testimonial = formData.testimonial;
+                submissionData.comment = formData.testimonial;
+            } else if (formData.type === FeedbackType.BUG_REPORT) {
+                submissionData.title = formData.title;
+                submissionData.comment = `**Bug Description:**\n${formData.bugDescription}${formData.stepsToReproduce ? `\n\n**Steps to Reproduce:**\n${formData.stepsToReproduce}` : ''}`;
+            } else if (formData.type === FeedbackType.FEATURE_REQUEST) {
+                submissionData.title = formData.title;
+                submissionData.comment = `**Feature Description:**\n${formData.featureDescription}${formData.useCase ? `\n\n**Use Case:**\n${formData.useCase}` : ''}`;
+            } else if (formData.type === FeedbackType.GENERAL_FEEDBACK) {
+                submissionData.comment = formData.generalComment;
+            }
+
+            const result = await submitFeedback(submissionData);
 
             if (result.success) {
                 setSuccessMessage('Thank you! Your feedback has been submitted successfully.');
@@ -150,6 +220,7 @@ export default function FeedbackPage() {
         setFormData({
             projectId: '',
             type: FeedbackType.PROJECT_SURVEY,
+            // Project Survey fields
             wouldRecommend: null,
             whatWorkedWell: '',
             whatNeedsImprovement: '',
@@ -158,8 +229,20 @@ export default function FeedbackPage() {
             qualityRating: 0,
             overallSatisfaction: 0,
             additionalComments: '',
+            // Testimonial fields
             testimonial: '',
             isPublicTestimonial: false,
+            // NPS Survey fields
+            npsScore: undefined,
+            // Bug Report fields
+            title: '',
+            bugDescription: '',
+            stepsToReproduce: '',
+            // Feature Request fields
+            featureDescription: '',
+            useCase: '',
+            // General Feedback fields
+            generalComment: '',
         });
     };
 
@@ -253,91 +336,301 @@ export default function FeedbackPage() {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Project Selection */}
+                        {/* Feedback Type Selection */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Select Project *
+                                Feedback Type *
                             </label>
                             <select
-                                value={formData.projectId}
-                                onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
+                                value={formData.type}
+                                onChange={(e) => setFormData({ ...formData, type: e.target.value as FeedbackType })}
                                 className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 required
                             >
-                                <option value="">Choose a project...</option>
-                                {projects.map((project) => (
-                                    <option key={project._id} value={project._id}>
-                                        {project.projectName}
-                                    </option>
-                                ))}
+                                <option value={FeedbackType.PROJECT_SURVEY}>Project Survey</option>
+                                <option value={FeedbackType.BUG_REPORT}>Bug Report</option>
+                                <option value={FeedbackType.FEATURE_REQUEST}>Feature Request</option>
+                                <option value={FeedbackType.TESTIMONIAL}>Testimonial</option>
+                                <option value={FeedbackType.GENERAL_FEEDBACK}>General Feedback</option>
+                                <option value={FeedbackType.NPS_SURVEY}>NPS Survey</option>
                             </select>
                         </div>
 
-                        {/* Would Recommend */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-3">
-                                Would you recommend our services? *
-                            </label>
-                            <div className="flex gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, wouldRecommend: true })}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg border-2 transition-all ${
-                                        formData.wouldRecommend === true
-                                            ? 'border-green-600 bg-green-50 text-green-700'
-                                            : 'border-gray-300 hover:border-gray-400'
-                                    }`}
+                        {/* Project Selection - Required for PROJECT_SURVEY and MILESTONE_FEEDBACK, Optional for others */}
+                        {(formData.type === FeedbackType.PROJECT_SURVEY ||
+                          formData.type === FeedbackType.MILESTONE_FEEDBACK ||
+                          formData.type === FeedbackType.TESTIMONIAL) && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Select Project *
+                                </label>
+                                <select
+                                    value={formData.projectId}
+                                    onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
                                 >
-                                    <ThumbsUp className="w-5 h-5" />
-                                    <span className="font-semibold">Yes, I would</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, wouldRecommend: false })}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg border-2 transition-all ${
-                                        formData.wouldRecommend === false
-                                            ? 'border-red-600 bg-red-50 text-red-700'
-                                            : 'border-gray-300 hover:border-gray-400'
-                                    }`}
-                                >
-                                    <ThumbsDown className="w-5 h-5" />
-                                    <span className="font-semibold">No, I wouldn't</span>
-                                </button>
+                                    <option value="">Choose a project...</option>
+                                    {projects.map((project) => (
+                                        <option key={project._id} value={project._id}>
+                                            {project.projectName}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-                        </div>
+                        )}
 
-                        {/* What Worked Well */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                What worked well? *
-                            </label>
-                            <textarea
-                                value={formData.whatWorkedWell}
-                                onChange={(e) => setFormData({ ...formData, whatWorkedWell: e.target.value })}
-                                rows={4}
-                                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Tell us what you were happy with..."
-                                required
-                            />
-                        </div>
+                        {/* Optional Project Selection for Bug Reports and Feature Requests */}
+                        {(formData.type === FeedbackType.BUG_REPORT || formData.type === FeedbackType.FEATURE_REQUEST) && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Related Project (Optional)
+                                </label>
+                                <select
+                                    value={formData.projectId}
+                                    onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="">None</option>
+                                    {projects.map((project) => (
+                                        <option key={project._id} value={project._id}>
+                                            {project.projectName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
 
-                        {/* Areas for Improvement */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                What could we improve? *
-                            </label>
-                            <textarea
-                                value={formData.whatNeedsImprovement}
-                                onChange={(e) => setFormData({ ...formData, whatNeedsImprovement: e.target.value })}
-                                rows={4}
-                                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Share your suggestions for improvement..."
-                                required
-                            />
-                        </div>
+                        {/* NPS Survey Fields */}
+                        {formData.type === FeedbackType.NPS_SURVEY && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    How likely are you to recommend us to a friend or colleague? *
+                                </label>
+                                <p className="text-sm text-gray-600 mb-3">0 = Not at all likely, 10 = Extremely likely</p>
+                                <div className="flex gap-2 flex-wrap">
+                                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
+                                        <button
+                                            key={score}
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, npsScore: score })}
+                                            className={`w-12 h-12 rounded-lg border-2 transition-all font-semibold ${
+                                                formData.npsScore === score
+                                                    ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                                    : 'border-gray-300 hover:border-gray-400'
+                                            }`}
+                                        >
+                                            {score}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
-                        {/* Ratings */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-lg">
+                        {/* Testimonial Fields */}
+                        {formData.type === FeedbackType.TESTIMONIAL && (
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Your Testimonial *
+                                    </label>
+                                    <textarea
+                                        value={formData.testimonial}
+                                        onChange={(e) => setFormData({ ...formData, testimonial: e.target.value })}
+                                        rows={6}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Share your experience working with us..."
+                                        required
+                                    />
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="checkbox"
+                                        id="isPublic"
+                                        checked={formData.isPublicTestimonial}
+                                        onChange={(e) => setFormData({ ...formData, isPublicTestimonial: e.target.checked })}
+                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <label htmlFor="isPublic" className="text-sm text-gray-700">
+                                        I agree to have this testimonial displayed publicly on your website
+                                    </label>
+                                </div>
+                            </>
+                        )}
+
+                        {/* Bug Report Fields */}
+                        {formData.type === FeedbackType.BUG_REPORT && (
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Bug Title *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Brief description of the bug"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Bug Description *
+                                    </label>
+                                    <textarea
+                                        value={formData.bugDescription}
+                                        onChange={(e) => setFormData({ ...formData, bugDescription: e.target.value })}
+                                        rows={5}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Describe what's happening..."
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Steps to Reproduce
+                                    </label>
+                                    <textarea
+                                        value={formData.stepsToReproduce}
+                                        onChange={(e) => setFormData({ ...formData, stepsToReproduce: e.target.value })}
+                                        rows={4}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="1. Go to...\n2. Click on...\n3. See error..."
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Feature Request Fields */}
+                        {formData.type === FeedbackType.FEATURE_REQUEST && (
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Feature Title *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Brief name for the feature"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Feature Description *
+                                    </label>
+                                    <textarea
+                                        value={formData.featureDescription}
+                                        onChange={(e) => setFormData({ ...formData, featureDescription: e.target.value })}
+                                        rows={5}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Describe the feature you'd like to see..."
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Use Case / Why is this needed?
+                                    </label>
+                                    <textarea
+                                        value={formData.useCase}
+                                        onChange={(e) => setFormData({ ...formData, useCase: e.target.value })}
+                                        rows={3}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="How would this help you?"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* General Feedback Fields */}
+                        {formData.type === FeedbackType.GENERAL_FEEDBACK && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Your Feedback *
+                                </label>
+                                <textarea
+                                    value={formData.generalComment}
+                                    onChange={(e) => setFormData({ ...formData, generalComment: e.target.value })}
+                                    rows={6}
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Share your thoughts with us..."
+                                    required
+                                />
+                            </div>
+                        )}
+
+                        {/* Project Survey Fields */}
+                        {formData.type === FeedbackType.PROJECT_SURVEY && (
+                            <>
+                                {/* Would Recommend */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                                        Would you recommend our services? *
+                                    </label>
+                                    <div className="flex gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, wouldRecommend: true })}
+                                            className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg border-2 transition-all ${
+                                                formData.wouldRecommend === true
+                                                    ? 'border-green-600 bg-green-50 text-green-700'
+                                                    : 'border-gray-300 hover:border-gray-400'
+                                            }`}
+                                        >
+                                            <ThumbsUp className="w-5 h-5" />
+                                            <span className="font-semibold">Yes, I would</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, wouldRecommend: false })}
+                                            className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-lg border-2 transition-all ${
+                                                formData.wouldRecommend === false
+                                                    ? 'border-red-600 bg-red-50 text-red-700'
+                                                    : 'border-gray-300 hover:border-gray-400'
+                                            }`}
+                                        >
+                                            <ThumbsDown className="w-5 h-5" />
+                                            <span className="font-semibold">No, I wouldn't</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* What Worked Well */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        What worked well? *
+                                    </label>
+                                    <textarea
+                                        value={formData.whatWorkedWell}
+                                        onChange={(e) => setFormData({ ...formData, whatWorkedWell: e.target.value })}
+                                        rows={4}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Tell us what you were happy with..."
+                                        required
+                                    />
+                                </div>
+
+                                {/* Areas for Improvement */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        What could we improve? *
+                                    </label>
+                                    <textarea
+                                        value={formData.whatNeedsImprovement}
+                                        onChange={(e) => setFormData({ ...formData, whatNeedsImprovement: e.target.value })}
+                                        rows={4}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Share your suggestions for improvement..."
+                                        required
+                                    />
+                                </div>
+
+                                {/* Ratings */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-lg">
                             <RatingSelector
                                 value={formData.communicationRating}
                                 onChange={(val) => setFormData({ ...formData, communicationRating: val })}
@@ -353,26 +646,28 @@ export default function FeedbackPage() {
                                 onChange={(val) => setFormData({ ...formData, qualityRating: val })}
                                 label="Quality of Work"
                             />
-                            <RatingSelector
-                                value={formData.overallSatisfaction}
-                                onChange={(val) => setFormData({ ...formData, overallSatisfaction: val })}
-                                label="Overall Satisfaction *"
-                            />
-                        </div>
+                                    <RatingSelector
+                                        value={formData.overallSatisfaction}
+                                        onChange={(val) => setFormData({ ...formData, overallSatisfaction: val })}
+                                        label="Overall Satisfaction *"
+                                    />
+                                </div>
 
-                        {/* Additional Comments */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Additional Comments (Optional)
-                            </label>
-                            <textarea
-                                value={formData.additionalComments}
-                                onChange={(e) => setFormData({ ...formData, additionalComments: e.target.value })}
-                                rows={3}
-                                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Anything else you'd like to share?"
-                            />
-                        </div>
+                                {/* Additional Comments */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Additional Comments (Optional)
+                                    </label>
+                                    <textarea
+                                        value={formData.additionalComments}
+                                        onChange={(e) => setFormData({ ...formData, additionalComments: e.target.value })}
+                                        rows={3}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Anything else you'd like to share?"
+                                    />
+                                </div>
+                            </>
+                        )}
 
                         {/* Submit Buttons */}
                         <div className="flex gap-3 pt-4 border-t">
