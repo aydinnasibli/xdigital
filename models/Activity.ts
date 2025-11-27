@@ -21,7 +21,6 @@ export enum ActivityType {
     FILE_COMMENTED = 'file_commented',
     MESSAGE_SENT = 'message_sent',
     MESSAGE_READ = 'message_read',
-    FEEDBACK_SUBMITTED = 'feedback_submitted',
     USER_LOGGED_IN = 'user_logged_in',
     USER_LOGGED_OUT = 'user_logged_out',
     COMMENT_ADDED = 'comment_added',
@@ -35,7 +34,6 @@ export enum ActivityEntity {
     FILE = 'file',
     MESSAGE = 'message',
     USER = 'user',
-    FEEDBACK = 'feedback',
     OTHER = 'other',
 }
 

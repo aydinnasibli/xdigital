@@ -14,7 +14,6 @@ import Notification from '@/models/Notification';
 import NotificationPreference from '@/models/NotificationPreference';
 import Activity from '@/models/Activity';
 import Analytics from '@/models/Analytics';
-import Feedback from '@/models/Feedback';
 import { logError, logInfo } from '@/lib/sentry-logger';
 
 export async function POST(req: Request) {
@@ -211,8 +210,6 @@ export async function POST(req: Request) {
                 Activity.deleteMany({ userId: userId }),
                 // Delete analytics data for this user (uses clerkUserId string field)
                 Analytics.deleteMany({ clerkUserId: clerkId }),
-                // Delete feedback given by this user (uses userId ObjectId field)
-                Feedback.deleteMany({ userId: userId }),
             ]);
 
             logInfo('User and all related data deleted successfully', { userId: userId.toString(), clerkId });
