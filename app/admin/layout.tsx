@@ -14,7 +14,6 @@ import {
     ArrowLeft,
     FileBox,
     BookOpen,
-    Star,
     Activity,
     Bell,
     Menu,
@@ -128,14 +127,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             onClick={() => setSidebarOpen(false)}
                         >
                             Messages
-                        </NavLink>
-                        <NavLink
-                            href="/admin/feedback"
-                            icon={Star}
-                            active={isActive('/admin/feedback')}
-                            onClick={() => setSidebarOpen(false)}
-                        >
-                            Feedback
                         </NavLink>
                         <NavLink
                             href="/admin/analytics"

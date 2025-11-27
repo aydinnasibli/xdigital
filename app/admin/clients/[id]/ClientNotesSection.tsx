@@ -140,7 +140,6 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
             important: 'bg-red-100 text-red-800',
             risk: 'bg-orange-100 text-orange-800',
             opportunity: 'bg-green-100 text-green-800',
-            feedback: 'bg-blue-100 text-blue-800',
             reminder: 'bg-purple-100 text-purple-800',
         };
         return colors[type as keyof typeof colors] || colors.general;
@@ -181,7 +180,6 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
                                 <option value={NoteType.IMPORTANT}>Important</option>
                                 <option value={NoteType.RISK}>Risk</option>
                                 <option value={NoteType.OPPORTUNITY}>Opportunity</option>
-                                <option value={NoteType.FEEDBACK}>Feedback</option>
                             </select>
                         </div>
 

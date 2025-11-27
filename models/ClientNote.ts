@@ -6,7 +6,6 @@ export enum NoteType {
     IMPORTANT = 'important',
     RISK = 'risk',
     OPPORTUNITY = 'opportunity',
-    FEEDBACK = 'feedback',
     REMINDER = 'reminder',
 }
 
