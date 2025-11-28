@@ -11,6 +11,7 @@ import { logActivity } from './activities';
 import { ActivityType, ActivityEntity } from '@/models/Activity';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/monitoring/sentry';
+import { deleteMultipleFromCloudinary } from '@/lib/services/cloudinary.service';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -63,6 +64,7 @@ export async function createFile(data: {
     folderId?: string;
     fileName: string;
     fileUrl: string;
+    cloudinaryPublicId?: string; // Add this field
     fileType: string;
     fileSize: number;
     category?: FileCategory;
@@ -99,6 +101,7 @@ export async function createFile(data: {
                 fileUrl: data.fileUrl,
                 fileName: data.fileName,
                 fileSize: data.fileSize,
+                cloudinaryPublicId: data.cloudinaryPublicId,
                 uploadedBy: user._id,
                 uploadedAt: new Date(),
             }],
@@ -122,7 +125,7 @@ export async function createFile(data: {
 }
 
 // Upload new version of file
-export async function uploadFileVersion(fileId: string, fileUrl: string, fileName: string, fileSize: number, notes?: string): Promise<ActionResponse> {
+export async function uploadFileVersion(fileId: string, fileUrl: string, fileName: string, fileSize: number, cloudinaryPublicId?: string, notes?: string): Promise<ActionResponse> {
     try {
         const { userId: clerkUserId } = await auth();
         if (!clerkUserId) {
@@ -142,12 +145,14 @@ export async function uploadFileVersion(fileId: string, fileUrl: string, fileNam
         file.fileUrl = fileUrl;
         file.fileName = fileName;
         file.fileSize = fileSize;
+        file.cloudinaryPublicId = cloudinaryPublicId;
 
         file.versions.push({
             versionNumber: file.currentVersion,
             fileUrl,
             fileName,
             fileSize,
+            cloudinaryPublicId,
             uploadedBy: user!._id,
             uploadedAt: new Date(),
             notes,
@@ -264,10 +269,47 @@ export async function deleteFile(fileId: string): Promise<ActionResponse> {
 
         await dbConnect();
 
-        const file = await File.findByIdAndDelete(fileId);
+        // First, find the file to get all Cloudinary public IDs
+        const file = await File.findById(fileId);
         if (!file) {
             return { success: false, error: 'File not found' };
         }
+
+        // Collect all Cloudinary public IDs (current version + all previous versions)
+        const publicIdsToDelete: string[] = [];
+
+        // Add current version
+        if (file.cloudinaryPublicId) {
+            publicIdsToDelete.push(file.cloudinaryPublicId);
+        }
+
+        // Add all version history
+        if (file.versions && file.versions.length > 0) {
+            file.versions.forEach((version) => {
+                if (version.cloudinaryPublicId && !publicIdsToDelete.includes(version.cloudinaryPublicId)) {
+                    publicIdsToDelete.push(version.cloudinaryPublicId);
+                }
+            });
+        }
+
+        // Delete from Cloudinary first (fail gracefully if it fails)
+        if (publicIdsToDelete.length > 0) {
+            try {
+                const deletedCount = await deleteMultipleFromCloudinary(publicIdsToDelete);
+                console.log(`Deleted ${deletedCount}/${publicIdsToDelete.length} files from Cloudinary`);
+            } catch (cloudinaryError) {
+                // Log error but don't fail the entire operation
+                logError(cloudinaryError as Error, {
+                    context: 'deleteFile - Cloudinary cleanup',
+                    fileId,
+                    publicIds: publicIdsToDelete,
+                });
+                console.warn('Failed to delete some files from Cloudinary, continuing with database deletion');
+            }
+        }
+
+        // Now delete from database
+        await File.findByIdAndDelete(fileId);
 
         await logActivity({
             type: ActivityType.FILE_DELETED,
