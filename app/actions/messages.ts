@@ -7,7 +7,7 @@ import Message, { MessageSender } from '@/models/Message';
 import User from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 import { sendRealtimeMessage } from '@/lib/services/pusher.service';
 
 type ActionResponse<T = any> = {

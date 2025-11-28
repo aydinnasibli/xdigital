@@ -1,7 +1,7 @@
 // app/admin/clients/[id]/page.tsx
 import Link from 'next/link';
 import { getClientDetails } from '@/app/actions/admin/clients';
-import { getClientNotes } from '@/app/actions/client-notes';
+import { getClientNotes } from '@/app/actions/clientNotes';
 import { ArrowLeft, Mail, Calendar, FolderKanban, FileText, DollarSign } from 'lucide-react';
 import ClientNotesSection from './ClientNotesSection';
 

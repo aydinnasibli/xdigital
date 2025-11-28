@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateTemplate } from '@/app/actions/project-templates';
+import { updateTemplate } from '@/app/actions/projectTemplates';
 import { ServiceType, WebDevPackage } from '@/models/Project';
 import { Plus, X } from 'lucide-react';
 import { toast } from 'sonner';

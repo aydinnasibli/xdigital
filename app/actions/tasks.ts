@@ -13,7 +13,7 @@ import { ActivityType, ActivityEntity } from '@/models/Activity';
 import { createNotification } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 import { requireAdmin } from '@/lib/auth/admin';
 
 type ActionResponse<T = any> = {

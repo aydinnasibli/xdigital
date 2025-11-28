@@ -10,7 +10,7 @@ import mongoose from 'mongoose';
 import { logActivity } from './activities';
 import { ActivityType, ActivityEntity } from '@/models/Activity';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 type ActionResponse<T = any> = {
     success: boolean;

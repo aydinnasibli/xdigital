@@ -1,7 +1,7 @@
 // app/admin/templates/[id]/edit/page.tsx
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
-import { getTemplate } from '@/app/actions/project-templates';
+import { getTemplate } from '@/app/actions/projectTemplates';
 import EditTemplateForm from './EditTemplateForm';
 
 export default async function EditTemplatePage({

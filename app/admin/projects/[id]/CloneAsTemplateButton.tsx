@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Copy, X } from 'lucide-react';
-import { cloneProjectAsTemplate } from '@/app/actions/project-templates';
+import { cloneProjectAsTemplate } from '@/app/actions/projectTemplates';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 

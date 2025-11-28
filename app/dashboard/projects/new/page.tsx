@@ -5,7 +5,7 @@ import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createProject } from '@/app/actions/projects';
-import { getTemplatesByPackage } from '@/app/actions/project-templates';
+import { getTemplatesByPackage } from '@/app/actions/projectTemplates';
 import { Check, ChevronRight, ChevronLeft, Eye, Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';

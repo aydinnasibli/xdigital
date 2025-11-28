@@ -1,6 +1,6 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import HorizontalScrollBar from "@/components/HorizontalScrollbar";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import HorizontalScrollBar from "@/components/ui/horizontal-scrollbar";
 
 export default function GenLayout({
     children,

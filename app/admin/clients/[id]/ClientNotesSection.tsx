@@ -7,7 +7,7 @@ import {
     updateClientNote,
     deleteClientNote,
     toggleNotePin,
-} from '@/app/actions/client-notes';
+} from '@/app/actions/clientNotes';
 import { useRouter } from 'next/navigation';
 import { Plus, Edit, Trash2, Pin, Save, X, Tag } from 'lucide-react';
 import { toast } from 'sonner';

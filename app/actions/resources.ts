@@ -8,8 +8,8 @@ import Resource, { ResourceType, ResourceCategory, ResourceVisibility } from '@/
 import User from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { logError } from '@/lib/sentry-logger';
-import { sanitizeHtml } from '@/lib/utils';
+import { logError } from '@/lib/monitoring/sentry';
+import { sanitizeHtml } from '@/lib/utils/cn';
 
 type ActionResponse<T = any> = {
     success: boolean;
