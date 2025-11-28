@@ -11,7 +11,7 @@ import { logActivity } from './activities';
 import { ActivityType, ActivityEntity } from '@/models/Activity';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { logError } from '@/lib/monitoring/sentry';
-import { deleteMultipleFromCloudinary } from '@/lib/services/cloudinary.service';
+import { deleteMultipleFromCloudinary, extractPublicIdFromUrl } from '@/lib/services/cloudinary.service';
 
 type ActionResponse<T = any> = {
     success: boolean;
@@ -278,9 +278,15 @@ export async function deleteFile(fileId: string): Promise<ActionResponse> {
         // Collect all Cloudinary public IDs (current version + all previous versions)
         const publicIdsToDelete: string[] = [];
 
-        // Add current version
+        // Add current version - extract from URL if publicId not stored (for old files)
         if (file.cloudinaryPublicId) {
             publicIdsToDelete.push(file.cloudinaryPublicId);
+        } else if (file.fileUrl) {
+            // Try to extract publicId from URL (for files uploaded before publicId was stored)
+            const extractedId = extractPublicIdFromUrl(file.fileUrl);
+            if (extractedId) {
+                publicIdsToDelete.push(extractedId);
+            }
         }
 
         // Add all version history
@@ -288,6 +294,12 @@ export async function deleteFile(fileId: string): Promise<ActionResponse> {
             file.versions.forEach((version) => {
                 if (version.cloudinaryPublicId && !publicIdsToDelete.includes(version.cloudinaryPublicId)) {
                     publicIdsToDelete.push(version.cloudinaryPublicId);
+                } else if (version.fileUrl && !version.cloudinaryPublicId) {
+                    // Try to extract from URL for old versions
+                    const extractedId = extractPublicIdFromUrl(version.fileUrl);
+                    if (extractedId && !publicIdsToDelete.includes(extractedId)) {
+                        publicIdsToDelete.push(extractedId);
+                    }
                 }
             });
         }
