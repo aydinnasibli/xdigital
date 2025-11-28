@@ -1,4 +1,4 @@
-import { getFaqWeb, getPricingPackages, getComparisonFeatures, getPortfolioShowcases } from '@/lib/sanityQueries'
+import { getFaqWeb, getPricingPackages, getComparisonFeatures, getPortfolioShowcases } from '@/lib/sanity/queries'
 import WebPageClient from './WebPageClient'
 
 // This tells Next.js to revalidate this page every day

@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
-import { logInfo, logWarning } from '@/lib/sentry-logger';
+import { logInfo, logWarning } from '@/lib/monitoring/sentry';
 
 interface Message {
     _id: string;

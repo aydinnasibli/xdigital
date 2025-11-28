@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { logWarning } from '@/lib/sentry-logger';
+import { logWarning } from '@/lib/monitoring/sentry';
 
 const MONGODB_URI = process.env.MONGODB_URI || '';
 

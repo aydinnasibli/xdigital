@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowUpRight, Sparkles, Rocket, CheckCircle2, Zap, TrendingUp, ChevronDown, ChevronUp, Users, Globe, Smartphone, Search, Calendar, X, Check, Minus } from 'lucide-react'
 import { useTimeOnPage } from '@/hooks/useTimeOnPage'
-import { PortfolioShowcase, PricingPackage, FaqWeb, ComparisonFeature } from '@/lib/sanityQueries'
+import { PortfolioShowcase, PricingPackage, FaqWeb, ComparisonFeature } from '@/lib/sanity/queries'
 import Link from 'next/link'
 
 

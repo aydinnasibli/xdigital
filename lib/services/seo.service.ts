@@ -1,7 +1,7 @@
 // lib/services/seo.service.ts
 // SEO analysis and monitoring service
 
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 /**
  * Validate URL to prevent SSRF attacks

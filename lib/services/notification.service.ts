@@ -5,7 +5,7 @@ import dbConnect from '@/lib/database/mongodb';
 import Notification, { NotificationType } from '@/models/Notification';
 import User from '@/models/User';
 import { sendEmail } from './email.service';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 interface CreateNotificationParams {
     userId: string; // Clerk user ID

@@ -2,7 +2,7 @@
 'use server';
 
 import Pusher from 'pusher';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 let pusherInstance: Pusher | null = null;
 

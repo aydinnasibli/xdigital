@@ -1,5 +1,5 @@
 import { client } from "@/sanity/lib/client";
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 export interface PricingPackage {
   _id: string

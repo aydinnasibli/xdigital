@@ -10,7 +10,7 @@ import { getProjectAnalytics } from '@/app/actions/monitoring';
 import dynamic from 'next/dynamic';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
 import { toast } from 'sonner';
-import { logInfo, logWarning } from '@/lib/sentry-logger';
+import { logInfo, logWarning } from '@/lib/monitoring/sentry';
 import { Smile, Reply, Edit2, Pin, X } from 'lucide-react';
 import { formatMessageDate, formatMessageTime } from '@/lib/utils/date';
 
