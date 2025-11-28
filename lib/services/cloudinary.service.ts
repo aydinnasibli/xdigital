@@ -21,26 +21,33 @@ export async function deleteFromCloudinary(publicId: string): Promise<boolean> {
     }
 
     try {
-        // Determine resource type from public_id
-        // Cloudinary stores different file types differently
-        const resourceType = publicId.includes('/video/') ? 'video' : 'auto';
+        // Cloudinary stores files in different resource types (image, video, raw)
+        // Since we upload with 'auto', we need to try different types
+        const resourceTypes = ['image', 'video', 'raw'] as const;
 
-        const result = await cloudinary.uploader.destroy(publicId, {
-            resource_type: resourceType,
-            invalidate: true, // Invalidate CDN cache
-        });
+        for (const resourceType of resourceTypes) {
+            try {
+                const result = await cloudinary.uploader.destroy(publicId, {
+                    resource_type: resourceType,
+                    invalidate: true, // Invalidate CDN cache
+                });
 
-        if (result.result === 'ok') {
-            console.log(`Successfully deleted file from Cloudinary: ${publicId}`);
-            return true;
-        } else if (result.result === 'not found') {
-            // File already deleted or doesn't exist
-            console.warn(`File not found in Cloudinary: ${publicId}`);
-            return true; // Consider this a success
-        } else {
-            console.error(`Failed to delete file from Cloudinary: ${publicId}`, result);
-            return false;
+                if (result.result === 'ok') {
+                    console.log(`Successfully deleted file from Cloudinary (${resourceType}): ${publicId}`);
+                    return true;
+                } else if (result.result === 'not found') {
+                    // File not found with this resource type, try next
+                    continue;
+                }
+            } catch (err) {
+                // Try next resource type
+                continue;
+            }
         }
+
+        // If we get here, file wasn't found in any resource type
+        console.warn(`File not found in any Cloudinary resource type: ${publicId}`);
+        return true; // Consider this a success (already deleted or never existed)
     } catch (error) {
         logError(error as Error, {
             context: 'deleteFromCloudinary',
