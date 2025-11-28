@@ -18,7 +18,7 @@ export function FileUpload({
     projectId,
     folderId,
     onUploadComplete,
-    maxFiles = 5,
+    maxFiles = 10,
     accept,
 }: FileUploadProps) {
     const [uploading, setUploading] = useState(false);
@@ -35,20 +35,40 @@ export function FileUpload({
                     // Update progress
                     setUploadProgress(prev => ({ ...prev, [file.name]: 0 }));
 
-                    // Upload file to our API
+                    // Upload file to our API with progress tracking
                     const formData = new FormData();
                     formData.append('file', file);
 
-                    const response = await fetch('/api/upload', {
-                        method: 'POST',
-                        body: formData,
+                    // Use XMLHttpRequest for progress tracking
+                    const result = await new Promise<any>((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+
+                        xhr.upload.addEventListener('progress', (e) => {
+                            if (e.lengthComputable) {
+                                const percentComplete = Math.round((e.loaded / e.total) * 100);
+                                setUploadProgress(prev => ({ ...prev, [file.name]: percentComplete }));
+                            }
+                        });
+
+                        xhr.addEventListener('load', () => {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                try {
+                                    resolve(JSON.parse(xhr.responseText));
+                                } catch (err) {
+                                    reject(new Error('Failed to parse response'));
+                                }
+                            } else {
+                                reject(new Error(`Upload failed: ${xhr.statusText}`));
+                            }
+                        });
+
+                        xhr.addEventListener('error', () => {
+                            reject(new Error('Upload failed'));
+                        });
+
+                        xhr.open('POST', '/api/upload');
+                        xhr.send(formData);
                     });
-
-                    if (!response.ok) {
-                        throw new Error(`Upload failed: ${response.statusText}`);
-                    }
-
-                    const result = await response.json();
 
                     // Save file metadata to database
                     const fileData = await createFile({
@@ -104,6 +124,7 @@ export function FileUpload({
     const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
         onDrop,
         maxFiles,
+        maxSize: 5 * 1024 * 1024, // 5MB limit
         accept: accept || {
             'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
             'application/pdf': ['.pdf'],
@@ -153,7 +174,7 @@ export function FileUpload({
                                 Drag & drop files here, or click to select files
                             </p>
                             <p className="text-xs text-gray-500">
-                                Max {maxFiles} files, up to 10MB each
+                                Max {maxFiles} files, up to 5MB each
                             </p>
                         </>
                     )}
