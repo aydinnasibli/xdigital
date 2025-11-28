@@ -253,23 +253,6 @@ export default async function DashboardPage() {
                     accentColor="from-emerald-500 to-teal-500"
                 />
             </div>
-
-            <style jsx global>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 6px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: rgba(31, 41, 55, 0.5);
-                    border-radius: 3px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(107, 114, 128, 0.5);
-                    border-radius: 3px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(156, 163, 175, 0.7);
-                }
-            `}</style>
         </div>
     );
 }
