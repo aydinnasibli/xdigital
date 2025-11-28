@@ -15,8 +15,8 @@ import {
     Search,
     ArrowRight,
     BarChart2,
-    Calendar,
-    Zap
+    Zap,
+    Sparkles
 } from 'lucide-react';
 
 export default async function DashboardPage() {
@@ -34,8 +34,13 @@ export default async function DashboardPage() {
 
     if (!projectResult.success || !projectResult.data) {
         return (
-            <div className="text-center py-12">
-                <p className="text-red-600">{projectResult.error || 'Failed to load dashboard'}</p>
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
+                        <span className="text-2xl">⚠️</span>
+                    </div>
+                    <p className="text-red-400">{projectResult.error || 'Failed to load dashboard'}</p>
+                </div>
             </div>
         );
     }
@@ -49,41 +54,52 @@ export default async function DashboardPage() {
     const greeting = currentHour < 12 ? 'Good morning' : currentHour < 18 ? 'Good afternoon' : 'Good evening';
 
     return (
-        <div className="space-y-6">
-            {/* Hero Section with Gradient */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 md:p-12 text-white shadow-2xl">
-                <div className="absolute inset-0 bg-black/10"></div>
-                <div className="relative z-10">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                        <div className="flex-1">
-                            <h1 className="text-4xl md:text-5xl font-bold mb-3">
-                                {greeting}, {firstName}!
-                            </h1>
-                            <p className="text-lg text-purple-100 mb-6">
-                                You have {stats.inProgress} active {stats.inProgress === 1 ? 'project' : 'projects'} and {stats.pending} pending
-                            </p>
+        <div className="space-y-8 p-6">
+            {/* Hero Section - Dark Glass Design */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-black to-gray-900 border border-gray-800/50 backdrop-blur-xl">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.1),transparent_50%)]"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.1),transparent_50%)]"></div>
+
+                <div className="relative p-8 md:p-12">
+                    <div className="flex items-start justify-between gap-8">
+                        <div className="flex-1 space-y-6">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5 text-purple-400" />
+                                    <span className="text-sm text-gray-400">Dashboard Overview</span>
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-bold text-white">
+                                    {greeting}, {firstName}
+                                </h1>
+                                <p className="text-lg text-gray-400">
+                                    You have <span className="text-purple-400 font-semibold">{stats.inProgress}</span> active {stats.inProgress === 1 ? 'project' : 'projects'}
+                                    {stats.pending > 0 && (
+                                        <> and <span className="text-amber-400 font-semibold">{stats.pending}</span> pending</>
+                                    )}
+                                </p>
+                            </div>
+
                             <div className="flex flex-wrap gap-3">
                                 <Link
                                     href="/dashboard/projects/new"
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-purple-700 rounded-xl hover:bg-purple-50 transition-all font-semibold shadow-xl hover:shadow-2xl hover:scale-105"
+                                    className="group inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/30 rounded-xl transition-all duration-200 text-white font-medium"
                                 >
-                                    <Plus className="w-5 h-5" />
+                                    <Plus className="w-4 h-4 transition-transform group-hover:rotate-90 duration-300" />
                                     New Project
                                 </Link>
                                 <Link
                                     href="/dashboard/projects"
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-xl hover:bg-white/20 transition-all font-semibold"
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-gray-700/50 hover:border-gray-600 rounded-xl transition-all duration-200 text-gray-300 hover:text-white"
                                 >
                                     View All Projects
                                     <ArrowRight className="w-4 h-4" />
                                 </Link>
                             </div>
                         </div>
-                        <div className="hidden md:block">
-                            <div className="relative w-48 h-48">
-                                <div className="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
-                                <div className="absolute inset-4 bg-white/20 rounded-full animate-pulse delay-75"></div>
-                                <div className="absolute inset-8 bg-white/20 rounded-full animate-pulse delay-150"></div>
+
+                        <div className="hidden lg:block">
+                            <div className="relative w-32 h-32">
+                                <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-2xl animate-pulse"></div>
                                 <div className="absolute inset-0 flex items-center justify-center text-6xl">
                                     🚀
                                 </div>
@@ -91,54 +107,51 @@ export default async function DashboardPage() {
                         </div>
                     </div>
                 </div>
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full -ml-32 -mb-32"></div>
             </div>
 
-            {/* Modern Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <ModernStatCard
+            {/* Modern Stats Grid - Dark Theme */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <DarkStatCard
                     title="Total Projects"
                     value={stats.total}
                     icon={FolderKanban}
-                    gradient="from-blue-500 to-cyan-500"
+                    accentColor="from-blue-500 to-cyan-500"
                     description="All time"
                 />
-                <ModernStatCard
+                <DarkStatCard
                     title="Pending"
                     value={stats.pending}
                     icon={Clock}
-                    gradient="from-amber-500 to-yellow-500"
+                    accentColor="from-amber-500 to-orange-500"
                     description="Awaiting start"
                     highlight={stats.pending > 0}
                 />
-                <ModernStatCard
+                <DarkStatCard
                     title="In Progress"
                     value={stats.inProgress}
                     icon={TrendingUp}
-                    gradient="from-purple-500 to-pink-500"
+                    accentColor="from-purple-500 to-pink-500"
                     description="Active now"
                     highlight={stats.inProgress > 0}
                 />
-                <ModernStatCard
+                <DarkStatCard
                     title="Completed"
                     value={stats.completed}
                     icon={CheckCircle}
-                    gradient="from-emerald-500 to-green-500"
-                    description="Successfully delivered"
+                    accentColor="from-emerald-500 to-green-500"
+                    description="Delivered"
                 />
             </div>
 
-            {/* Charts Section */}
+            {/* Charts Section - Dark Glass */}
             {stats.total > 0 && (
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8">
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6 md:p-8">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl">
-                            <BarChart2 className="w-6 h-6 text-white" />
+                        <div className="p-2.5 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl">
+                            <BarChart2 className="w-5 h-5 text-blue-400" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900">Analytics Overview</h2>
+                            <h2 className="text-xl font-semibold text-white">Analytics Overview</h2>
                             <p className="text-sm text-gray-500">Visual representation of your projects</p>
                         </div>
                     </div>
@@ -158,158 +171,182 @@ export default async function DashboardPage() {
                 {/* Recent Projects - Takes 2 columns */}
                 <div className="lg:col-span-2">
                     {recentProjects.length > 0 ? (
-                        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8">
+                        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6 md:p-8">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
-                                        <FolderKanban className="w-6 h-6 text-white" />
+                                    <div className="p-2.5 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl">
+                                        <FolderKanban className="w-5 h-5 text-purple-400" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-gray-900">Recent Projects</h2>
-                                        <p className="text-sm text-gray-500">Your latest project updates</p>
+                                        <h2 className="text-xl font-semibold text-white">Recent Projects</h2>
+                                        <p className="text-sm text-gray-500">Your latest updates</p>
                                     </div>
                                 </div>
                                 <Link
                                     href="/dashboard/projects"
-                                    className="text-sm text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-1"
+                                    className="text-sm text-purple-400 hover:text-purple-300 font-medium flex items-center gap-1 transition-colors"
                                 >
                                     View All
                                     <ArrowRight className="w-4 h-4" />
                                 </Link>
                             </div>
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {recentProjects.map((project: any) => (
-                                    <ProjectCard key={project._id} project={project} />
+                                    <DarkProjectCard key={project._id} project={project} />
                                 ))}
                             </div>
                         </div>
                     ) : (
-                        <EmptyStateCard />
+                        <DarkEmptyState />
                     )}
                 </div>
 
                 {/* Recent Activity Sidebar */}
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl">
-                            <Zap className="w-6 h-6 text-white" />
+                        <div className="p-2.5 bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-xl">
+                            <Zap className="w-5 h-5 text-orange-400" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
-                            <p className="text-xs text-gray-500">Latest updates</p>
+                            <h2 className="text-lg font-semibold text-white">Activity</h2>
+                            <p className="text-xs text-gray-500">Recent updates</p>
                         </div>
                     </div>
                     {activities.length > 0 ? (
-                        <div className="space-y-3 max-h-96 overflow-y-auto">
-                            {activities.slice(0, 5).map((activity: any) => (
-                                <ActivityItem key={activity._id} activity={activity} />
+                        <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+                            {activities.slice(0, 8).map((activity: any) => (
+                                <DarkActivityItem key={activity._id} activity={activity} />
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-8 text-gray-400">
-                            <p>No recent activity</p>
+                        <div className="text-center py-12">
+                            <div className="w-12 h-12 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <Zap className="w-6 h-6 text-gray-600" />
+                            </div>
+                            <p className="text-sm text-gray-500">No recent activity</p>
                         </div>
                     )}
                 </div>
             </div>
 
             {/* Quick Actions Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <QuickActionCard
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <DarkQuickAction
                     href="/dashboard/projects/new"
-                    icon={<Plus className="w-8 h-8" />}
+                    icon={<Plus className="w-6 h-6" />}
                     title="New Project"
-                    description="Start a new project request"
-                    gradient="from-blue-500 to-cyan-500"
+                    description="Start a project request"
+                    accentColor="from-blue-500 to-cyan-500"
                 />
-                <QuickActionCard
+                <DarkQuickAction
                     href="/dashboard/notifications"
-                    icon={<Bell className="w-8 h-8" />}
+                    icon={<Bell className="w-6 h-6" />}
                     title="Notifications"
-                    description="Check your updates"
-                    gradient="from-purple-500 to-pink-500"
+                    description="Check updates"
+                    accentColor="from-purple-500 to-pink-500"
                 />
-                <QuickActionCard
+                <DarkQuickAction
                     href="/dashboard/resources"
-                    icon={<Search className="w-8 h-8" />}
+                    icon={<Search className="w-6 h-6" />}
                     title="Resources"
-                    description="Browse helpful resources"
-                    gradient="from-emerald-500 to-teal-500"
+                    description="Browse guides"
+                    accentColor="from-emerald-500 to-teal-500"
                 />
             </div>
+
+            <style jsx global>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: rgba(31, 41, 55, 0.5);
+                    border-radius: 3px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(107, 114, 128, 0.5);
+                    border-radius: 3px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(156, 163, 175, 0.7);
+                }
+            `}</style>
         </div>
     );
 }
 
-// Modern Stat Card Component
-function ModernStatCard({
+// Dark Stat Card Component
+function DarkStatCard({
     title,
     value,
     icon: Icon,
-    gradient,
+    accentColor,
     description,
     highlight,
 }: {
     title: string;
     value: number;
     icon: any;
-    gradient: string;
+    accentColor: string;
     description: string;
     highlight?: boolean;
 }) {
     return (
-        <div className={`group relative overflow-hidden bg-white rounded-2xl shadow-lg border ${highlight ? 'border-purple-200 ring-2 ring-purple-100' : 'border-gray-100'} p-6 hover:shadow-xl transition-all duration-300`}>
-            <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity`}></div>
+        <div className={`group relative overflow-hidden bg-black/40 backdrop-blur-xl border ${highlight ? 'border-purple-500/30' : 'border-gray-800/50'} rounded-xl p-5 hover:bg-black/60 transition-all duration-300`}>
+            <div className={`absolute inset-0 bg-gradient-to-br ${accentColor} opacity-0 group-hover:opacity-5 transition-opacity`}></div>
 
-            <div className="relative">
-                <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${gradient} shadow-lg group-hover:scale-110 transition-transform`}>
-                        <Icon className="w-6 h-6 text-white" />
+            <div className="relative space-y-3">
+                <div className="flex items-center justify-between">
+                    <div className={`p-2.5 rounded-lg bg-gradient-to-br ${accentColor} bg-opacity-10 border border-white/10`}>
+                        <Icon className="w-5 h-5 text-white" />
                     </div>
                     {highlight && (
-                        <div className="animate-pulse">
-                            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse"></div>
+                            <span className="text-xs text-purple-400 font-medium">Active</span>
                         </div>
                     )}
                 </div>
-                <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-                <p className="text-4xl font-bold text-gray-900 mb-2">{value}</p>
-                <p className="text-xs text-gray-500">{description}</p>
+                <div>
+                    <p className="text-sm text-gray-400 mb-1">{title}</p>
+                    <p className="text-3xl font-bold text-white">{value}</p>
+                    <p className="text-xs text-gray-600 mt-1">{description}</p>
+                </div>
             </div>
         </div>
     );
 }
 
-// Project Card Component
-function ProjectCard({ project }: { project: any }) {
+// Dark Project Card Component
+function DarkProjectCard({ project }: { project: any }) {
     const statusConfig = {
-        completed: { bg: 'bg-green-100', text: 'text-green-800', label: 'Completed' },
-        in_progress: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'In Progress' },
-        pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' },
+        completed: { dot: 'bg-emerald-500', text: 'text-emerald-400', label: 'Completed' },
+        in_progress: { dot: 'bg-blue-500', text: 'text-blue-400', label: 'In Progress' },
+        pending: { dot: 'bg-amber-500', text: 'text-amber-400', label: 'Pending' },
     };
 
-    const config = statusConfig[project.status as keyof typeof statusConfig] || { bg: 'bg-gray-100', text: 'text-gray-800', label: project.status };
+    const config = statusConfig[project.status as keyof typeof statusConfig] || { dot: 'bg-gray-500', text: 'text-gray-400', label: project.status };
 
     return (
         <Link
             href={`/dashboard/projects/${project._id}`}
-            className="group block p-5 border-2 border-gray-100 rounded-2xl hover:border-purple-200 hover:bg-purple-50/50 transition-all duration-300"
+            className="group block p-4 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-gray-700 rounded-xl transition-all duration-200"
         >
             <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 text-lg mb-2 group-hover:text-purple-700 transition-colors truncate">
+                    <h3 className="font-semibold text-white text-base mb-1.5 group-hover:text-purple-300 transition-colors truncate">
                         {project.projectName}
                     </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                    <p className="text-sm text-gray-400 line-clamp-1 mb-2">
                         {project.projectDescription}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <Calendar className="w-3 h-3" />
+                        <Clock className="w-3 h-3" />
                         {new Date(project.createdAt).toLocaleDateString()}
                     </div>
                 </div>
-                <div className="flex-shrink-0">
-                    <span className={`px-3 py-1.5 text-xs font-semibold rounded-full ${config.bg} ${config.text} whitespace-nowrap`}>
+                <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 ${config.dot} rounded-full`}></div>
+                    <span className={`text-xs font-medium ${config.text}`}>
                         {config.label}
                     </span>
                 </div>
@@ -318,17 +355,17 @@ function ProjectCard({ project }: { project: any }) {
     );
 }
 
-// Activity Item Component
-function ActivityItem({ activity }: { activity: any }) {
+// Dark Activity Item Component
+function DarkActivityItem({ activity }: { activity: any }) {
     return (
-        <div className="flex gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-            <div className="flex-shrink-0 w-2 h-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mt-2"></div>
+        <div className="flex gap-3 p-3 bg-white/5 hover:bg-white/10 border border-gray-800/30 rounded-lg transition-colors">
+            <div className="flex-shrink-0 w-1.5 h-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mt-2"></div>
             <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm truncate">{activity.title}</p>
+                <p className="font-medium text-white text-sm truncate">{activity.title}</p>
                 {activity.description && (
-                    <p className="text-xs text-gray-600 mt-1 line-clamp-2">{activity.description}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{activity.description}</p>
                 )}
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-gray-600 mt-1">
                     {new Date(activity.createdAt).toLocaleString()}
                 </p>
             </div>
@@ -336,58 +373,60 @@ function ActivityItem({ activity }: { activity: any }) {
     );
 }
 
-// Empty State Card Component
-function EmptyStateCard() {
+// Dark Empty State Component
+function DarkEmptyState() {
     return (
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl border-2 border-dashed border-purple-200 p-12 text-center">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-lg mb-6">
-                <div className="text-5xl">🚀</div>
+        <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border-2 border-dashed border-gray-800 rounded-2xl p-12 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/5 backdrop-blur-sm rounded-full border border-gray-800/50 mb-6">
+                <div className="text-4xl">🚀</div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">No projects yet</h3>
-            <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                Get started by creating your first project and let's bring your ideas to life!
+            <h3 className="text-2xl font-bold text-white mb-2">No projects yet</h3>
+            <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                Get started by creating your first project and let's bring your ideas to life
             </p>
             <Link
                 href="/dashboard/projects/new"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all font-semibold shadow-xl hover:shadow-2xl hover:scale-105"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/30 rounded-xl transition-all duration-200 text-white font-medium"
             >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
                 Create Your First Project
             </Link>
         </div>
     );
 }
 
-// Quick Action Card Component
-function QuickActionCard({
+// Dark Quick Action Component
+function DarkQuickAction({
     href,
     icon,
     title,
     description,
-    gradient,
+    accentColor,
 }: {
     href: string;
     icon: React.ReactNode;
     title: string;
     description: string;
-    gradient: string;
+    accentColor: string;
 }) {
     return (
         <Link
             href={href}
-            className="group relative overflow-hidden bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300"
+            className="group relative overflow-hidden bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-gray-700 rounded-xl p-5 transition-all duration-200"
         >
-            <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
+            <div className={`absolute inset-0 bg-gradient-to-br ${accentColor} opacity-0 group-hover:opacity-10 transition-opacity`}></div>
 
-            <div className="relative z-10">
-                <div className="inline-flex p-4 bg-gray-100 rounded-xl group-hover:bg-white/20 transition-colors mb-4 group-hover:scale-110 transform duration-300">
-                    <div className="text-gray-700 group-hover:text-white transition-colors">
+            <div className="relative z-10 space-y-3">
+                <div className="inline-flex p-3 bg-white/5 group-hover:bg-white/10 rounded-xl transition-colors">
+                    <div className="text-gray-300 group-hover:text-white transition-colors">
                         {icon}
                     </div>
                 </div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2 group-hover:text-white transition-colors">{title}</h3>
-                <p className="text-sm text-gray-600 group-hover:text-white/90 transition-colors">{description}</p>
-                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-white absolute top-6 right-6 transition-colors" />
+                <div>
+                    <h3 className="font-semibold text-white text-base mb-1">{title}</h3>
+                    <p className="text-sm text-gray-500">{description}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
             </div>
         </Link>
     );
