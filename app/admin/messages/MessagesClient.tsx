@@ -6,7 +6,7 @@ import { MessageSquare, Send, Search, Plus, Smile, Reply, Edit2, Pin, X } from '
 import { sendAdminMessage, addMessageReaction, sendAdminTypingIndicator, adminReplyToMessage, adminEditMessage, togglePinMessage } from '@/app/actions/admin/messages';
 import { toast } from 'sonner';
 import { usePusherChannel } from '@/lib/hooks/usePusher';
-import { logInfo } from '@/lib/sentry-logger';
+import { logInfo } from '@/lib/monitoring/sentry';
 import { formatMessageTime, formatConversationDate } from '@/lib/utils/date';
 
 interface Message {

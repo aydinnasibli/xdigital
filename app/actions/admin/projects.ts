@@ -8,10 +8,10 @@ import User from '@/models/User';
 import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 import { createNotification } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
-import { escapeRegex } from '@/lib/utils';
+import { escapeRegex } from '@/lib/utils/cn';
 
 type ActionResponse<T = any> = {
     success: boolean;

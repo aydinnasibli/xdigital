@@ -14,7 +14,7 @@ import Notification from '@/models/Notification';
 import NotificationPreference from '@/models/NotificationPreference';
 import Activity from '@/models/Activity';
 import Analytics from '@/models/Analytics';
-import { logError, logInfo } from '@/lib/sentry-logger';
+import { logError, logInfo } from '@/lib/monitoring/sentry';
 
 export async function POST(req: Request) {
     const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;

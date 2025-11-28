@@ -9,7 +9,7 @@ import User, { UserRole } from '@/models/User';
 import mongoose from 'mongoose';
 import { requireAdmin } from '@/lib/auth/admin';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 import ReminderEmailLog from '@/models/ReminderEmailLog';
 import { sendEmail } from '@/lib/services/email.service';
 

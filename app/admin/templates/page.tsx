@@ -2,7 +2,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
-import { getTemplates } from '@/app/actions/project-templates';
+import { getTemplates } from '@/app/actions/projectTemplates';
 import { ExternalLink, Eye, Trash2, Edit } from 'lucide-react';
 import Image from 'next/image';
 import TemplateActions from './TemplateActions';

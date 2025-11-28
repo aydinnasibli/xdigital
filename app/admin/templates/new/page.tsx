@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createTemplate } from '@/app/actions/project-templates';
+import { createTemplate } from '@/app/actions/projectTemplates';
 import { ServiceType, WebDevPackage } from '@/models/Project';
 import { Plus, X, Upload } from 'lucide-react';
 

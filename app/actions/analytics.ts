@@ -6,7 +6,7 @@ import Analytics from '@/models/Analytics';
 import User from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 type ActionResponse<T = any> = {
     success: boolean;

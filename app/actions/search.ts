@@ -8,8 +8,8 @@ import Message from '@/models/Message';
 import File from '@/models/File';
 import Task from '@/models/Task';
 import User from '@/models/User';
-import { logError } from '@/lib/sentry-logger';
-import { escapeRegex } from '@/lib/utils';
+import { logError } from '@/lib/monitoring/sentry';
+import { escapeRegex } from '@/lib/utils/cn';
 
 type ActionResponse<T = any> = {
     success: boolean;

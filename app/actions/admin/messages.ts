@@ -9,7 +9,7 @@ import User, { IUser } from '@/models/User';
 import { requireAdmin, getAdminSession } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 import { sendRealtimeMessage } from '@/lib/services/pusher.service';
 
 type ActionResponse<T = any> = {

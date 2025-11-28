@@ -1,7 +1,7 @@
 // app/admin/clients/[id]/notes/page.tsx
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
-import { getClientNotes } from '@/app/actions/client-notes';
+import { getClientNotes } from '@/app/actions/clientNotes';
 import Link from 'next/link';
 
 export default async function ClientNotesPage({

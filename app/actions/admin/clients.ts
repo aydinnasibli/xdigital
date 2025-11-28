@@ -6,9 +6,9 @@ import User from '@/models/User';
 import Project from '@/models/Project';
 import { requireAdmin } from '@/lib/auth/admin';
 import mongoose from 'mongoose';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { escapeRegex } from '@/lib/utils';
+import { escapeRegex } from '@/lib/utils/cn';
 
 type ActionResponse<T = any> = {
     success: boolean;

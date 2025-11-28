@@ -9,7 +9,7 @@ import { GoogleAnalyticsService } from '@/lib/services/analytics.service';
 import { SEOService } from '@/lib/services/seo.service';
 import { PerformanceService } from '@/lib/services/performance.service';
 import { PDFReportService, type ReportData } from '@/lib/services/pdf-report.service';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 type ActionResponse<T = any> = {
     success: boolean;

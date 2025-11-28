@@ -2,7 +2,7 @@
 'use server';
 
 import { Resend } from 'resend';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 let resendInstance: Resend | null = null;
 

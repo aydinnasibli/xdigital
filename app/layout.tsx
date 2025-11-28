@@ -2,9 +2,9 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Metadata } from "next";
-import Navbar from "../components/Navbar";
-import HorizontalScrollBar from "@/components/HorizontalScrollbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/layout/Navbar";
+import HorizontalScrollBar from "@/components/ui/horizontal-scrollbar";
+import Footer from "@/components/layout/Footer";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 
 export const metadata: Metadata = {

@@ -7,7 +7,7 @@ import Activity, { ActivityType, ActivityEntity } from '@/models/Activity';
 import User from '@/models/User';
 import mongoose from 'mongoose';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 import { requireAdmin } from '@/lib/auth/admin';
 
 type ActionResponse<T = any> = {

@@ -8,7 +8,7 @@ import User from '@/models/User';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
 import { createNotification as createNotificationService } from '@/lib/services/notification.service';
 import { NotificationType } from '@/models/Notification';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 type ActionResponse<T = any> = {
     success: boolean;

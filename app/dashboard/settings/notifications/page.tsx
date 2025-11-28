@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getNotificationPreferences, updateNotificationPreferences } from '@/app/actions/notification-preferences';
+import { getNotificationPreferences, updateNotificationPreferences } from '@/app/actions/notificationPreferences';
 import { NotificationChannel } from '@/models/NotificationPreference';
 import { toast } from 'sonner';
 

@@ -6,7 +6,7 @@ import dbConnect from '@/lib/database/mongodb';
 import NotificationPreference, { NotificationChannel, DigestFrequency } from '@/models/NotificationPreference';
 import User from '@/models/User';
 import { toSerializedObject } from '@/lib/utils/serialize-mongo';
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 type ActionResponse<T = any> = {
     success: boolean;

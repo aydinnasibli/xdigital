@@ -1,7 +1,7 @@
 // lib/services/analytics.service.ts
 // Google Analytics Data API integration for fetching website analytics
 
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 interface GoogleAnalyticsConfig {
     propertyId: string;

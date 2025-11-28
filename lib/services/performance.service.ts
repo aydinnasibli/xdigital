@@ -1,7 +1,7 @@
 // lib/services/performance.service.ts
 // Website performance monitoring using Lighthouse and Web Vitals
 
-import { logError } from '@/lib/sentry-logger';
+import { logError } from '@/lib/monitoring/sentry';
 
 export interface PerformanceMetrics {
     overall: number; // 0-100
