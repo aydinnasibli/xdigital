@@ -8,7 +8,6 @@ import {
 import {
     FolderKanban,
     Users,
-    MessageSquare,
     Clock,
     CheckCircle,
     AlertCircle,
@@ -16,7 +15,10 @@ import {
     TrendingDown,
     ArrowUpRight,
     BarChart3,
-    FileText
+    FileText,
+    Sparkles,
+    Zap,
+    Target
 } from 'lucide-react';
 import { DashboardCharts } from '@/components/analytics/DashboardCharts';
 import Link from 'next/link';
@@ -30,32 +32,38 @@ export default async function AdminDashboardPage() {
     const projects = projectStats.success ? projectStats.data : null;
     const clients = clientStats.success ? clientStats.data : null;
 
-    // Calculate trends (mock data - you can replace with real calculations)
+    // Calculate trends
     const projectTrend = ((projects?.thisMonth || 0) / Math.max((projects?.total || 1) - (projects?.thisMonth || 0), 1) * 100).toFixed(1);
     const clientTrend = ((clients?.newThisMonth || 0) / Math.max((clients?.totalClients || 1) - (clients?.newThisMonth || 0), 1) * 100).toFixed(1);
 
     return (
         <div className="space-y-6">
-            {/* Header with Gradient */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 p-8 text-white shadow-xl">
-                <div className="absolute inset-0 bg-black/10"></div>
+            {/* Header - Dark Glass */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-black to-gray-900 border border-gray-800/50 backdrop-blur-xl p-8">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.15),transparent_50%)]"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.15),transparent_50%)]"></div>
+
                 <div className="relative z-10">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
-                            <p className="text-blue-100">Welcome back! Here's what's happening today</p>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="w-5 h-5 text-purple-400" />
+                                <span className="text-sm text-gray-400">Admin Control Center</span>
+                            </div>
+                            <h1 className="text-4xl font-bold text-white">Admin Dashboard</h1>
+                            <p className="text-gray-400">Welcome back! Here's what's happening today</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <Link
                                 href="/admin/templates"
-                                className="px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl hover:bg-white/20 transition-all text-sm font-medium flex items-center gap-2"
+                                className="group inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-gray-800/50 hover:border-gray-700 rounded-xl transition-all text-sm font-medium text-gray-300 hover:text-white"
                             >
                                 <FileText className="w-4 h-4" />
                                 Templates
                             </Link>
                             <Link
                                 href="/admin/analytics"
-                                className="px-5 py-2.5 bg-white text-blue-700 rounded-xl hover:bg-blue-50 transition-all text-sm font-medium flex items-center gap-2 shadow-lg"
+                                className="group inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/30 rounded-xl transition-all text-sm font-medium text-white"
                             >
                                 <BarChart3 className="w-4 h-4" />
                                 Analytics
@@ -63,103 +71,108 @@ export default async function AdminDashboardPage() {
                         </div>
                     </div>
                 </div>
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>
             </div>
 
-            {/* Modern Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <ModernStatCard
+            {/* Modern Stats Grid - Dark Glass */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <DarkStatCard
                     title="Total Projects"
                     value={projects?.total || 0}
                     subtitle={`${projects?.thisMonth || 0} this month`}
                     icon={FolderKanban}
-                    gradient="from-blue-500 to-blue-600"
+                    accentColor="from-blue-500 to-cyan-500"
                     trend={Number(projectTrend)}
                     trendLabel="vs last period"
                 />
-                <ModernStatCard
+                <DarkStatCard
                     title="Total Clients"
                     value={clients?.totalClients || 0}
                     subtitle={`${clients?.newThisMonth || 0} new this month`}
                     icon={Users}
-                    gradient="from-emerald-500 to-emerald-600"
+                    accentColor="from-emerald-500 to-green-500"
                     trend={Number(clientTrend)}
                     trendLabel="vs last period"
                 />
-                <ModernStatCard
+                <DarkStatCard
                     title="Active Clients"
                     value={clients?.clientsWithActiveProjects || 0}
                     subtitle="With active projects"
-                    icon={Users}
-                    gradient="from-purple-500 to-purple-600"
+                    icon={Target}
+                    accentColor="from-purple-500 to-pink-500"
                     trendLabel="Currently engaged"
                 />
             </div>
 
-            {/* Project Status Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <ModernStatusCard
+            {/* Project Status Cards - Dark Theme */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <StatusCard
                     title="Pending"
                     value={projects?.pending || 0}
                     icon={Clock}
-                    gradient="from-amber-400 to-yellow-500"
+                    accentColor="from-amber-500 to-orange-500"
                     description="Awaiting start"
                 />
-                <ModernStatusCard
+                <StatusCard
                     title="In Progress"
                     value={projects?.inProgress || 0}
-                    icon={AlertCircle}
-                    gradient="from-blue-400 to-blue-600"
+                    icon={Zap}
+                    accentColor="from-blue-500 to-cyan-500"
                     description="Currently active"
+                    pulse={true}
                 />
-                <ModernStatusCard
+                <StatusCard
                     title="Completed"
                     value={projects?.completed || 0}
                     icon={CheckCircle}
-                    gradient="from-emerald-400 to-green-600"
+                    accentColor="from-emerald-500 to-green-500"
                     description="Successfully delivered"
                 />
             </div>
 
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-                {/* Client Activity */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                    <h2 className="text-xl font-bold text-gray-900 mb-6">Client Activity</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium text-gray-700">Active Projects</span>
-                                <span className="text-2xl font-bold text-blue-700">
-                                    {clients?.clientsWithActiveProjects || 0}
-                                </span>
-                            </div>
-                            <p className="text-xs text-gray-600 mt-1">Clients with projects</p>
-                        </div>
-                        <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium text-gray-700">New This Month</span>
-                                <span className="text-2xl font-bold text-purple-700">
-                                    {clients?.newThisMonth || 0}
-                                </span>
-                            </div>
-                            <p className="text-xs text-gray-600 mt-1">Recently onboarded</p>
-                        </div>
+            {/* Client Activity - Dark Glass */}
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2.5 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl">
+                        <Users className="w-5 h-5 text-purple-400" />
                     </div>
+                    <div>
+                        <h2 className="text-xl font-semibold text-white">Client Activity</h2>
+                        <p className="text-sm text-gray-500">Recent client engagement metrics</p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <MetricCard
+                        label="Active Projects"
+                        value={clients?.clientsWithActiveProjects || 0}
+                        description="Clients with projects"
+                        accentColor="from-blue-500 to-cyan-500"
+                    />
+                    <MetricCard
+                        label="New This Month"
+                        value={clients?.newThisMonth || 0}
+                        description="Recently onboarded"
+                        accentColor="from-purple-500 to-pink-500"
+                    />
                 </div>
             </div>
 
-            {/* Analytics Charts */}
-            {projects && (
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                    <h2 className="text-xl font-bold text-gray-900 mb-6">Analytics Overview</h2>
+            {/* Charts Section - Dark Glass */}
+            {projects && projects.total > 0 && (
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2.5 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl">
+                            <BarChart3 className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-semibold text-white">Project Analytics</h2>
+                            <p className="text-sm text-gray-500">Visual overview of project distribution</p>
+                        </div>
+                    </div>
                     <DashboardCharts
                         projectsByStatus={[
-                            { status: 'Pending', count: projects.pending || 0 },
-                            { status: 'In Progress', count: projects.inProgress || 0 },
-                            { status: 'Completed', count: projects.completed || 0 },
+                            { status: 'Pending', count: projects?.pending || 0 },
+                            { status: 'In Progress', count: projects?.inProgress || 0 },
+                            { status: 'Completed', count: projects?.completed || 0 },
                         ]}
                         revenueData={[]}
                     />
@@ -167,146 +180,177 @@ export default async function AdminDashboardPage() {
             )}
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <QuickActionCard
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <QuickAction
                     href="/admin/projects"
-                    icon="📁"
+                    icon={<FolderKanban className="w-6 h-6" />}
                     title="Manage Projects"
-                    description="View and update all projects"
-                    gradient="from-blue-500 to-cyan-500"
+                    description="View all projects"
+                    accentColor="from-blue-500 to-cyan-500"
                 />
-                <QuickActionCard
+                <QuickAction
                     href="/admin/clients"
-                    icon="👥"
+                    icon={<Users className="w-6 h-6" />}
                     title="Manage Clients"
-                    description="View client details and notes"
-                    gradient="from-purple-500 to-pink-500"
+                    description="View all clients"
+                    accentColor="from-purple-500 to-pink-500"
+                />
+                <QuickAction
+                    href="/admin/analytics"
+                    icon={<BarChart3 className="w-6 h-6" />}
+                    title="View Analytics"
+                    description="Detailed insights"
+                    accentColor="from-emerald-500 to-teal-500"
                 />
             </div>
         </div>
     );
 }
 
-// Modern Stat Card Component
-function ModernStatCard({
+// Dark Stat Card Component
+function DarkStatCard({
     title,
     value,
     subtitle,
     icon: Icon,
-    gradient,
+    accentColor,
     trend,
     trendLabel,
-    urgent,
 }: {
     title: string;
-    value: number | string;
+    value: number;
     subtitle: string;
     icon: any;
-    gradient: string;
+    accentColor: string;
     trend?: number;
     trendLabel?: string;
-    urgent?: boolean;
 }) {
     return (
-        <div className="group relative overflow-hidden bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
-            {/* Background Gradient on Hover */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity`}></div>
+        <div className="group relative overflow-hidden bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-gray-700 rounded-xl p-6 transition-all duration-200">
+            <div className={`absolute inset-0 bg-gradient-to-br ${accentColor} opacity-0 group-hover:opacity-5 transition-opacity`}></div>
 
-            <div className="relative">
-                <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-                        <p className="text-3xl font-bold text-gray-900">{value}</p>
-                    </div>
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${gradient} shadow-lg`}>
+            <div className="relative space-y-4">
+                <div className="flex items-center justify-between">
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${accentColor} bg-opacity-10 border border-white/10`}>
                         <Icon className="w-6 h-6 text-white" />
                     </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-500">{subtitle}</p>
                     {trend !== undefined && (
-                        <div className={`flex items-center gap-1 text-xs font-medium ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                            {Math.abs(trend)}%
+                        <div className="flex items-center gap-1.5">
+                            {trend >= 0 ? (
+                                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                            ) : (
+                                <TrendingDown className="w-4 h-4 text-red-400" />
+                            )}
+                            <span className={`text-sm font-semibold ${trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {Math.abs(trend)}%
+                            </span>
                         </div>
                     )}
-                    {urgent && (
-                        <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-600 rounded-full">
-                            Urgent
-                        </span>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-400 mb-1">{title}</p>
+                    <p className="text-3xl font-bold text-white">{value}</p>
+                    <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+                    {trendLabel && (
+                        <p className="text-xs text-gray-600 mt-1">{trendLabel}</p>
                     )}
                 </div>
-                {trendLabel && (
-                    <p className="text-xs text-gray-400 mt-1">{trendLabel}</p>
-                )}
             </div>
         </div>
     );
 }
 
-// Modern Status Card Component
-function ModernStatusCard({
+// Status Card Component
+function StatusCard({
     title,
     value,
     icon: Icon,
-    gradient,
+    accentColor,
     description,
+    pulse = false,
 }: {
     title: string;
     value: number;
     icon: any;
-    gradient: string;
+    accentColor: string;
     description: string;
+    pulse?: boolean;
 }) {
     return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 group`}>
-            {/* Decorative Circle */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform"></div>
+        <div className="relative overflow-hidden bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-5">
+            <div className={`absolute inset-0 bg-gradient-to-br ${accentColor} opacity-5`}></div>
 
-            <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                        <Icon className="w-6 h-6" />
-                    </div>
-                    <div className="text-right">
-                        <p className="text-sm font-medium opacity-90">{title}</p>
-                        <p className="text-4xl font-bold mt-1">{value}</p>
-                    </div>
+            <div className="relative flex items-center gap-4">
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${accentColor} bg-opacity-10 border border-white/10 ${pulse ? 'animate-pulse' : ''}`}>
+                    <Icon className="w-5 h-5 text-white" />
                 </div>
-                <p className="text-sm opacity-80">{description}</p>
+                <div className="flex-1">
+                    <p className="text-sm text-gray-400">{title}</p>
+                    <p className="text-2xl font-bold text-white">{value}</p>
+                    <p className="text-xs text-gray-600 mt-0.5">{description}</p>
+                </div>
             </div>
         </div>
     );
 }
 
-// Quick Action Card Component
-function QuickActionCard({
+// Metric Card Component
+function MetricCard({
+    label,
+    value,
+    description,
+    accentColor,
+}: {
+    label: string;
+    value: number;
+    description: string;
+    accentColor: string;
+}) {
+    return (
+        <div className="relative overflow-hidden bg-white/5 backdrop-blur-sm border border-gray-800/30 rounded-xl p-4">
+            <div className={`absolute inset-0 bg-gradient-to-br ${accentColor} opacity-5`}></div>
+
+            <div className="relative">
+                <p className="text-sm font-medium text-gray-300 mb-1">{label}</p>
+                <p className="text-3xl font-bold text-white mb-1">{value}</p>
+                <p className="text-xs text-gray-500">{description}</p>
+            </div>
+        </div>
+    );
+}
+
+// Quick Action Component
+function QuickAction({
     href,
     icon,
     title,
     description,
-    gradient,
+    accentColor,
 }: {
     href: string;
-    icon: string;
+    icon: React.ReactNode;
     title: string;
     description: string;
-    gradient: string;
+    accentColor: string;
 }) {
     return (
         <Link
             href={href}
-            className="group relative overflow-hidden bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300"
+            className="group relative overflow-hidden bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-gray-700 rounded-xl p-5 transition-all duration-200"
         >
-            {/* Gradient Background on Hover */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
+            <div className={`absolute inset-0 bg-gradient-to-br ${accentColor} opacity-0 group-hover:opacity-10 transition-opacity`}></div>
 
-            <div className="relative z-10">
-                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">{icon}</div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2 group-hover:text-white transition-colors">{title}</h3>
-                <p className="text-sm text-gray-600 group-hover:text-white/90 transition-colors">{description}</p>
-                <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-white absolute top-6 right-6 transition-colors" />
+            <div className="relative z-10 space-y-3">
+                <div className="inline-flex p-3 bg-white/5 group-hover:bg-white/10 rounded-xl transition-colors">
+                    <div className="text-gray-300 group-hover:text-white transition-colors">
+                        {icon}
+                    </div>
+                </div>
+                <div>
+                    <h3 className="font-semibold text-white text-base mb-1">{title}</h3>
+                    <p className="text-sm text-gray-500">{description}</p>
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
             </div>
         </Link>
     );
