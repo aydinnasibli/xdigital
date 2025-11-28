@@ -56,6 +56,7 @@ export function FileUpload({
                         folderId,
                         fileName: result.data.fileName,
                         fileUrl: result.data.fileUrl,
+                        cloudinaryPublicId: result.data.publicId, // Save Cloudinary publicId for cleanup
                         fileType: result.data.fileType,
                         fileSize: result.data.fileSize,
                     });

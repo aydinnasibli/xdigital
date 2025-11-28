@@ -23,6 +23,7 @@ interface IVersion {
     fileUrl: string;
     fileName: string;
     fileSize: number;
+    cloudinaryPublicId?: string; // For cleanup
     uploadedBy: Types.ObjectId;
     uploadedAt: Date;
     notes?: string;
@@ -43,6 +44,7 @@ export interface IFile extends Document {
     folderId?: Types.ObjectId; // Reference to FileFolder model
     fileName: string;
     fileUrl: string; // Current version URL
+    cloudinaryPublicId?: string; // For current version cleanup
     fileType: string; // MIME type
     fileSize: number; // In bytes
     category: FileCategory;
@@ -91,6 +93,9 @@ const FileSchema = new Schema<IFile>(
         fileUrl: {
             type: String,
             required: true,
+        },
+        cloudinaryPublicId: {
+            type: String,
         },
         fileType: {
             type: String,
@@ -141,6 +146,9 @@ const FileSchema = new Schema<IFile>(
             fileSize: {
                 type: Number,
                 required: true,
+            },
+            cloudinaryPublicId: {
+                type: String,
             },
             uploadedBy: {
                 type: Schema.Types.ObjectId,
