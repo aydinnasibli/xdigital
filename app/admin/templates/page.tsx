@@ -25,18 +25,23 @@ export default async function TemplatesPage() {
     return (
         <div className="space-y-6 p-6">
             {/* Header */}
-            <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white">Project Templates</h1>
-                        <p className="text-gray-400 mt-2">Create and manage reusable project templates</p>
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-black to-gray-900 border border-gray-800/50 backdrop-blur-xl p-8">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.15),transparent_50%)]"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.15),transparent_50%)]"></div>
+
+                <div className="relative z-10">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold text-white">Project Templates</h1>
+                            <p className="text-gray-400 mt-2">Create and manage reusable project templates</p>
+                        </div>
+                        <Link
+                            href="/admin/templates/new"
+                            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                        >
+                            Create Template
+                        </Link>
                     </div>
-                    <Link
-                        href="/admin/templates/new"
-                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                    >
-                        Create Template
-                    </Link>
                 </div>
             </div>
 
@@ -85,7 +90,11 @@ export default async function TemplatesPage() {
                 ) : (
                     <div className="divide-y divide-gray-800/50">
                         {templates.map((template: any) => (
-                            <div key={template._id} className="p-6 hover:bg-white/5 transition-colors">
+                            <Link
+                                key={template._id}
+                                href={`/admin/templates/${template._id}/edit`}
+                                className="block p-6 hover:bg-white/10 transition-colors cursor-pointer"
+                            >
                                 <div className="flex gap-6">
                                     {/* Template Screenshot */}
                                     {template.screenshots && template.screenshots[0] ? (
@@ -108,7 +117,7 @@ export default async function TemplatesPage() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-start justify-between">
                                             <div>
-                                                <h3 className="text-lg font-semibold text-white">{template.name}</h3>
+                                                <h3 className="text-lg font-semibold text-white group-hover:text-purple-300 transition-colors">{template.name}</h3>
                                                 <p className="text-sm text-gray-400 mt-1">{template.description || 'No description'}</p>
                                             </div>
                                             <div className="flex gap-2 ml-4">
@@ -117,6 +126,7 @@ export default async function TemplatesPage() {
                                                         href={template.demoUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
+                                                        onClick={(e) => e.stopPropagation()}
                                                         className="p-2 text-blue-400 hover:bg-white/5 rounded-lg transition-colors"
                                                         title="Preview Demo"
                                                     >
@@ -128,20 +138,16 @@ export default async function TemplatesPage() {
                                                         href={template.githubRepoUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
+                                                        onClick={(e) => e.stopPropagation()}
                                                         className="p-2 text-gray-400 hover:bg-white/5 rounded-lg transition-colors"
                                                         title="View GitHub Repo"
                                                     >
                                                         <ExternalLink size={18} />
                                                     </a>
                                                 )}
-                                                <Link
-                                                    href={`/admin/templates/${template._id}/edit`}
-                                                    className="p-2 text-gray-400 hover:bg-white/5 rounded-lg transition-colors"
-                                                    title="Edit Template"
-                                                >
-                                                    <Edit size={18} />
-                                                </Link>
-                                                <TemplateActions templateId={template._id} templateName={template.name} />
+                                                <div onClick={(e) => e.stopPropagation()}>
+                                                    <TemplateActions templateId={template._id} templateName={template.name} />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -184,7 +190,7 @@ export default async function TemplatesPage() {
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}
