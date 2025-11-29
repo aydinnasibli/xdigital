@@ -11,7 +11,6 @@ import TimelineSection from './TimelineSection';
 import TasksSection from './TasksSection';
 import FilesSection from './FilesSection';
 import EditProjectSection from './EditProjectSection';
-import CloneAsTemplateButton from './CloneAsTemplateButton';
 
 export default async function AdminProjectDetailPage({
     params,
@@ -55,10 +54,6 @@ export default async function AdminProjectDetailPage({
                         </h1>
                         <p className="text-gray-400 mt-1">{project.projectDescription}</p>
                     </div>
-                    <CloneAsTemplateButton
-                        projectId={project._id}
-                        projectName={project.projectName}
-                    />
                 </div>
             </div>
 
