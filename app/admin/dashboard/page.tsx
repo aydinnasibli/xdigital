@@ -83,7 +83,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Modern Stats Grid - Dark Glass */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid  gr grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <DarkStatCard
           title="Total Projects"
           value={projects?.total || 0}

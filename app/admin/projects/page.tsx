@@ -113,7 +113,7 @@ export default async function AdminProjectsPage({ searchParams }: PageProps) {
           <div className="mt-4">
             <button
               type="submit"
-              className="px-4 py-2 bg-gray-500/80 text-white rounded-lg hover:bg-gray-700/90 hover:cursor-pointer transition-all duration-300"
+              className="px-4  py-2 bg-gray-700/80 text-gray-200 rounded-lg hover:bg-gray-800 hover:cursor-pointer transition-all duration-300"
             >
               Apply Filters
             </button>
