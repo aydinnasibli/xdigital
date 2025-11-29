@@ -23,70 +23,73 @@ export default async function TemplatesPage() {
     const digitalTemplates = templates.filter((t: any) => t.serviceType === 'digital_solutions');
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Project Templates</h1>
-                    <p className="text-gray-600 mt-2">Create and manage reusable project templates</p>
+        <div className="space-y-6 p-6">
+            {/* Header */}
+            <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-white">Project Templates</h1>
+                        <p className="text-gray-400 mt-2">Create and manage reusable project templates</p>
+                    </div>
+                    <Link
+                        href="/admin/templates/new"
+                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                        Create Template
+                    </Link>
                 </div>
-                <Link
-                    href="/admin/templates/new"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                    Create Template
-                </Link>
             </div>
 
             {/* Template Categories */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
                     <div className="text-3xl mb-3">🌐</div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Web Development</h3>
-                    <p className="text-sm text-gray-600 mb-4">Templates for web projects</p>
-                    <div className="text-2xl font-bold text-blue-600">{webDevTemplates.length}</div>
+                    <h3 className="font-semibold text-white mb-2">Web Development</h3>
+                    <p className="text-sm text-gray-400 mb-4">Templates for web projects</p>
+                    <div className="text-2xl font-bold text-blue-400">{webDevTemplates.length}</div>
                     <div className="text-xs text-gray-500 mt-1">Templates available</div>
                 </div>
-                <div className="bg-white p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
                     <div className="text-3xl mb-3">📱</div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Social Media Marketing</h3>
-                    <p className="text-sm text-gray-600 mb-4">Templates for SMM projects</p>
-                    <div className="text-2xl font-bold text-purple-600">{smmTemplates.length}</div>
+                    <h3 className="font-semibold text-white mb-2">Social Media Marketing</h3>
+                    <p className="text-sm text-gray-400 mb-4">Templates for SMM projects</p>
+                    <div className="text-2xl font-bold text-purple-400">{smmTemplates.length}</div>
                     <div className="text-xs text-gray-500 mt-1">Templates available</div>
                 </div>
-                <div className="bg-white p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
                     <div className="text-3xl mb-3">💼</div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Digital Solutions</h3>
-                    <p className="text-sm text-gray-600 mb-4">Templates for consulting</p>
-                    <div className="text-2xl font-bold text-green-600">{digitalTemplates.length}</div>
+                    <h3 className="font-semibold text-white mb-2">Digital Solutions</h3>
+                    <p className="text-sm text-gray-400 mb-4">Templates for consulting</p>
+                    <div className="text-2xl font-bold text-emerald-400">{digitalTemplates.length}</div>
                     <div className="text-xs text-gray-500 mt-1">Templates available</div>
                 </div>
             </div>
 
             {/* Templates List */}
-            <div className="bg-white rounded-lg border shadow-sm">
-                <div className="p-6 border-b">
-                    <h2 className="text-xl font-semibold">All Templates</h2>
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl overflow-hidden">
+                <div className="p-6 border-b border-gray-800/50">
+                    <h2 className="text-xl font-semibold text-white">All Templates</h2>
                 </div>
                 {templates.length === 0 ? (
-                    <div className="p-12 text-center text-gray-500">
+                    <div className="p-12 text-center text-gray-400">
                         <div className="text-6xl mb-4">📋</div>
-                        <p>No templates yet</p>
+                        <p className="text-white">No templates yet</p>
                         <p className="text-sm mt-2">Create your first project template to streamline your workflow</p>
                         <Link
                             href="/admin/templates/new"
-                            className="inline-block mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            className="inline-block mt-4 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                         >
                             Create First Template
                         </Link>
                     </div>
                 ) : (
-                    <div className="divide-y">
+                    <div className="divide-y divide-gray-800/50">
                         {templates.map((template: any) => (
-                            <div key={template._id} className="p-6 hover:bg-gray-50 transition">
+                            <div key={template._id} className="p-6 hover:bg-white/5 transition-colors">
                                 <div className="flex gap-6">
                                     {/* Template Screenshot */}
                                     {template.screenshots && template.screenshots[0] ? (
-                                        <div className="w-48 h-32 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                        <div className="w-48 h-32 rounded-lg overflow-hidden bg-gray-800/50 border border-gray-700 flex-shrink-0">
                                             <Image
                                                 src={template.screenshots[0]}
                                                 alt={template.name}
@@ -96,8 +99,8 @@ export default async function TemplatesPage() {
                                             />
                                         </div>
                                     ) : (
-                                        <div className="w-48 h-32 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                            <span className="text-gray-400 text-4xl">🎨</span>
+                                        <div className="w-48 h-32 rounded-lg bg-gray-800/50 border border-gray-700 flex items-center justify-center flex-shrink-0">
+                                            <span className="text-gray-500 text-4xl">🎨</span>
                                         </div>
                                     )}
 
@@ -105,8 +108,8 @@ export default async function TemplatesPage() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-start justify-between">
                                             <div>
-                                                <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
-                                                <p className="text-sm text-gray-600 mt-1">{template.description || 'No description'}</p>
+                                                <h3 className="text-lg font-semibold text-white">{template.name}</h3>
+                                                <p className="text-sm text-gray-400 mt-1">{template.description || 'No description'}</p>
                                             </div>
                                             <div className="flex gap-2 ml-4">
                                                 {template.demoUrl && (
@@ -114,7 +117,7 @@ export default async function TemplatesPage() {
                                                         href={template.demoUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                        className="p-2 text-blue-400 hover:bg-white/5 rounded-lg transition-colors"
                                                         title="Preview Demo"
                                                     >
                                                         <Eye size={18} />
@@ -125,7 +128,7 @@ export default async function TemplatesPage() {
                                                         href={template.githubRepoUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                                                        className="p-2 text-gray-400 hover:bg-white/5 rounded-lg transition-colors"
                                                         title="View GitHub Repo"
                                                     >
                                                         <ExternalLink size={18} />
@@ -133,7 +136,7 @@ export default async function TemplatesPage() {
                                                 )}
                                                 <Link
                                                     href={`/admin/templates/${template._id}/edit`}
-                                                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                                                    className="p-2 text-gray-400 hover:bg-white/5 rounded-lg transition-colors"
                                                     title="Edit Template"
                                                 >
                                                     <Edit size={18} />
@@ -144,19 +147,19 @@ export default async function TemplatesPage() {
 
                                         {/* Template Metadata */}
                                         <div className="flex flex-wrap gap-2 mt-3">
-                                            <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                            <span className="px-2 py-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs rounded-full">
                                                 {template.package.toUpperCase()}
                                             </span>
                                             {template.category && (
-                                                <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                                                <span className="px-2 py-1 bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs rounded-full">
                                                     {template.category}
                                                 </span>
                                             )}
-                                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                                            <span className="px-2 py-1 bg-gray-500/20 text-gray-400 border border-gray-500/30 text-xs rounded-full">
                                                 Used {template.usageCount} times
                                             </span>
                                             {template.isDefault && (
-                                                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                                                <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs rounded-full">
                                                     Default Template
                                                 </span>
                                             )}
@@ -167,7 +170,7 @@ export default async function TemplatesPage() {
                                             <div className="mt-3">
                                                 <div className="flex flex-wrap gap-2">
                                                     {template.features.slice(0, 5).map((feature: string, idx: number) => (
-                                                        <span key={idx} className="text-xs text-gray-600">
+                                                        <span key={idx} className="text-xs text-gray-400">
                                                             ✓ {feature}
                                                         </span>
                                                     ))}
@@ -188,24 +191,24 @@ export default async function TemplatesPage() {
             </div>
 
             {/* Quick Template Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="font-semibold text-blue-900 mb-2">💡 What are Project Templates?</h3>
-                <p className="text-blue-800 text-sm">
+            <div className="bg-purple-500/10 border border-purple-500/30 backdrop-blur-sm rounded-xl p-6">
+                <h3 className="font-semibold text-purple-300 mb-2">💡 What are Project Templates?</h3>
+                <p className="text-gray-300 text-sm">
                     Project templates allow you to create standardized workflows with pre-defined milestones, tasks, and timelines.
                     When creating a new project, you can select a template to automatically populate all the standard items, saving time and ensuring consistency.
                 </p>
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
-                        <div className="font-medium text-blue-900">✓ Pre-defined Milestones</div>
-                        <div className="text-blue-700 text-xs mt-1">Standard project phases</div>
+                        <div className="font-medium text-white">✓ Pre-defined Milestones</div>
+                        <div className="text-gray-400 text-xs mt-1">Standard project phases</div>
                     </div>
                     <div>
-                        <div className="font-medium text-blue-900">✓ Task Checklists</div>
-                        <div className="text-blue-700 text-xs mt-1">Recurring tasks for each project type</div>
+                        <div className="font-medium text-white">✓ Task Checklists</div>
+                        <div className="text-gray-400 text-xs mt-1">Recurring tasks for each project type</div>
                     </div>
                     <div>
-                        <div className="font-medium text-blue-900">✓ Timeline Estimates</div>
-                        <div className="text-blue-700 text-xs mt-1">Automatic scheduling</div>
+                        <div className="font-medium text-white">✓ Timeline Estimates</div>
+                        <div className="text-gray-400 text-xs mt-1">Automatic scheduling</div>
                     </div>
                 </div>
             </div>
