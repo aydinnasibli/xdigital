@@ -38,10 +38,11 @@ export default async function AdminAnalyticsPage() {
     const monthlyProjects = getMonthlyData(projects);
 
     return (
-        <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-                <p className="text-gray-600 mt-2">Overview of business performance and trends</p>
+        <div className="space-y-8 p-6">
+            {/* Header */}
+            <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
+                <h1 className="text-3xl font-bold text-white">Analytics Dashboard</h1>
+                <p className="text-gray-400 mt-2">Overview of business performance and trends</p>
             </div>
 
             {/* Key Metrics */}
@@ -72,8 +73,8 @@ export default async function AdminAnalyticsPage() {
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Projects by Status */}
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
+                    <h2 className="text-xl font-semibold text-white mb-4">
                         Projects by Status
                     </h2>
                     <div className="space-y-3">
@@ -81,13 +82,13 @@ export default async function AdminAnalyticsPage() {
                             <div key={status} className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-3 h-3 rounded-full ${getStatusColor(status)}`} />
-                                    <span className="text-gray-700 capitalize">
+                                    <span className="text-gray-300 capitalize">
                                         {status.replace('_', ' ')}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <span className="text-gray-900 font-semibold">{count}</span>
-                                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                                    <span className="text-white font-semibold">{count}</span>
+                                    <div className="w-32 bg-gray-700/50 rounded-full h-2">
                                         <div
                                             className={`h-2 rounded-full ${getStatusBgColor(status)}`}
                                             style={{
@@ -102,19 +103,19 @@ export default async function AdminAnalyticsPage() {
                 </div>
 
                 {/* Projects by Service Type */}
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
+                    <h2 className="text-xl font-semibold text-white mb-4">
                         Projects by Service
                     </h2>
                     <div className="space-y-3">
                         {Object.entries(projectsByService).map(([service, count]: [string, any]) => (
                             <div key={service} className="flex items-center justify-between">
-                                <span className="text-gray-700">
+                                <span className="text-gray-300">
                                     {formatServiceType(service)}
                                 </span>
                                 <div className="flex items-center gap-3">
-                                    <span className="text-gray-900 font-semibold">{count}</span>
-                                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                                    <span className="text-white font-semibold">{count}</span>
+                                    <div className="w-32 bg-gray-700/50 rounded-full h-2">
                                         <div
                                             className="bg-blue-500 h-2 rounded-full"
                                             style={{
@@ -130,16 +131,16 @@ export default async function AdminAnalyticsPage() {
             </div>
 
             {/* Monthly Project Trends */}
-            <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
+                <h2 className="text-xl font-semibold text-white mb-4">
                     Project Trends (Last 6 Months)
                 </h2>
                 <div className="space-y-3">
                     {monthlyProjects.map((month) => (
                         <div key={month.month} className="flex items-center justify-between">
-                            <span className="text-gray-700 font-medium w-24">{month.month}</span>
+                            <span className="text-gray-300 font-medium w-24">{month.month}</span>
                             <div className="flex items-center gap-3 flex-1">
-                                <div className="flex-1 bg-gray-200 rounded-full h-8">
+                                <div className="flex-1 bg-gray-700/50 rounded-full h-8">
                                     <div
                                         className="bg-gradient-to-r from-blue-500 to-purple-600 h-8 rounded-full flex items-center justify-end px-3"
                                         style={{
@@ -175,21 +176,23 @@ function MetricCard({
     color: string;
 }) {
     const colors = {
-        green: 'bg-green-100 text-green-600',
-        blue: 'bg-blue-100 text-blue-600',
-        purple: 'bg-purple-100 text-purple-600',
-        orange: 'bg-orange-100 text-orange-600',
+        green: { bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', icon: 'text-emerald-400' },
+        blue: { bg: 'bg-blue-500/20', border: 'border-blue-500/30', icon: 'text-blue-400' },
+        purple: { bg: 'bg-purple-500/20', border: 'border-purple-500/30', icon: 'text-purple-400' },
+        orange: { bg: 'bg-orange-500/20', border: 'border-orange-500/30', icon: 'text-orange-400' },
     };
 
+    const colorScheme = colors[color as keyof typeof colors];
+
     return (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg ${colors[color as keyof typeof colors]}`}>
-                    <Icon className="w-6 h-6" />
+                <div className={`p-3 rounded-lg border ${colorScheme.bg} ${colorScheme.border}`}>
+                    <Icon className={`w-6 h-6 ${colorScheme.icon}`} />
                 </div>
             </div>
-            <h3 className="text-3xl font-bold text-gray-900">{value}</h3>
-            <p className="text-sm text-gray-600 mt-1">{title}</p>
+            <h3 className="text-3xl font-bold text-white">{value}</h3>
+            <p className="text-sm text-gray-300 mt-1">{title}</p>
             <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
         </div>
     );
