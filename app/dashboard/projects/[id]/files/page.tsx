@@ -22,29 +22,31 @@ export default async function ProjectFilesPage({
     const files = filesResult.success ? filesResult.data : [];
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Files & Documents</h1>
-                    <p className="text-gray-600 mt-2">Upload and manage project files</p>
+        <div className="space-y-6 p-6">
+            <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-white">Files & Documents</h1>
+                        <p className="text-gray-400 mt-2">Upload and manage project files</p>
+                    </div>
+                    <Link
+                        href={`/dashboard/projects/${projectId}`}
+                        className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-gray-700 text-purple-400 hover:text-purple-300 rounded-lg transition-all"
+                    >
+                        ← Back to Project
+                    </Link>
                 </div>
-                <Link
-                    href={`/dashboard/projects/${projectId}`}
-                    className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                >
-                    ← Back to Project
-                </Link>
             </div>
 
             {/* Upload Section */}
-            <div className="bg-white p-6 rounded-lg border shadow-sm">
-                <h2 className="text-xl font-semibold mb-4">Upload Files</h2>
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                <h2 className="text-xl font-semibold mb-4 text-white">Upload Files</h2>
                 <FileUpload projectId={projectId} />
             </div>
 
             {/* Files List */}
-            <div className="bg-white p-6 rounded-lg border shadow-sm">
-                <h2 className="text-xl font-semibold mb-4">All Files ({files.length})</h2>
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                <h2 className="text-xl font-semibold mb-4 text-white">All Files ({files.length})</h2>
                 <FilesList files={files} projectId={projectId} />
             </div>
         </div>

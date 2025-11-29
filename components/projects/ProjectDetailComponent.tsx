@@ -150,14 +150,14 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
     if (!configured) {
         return (
             <div className="space-y-6">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
-                    <div className="text-yellow-600 mb-4">
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-8 text-center backdrop-blur-sm">
+                    <div className="text-amber-400 mb-4">
                         <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Analytics Not Configured</h3>
-                    <p className="text-gray-600 mb-4">{configMessage}</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">Analytics Not Configured</h3>
+                    <p className="text-gray-400 mb-4">{configMessage}</p>
                     <p className="text-sm text-gray-500">
                         Google Analytics will be set up by the admin when your project is deployed.
                         You'll be able to track traffic, user behavior, and performance metrics once configured.
@@ -169,32 +169,32 @@ function AnalyticsTab({ projectId }: { projectId: string }) {
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-lg border">
-                    <div className="text-sm text-gray-600">Page Views</div>
-                    <div className="text-3xl font-bold mt-2">{summary.pageViews}</div>
-                    <div className="text-sm text-gray-500 mt-1">Total views</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                    <div className="text-sm text-gray-400">Page Views</div>
+                    <div className="text-3xl font-bold text-white mt-2">{summary.pageViews}</div>
+                    <div className="text-sm text-gray-600 mt-1">Total views</div>
                 </div>
-                <div className="bg-white p-6 rounded-lg border">
-                    <div className="text-sm text-gray-600">Visitors</div>
-                    <div className="text-3xl font-bold mt-2">{summary.visitors}</div>
-                    <div className="text-sm text-gray-500 mt-1">Unique visitors</div>
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                    <div className="text-sm text-gray-400">Visitors</div>
+                    <div className="text-3xl font-bold text-white mt-2">{summary.visitors}</div>
+                    <div className="text-sm text-gray-600 mt-1">Unique visitors</div>
                 </div>
-                <div className="bg-white p-6 rounded-lg border">
-                    <div className="text-sm text-gray-600">Conversions</div>
-                    <div className="text-3xl font-bold mt-2">{summary.conversions}</div>
-                    <div className="text-sm text-gray-500 mt-1">Goal completions</div>
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                    <div className="text-sm text-gray-400">Conversions</div>
+                    <div className="text-3xl font-bold text-white mt-2">{summary.conversions}</div>
+                    <div className="text-sm text-gray-600 mt-1">Goal completions</div>
                 </div>
-                <div className="bg-white p-6 rounded-lg border">
-                    <div className="text-sm text-gray-600">Engagement</div>
-                    <div className="text-3xl font-bold mt-2">{summary.engagement}</div>
-                    <div className="text-sm text-gray-500 mt-1">Total interactions</div>
+                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                    <div className="text-sm text-gray-400">Engagement</div>
+                    <div className="text-3xl font-bold text-white mt-2">{summary.engagement}</div>
+                    <div className="text-sm text-gray-600 mt-1">Total interactions</div>
                 </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg border">
-                <h3 className="font-semibold mb-4">Analytics Overview</h3>
-                <p className="text-gray-500 mb-4">
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                <h3 className="font-semibold text-white mb-4">Analytics Overview</h3>
+                <p className="text-gray-400 mb-4">
                     Detailed analytics will be available once your project goes live.
                     You'll be able to track traffic, user behavior, and performance metrics.
                 </p>
@@ -509,14 +509,14 @@ function MessagesTab({ projectId }: { projectId: string }) {
     const currentTypingIndicators = Array.from(typingIndicators.values());
 
     return (
-        <div className="bg-white rounded-lg border flex flex-col h-[600px]">
+        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl flex flex-col h-[600px]">
             {/* Sticky Pinned Message Header (Single Pin) */}
             {messages.some(m => m.isPinned && !m.parentMessageId) && (
-                <div className="sticky top-0 z-10 bg-gradient-to-r from-yellow-50 to-amber-50 border-b-2 border-yellow-300 shadow-md">
+                <div className="sticky top-0 z-10 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-b border-amber-500/30 backdrop-blur-sm shadow-md">
                     <div className="p-3">
                         <div className="flex items-center gap-2 mb-2">
-                            <Pin className="w-4 h-4 text-yellow-600" />
-                            <span className="text-sm font-bold text-yellow-800">Pinned Message</span>
+                            <Pin className="w-4 h-4 text-amber-400" />
+                            <span className="text-sm font-bold text-amber-300">Pinned Message</span>
                         </div>
                         {(() => {
                             const pinnedMsg = messages.find(m => m._id && !m.parentMessageId && m.isPinned);
@@ -527,16 +527,16 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                         const element = document.getElementById(`message-${pinnedMsg._id}`);
                                         element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                     }}
-                                    className="w-full bg-white rounded-lg p-3 border-l-4 border-yellow-400 shadow-sm hover:shadow-md transition-shadow text-left"
+                                    className="w-full bg-black/30 backdrop-blur-sm rounded-lg p-3 border-l-4 border-amber-400 shadow-sm hover:bg-black/40 transition-all text-left"
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-semibold text-gray-600 mb-1">
+                                            <p className="text-xs font-semibold text-gray-400 mb-1">
                                                 {pinnedMsg.sender === 'client' ? 'You' : 'xDigital Team'}
                                             </p>
-                                            <p className="text-sm text-gray-800 truncate">{pinnedMsg.message}</p>
+                                            <p className="text-sm text-gray-200 truncate">{pinnedMsg.message}</p>
                                         </div>
-                                        <Pin className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-1" />
+                                        <Pin className="w-4 h-4 text-amber-400 flex-shrink-0 mt-1" />
                                     </div>
                                 </button>
                             );
@@ -547,7 +547,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
 
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {messages.length === 0 ? (
-                    <p className="text-gray-500 text-center">No messages yet. Start the conversation!</p>
+                    <p className="text-gray-400 text-center">No messages yet. Start the conversation!</p>
                 ) : (
                     <div className="space-y-4">
                         {/* Regular (Non-Pinned) Messages */}
@@ -558,12 +558,12 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                 {editingMessage?._id === msg._id ? (
                                     // Edit Mode
                                     <div className="flex justify-end">
-                                        <div className="max-w-[70%] bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                            <p className="text-xs font-semibold mb-2 text-gray-600">Editing message</p>
+                                        <div className="max-w-[70%] bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 backdrop-blur-sm">
+                                            <p className="text-xs font-semibold mb-2 text-blue-300">Editing message</p>
                                             <textarea
                                                 value={editText}
                                                 onChange={(e) => setEditText(e.target.value)}
-                                                className="w-full border rounded px-2 py-1 text-sm"
+                                                className="w-full bg-black/30 border border-gray-700 text-white rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                                 rows={3}
                                             />
                                             <div className="flex gap-2 mt-2">
@@ -575,7 +575,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                                 </button>
                                                 <button
                                                     onClick={handleCancelEdit}
-                                                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+                                                    className="px-3 py-1 bg-white/10 text-gray-300 rounded text-sm hover:bg-white/20"
                                                 >
                                                     Cancel
                                                 </button>
@@ -592,11 +592,11 @@ function MessagesTab({ projectId }: { projectId: string }) {
                                             className={`max-w-[70%] rounded-lg p-3 ${
                                                 msg.sender === 'client'
                                                     ? 'bg-blue-600 text-white'
-                                                    : 'bg-gray-100 text-gray-900'
+                                                    : 'bg-white/5 backdrop-blur-sm border border-gray-800/50 text-gray-200'
                                             }`}
                                         >
                                             <div className="flex items-start justify-between gap-2 mb-1">
-                                                <p className={`text-xs font-semibold ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-600'}`}>
+                                                <p className={`text-xs font-semibold ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-400'}`}>
                                                     {msg.sender === 'client' ? 'You' : 'xDigital Team'}
                                                 </p>
                                             </div>
@@ -970,7 +970,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                 {/* Typing Indicators */}
                 {currentTypingIndicators.length > 0 && (
                     <div className="flex justify-start">
-                        <div className="bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-600">
+                        <div className="bg-white/5 backdrop-blur-sm border border-gray-800/50 rounded-lg px-4 py-2 text-sm text-gray-400">
                             {currentTypingIndicators[0].userName} is typing
                             <span className="animate-pulse">...</span>
                         </div>
@@ -980,22 +980,22 @@ function MessagesTab({ projectId }: { projectId: string }) {
                 <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={handleSend} className="border-t p-4">
+            <form onSubmit={handleSend} className="border-t border-gray-800/50 p-4 bg-black/20 backdrop-blur-sm">
                 {/* Reply Context */}
                 {replyingTo && (
-                    <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg flex items-start justify-between">
+                    <div className="mb-3 p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-start justify-between backdrop-blur-sm">
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                                <Reply className="w-3 h-3 text-blue-600" />
-                                <span className="text-xs font-semibold text-blue-800">
+                                <Reply className="w-3 h-3 text-blue-400" />
+                                <span className="text-xs font-semibold text-blue-300">
                                     Replying to {replyingTo.sender === 'client' ? 'yourself' : 'xDigital Team'}
                                 </span>
                             </div>
-                            <p className="text-sm text-gray-700 truncate">{replyingTo.message}</p>
+                            <p className="text-sm text-gray-300 truncate">{replyingTo.message}</p>
                         </div>
                         <button
                             onClick={() => setReplyingTo(null)}
-                            className="text-gray-500 hover:text-gray-700 p-1"
+                            className="text-gray-400 hover:text-gray-200 p-1"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -1011,7 +1011,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                         }}
                         placeholder={replyingTo ? "Type your reply..." : "Type your message..."}
                         rows={2}
-                        className="flex-1 px-4 py-2 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
                         disabled={sending}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
@@ -1023,7 +1023,7 @@ function MessagesTab({ projectId }: { projectId: string }) {
                     <button
                         type="submit"
                         disabled={sending || !newMessage.trim()}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         {sending ? 'Sending...' : replyingTo ? 'Reply' : 'Send'}
                     </button>
@@ -1058,36 +1058,36 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
     };
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div>
+        <div className="space-y-6 p-6">
+            {/* Header - Dark Glass */}
+            <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
                 <Link
                     href="/dashboard/projects"
-                    className="text-blue-600 hover:underline mb-4 inline-block"
+                    className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 mb-4 transition-colors"
                 >
                     ← Back to Projects
                 </Link>
 
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h1 className="text-3xl font-bold">{project.projectName}</h1>
-                        <div className="flex gap-2 mt-2">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div className="flex-1">
+                        <h1 className="text-3xl font-bold text-white mb-3">{project.projectName}</h1>
+                        <div className="flex flex-wrap gap-2">
                             <span
-                                className={`px-3 py-1 text-sm rounded-full ${project.status === 'completed'
-                                    ? 'bg-green-100 text-green-800'
+                                className={`px-3 py-1.5 text-sm font-medium rounded-full ${project.status === 'completed'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                                     : project.status === 'in_progress'
-                                        ? 'bg-blue-100 text-blue-800'
+                                        ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                                         : project.status === 'pending'
-                                            ? 'bg-yellow-100 text-yellow-800'
-                                            : 'bg-gray-100 text-gray-800'
+                                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                            : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
                                     }`}
                             >
                                 {project.status.replace('_', ' ').toUpperCase()}
                             </span>
-                            <span className="px-3 py-1 text-sm bg-gray-100 rounded-full">
+                            <span className="px-3 py-1.5 text-sm font-medium bg-white/5 text-gray-300 border border-gray-800/50 rounded-full">
                                 {project.serviceType.replace('_', ' ')}
                             </span>
-                            <span className="px-3 py-1 text-sm bg-gray-100 rounded-full">
+                            <span className="px-3 py-1.5 text-sm font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded-full">
                                 {project.package} Package
                             </span>
                         </div>
@@ -1095,14 +1095,14 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                     <div className="flex gap-2">
                         <Link
                             href={`/dashboard/projects/${project._id}/edit`}
-                            className="px-4 py-2 border rounded hover:bg-gray-50"
+                            className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-gray-700 rounded-lg text-gray-300 hover:text-white transition-all"
                         >
                             Edit
                         </Link>
                         <button
                             onClick={handleDelete}
                             disabled={isPending}
-                            className="px-4 py-2 text-red-600 border border-red-200 rounded hover:bg-red-50 disabled:opacity-50"
+                            className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 rounded-lg text-red-400 hover:text-red-300 transition-all disabled:opacity-50"
                         >
                             Delete
                         </button>
@@ -1110,41 +1110,41 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div className="border-b">
-                <div className="flex gap-6">
+            {/* Tabs - Dark Theme */}
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-1">
+                <div className="flex flex-wrap gap-1">
                     <button
                         onClick={() => setActiveTab('overview')}
-                        className={`pb-3 px-1 border-b-2 ${activeTab === 'overview'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-600 hover:text-gray-900'
+                        className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'overview'
+                            ? 'bg-white/10 text-white border border-purple-500/30'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
                         Overview
                     </button>
                     <button
                         onClick={() => setActiveTab('milestones')}
-                        className={`pb-3 px-1 border-b-2 ${activeTab === 'milestones'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-600 hover:text-gray-900'
+                        className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'milestones'
+                            ? 'bg-white/10 text-white border border-purple-500/30'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
                         Milestones
                     </button>
                     <button
                         onClick={() => setActiveTab('messages')}
-                        className={`pb-3 px-1 border-b-2 ${activeTab === 'messages'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-600 hover:text-gray-900'
+                        className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'messages'
+                            ? 'bg-white/10 text-white border border-purple-500/30'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
                         Messages
                     </button>
                     <button
                         onClick={() => setActiveTab('analytics')}
-                        className={`pb-3 px-1 border-b-2 ${activeTab === 'analytics'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-600 hover:text-gray-900'
+                        className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'analytics'
+                            ? 'bg-white/10 text-white border border-purple-500/30'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
                         Analytics
@@ -1154,18 +1154,18 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         <>
                             <button
                                 onClick={() => setActiveTab('seo')}
-                                className={`pb-3 px-1 border-b-2 ${activeTab === 'seo'
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                                className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'seo'
+                                    ? 'bg-white/10 text-white border border-purple-500/30'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 SEO
                             </button>
                             <button
                                 onClick={() => setActiveTab('performance')}
-                                className={`pb-3 px-1 border-b-2 ${activeTab === 'performance'
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                                className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'performance'
+                                    ? 'bg-white/10 text-white border border-purple-500/30'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 Performance
@@ -1182,39 +1182,40 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <Link
                             href={`/dashboard/projects/${project._id}/tasks`}
-                            className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"
+                            className="bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/30 p-6 rounded-xl transition-all group"
                         >
                             <div className="text-3xl mb-3">✅</div>
-                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Tasks & Kanban</h3>
-                            <p className="text-sm text-gray-600 mt-1">Manage project tasks</p>
+                            <h3 className="font-semibold text-white group-hover:text-purple-300">Tasks & Kanban</h3>
+                            <p className="text-sm text-gray-400 mt-1">Manage project tasks</p>
                         </Link>
                         <Link
                             href={`/dashboard/projects/${project._id}/files`}
-                            className="bg-white p-6 rounded-lg border hover:border-blue-500 hover:shadow-md transition-all group"
+                            className="bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/30 p-6 rounded-xl transition-all group"
                         >
                             <div className="text-3xl mb-3">📁</div>
-                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">Files & Documents</h3>
-                            <p className="text-sm text-gray-600 mt-1">View and upload files</p>
+                            <h3 className="font-semibold text-white group-hover:text-purple-300">Files & Documents</h3>
+                            <p className="text-sm text-gray-400 mt-1">View and upload files</p>
                         </Link>
                     </div>
 
                     {/* Live Website */}
                     {project.deploymentUrl && (
-                        <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 p-6 rounded-lg">
-                            <div className="flex items-center justify-between">
+                        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 to-blue-500/10 backdrop-blur-xl border border-emerald-500/20 p-6 rounded-2xl">
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)]"></div>
+                            <div className="relative flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                                    <h2 className="text-xl font-semibold mb-2 flex items-center gap-2 text-white">
                                         <span className="text-2xl">🌐</span>
                                         Your Website is Live!
                                     </h2>
-                                    <p className="text-gray-700 mb-4">
+                                    <p className="text-gray-300 mb-4">
                                         Your website has been successfully deployed and is now accessible online.
                                     </p>
                                     <a
                                         href={project.deploymentUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                                        className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 hover:border-emerald-500/50 text-white rounded-xl transition-all"
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -1224,30 +1225,30 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                                 </div>
                                 <div className="hidden md:block text-6xl">🚀</div>
                             </div>
-                            <div className="mt-4 p-3 bg-white/50 rounded border border-blue-200">
-                                <p className="text-xs text-gray-600 mb-1">Website URL:</p>
-                                <p className="text-sm font-mono text-blue-600 break-all">{project.deploymentUrl}</p>
+                            <div className="relative mt-4 p-3 bg-black/30 backdrop-blur-sm rounded-lg border border-gray-800/50">
+                                <p className="text-xs text-gray-400 mb-1">Website URL:</p>
+                                <p className="text-sm font-mono text-emerald-400 break-all">{project.deploymentUrl}</p>
                             </div>
                         </div>
                     )}
 
-                    <div className="bg-white p-6 rounded-lg border">
-                        <h2 className="text-xl font-semibold mb-4">Project Description</h2>
-                        <p className="text-gray-700">{project.projectDescription}</p>
+                    <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                        <h2 className="text-xl font-semibold mb-4 text-white">Project Description</h2>
+                        <p className="text-gray-300">{project.projectDescription}</p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg border">
-                        <h2 className="text-xl font-semibold mb-4">Project Details</h2>
+                    <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                        <h2 className="text-xl font-semibold mb-4 text-white">Project Details</h2>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <div className="text-sm text-gray-600">Created</div>
-                                <div className="font-medium">
+                                <div className="text-sm text-gray-400">Created</div>
+                                <div className="font-medium text-white">
                                     {new Date(project.createdAt).toLocaleDateString()}
                                 </div>
                             </div>
                             <div>
-                                <div className="text-sm text-gray-600">Last Updated</div>
-                                <div className="font-medium">
+                                <div className="text-sm text-gray-400">Last Updated</div>
+                                <div className="font-medium text-white">
                                     {new Date(project.updatedAt).toLocaleDateString()}
                                 </div>
                             </div>
@@ -1259,20 +1260,20 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {activeTab === 'milestones' && (
                 <div className="space-y-6">
                     {/* Timeline */}
-                    <div className="bg-white p-6 rounded-lg border">
-                        <h2 className="text-xl font-semibold mb-4">Project Timeline</h2>
+                    <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                        <h2 className="text-xl font-semibold mb-4 text-white">Project Timeline</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <div className="text-sm text-gray-600">Start Date</div>
-                                <div className="font-medium text-lg">
+                                <div className="text-sm text-gray-400">Start Date</div>
+                                <div className="font-medium text-lg text-white">
                                     {project.timeline?.startDate
                                         ? new Date(project.timeline.startDate).toLocaleDateString()
                                         : 'Not set by admin yet'}
                                 </div>
                             </div>
                             <div>
-                                <div className="text-sm text-gray-600">Estimated Completion</div>
-                                <div className="font-medium text-lg">
+                                <div className="text-sm text-gray-400">Estimated Completion</div>
+                                <div className="font-medium text-lg text-white">
                                     {project.timeline?.estimatedCompletion
                                         ? new Date(project.timeline.estimatedCompletion).toLocaleDateString()
                                         : 'Not set by admin yet'}
@@ -1280,8 +1281,8 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             </div>
                             {project.timeline?.completedDate && (
                                 <div>
-                                    <div className="text-sm text-gray-600">Completed Date</div>
-                                    <div className="font-medium text-lg text-green-600">
+                                    <div className="text-sm text-gray-400">Completed Date</div>
+                                    <div className="font-medium text-lg text-emerald-400">
                                         {new Date(project.timeline.completedDate).toLocaleDateString()}
                                     </div>
                                 </div>
@@ -1291,27 +1292,31 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
                     {/* Milestones */}
                     {project.milestones && project.milestones.length > 0 ? (
-                        <div className="bg-white p-6 rounded-lg border">
-                            <h2 className="text-xl font-semibold mb-4">Project Milestones</h2>
+                        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+                            <h2 className="text-xl font-semibold mb-4 text-white">Project Milestones</h2>
                             <div className="space-y-4">
                                 {project.milestones.map((milestone, index) => (
                                     <div
                                         key={index}
                                         className={`flex items-start gap-4 p-4 border rounded-lg ${
-                                            milestone.completed ? 'bg-green-50 border-green-200' : 'bg-white'
+                                            milestone.completed
+                                                ? 'bg-emerald-500/10 border-emerald-500/30'
+                                                : 'bg-white/5 border-gray-800/50'
                                         }`}
                                     >
                                         <div
                                             className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                                milestone.completed ? 'bg-green-500' : 'bg-gray-300'
+                                                milestone.completed
+                                                    ? 'bg-emerald-500/20 border border-emerald-500/30'
+                                                    : 'bg-gray-700/50 border border-gray-600'
                                             }`}
                                         >
-                                            {milestone.completed && <span className="text-white text-lg">✓</span>}
+                                            {milestone.completed && <span className="text-emerald-400 text-lg">✓</span>}
                                         </div>
                                         <div className="flex-1">
-                                            <h3 className="font-semibold text-lg">{milestone.title}</h3>
+                                            <h3 className="font-semibold text-lg text-white">{milestone.title}</h3>
                                             {milestone.description && (
-                                                <p className="text-gray-600 mt-1">{milestone.description}</p>
+                                                <p className="text-gray-400 mt-1">{milestone.description}</p>
                                             )}
                                             <div className="flex gap-4 mt-2 text-sm">
                                                 {milestone.dueDate && (
@@ -1320,7 +1325,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                                                     </div>
                                                 )}
                                                 {milestone.completed && milestone.completedDate && (
-                                                    <div className="text-green-600">
+                                                    <div className="text-emerald-400">
                                                         ✓ Completed: {new Date(milestone.completedDate).toLocaleDateString()}
                                                     </div>
                                                 )}
@@ -1331,10 +1336,10 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-white p-12 rounded-lg border text-center">
+                        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-12 rounded-xl text-center">
                             <div className="text-6xl mb-4">🎯</div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Milestones Yet</h3>
-                            <p className="text-gray-600">
+                            <h3 className="text-xl font-semibold text-white mb-2">No Milestones Yet</h3>
+                            <p className="text-gray-400">
                                 Milestones will be added by the admin as your project progresses.
                             </p>
                         </div>

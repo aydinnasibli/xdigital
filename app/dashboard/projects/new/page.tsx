@@ -110,15 +110,13 @@ export default function NewProjectPage() {
     const canProceedToStep4 = formData.customization.businessName;
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <div className="mb-6">
-                <Link href="/dashboard/projects" className="text-blue-600 hover:underline">
-                    ← Back to Projects
-                </Link>
-            </div>
+        <div className="max-w-6xl mx-auto p-6 space-y-6">
+            <Link href="/dashboard/projects" className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors">
+                ← Back to Projects
+            </Link>
 
             {/* Step Indicator */}
-            <div className="mb-8">
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-2xl">
                 <div className="flex items-center justify-between">
                     {[1, 2, 3, 4].map((step) => (
                         <div key={step} className="flex items-center flex-1">
@@ -126,14 +124,14 @@ export default function NewProjectPage() {
                                 <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
                                         currentStep >= step
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-200 text-gray-500'
+                                            ? 'bg-purple-600 text-white border border-purple-500/30'
+                                            : 'bg-white/5 text-gray-500 border border-gray-700'
                                     }`}
                                 >
                                     {currentStep > step ? <Check size={20} /> : step}
                                 </div>
                                 <div className="ml-3">
-                                    <p className={`text-sm font-medium ${currentStep >= step ? 'text-gray-900' : 'text-gray-500'}`}>
+                                    <p className={`text-sm font-medium ${currentStep >= step ? 'text-white' : 'text-gray-500'}`}>
                                         {step === 1 && 'Choose Package'}
                                         {step === 2 && 'Select Template'}
                                         {step === 3 && 'Customize'}
@@ -142,66 +140,66 @@ export default function NewProjectPage() {
                                 </div>
                             </div>
                             {step < 4 && (
-                                <div className={`flex-1 h-1 mx-4 ${currentStep > step ? 'bg-blue-600' : 'bg-gray-200'}`} />
+                                <div className={`flex-1 h-1 mx-4 rounded ${currentStep > step ? 'bg-purple-600' : 'bg-gray-800'}`} />
                             )}
                         </div>
                     ))}
                 </div>
             </div>
 
-            <div className="bg-white p-8 rounded-lg border min-h-[600px]">
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-8 rounded-2xl min-h-[600px]">
                 {/* Step 1: Package Selection */}
                 {currentStep === 1 && (
                     <div className="space-y-6">
-                        <h1 className="text-3xl font-bold">Choose Your Package</h1>
-                        <p className="text-gray-600">Let's start by selecting the perfect package for your needs</p>
+                        <h1 className="text-3xl font-bold text-white">Choose Your Package</h1>
+                        <p className="text-gray-400">Let's start by selecting the perfect package for your needs</p>
 
                         <div>
-                            <label className="block text-sm font-medium mb-2">Project Name *</label>
+                            <label className="block text-sm font-medium mb-2 text-gray-300">Project Name *</label>
                             <input
                                 type="text"
                                 value={formData.projectName}
                                 onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
                                 required
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                 placeholder="My Awesome Website"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-2">Project Description *</label>
+                            <label className="block text-sm font-medium mb-2 text-gray-300">Project Description *</label>
                             <textarea
                                 value={formData.projectDescription}
                                 onChange={(e) => setFormData({ ...formData, projectDescription: e.target.value })}
                                 required
                                 rows={4}
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                 placeholder="Describe what kind of website you need..."
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-3">Select Your Package *</label>
+                            <label className="block text-sm font-medium mb-3 text-gray-300">Select Your Package *</label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {['basic', 'standard', 'premium', 'enterprise'].map((pkg) => (
                                     <div
                                         key={pkg}
                                         onClick={() => setFormData({ ...formData, package: pkg })}
-                                        className={`p-6 border-2 rounded-lg cursor-pointer transition ${
+                                        className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
                                             formData.package === pkg
-                                                ? 'border-blue-600 bg-blue-50'
-                                                : 'border-gray-200 hover:border-blue-300'
+                                                ? 'border-purple-500/50 bg-purple-500/10'
+                                                : 'border-gray-700 bg-white/5 hover:border-purple-500/30'
                                         }`}
                                     >
                                         <div className="flex items-center justify-between mb-3">
-                                            <h3 className="text-xl font-semibold capitalize">{pkg}</h3>
+                                            <h3 className="text-xl font-semibold capitalize text-white">{pkg}</h3>
                                             {formData.package === pkg && (
-                                                <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                                                <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
                                                     <Check size={16} className="text-white" />
                                                 </div>
                                             )}
                                         </div>
-                                        <ul className="text-sm space-y-2 text-gray-700">
+                                        <ul className="text-sm space-y-2 text-gray-400">
                                             {pkg === 'basic' && (
                                                 <>
                                                     <li>✓ Up to 5 pages</li>
@@ -245,19 +243,19 @@ export default function NewProjectPage() {
                 {/* Step 2: Template Selection */}
                 {currentStep === 2 && (
                     <div className="space-y-6">
-                        <h1 className="text-3xl font-bold">Choose Your Template</h1>
-                        <p className="text-gray-600">
+                        <h1 className="text-3xl font-bold text-white">Choose Your Template</h1>
+                        <p className="text-gray-400">
                             Browse our professionally designed templates for {formData.package} package
                         </p>
 
                         {loadingTemplates ? (
                             <div className="text-center py-12">
-                                <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto" />
-                                <p className="mt-4 text-gray-600">Loading templates...</p>
+                                <div className="animate-spin w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full mx-auto" />
+                                <p className="mt-4 text-gray-400">Loading templates...</p>
                             </div>
                         ) : templates.length === 0 ? (
-                            <div className="text-center py-12 bg-gray-50 rounded-lg">
-                                <p className="text-gray-600">No templates available for this package yet.</p>
+                            <div className="text-center py-12 bg-white/5 border border-gray-800/50 rounded-xl">
+                                <p className="text-gray-300">No templates available for this package yet.</p>
                                 <p className="text-sm text-gray-500 mt-2">Please contact us for custom designs.</p>
                             </div>
                         ) : (
@@ -266,14 +264,14 @@ export default function NewProjectPage() {
                                     <div
                                         key={template._id}
                                         onClick={() => setFormData({ ...formData, templateId: template._id })}
-                                        className={`border-2 rounded-lg overflow-hidden cursor-pointer transition ${
+                                        className={`border-2 rounded-xl overflow-hidden cursor-pointer transition-all ${
                                             formData.templateId === template._id
-                                                ? 'border-blue-600 shadow-lg'
-                                                : 'border-gray-200 hover:border-blue-300'
+                                                ? 'border-purple-500/50 shadow-lg shadow-purple-500/20'
+                                                : 'border-gray-700 hover:border-purple-500/30 bg-white/5'
                                         }`}
                                     >
                                         {/* Template Screenshot */}
-                                        <div className="relative h-48 bg-gray-100">
+                                        <div className="relative h-48 bg-gray-900">
                                             {template.screenshots && template.screenshots[0] ? (
                                                 <Image
                                                     src={template.screenshots[0]}
@@ -287,26 +285,26 @@ export default function NewProjectPage() {
                                                 </div>
                                             )}
                                             {formData.templateId === template._id && (
-                                                <div className="absolute top-3 right-3 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                                <div className="absolute top-3 right-3 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
                                                     <Check size={20} className="text-white" />
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Template Info */}
-                                        <div className="p-4">
-                                            <h3 className="font-semibold text-lg mb-1">{template.name}</h3>
-                                            <p className="text-sm text-gray-600 mb-3">{template.description || 'Professional template'}</p>
+                                        <div className="p-4 bg-black/40 backdrop-blur-sm">
+                                            <h3 className="font-semibold text-lg mb-1 text-white">{template.name}</h3>
+                                            <p className="text-sm text-gray-400 mb-3">{template.description || 'Professional template'}</p>
 
                                             {template.category && (
-                                                <span className="inline-block px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full mb-3">
+                                                <span className="inline-block px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full mb-3 border border-purple-500/30">
                                                     {template.category}
                                                 </span>
                                             )}
 
                                             {template.features && template.features.length > 0 && (
                                                 <div className="mt-3">
-                                                    <ul className="text-xs text-gray-600 space-y-1">
+                                                    <ul className="text-xs text-gray-400 space-y-1">
                                                         {template.features.slice(0, 3).map((feature: string, idx: number) => (
                                                             <li key={idx}>✓ {feature}</li>
                                                         ))}
@@ -320,7 +318,7 @@ export default function NewProjectPage() {
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => e.stopPropagation()}
-                                                    className="mt-4 flex items-center gap-2 text-sm text-blue-600 hover:underline"
+                                                    className="mt-4 flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
                                                 >
                                                     <Eye size={16} />
                                                     Preview Demo
@@ -337,16 +335,16 @@ export default function NewProjectPage() {
                 {/* Step 3: Customization */}
                 {currentStep === 3 && (
                     <div className="space-y-6">
-                        <h1 className="text-3xl font-bold">Customize Your Website</h1>
-                        <p className="text-gray-600">Tell us about your business so we can personalize your website</p>
+                        <h1 className="text-3xl font-bold text-white">Customize Your Website</h1>
+                        <p className="text-gray-400">Tell us about your business so we can personalize your website</p>
 
                         <div className="space-y-6">
                             {/* Business Info */}
-                            <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-                                <h2 className="text-xl font-semibold">Business Information</h2>
+                            <div className="bg-white/5 border border-gray-800/50 p-6 rounded-xl space-y-4">
+                                <h2 className="text-xl font-semibold text-white">Business Information</h2>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">Business Name *</label>
+                                    <label className="block text-sm font-medium mb-2 text-gray-300">Business Name *</label>
                                     <input
                                         type="text"
                                         required
@@ -357,13 +355,13 @@ export default function NewProjectPage() {
                                                 customization: { ...formData.customization, businessName: e.target.value },
                                             })
                                         }
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                         placeholder="Your Business Name"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">Industry/Category</label>
+                                    <label className="block text-sm font-medium mb-2 text-gray-300">Industry/Category</label>
                                     <input
                                         type="text"
                                         value={formData.customization.industry}
@@ -373,18 +371,18 @@ export default function NewProjectPage() {
                                                 customization: { ...formData.customization, industry: e.target.value },
                                             })
                                         }
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                         placeholder="e.g., Restaurant, E-commerce, Consulting"
                                     />
                                 </div>
                             </div>
 
                             {/* Brand Colors */}
-                            <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-                                <h2 className="text-xl font-semibold">Brand Colors</h2>
+                            <div className="bg-white/5 border border-gray-800/50 p-6 rounded-xl space-y-4">
+                                <h2 className="text-xl font-semibold text-white">Brand Colors</h2>
                                 <div className="grid grid-cols-3 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">Primary Color</label>
+                                        <label className="block text-sm font-medium mb-2 text-gray-300">Primary Color</label>
                                         <div className="flex gap-2">
                                             <input
                                                 type="color"
@@ -401,7 +399,7 @@ export default function NewProjectPage() {
                                                         },
                                                     })
                                                 }
-                                                className="w-16 h-10 border rounded cursor-pointer"
+                                                className="w-16 h-10 border border-gray-700 rounded-lg cursor-pointer bg-black/30"
                                             />
                                             <input
                                                 type="text"
@@ -418,12 +416,12 @@ export default function NewProjectPage() {
                                                         },
                                                     })
                                                 }
-                                                className="flex-1 px-3 py-2 border rounded-lg text-sm font-mono"
+                                                className="flex-1 px-3 py-2 bg-white/5 border border-gray-700 text-white rounded-lg text-sm font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
                                             />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">Secondary Color</label>
+                                        <label className="block text-sm font-medium mb-2 text-gray-300">Secondary Color</label>
                                         <div className="flex gap-2">
                                             <input
                                                 type="color"
@@ -440,7 +438,7 @@ export default function NewProjectPage() {
                                                         },
                                                     })
                                                 }
-                                                className="w-16 h-10 border rounded cursor-pointer"
+                                                className="w-16 h-10 border border-gray-700 rounded-lg cursor-pointer bg-black/30"
                                             />
                                             <input
                                                 type="text"
@@ -457,12 +455,12 @@ export default function NewProjectPage() {
                                                         },
                                                     })
                                                 }
-                                                className="flex-1 px-3 py-2 border rounded-lg text-sm font-mono"
+                                                className="flex-1 px-3 py-2 bg-white/5 border border-gray-700 text-white rounded-lg text-sm font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
                                             />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">Accent Color</label>
+                                        <label className="block text-sm font-medium mb-2 text-gray-300">Accent Color</label>
                                         <div className="flex gap-2">
                                             <input
                                                 type="color"
@@ -479,7 +477,7 @@ export default function NewProjectPage() {
                                                         },
                                                     })
                                                 }
-                                                className="w-16 h-10 border rounded cursor-pointer"
+                                                className="w-16 h-10 border border-gray-700 rounded-lg cursor-pointer bg-black/30"
                                             />
                                             <input
                                                 type="text"
@@ -496,7 +494,7 @@ export default function NewProjectPage() {
                                                         },
                                                     })
                                                 }
-                                                className="flex-1 px-3 py-2 border rounded-lg text-sm font-mono"
+                                                className="flex-1 px-3 py-2 bg-white/5 border border-gray-700 text-white rounded-lg text-sm font-mono focus:ring-2 focus:ring-purple-500 focus:outline-none"
                                             />
                                         </div>
                                     </div>
@@ -504,10 +502,10 @@ export default function NewProjectPage() {
                             </div>
 
                             {/* Logo Upload */}
-                            <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-                                <h2 className="text-xl font-semibold">Logo</h2>
+                            <div className="bg-white/5 border border-gray-800/50 p-6 rounded-xl space-y-4">
+                                <h2 className="text-xl font-semibold text-white">Logo</h2>
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">Logo URL</label>
+                                    <label className="block text-sm font-medium mb-2 text-gray-300">Logo URL</label>
                                     <input
                                         type="url"
                                         value={formData.customization.logoUrl}
@@ -517,7 +515,7 @@ export default function NewProjectPage() {
                                                 customization: { ...formData.customization, logoUrl: e.target.value },
                                             })
                                         }
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                         placeholder="https://example.com/logo.png or upload via file manager after submission"
                                     />
                                     <p className="text-xs text-gray-500 mt-1">
@@ -527,11 +525,11 @@ export default function NewProjectPage() {
                             </div>
 
                             {/* Contact Info */}
-                            <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-                                <h2 className="text-xl font-semibold">Contact Information</h2>
+                            <div className="bg-white/5 border border-gray-800/50 p-6 rounded-xl space-y-4">
+                                <h2 className="text-xl font-semibold text-white">Contact Information</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">Email</label>
+                                        <label className="block text-sm font-medium mb-2 text-gray-300">Email</label>
                                         <input
                                             type="email"
                                             value={formData.customization.contactInfo.email}
@@ -547,12 +545,12 @@ export default function NewProjectPage() {
                                                     },
                                                 })
                                             }
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                             placeholder="contact@business.com"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">Phone</label>
+                                        <label className="block text-sm font-medium mb-2 text-gray-300">Phone</label>
                                         <input
                                             type="tel"
                                             value={formData.customization.contactInfo.phone}
@@ -568,13 +566,13 @@ export default function NewProjectPage() {
                                                     },
                                                 })
                                             }
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                             placeholder="+1 (555) 123-4567"
                                         />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">Address</label>
+                                    <label className="block text-sm font-medium mb-2 text-gray-300">Address</label>
                                     <input
                                         type="text"
                                         value={formData.customization.contactInfo.address}
@@ -590,18 +588,18 @@ export default function NewProjectPage() {
                                                 },
                                             })
                                         }
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                         placeholder="123 Main St, City, State 12345"
                                     />
                                 </div>
                             </div>
 
                             {/* Social Media */}
-                            <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-                                <h2 className="text-xl font-semibold">Social Media Links</h2>
+                            <div className="bg-white/5 border border-gray-800/50 p-6 rounded-xl space-y-4">
+                                <h2 className="text-xl font-semibold text-white">Social Media Links</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">Facebook</label>
+                                        <label className="block text-sm font-medium mb-2 text-gray-300">Facebook</label>
                                         <input
                                             type="url"
                                             value={formData.customization.socialMedia.facebook}
@@ -617,12 +615,12 @@ export default function NewProjectPage() {
                                                     },
                                                 })
                                             }
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                             placeholder="https://facebook.com/yourpage"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">Twitter</label>
+                                        <label className="block text-sm font-medium mb-2 text-gray-300">Twitter</label>
                                         <input
                                             type="url"
                                             value={formData.customization.socialMedia.twitter}
@@ -638,12 +636,12 @@ export default function NewProjectPage() {
                                                     },
                                                 })
                                             }
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                             placeholder="https://twitter.com/yourhandle"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">Instagram</label>
+                                        <label className="block text-sm font-medium mb-2 text-gray-300">Instagram</label>
                                         <input
                                             type="url"
                                             value={formData.customization.socialMedia.instagram}
@@ -659,12 +657,12 @@ export default function NewProjectPage() {
                                                     },
                                                 })
                                             }
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                             placeholder="https://instagram.com/yourprofile"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">LinkedIn</label>
+                                        <label className="block text-sm font-medium mb-2 text-gray-300">LinkedIn</label>
                                         <input
                                             type="url"
                                             value={formData.customization.socialMedia.linkedin}
@@ -680,7 +678,7 @@ export default function NewProjectPage() {
                                                     },
                                                 })
                                             }
-                                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                             placeholder="https://linkedin.com/company/yourcompany"
                                         />
                                     </div>
@@ -688,10 +686,10 @@ export default function NewProjectPage() {
                             </div>
 
                             {/* Special Requirements */}
-                            <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-                                <h2 className="text-xl font-semibold">Special Requirements</h2>
+                            <div className="bg-white/5 border border-gray-800/50 p-6 rounded-xl space-y-4">
+                                <h2 className="text-xl font-semibold text-white">Special Requirements</h2>
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">
+                                    <label className="block text-sm font-medium mb-2 text-gray-300">
                                         Any special requests or features you need?
                                     </label>
                                     <textarea
@@ -706,7 +704,7 @@ export default function NewProjectPage() {
                                             })
                                         }
                                         rows={4}
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
                                         placeholder="Tell us about any specific features, integrations, or design elements you need..."
                                     />
                                 </div>
@@ -718,52 +716,52 @@ export default function NewProjectPage() {
                 {/* Step 4: Review & Submit */}
                 {currentStep === 4 && (
                     <div className="space-y-6">
-                        <h1 className="text-3xl font-bold">Review Your Project</h1>
-                        <p className="text-gray-600">Please review your project details before submitting</p>
+                        <h1 className="text-3xl font-bold text-white">Review Your Project</h1>
+                        <p className="text-gray-400">Please review your project details before submitting</p>
 
                         <div className="space-y-4">
-                            <div className="bg-gray-50 p-6 rounded-lg">
-                                <h2 className="text-lg font-semibold mb-3">Project Details</h2>
+                            <div className="bg-white/5 border border-gray-800/50 p-6 rounded-xl">
+                                <h2 className="text-lg font-semibold mb-3 text-white">Project Details</h2>
                                 <div className="space-y-2 text-sm">
-                                    <p>
-                                        <span className="font-medium">Project Name:</span> {formData.projectName}
+                                    <p className="text-gray-300">
+                                        <span className="font-medium text-white">Project Name:</span> {formData.projectName}
                                     </p>
-                                    <p>
-                                        <span className="font-medium">Package:</span>{' '}
+                                    <p className="text-gray-300">
+                                        <span className="font-medium text-white">Package:</span>{' '}
                                         <span className="capitalize">{formData.package}</span>
                                     </p>
-                                    <p>
-                                        <span className="font-medium">Description:</span> {formData.projectDescription}
+                                    <p className="text-gray-300">
+                                        <span className="font-medium text-white">Description:</span> {formData.projectDescription}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 p-6 rounded-lg">
-                                <h2 className="text-lg font-semibold mb-3">Business Information</h2>
+                            <div className="bg-white/5 border border-gray-800/50 p-6 rounded-xl">
+                                <h2 className="text-lg font-semibold mb-3 text-white">Business Information</h2>
                                 <div className="space-y-2 text-sm">
-                                    <p>
-                                        <span className="font-medium">Business Name:</span>{' '}
+                                    <p className="text-gray-300">
+                                        <span className="font-medium text-white">Business Name:</span>{' '}
                                         {formData.customization.businessName}
                                     </p>
                                     {formData.customization.industry && (
-                                        <p>
-                                            <span className="font-medium">Industry:</span>{' '}
+                                        <p className="text-gray-300">
+                                            <span className="font-medium text-white">Industry:</span>{' '}
                                             {formData.customization.industry}
                                         </p>
                                     )}
-                                    <p>
-                                        <span className="font-medium">Brand Colors:</span>
+                                    <p className="text-gray-300">
+                                        <span className="font-medium text-white">Brand Colors:</span>
                                         <span className="ml-2 inline-flex gap-2">
                                             <span
-                                                className="w-6 h-6 rounded border"
+                                                className="w-6 h-6 rounded border border-gray-700"
                                                 style={{ backgroundColor: formData.customization.brandColors.primary }}
                                             />
                                             <span
-                                                className="w-6 h-6 rounded border"
+                                                className="w-6 h-6 rounded border border-gray-700"
                                                 style={{ backgroundColor: formData.customization.brandColors.secondary }}
                                             />
                                             <span
-                                                className="w-6 h-6 rounded border"
+                                                className="w-6 h-6 rounded border border-gray-700"
                                                 style={{ backgroundColor: formData.customization.brandColors.accent }}
                                             />
                                         </span>
@@ -774,24 +772,24 @@ export default function NewProjectPage() {
                             {(formData.customization.contactInfo.email ||
                                 formData.customization.contactInfo.phone ||
                                 formData.customization.contactInfo.address) && (
-                                <div className="bg-gray-50 p-6 rounded-lg">
-                                    <h2 className="text-lg font-semibold mb-3">Contact Information</h2>
+                                <div className="bg-white/5 border border-gray-800/50 p-6 rounded-xl">
+                                    <h2 className="text-lg font-semibold mb-3 text-white">Contact Information</h2>
                                     <div className="space-y-2 text-sm">
                                         {formData.customization.contactInfo.email && (
-                                            <p>
-                                                <span className="font-medium">Email:</span>{' '}
+                                            <p className="text-gray-300">
+                                                <span className="font-medium text-white">Email:</span>{' '}
                                                 {formData.customization.contactInfo.email}
                                             </p>
                                         )}
                                         {formData.customization.contactInfo.phone && (
-                                            <p>
-                                                <span className="font-medium">Phone:</span>{' '}
+                                            <p className="text-gray-300">
+                                                <span className="font-medium text-white">Phone:</span>{' '}
                                                 {formData.customization.contactInfo.phone}
                                             </p>
                                         )}
                                         {formData.customization.contactInfo.address && (
-                                            <p>
-                                                <span className="font-medium">Address:</span>{' '}
+                                            <p className="text-gray-300">
+                                                <span className="font-medium text-white">Address:</span>{' '}
                                                 {formData.customization.contactInfo.address}
                                             </p>
                                         )}
@@ -799,9 +797,9 @@ export default function NewProjectPage() {
                                 </div>
                             )}
 
-                            <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg">
-                                <h3 className="font-semibold text-blue-900 mb-2">What happens next?</h3>
-                                <ul className="text-sm text-blue-800 space-y-1">
+                            <div className="bg-purple-500/10 border border-purple-500/30 p-6 rounded-xl">
+                                <h3 className="font-semibold text-purple-300 mb-2">What happens next?</h3>
+                                <ul className="text-sm text-gray-300 space-y-1">
                                     <li>1. We&apos;ll review your project requirements</li>
                                     <li>2. Customize the selected template with your branding</li>
                                     <li>3. Deploy your website to your own Vercel account</li>
@@ -814,11 +812,11 @@ export default function NewProjectPage() {
                 )}
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-between mt-8 pt-6 border-t">
+                <div className="flex justify-between mt-8 pt-6 border-t border-gray-800/50">
                     <button
                         onClick={prevStep}
                         disabled={currentStep === 1}
-                        className="flex items-center gap-2 px-6 py-3 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-gray-700 text-gray-300 hover:text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <ChevronLeft size={20} />
                         Previous
@@ -832,7 +830,7 @@ export default function NewProjectPage() {
                                 (currentStep === 2 && !canProceedToStep3) ||
                                 (currentStep === 3 && !canProceedToStep4)
                             }
-                            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Next
                             <ChevronRight size={20} />
@@ -841,7 +839,7 @@ export default function NewProjectPage() {
                         <button
                             onClick={handleSubmit}
                             disabled={isPending}
-                            className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                            className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isPending ? 'Submitting...' : 'Submit Project'}
                             <Check size={20} />
