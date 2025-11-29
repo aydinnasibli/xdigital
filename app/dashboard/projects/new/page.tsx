@@ -110,15 +110,13 @@ export default function NewProjectPage() {
     const canProceedToStep4 = formData.customization.businessName;
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <div className="mb-6">
-                <Link href="/dashboard/projects" className="text-blue-600 hover:underline">
-                    ← Back to Projects
-                </Link>
-            </div>
+        <div className="max-w-6xl mx-auto p-6 space-y-6">
+            <Link href="/dashboard/projects" className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors">
+                ← Back to Projects
+            </Link>
 
             {/* Step Indicator */}
-            <div className="mb-8">
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-2xl">
                 <div className="flex items-center justify-between">
                     {[1, 2, 3, 4].map((step) => (
                         <div key={step} className="flex items-center flex-1">
@@ -126,14 +124,14 @@ export default function NewProjectPage() {
                                 <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
                                         currentStep >= step
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-200 text-gray-500'
+                                            ? 'bg-purple-600 text-white border border-purple-500/30'
+                                            : 'bg-white/5 text-gray-500 border border-gray-700'
                                     }`}
                                 >
                                     {currentStep > step ? <Check size={20} /> : step}
                                 </div>
                                 <div className="ml-3">
-                                    <p className={`text-sm font-medium ${currentStep >= step ? 'text-gray-900' : 'text-gray-500'}`}>
+                                    <p className={`text-sm font-medium ${currentStep >= step ? 'text-white' : 'text-gray-500'}`}>
                                         {step === 1 && 'Choose Package'}
                                         {step === 2 && 'Select Template'}
                                         {step === 3 && 'Customize'}
@@ -142,14 +140,14 @@ export default function NewProjectPage() {
                                 </div>
                             </div>
                             {step < 4 && (
-                                <div className={`flex-1 h-1 mx-4 ${currentStep > step ? 'bg-blue-600' : 'bg-gray-200'}`} />
+                                <div className={`flex-1 h-1 mx-4 rounded ${currentStep > step ? 'bg-purple-600' : 'bg-gray-800'}`} />
                             )}
                         </div>
                     ))}
                 </div>
             </div>
 
-            <div className="bg-white p-8 rounded-lg border min-h-[600px]">
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-8 rounded-2xl min-h-[600px]">
                 {/* Step 1: Package Selection */}
                 {currentStep === 1 && (
                     <div className="space-y-6">
