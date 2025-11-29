@@ -440,25 +440,38 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
-                <p className="text-gray-600 mt-2">
-                    Real-time communication with clients about their projects
-                </p>
+            {/* Header - Dark Glass */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-black to-gray-900 border border-gray-800/50 backdrop-blur-xl p-8">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.15),transparent_50%)]"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.15),transparent_50%)]"></div>
+
+                <div className="relative z-10">
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl">
+                            <MessageSquare className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <div className="flex-1">
+                            <h1 className="text-3xl font-bold text-white mb-2">Messages</h1>
+                            <p className="text-gray-400">
+                                Real-time communication with clients about their projects
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Conversations List */}
-                <div className="lg:col-span-1 bg-white rounded-lg shadow">
-                    <div className="p-4 border-b border-gray-200">
+                <div className="lg:col-span-1 bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl overflow-hidden">
+                    <div className="p-4 border-b border-gray-800/50">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
                             <input
                                 type="text"
                                 placeholder="Search conversations..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full pl-10 pr-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors"
                             />
                         </div>
                     </div>
@@ -470,15 +483,15 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                 <button
                                     key={conv.projectId}
                                     onClick={() => handleSelectProject(conv.projectId)}
-                                    className={`w-full text-left p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors ${
-                                        selectedProjectId === conv.projectId ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
+                                    className={`w-full text-left p-4 border-b border-gray-800/30 hover:bg-white/5 transition-colors ${
+                                        selectedProjectId === conv.projectId ? 'bg-purple-500/10 border-l-4 border-l-purple-500' : ''
                                     }`}
                                 >
                                     <div className="flex justify-between items-start mb-1">
-                                        <p className="font-semibold text-gray-900 truncate">{conv.projectName}</p>
+                                        <p className="font-semibold text-white truncate">{conv.projectName}</p>
                                     </div>
-                                    <p className="text-sm text-gray-600 truncate">{conv.clientName}</p>
-                                    <p className="text-xs text-gray-500 mt-1">
+                                    <p className="text-sm text-gray-400 truncate">{conv.clientName}</p>
+                                    <p className="text-xs text-gray-600 mt-1">
                                         {formatConversationDate(conv.lastMessageAt)}
                                     </p>
                                 </button>
@@ -491,23 +504,23 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
                         {/* Projects without conversations */}
                         {projectsWithoutConversations.length > 0 && (
-                            <div className="border-t-2 border-gray-300 mt-2">
-                                <div className="p-3 bg-gray-50">
-                                    <p className="text-xs font-semibold text-gray-500 uppercase">Start New Conversation</p>
+                            <div className="border-t-2 border-gray-700 mt-2">
+                                <div className="p-3 bg-white/5">
+                                    <p className="text-xs font-semibold text-gray-400 uppercase">Start New Conversation</p>
                                 </div>
                                 {projectsWithoutConversations.map((proj) => (
                                     <button
                                         key={proj._id}
                                         onClick={() => handleStartNewConversation(proj._id)}
-                                        className={`w-full text-left p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors ${
-                                            selectedProjectId === proj._id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
+                                        className={`w-full text-left p-4 border-b border-gray-800/30 hover:bg-white/5 transition-colors ${
+                                            selectedProjectId === proj._id ? 'bg-purple-500/10 border-l-4 border-l-purple-500' : ''
                                         }`}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <Plus className="w-4 h-4 text-gray-400" />
+                                            <Plus className="w-4 h-4 text-gray-500" />
                                             <div className="flex-1">
-                                                <p className="font-semibold text-gray-900 truncate">{proj.projectName}</p>
-                                                <p className="text-sm text-gray-600 truncate">{proj.clientName}</p>
+                                                <p className="font-semibold text-white truncate">{proj.projectName}</p>
+                                                <p className="text-sm text-gray-400 truncate">{proj.clientName}</p>
                                             </div>
                                         </div>
                                     </button>
@@ -518,15 +531,15 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                 </div>
 
                 {/* Conversation View */}
-                <div className="lg:col-span-2 bg-white rounded-lg shadow flex flex-col" style={{ height: '700px' }}>
+                <div className="lg:col-span-2 bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl flex flex-col overflow-hidden" style={{ height: '700px' }}>
                     {selectedProjectId ? (
                         <>
                             {/* Conversation Header */}
-                            <div className="p-4 border-b border-gray-200">
-                                <h2 className="text-xl font-semibold text-gray-900">
+                            <div className="p-4 border-b border-gray-800/50 bg-white/5">
+                                <h2 className="text-xl font-semibold text-white">
                                     {selectedConversation?.projectName || 'New Conversation'}
                                 </h2>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-gray-400">
                                     {selectedConversation?.clientName} • {selectedConversation?.clientEmail}
                                 </p>
                             </div>

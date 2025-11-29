@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { getNotificationPreferences, updateNotificationPreferences } from '@/app/actions/notificationPreferences';
 import { NotificationChannel } from '@/models/NotificationPreference';
 import { toast } from 'sonner';
+import { Bell, Mail, Sparkles, Save, RotateCcw } from 'lucide-react';
 
 interface NotificationSetting {
     enabled: boolean;
@@ -116,64 +117,94 @@ export default function NotificationSettingsPage() {
         key: keyof Preferences;
         label: string;
         description: string;
+        icon: string;
     }> = [
         {
             key: 'projectUpdates',
             label: 'Project Updates',
             description: 'Get notified when project status changes',
+            icon: '📊',
         },
         {
             key: 'messages',
             label: 'Messages',
             description: 'When you receive a new message from admin',
+            icon: '💬',
         },
         {
             key: 'milestones',
             label: 'Milestones',
             description: 'When a project milestone is completed',
+            icon: '🎯',
         },
         {
             key: 'tasks',
             label: 'Tasks',
             description: 'When a task is assigned or updated',
+            icon: '✅',
         },
         {
             key: 'mentions',
             label: 'Mentions',
             description: 'When someone mentions you in a message',
+            icon: '👋',
         },
         {
             key: 'general',
             label: 'General',
             description: 'General notifications and announcements',
+            icon: '📢',
         },
     ];
 
     if (loading) {
         return (
-            <div className="space-y-6 max-w-4xl">
-                <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="space-y-6 max-w-6xl mx-auto p-6">
+                <div className="flex items-center justify-center py-24">
+                    <div className="relative">
+                        <div className="w-16 h-16 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <Bell className="w-6 h-6 text-purple-400" />
+                        </div>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6 max-w-4xl">
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900">Notification Preferences</h1>
-                <p className="text-gray-600 mt-2">Manage how you receive updates about your projects</p>
+        <div className="space-y-6 max-w-6xl mx-auto p-6">
+            {/* Header - Dark Glass */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-black to-gray-900 border border-gray-800/50 backdrop-blur-xl p-8">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.15),transparent_50%)]"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.15),transparent_50%)]"></div>
+
+                <div className="relative z-10">
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl">
+                            <Sparkles className="w-6 h-6 text-purple-400" />
+                        </div>
+                        <div className="flex-1">
+                            <h1 className="text-3xl font-bold text-white mb-2">Notification Preferences</h1>
+                            <p className="text-gray-400">Manage how you receive updates about your projects and activities</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Global Toggle */}
-            <div className="bg-white rounded-lg border shadow-sm p-6">
+            {/* Global Toggle - Dark Glass */}
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
                 <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-xl font-semibold">Enable Notifications</h2>
-                        <p className="text-sm text-gray-600 mt-1">
-                            Master switch for all notifications
-                        </p>
+                    <div className="flex items-center gap-4">
+                        <div className="p-2.5 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl">
+                            <Bell className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-semibold text-white">Enable Notifications</h2>
+                            <p className="text-sm text-gray-500 mt-1">
+                                Master switch for all notifications
+                            </p>
+                        </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                         <input
@@ -182,44 +213,55 @@ export default function NotificationSettingsPage() {
                             onChange={(e) => setGlobalEnabled(e.target.checked)}
                             className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className="w-14 h-7 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-500/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-600 peer-checked:to-pink-600"></div>
                     </label>
                 </div>
             </div>
 
-            {/* Notification Settings Table */}
-            <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-                <div className="p-6 border-b">
-                    <h2 className="text-xl font-semibold">Notification Types</h2>
-                    <p className="text-sm text-gray-600 mt-1">
+            {/* Notification Settings Table - Dark Glass */}
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-2xl overflow-hidden">
+                <div className="p-6 border-b border-gray-800/50">
+                    <h2 className="text-xl font-semibold text-white">Notification Types</h2>
+                    <p className="text-sm text-gray-500 mt-1">
                         Configure how you want to receive each type of notification
                     </p>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50 border-b">
+                        <thead className="bg-white/5 border-b border-gray-800/50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                     Notification Type
                                 </th>
-                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
                                     Enabled
                                 </th>
-                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Email
+                                <th className="px-6 py-4 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Mail className="w-4 h-4" />
+                                        Email
+                                    </div>
                                 </th>
-                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    In-App
+                                <th className="px-6 py-4 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Bell className="w-4 h-4" />
+                                        In-App
+                                    </div>
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="divide-y divide-gray-800/50">
                             {notificationTypes.map((type) => (
-                                <tr key={type.key} className="hover:bg-gray-50">
+                                <tr key={type.key} className="hover:bg-white/5 transition-colors">
                                     <td className="px-6 py-4">
-                                        <div className="font-medium text-gray-900">{type.label}</div>
-                                        <div className="text-sm text-gray-600">{type.description}</div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-2xl">{type.icon}</span>
+                                            <div>
+                                                <div className="font-medium text-white">{type.label}</div>
+                                                <div className="text-sm text-gray-500">{type.description}</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <label className="relative inline-flex items-center cursor-pointer">
@@ -229,7 +271,7 @@ export default function NotificationSettingsPage() {
                                                 onChange={() => handleToggle(type.key, 'enabled')}
                                                 className="sr-only peer"
                                             />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                            <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-500/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-600 peer-checked:to-pink-600"></div>
                                         </label>
                                     </td>
                                     <td className="px-6 py-4 text-center">
@@ -241,7 +283,7 @@ export default function NotificationSettingsPage() {
                                                 disabled={!preferences?.[type.key]?.enabled}
                                                 className="sr-only peer"
                                             />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
+                                            <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-cyan-600 peer-disabled:opacity-30 peer-disabled:cursor-not-allowed"></div>
                                         </label>
                                     </td>
                                     <td className="px-6 py-4 text-center">
@@ -253,7 +295,7 @@ export default function NotificationSettingsPage() {
                                                 disabled={!preferences?.[type.key]?.enabled}
                                                 className="sr-only peer"
                                             />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
+                                            <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-500/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-600 peer-checked:to-green-600 peer-disabled:opacity-30 peer-disabled:cursor-not-allowed"></div>
                                         </label>
                                     </td>
                                 </tr>
@@ -263,20 +305,22 @@ export default function NotificationSettingsPage() {
                 </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-between">
+            {/* Action Buttons - Dark Glass */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-between">
                 <button
-                    onClick={loadPreferences}
+                    onClick={() => void loadPreferences()}
                     disabled={loading}
-                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-gray-800/50 hover:border-gray-700 rounded-xl transition-all text-gray-300 hover:text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
+                    <RotateCcw className="w-4 h-4" />
                     Reset Changes
                 </button>
                 <button
-                    onClick={handleSave}
+                    onClick={() => void handleSave()}
                     disabled={saving || !preferences}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/20"
                 >
+                    <Save className="w-4 h-4" />
                     {saving ? 'Saving...' : 'Save Preferences'}
                 </button>
             </div>
