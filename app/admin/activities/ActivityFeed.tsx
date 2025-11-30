@@ -137,11 +137,11 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
     return (
         <div className="space-y-6">
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-4">
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+                        className="flex items-center gap-2 text-gray-700 hover:text-white"
                     >
                         <Filter className="w-5 h-5" />
                         <span className="font-medium">Filters</span>
@@ -234,7 +234,7 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
                                     clearFilters();
                                     handleRefresh();
                                 }}
-                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white/5"
                             >
                                 Clear Filters
                             </button>
@@ -244,11 +244,11 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
             </div>
 
             {/* Activity Feed */}
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow">
                 <div className="p-6 border-b">
-                    <h2 className="text-xl font-semibold text-gray-900">
+                    <h2 className="text-xl font-semibold text-white">
                         Recent Activities
-                        <span className="ml-2 text-sm font-normal text-gray-600">
+                        <span className="ml-2 text-sm font-normal text-gray-400">
                             ({activities.length} {activities.length === 1 ? 'activity' : 'activities'})
                         </span>
                     </h2>
@@ -257,7 +257,7 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
                 {loading ? (
                     <div className="p-12 text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Loading activities...</p>
+                        <p className="text-gray-400">Loading activities...</p>
                     </div>
                 ) : activities.length === 0 ? (
                     <div className="p-12 text-center text-gray-500">
@@ -270,14 +270,14 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
                         {activities.map((activity) => {
                             const Icon = getActivityIcon(activity.type, activity.entityType);
                             return (
-                                <div key={activity._id} className="p-6 hover:bg-gray-50 transition">
+                                <div key={activity._id} className="p-6 hover:bg-white/5 transition">
                                     <div className="flex items-start gap-4">
                                         <div className={`p-2 rounded-lg ${getActivityColor(activity.type)}`}>
                                             <Icon className="w-5 h-5" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <h3 className="font-semibold text-gray-900">{activity.title}</h3>
+                                                <h3 className="font-semibold text-white">{activity.title}</h3>
                                                 <span className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">
                                                     {getTypeLabel(activity.type)}
                                                 </span>
@@ -286,7 +286,7 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
                                                 </span>
                                             </div>
                                             {activity.description && (
-                                                <p className="text-sm text-gray-600 mb-2">{activity.description}</p>
+                                                <p className="text-sm text-gray-400 mb-2">{activity.description}</p>
                                             )}
                                             <div className="flex items-center gap-3 text-xs text-gray-500">
                                                 <span className="flex items-center gap-1">
@@ -300,9 +300,9 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
                                                 </span>
                                             </div>
                                             {activity.metadata && Object.keys(activity.metadata).length > 0 && (
-                                                <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                                                <div className="mt-2 p-2 bg-white/5 rounded text-xs">
                                                     <p className="font-medium text-gray-700 mb-1">Metadata:</p>
-                                                    <pre className="text-gray-600 overflow-x-auto">
+                                                    <pre className="text-gray-400 overflow-x-auto">
                                                         {JSON.stringify(activity.metadata, null, 2)}
                                                     </pre>
                                                 </div>
@@ -319,25 +319,25 @@ export default function ActivityFeed({ initialActivities }: { initialActivities:
             {/* Stats */}
             {activities.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <p className="text-sm text-gray-600">Total Activities</p>
-                        <p className="text-2xl font-bold text-gray-900">{activities.length}</p>
+                    <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow p-4">
+                        <p className="text-sm text-gray-400">Total Activities</p>
+                        <p className="text-2xl font-bold text-white">{activities.length}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <p className="text-sm text-gray-600">Unique Users</p>
-                        <p className="text-2xl font-bold text-gray-900">
+                    <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow p-4">
+                        <p className="text-sm text-gray-400">Unique Users</p>
+                        <p className="text-2xl font-bold text-white">
                             {new Set(activities.map(a => a.userId)).size}
                         </p>
                     </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <p className="text-sm text-gray-600">Activity Types</p>
-                        <p className="text-2xl font-bold text-gray-900">
+                    <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow p-4">
+                        <p className="text-sm text-gray-400">Activity Types</p>
+                        <p className="text-2xl font-bold text-white">
                             {new Set(activities.map(a => a.type)).size}
                         </p>
                     </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <p className="text-sm text-gray-600">Entity Types</p>
-                        <p className="text-2xl font-bold text-gray-900">
+                    <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow p-4">
+                        <p className="text-sm text-gray-400">Entity Types</p>
+                        <p className="text-2xl font-bold text-white">
                             {new Set(activities.map(a => a.entityType)).size}
                         </p>
                     </div>

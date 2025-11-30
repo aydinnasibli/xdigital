@@ -123,8 +123,8 @@ export default function EditTemplateForm({ template }: { template: TemplateData 
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Basic Information */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Basic Information</h2>
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
+                    <h2 className="text-xl font-semibold text-white">Basic Information</h2>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -162,7 +162,7 @@ export default function EditTemplateForm({ template }: { template: TemplateData 
                                 required
                                 value={formData.serviceType}
                                 disabled
-                                className="w-full px-4 py-2 border rounded-lg bg-gray-50 cursor-not-allowed"
+                                className="w-full px-4 py-2 border rounded-lg bg-white/5 cursor-not-allowed"
                             >
                                 <option value={ServiceType.WEB_DEVELOPMENT}>Web Development</option>
                                 <option value={ServiceType.SMM}>Social Media Marketing</option>
@@ -179,7 +179,7 @@ export default function EditTemplateForm({ template }: { template: TemplateData 
                                 required
                                 value={formData.package}
                                 disabled
-                                className="w-full px-4 py-2 border rounded-lg bg-gray-50 cursor-not-allowed"
+                                className="w-full px-4 py-2 border rounded-lg bg-white/5 cursor-not-allowed"
                             >
                                 <option value={WebDevPackage.BASIC}>Basic</option>
                                 <option value={WebDevPackage.STANDARD}>Standard</option>
@@ -198,7 +198,7 @@ export default function EditTemplateForm({ template }: { template: TemplateData 
                             type="text"
                             value={formData.category}
                             disabled
-                            className="w-full px-4 py-2 border rounded-lg bg-gray-50 cursor-not-allowed"
+                            className="w-full px-4 py-2 border rounded-lg bg-white/5 cursor-not-allowed"
                             placeholder="e.g., Restaurant, Business, Portfolio"
                         />
                         <p className="text-xs text-gray-500 mt-1">Category cannot be changed after creation</p>
@@ -219,8 +219,8 @@ export default function EditTemplateForm({ template }: { template: TemplateData 
                 </div>
 
                 {/* Website URLs */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Repository & Demo</h2>
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
+                    <h2 className="text-xl font-semibold text-white">Repository & Demo</h2>
                     <p className="text-sm text-gray-500">These fields are read-only. To update URLs, please create a new template.</p>
 
                     <div>
@@ -231,7 +231,7 @@ export default function EditTemplateForm({ template }: { template: TemplateData 
                             type="url"
                             value={formData.githubRepoUrl}
                             disabled
-                            className="w-full px-4 py-2 border rounded-lg bg-gray-50 cursor-not-allowed"
+                            className="w-full px-4 py-2 border rounded-lg bg-white/5 cursor-not-allowed"
                             placeholder="https://github.com/username/repo-name"
                         />
                     </div>
@@ -244,20 +244,20 @@ export default function EditTemplateForm({ template }: { template: TemplateData 
                             type="url"
                             value={formData.demoUrl}
                             disabled
-                            className="w-full px-4 py-2 border rounded-lg bg-gray-50 cursor-not-allowed"
+                            className="w-full px-4 py-2 border rounded-lg bg-white/5 cursor-not-allowed"
                             placeholder="https://demo.example.com"
                         />
                     </div>
                 </div>
 
                 {/* Screenshots - Read Only */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Screenshots</h2>
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
+                    <h2 className="text-xl font-semibold text-white">Screenshots</h2>
                     <p className="text-sm text-gray-500">Screenshots are read-only. To update, please create a new template.</p>
 
                     <div className="space-y-2">
                         {formData.screenshots.filter(s => s.trim() !== '').map((screenshot, index) => (
-                            <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                            <div key={index} className="p-3 bg-white/5 rounded-lg">
                                 <a href={screenshot} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline truncate block">
                                     {screenshot}
                                 </a>
@@ -270,13 +270,13 @@ export default function EditTemplateForm({ template }: { template: TemplateData 
                 </div>
 
                 {/* Features - Read Only */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Features</h2>
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
+                    <h2 className="text-xl font-semibold text-white">Features</h2>
                     <p className="text-sm text-gray-500">Features are read-only. To update, please create a new template.</p>
 
                     <div className="space-y-2">
                         {formData.features.filter(f => f.trim() !== '').map((feature, index) => (
-                            <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                            <div key={index} className="p-3 bg-white/5 rounded-lg">
                                 <p className="text-sm text-gray-700">✓ {feature}</p>
                             </div>
                         ))}
@@ -287,8 +287,8 @@ export default function EditTemplateForm({ template }: { template: TemplateData 
                 </div>
 
                 {/* Additional Options */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Template Status</h2>
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
+                    <h2 className="text-xl font-semibold text-white">Template Status</h2>
 
                     <label className="flex items-center gap-3 cursor-pointer">
                         <input
@@ -322,7 +322,7 @@ export default function EditTemplateForm({ template }: { template: TemplateData 
                     <button
                         type="button"
                         onClick={() => router.back()}
-                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-white/5"
                     >
                         Cancel
                     </button>

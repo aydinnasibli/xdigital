@@ -114,7 +114,7 @@ export default function SearchInterface() {
     return (
         <div className="space-y-6">
             {/* Search Bar */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow p-6">
                 <div className="flex gap-3">
                     <div className="flex-1 relative">
                         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -154,9 +154,9 @@ export default function SearchInterface() {
 
                 {/* Filters Panel */}
                 {showFilters && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+                    <div className="mt-4 p-4 bg-white/5 rounded-lg border">
                         <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-medium text-gray-900">Filter by type</h3>
+                            <h3 className="font-medium text-white">Filter by type</h3>
                             {selectedEntities.length > 0 && (
                                 <button
                                     onClick={clearFilters}
@@ -177,7 +177,7 @@ export default function SearchInterface() {
                                         className={`p-3 rounded-lg border-2 transition flex flex-col items-center gap-2 ${
                                             isSelected
                                                 ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                                : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                                                : 'border-gray-800/50 hover:border-gray-300 text-gray-700'
                                         }`}
                                     >
                                         <Icon className="w-5 h-5" />
@@ -192,12 +192,12 @@ export default function SearchInterface() {
 
             {/* Results */}
             {hasSearched && (
-                <div className="bg-white rounded-lg shadow">
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow">
                     <div className="p-6 border-b">
-                        <h2 className="text-xl font-semibold text-gray-900">
+                        <h2 className="text-xl font-semibold text-white">
                             Search Results
                             {results.length > 0 && (
-                                <span className="ml-2 text-sm font-normal text-gray-600">
+                                <span className="ml-2 text-sm font-normal text-gray-400">
                                     ({results.length} {results.length === 1 ? 'result' : 'results'})
                                 </span>
                             )}
@@ -222,15 +222,15 @@ export default function SearchInterface() {
                                     <Link
                                         key={`${result.type}-${result.id}`}
                                         href={getResultLink(result)}
-                                        className="block p-6 hover:bg-gray-50 transition"
+                                        className="block p-6 hover:bg-white/5 transition"
                                     >
                                         <div className="flex items-start gap-4">
                                             <div className="p-2 bg-gray-100 rounded-lg flex-shrink-0">
-                                                <Icon className="w-5 h-5 text-gray-600" />
+                                                <Icon className="w-5 h-5 text-gray-400" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <h3 className="font-semibold text-gray-900 truncate">
+                                                    <h3 className="font-semibold text-white truncate">
                                                         {result.title}
                                                     </h3>
                                                     <span className={`px-2 py-0.5 text-xs rounded-full whitespace-nowrap ${getTypeColor(result.type)}`}>
@@ -238,7 +238,7 @@ export default function SearchInterface() {
                                                     </span>
                                                 </div>
                                                 {result.description && (
-                                                    <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                                                    <p className="text-sm text-gray-400 line-clamp-2 mb-2">
                                                         {result.description}
                                                     </p>
                                                 )}

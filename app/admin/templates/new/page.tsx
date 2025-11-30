@@ -90,8 +90,8 @@ export default function NewTemplatePage() {
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <div>
-                <h1 className="text-3xl font-bold text-gray-900">Create New Template</h1>
-                <p className="text-gray-600 mt-2">Add a new website template for your clients to choose from</p>
+                <h1 className="text-3xl font-bold text-white">Create New Template</h1>
+                <p className="text-gray-400 mt-2">Add a new website template for your clients to choose from</p>
             </div>
 
             {error && (
@@ -102,8 +102,8 @@ export default function NewTemplatePage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Basic Information */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Basic Information</h2>
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
+                    <h2 className="text-xl font-semibold text-white">Basic Information</h2>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -195,9 +195,9 @@ export default function NewTemplatePage() {
                 </div>
 
                 {/* Package Availability */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Package Availability</h2>
-                    <p className="text-sm text-gray-600">
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
+                    <h2 className="text-xl font-semibold text-white">Package Availability</h2>
+                    <p className="text-sm text-gray-400">
                         Select which pricing packages can access this template. Premium users will see templates from all lower tiers.
                     </p>
 
@@ -217,8 +217,8 @@ export default function NewTemplatePage() {
                 </div>
 
                 {/* Website URLs */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Repository & Demo</h2>
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
+                    <h2 className="text-xl font-semibold text-white">Repository & Demo</h2>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -248,9 +248,9 @@ export default function NewTemplatePage() {
                 </div>
 
                 {/* Screenshots */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-semibold text-gray-900">Screenshots</h2>
+                        <h2 className="text-xl font-semibold text-white">Screenshots</h2>
                         <button
                             type="button"
                             onClick={() => addArrayField('screenshots')}
@@ -286,9 +286,9 @@ export default function NewTemplatePage() {
                 </div>
 
                 {/* Features */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-semibold text-gray-900">Features</h2>
+                        <h2 className="text-xl font-semibold text-white">Features</h2>
                         <button
                             type="button"
                             onClick={() => addArrayField('features')}
@@ -324,8 +324,8 @@ export default function NewTemplatePage() {
                 </div>
 
                 {/* Additional Options */}
-                <div className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Additional Options</h2>
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-4">
+                    <h2 className="text-xl font-semibold text-white">Additional Options</h2>
 
                     <label className="flex items-center gap-3 cursor-pointer">
                         <input
@@ -346,7 +346,7 @@ export default function NewTemplatePage() {
                     <button
                         type="button"
                         onClick={() => router.back()}
-                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-white/5"
                     >
                         Cancel
                     </button>
