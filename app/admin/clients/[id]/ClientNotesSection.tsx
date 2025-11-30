@@ -146,9 +146,9 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
     };
 
     return (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow p-6">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Client Notes ({notes.length})</h2>
+                <h2 className="text-xl font-semibold text-white">Client Notes ({notes.length})</h2>
                 {!isAdding && (
                     <button
                         onClick={() => setIsAdding(true)}
@@ -162,7 +162,7 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
 
             {/* Add/Edit Form */}
             {isAdding && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+                <div className="mb-6 p-4 bg-white/5 rounded-lg border">
                     <h3 className="text-lg font-semibold mb-4">
                         {editingId ? 'Edit Note' : 'New Note'}
                     </h3>
@@ -273,7 +273,7 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
                             </button>
                             <button
                                 onClick={resetForm}
-                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white/5"
                             >
                                 Cancel
                             </button>
@@ -290,7 +290,7 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
                     notes.map((note) => (
                         <div
                             key={note._id}
-                            className={`border rounded-lg p-4 ${note.isPinned ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+                            className={`border rounded-lg p-4 ${note.isPinned ? 'border-blue-300 bg-blue-50' : 'border-gray-800/50'
                                 }`}
                         >
                             <div className="flex items-start justify-between">
@@ -301,7 +301,7 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
                                             {note.type}
                                         </span>
                                         {note.title && (
-                                            <h4 className="font-semibold text-gray-900">{note.title}</h4>
+                                            <h4 className="font-semibold text-white">{note.title}</h4>
                                         )}
                                     </div>
                                     <p className="text-gray-700 whitespace-pre-wrap">{note.content}</p>
@@ -310,7 +310,7 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
                                             {note.tags.map((tag) => (
                                                 <span
                                                     key={tag}
-                                                    className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full"
+                                                    className="text-xs px-2 py-0.5 bg-gray-100 text-gray-400 rounded-full"
                                                 >
                                                     #{tag}
                                                 </span>
@@ -334,7 +334,7 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
                                         onClick={() => handleTogglePin(note._id)}
                                         className={`p-2 rounded-lg transition ${note.isPinned
                                                 ? 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                                                : 'text-gray-600 hover:bg-gray-100'
+                                                : 'text-gray-400 hover:bg-gray-100'
                                             }`}
                                         title="Toggle pin"
                                     >
@@ -342,7 +342,7 @@ export default function ClientNotesSection({ clientId, notes }: { clientId: stri
                                     </button>
                                     <button
                                         onClick={() => handleEdit(note)}
-                                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                        className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg"
                                         title="Edit note"
                                     >
                                         <Edit className="w-4 h-4" />

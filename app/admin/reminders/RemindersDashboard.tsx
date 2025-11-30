@@ -227,61 +227,61 @@ export default function RemindersDashboard() {
         <div className="space-y-6">
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-100 rounded-lg">
                             <Bell className="w-5 h-5 text-blue-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-600">Total</p>
-                            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                            <p className="text-sm text-gray-400">Total</p>
+                            <p className="text-2xl font-bold text-white">{stats.total}</p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-orange-100 rounded-lg">
                             <Clock className="w-5 h-5 text-orange-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-600">Active</p>
-                            <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
+                            <p className="text-sm text-gray-400">Active</p>
+                            <p className="text-2xl font-bold text-white">{stats.active}</p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-green-100 rounded-lg">
                             <CheckCircle2 className="w-5 h-5 text-green-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-600">Completed</p>
-                            <p className="text-2xl font-bold text-gray-900">{stats.completed}</p>
+                            <p className="text-sm text-gray-400">Completed</p>
+                            <p className="text-2xl font-bold text-white">{stats.completed}</p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-red-100 rounded-lg">
                             <AlertCircle className="w-5 h-5 text-red-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-600">Overdue</p>
-                            <p className="text-2xl font-bold text-gray-900">{stats.overdue}</p>
+                            <p className="text-sm text-gray-400">Overdue</p>
+                            <p className="text-2xl font-bold text-white">{stats.overdue}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Filters and Actions */}
-            <div className="bg-white rounded-lg border shadow-sm p-4">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-4">
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                     <div className="flex flex-wrap gap-3 items-center">
                         <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
                             <button
                                 onClick={() => setFilter('all')}
                                 className={`px-3 py-1.5 text-sm rounded-md transition ${
-                                    filter === 'all' ? 'bg-white shadow-sm font-medium' : 'text-gray-600'
+                                    filter === 'all' ? 'bg-black/40 backdrop-blur-xl shadow-sm font-medium' : 'text-gray-600'
                                 }`}
                             >
                                 All
@@ -289,7 +289,7 @@ export default function RemindersDashboard() {
                             <button
                                 onClick={() => setFilter('active')}
                                 className={`px-3 py-1.5 text-sm rounded-md transition ${
-                                    filter === 'active' ? 'bg-white shadow-sm font-medium' : 'text-gray-600'
+                                    filter === 'active' ? 'bg-black/40 backdrop-blur-xl shadow-sm font-medium' : 'text-gray-600'
                                 }`}
                             >
                                 Active
@@ -297,7 +297,7 @@ export default function RemindersDashboard() {
                             <button
                                 onClick={() => setFilter('completed')}
                                 className={`px-3 py-1.5 text-sm rounded-md transition ${
-                                    filter === 'completed' ? 'bg-white shadow-sm font-medium' : 'text-gray-600'
+                                    filter === 'completed' ? 'bg-black/40 backdrop-blur-xl shadow-sm font-medium' : 'text-gray-600'
                                 }`}
                             >
                                 Completed
@@ -332,7 +332,7 @@ export default function RemindersDashboard() {
                         <button
                             onClick={loadReminders}
                             disabled={loading}
-                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
+                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-white/5 flex items-center gap-2 disabled:opacity-50"
                         >
                             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                             Refresh
@@ -353,7 +353,7 @@ export default function RemindersDashboard() {
             </div>
 
             {/* Reminders List */}
-            <div className="bg-white rounded-lg border shadow-sm">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm">
                 {loading ? (
                     <div className="p-12 text-center">
                         <RefreshCw className="w-8 h-8 mx-auto mb-3 text-gray-400 animate-spin" />
@@ -372,14 +372,14 @@ export default function RemindersDashboard() {
                             return (
                                 <div
                                     key={reminder._id}
-                                    className={`p-6 hover:bg-gray-50 transition ${
+                                    className={`p-6 hover:bg-white/5 transition ${
                                         reminder.isCompleted ? 'opacity-60' : ''
                                     }`}
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                                <h3 className="font-semibold text-gray-900">{reminder.title}</h3>
+                                                <h3 className="font-semibold text-white">{reminder.title}</h3>
                                                 <span
                                                     className={`px-2 py-0.5 text-xs rounded-full border ${getPriorityColor(
                                                         reminder.priority
@@ -399,7 +399,7 @@ export default function RemindersDashboard() {
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-gray-600 mb-3">{reminder.description}</p>
+                                            <p className="text-sm text-gray-400 mb-3">{reminder.description}</p>
                                             <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
                                                 {reminder.clientName ? (
                                                     <span className="flex items-center gap-1">
@@ -476,10 +476,10 @@ export default function RemindersDashboard() {
             {/* Create/Edit Form Modal */}
             {showForm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-black/40 backdrop-blur-xl rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-semibold text-gray-900">
+                                <h2 className="text-xl font-semibold text-white">
                                     {editingId ? 'Edit Reminder' : 'Create New Reminder'}
                                 </h2>
                                 <button
@@ -604,7 +604,7 @@ export default function RemindersDashboard() {
                                         setEditingId(null);
                                         setFormData(emptyFormData);
                                     }}
-                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-white/5"
                                     disabled={submitting}
                                 >
                                     Cancel

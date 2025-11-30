@@ -144,7 +144,7 @@ export default function MilestonesSection({
               className={`p-4 border rounded-lg ${
                 milestone.completed
                   ? "bg-blue-50 border-blue-200"
-                  : "bg-white border-gray-200"
+                  : "bg-black/40 backdrop-blur-xl border-gray-800/50"
               }`}
             >
               <div className="flex items-start gap-3">
@@ -163,13 +163,13 @@ export default function MilestonesSection({
                     className={`font-medium ${
                       milestone.completed
                         ? "text-green-900 line-through"
-                        : "text-gray-900"
+                        : "text-white"
                     }`}
                   >
                     {milestone.title}
                   </h4>
                   {milestone.description && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-400 mt-1">
                       {milestone.description}
                     </p>
                   )}
