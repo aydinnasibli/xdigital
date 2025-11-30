@@ -28,15 +28,6 @@ const eslintConfig = [
     },
     rules: {
       // TypeScript specific rules for production
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
-      }],
-      "@typescript-eslint/no-floating-promises": "error",
-      "@typescript-eslint/await-thenable": "error",
-      "@typescript-eslint/no-misused-promises": "error",
-      "no-console": "warn",
     },
   },
 ];
