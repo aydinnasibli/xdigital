@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Bell,
   Calendar,
@@ -23,7 +24,6 @@ import {
   updateReminder,
   deleteReminder,
   markReminderCompleted,
-  getAllClients,
 } from "@/app/actions/reminders";
 import { toast } from "sonner";
 import { ReminderPriority } from "@/models/Reminder";
@@ -69,30 +69,46 @@ const emptyFormData: ReminderFormData = {
   tags: "",
 };
 
-export default function RemindersDashboard() {
-  const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
+interface RemindersDashboardProps {
+  initialReminders: Reminder[];
+  initialClients: Client[];
+  initialFilter: 'all' | 'active' | 'completed' | 'overdue';
+  initialDays: number;
+}
+
+export default function RemindersDashboard({
+  initialReminders,
+  initialClients,
+  initialFilter,
+  initialDays,
+}: RemindersDashboardProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [reminders, setReminders] = useState<Reminder[]>(initialReminders);
+  const clients = initialClients;
+  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<ReminderFormData>(emptyFormData);
   const [submitting, setSubmitting] = useState(false);
-  const [filter, setFilter] = useState<
-    "all" | "active" | "completed" | "overdue"
-  >("active");
+  const filter = initialFilter;
   const [searchQuery, setSearchQuery] = useState("");
-  const [days, setDays] = useState(30);
-  const loadData = async () => {
-    setLoading(true);
-    await Promise.all([loadReminders(), loadClients()]);
-    setLoading(false);
+  const days = initialDays;
+
+  const handleFilterChange = (newFilter: 'all' | 'active' | 'completed' | 'overdue') => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('filter', newFilter);
+    router.push(`/admin/reminders?${params.toString()}`);
   };
 
-  useEffect(() => {
-    void loadData();
-  }, [days, filter]);
+  const handleDaysChange = (newDays: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('days', newDays.toString());
+    router.push(`/admin/reminders?${params.toString()}`);
+  };
 
   const loadReminders = async () => {
+    setLoading(true);
     const result = await getAllReminders({
       includeCompleted: filter !== "active",
       days: filter === "all" ? undefined : days,
@@ -102,13 +118,7 @@ export default function RemindersDashboard() {
     } else {
       toast.error(result.error || "Failed to load reminders");
     }
-  };
-
-  const loadClients = async () => {
-    const result = await getAllClients();
-    if (result.success) {
-      setClients(result.data || []);
-    }
+    setLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -295,46 +305,46 @@ export default function RemindersDashboard() {
       </div>
 
       {/* Filters and Actions */}
-      <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-4">
+      <div className="bg-black/40 backdrop-blur-xl rounded-lg border border-gray-800/50 shadow-sm p-4">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex flex-wrap gap-3 items-center">
-            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm rounded-lg p-1 border border-gray-800/50">
               <button
-                onClick={() => setFilter("all")}
+                onClick={() => handleFilterChange("all")}
                 className={`px-3 py-1.5 text-sm rounded-md transition ${
                   filter === "all"
-                    ? "bg-black/40 backdrop-blur-xl shadow-sm font-medium"
-                    : "text-gray-600"
+                    ? "bg-white/10 text-white shadow-sm font-medium border border-purple-500/30"
+                    : "text-gray-400 hover:text-white"
                 }`}
               >
                 All
               </button>
               <button
-                onClick={() => setFilter("active")}
+                onClick={() => handleFilterChange("active")}
                 className={`px-3 py-1.5 text-sm rounded-md transition ${
                   filter === "active"
-                    ? "bg-black/40 backdrop-blur-xl shadow-sm font-medium"
-                    : "text-gray-600"
+                    ? "bg-white/10 text-white shadow-sm font-medium border border-purple-500/30"
+                    : "text-gray-400 hover:text-white"
                 }`}
               >
                 Active
               </button>
               <button
-                onClick={() => setFilter("completed")}
+                onClick={() => handleFilterChange("completed")}
                 className={`px-3 py-1.5 text-sm rounded-md transition ${
                   filter === "completed"
-                    ? "bg-black/40 backdrop-blur-xl shadow-sm font-medium"
-                    : "text-gray-600"
+                    ? "bg-white/10 text-white shadow-sm font-medium border border-purple-500/30"
+                    : "text-gray-400 hover:text-white"
                 }`}
               >
                 Completed
               </button>
               <button
-                onClick={() => setFilter("overdue")}
+                onClick={() => handleFilterChange("overdue")}
                 className={`px-3 py-1.5 text-sm rounded-md transition ${
                   filter === "overdue"
-                    ? "bg-black/40 backdrop-blur-xl shadow-sm font-medium"
-                    : "text-gray-600"
+                    ? "bg-white/10 text-white shadow-sm font-medium border border-purple-500/30"
+                    : "text-gray-400 hover:text-white"
                 }`}
               >
                 Overdue
@@ -343,14 +353,14 @@ export default function RemindersDashboard() {
 
             <select
               value={days}
-              onChange={(e) => setDays(Number(e.target.value))}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              onChange={(e) => handleDaysChange(Number(e.target.value))}
+              className="bg-white/5 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors cursor-pointer"
             >
-              <option value={7}>Next 7 days</option>
-              <option value={14}>Next 14 days</option>
-              <option value={30}>Next 30 days</option>
-              <option value={60}>Next 60 days</option>
-              <option value={90}>Next 90 days</option>
+              <option value={7} className="bg-gray-900">Next 7 days</option>
+              <option value={14} className="bg-gray-900">Next 14 days</option>
+              <option value={30} className="bg-gray-900">Next 30 days</option>
+              <option value={60} className="bg-gray-900">Next 60 days</option>
+              <option value={90} className="bg-gray-900">Next 90 days</option>
             </select>
 
             <div className="relative">
@@ -360,16 +370,16 @@ export default function RemindersDashboard() {
                 placeholder="Search reminders..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-64"
+                className="pl-10 pr-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg text-sm w-64 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors"
               />
             </div>
           </div>
 
           <div className="flex gap-2">
             <button
-              onClick={() => void handleSubmit}
+              onClick={loadReminders}
               disabled={loading}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-white/5 flex items-center gap-2 disabled:opacity-50"
+              className="px-4 py-2 bg-white/5 border border-gray-700 text-gray-300 rounded-lg hover:bg-white/10 hover:border-gray-600 hover:text-white flex items-center gap-2 disabled:opacity-50 transition-all"
             >
               <RefreshCw
                 className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
@@ -382,7 +392,7 @@ export default function RemindersDashboard() {
                 setEditingId(null);
                 setFormData(emptyFormData);
               }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 border border-purple-500/30 flex items-center gap-2 transition-all"
             >
               <Plus className="w-4 h-4" />
               New Reminder
@@ -392,7 +402,7 @@ export default function RemindersDashboard() {
       </div>
 
       {/* Reminders List */}
-      <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm">
+      <div className="bg-black/40 backdrop-blur-xl rounded-lg border border-gray-800/50 shadow-sm">
         {loading ? (
           <div className="p-12 text-center">
             <RefreshCw className="w-8 h-8 mx-auto mb-3 text-gray-400 animate-spin" />
