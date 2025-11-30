@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Bell,
     Calendar,
@@ -23,7 +24,6 @@ import {
     updateReminder,
     deleteReminder,
     markReminderCompleted,
-    getAllClients,
 } from '@/app/actions/reminders';
 import { toast } from 'sonner';
 import { ReminderPriority } from '@/models/Reminder';
@@ -69,29 +69,46 @@ const emptyFormData: ReminderFormData = {
     tags: '',
 };
 
-export default function RemindersDashboard() {
-    const [reminders, setReminders] = useState<Reminder[]>([]);
-    const [clients, setClients] = useState<Client[]>([]);
-    const [loading, setLoading] = useState(true);
+interface RemindersDashboardProps {
+    initialReminders: Reminder[];
+    initialClients: Client[];
+    initialFilter: 'all' | 'active' | 'completed';
+    initialDays: number;
+}
+
+export default function RemindersDashboard({
+    initialReminders,
+    initialClients,
+    initialFilter,
+    initialDays,
+}: RemindersDashboardProps) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [reminders, setReminders] = useState<Reminder[]>(initialReminders);
+    const clients = initialClients;
+    const [loading, setLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<ReminderFormData>(emptyFormData);
     const [submitting, setSubmitting] = useState(false);
-    const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('active');
+    const filter = initialFilter;
     const [searchQuery, setSearchQuery] = useState('');
-    const [days, setDays] = useState(30);
+    const days = initialDays;
 
-    useEffect(() => {
-        loadData();
-    }, [days, filter]);
+    const handleFilterChange = (newFilter: 'all' | 'active' | 'completed') => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('filter', newFilter);
+        router.push(`/admin/reminders?${params.toString()}`);
+    };
 
-    const loadData = async () => {
-        setLoading(true);
-        await Promise.all([loadReminders(), loadClients()]);
-        setLoading(false);
+    const handleDaysChange = (newDays: number) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('days', newDays.toString());
+        router.push(`/admin/reminders?${params.toString()}`);
     };
 
     const loadReminders = async () => {
+        setLoading(true);
         const result = await getAllReminders({
             includeCompleted: filter !== 'active',
             days: filter === 'all' ? undefined : days,
@@ -101,13 +118,7 @@ export default function RemindersDashboard() {
         } else {
             toast.error(result.error || 'Failed to load reminders');
         }
-    };
-
-    const loadClients = async () => {
-        const result = await getAllClients();
-        if (result.success) {
-            setClients(result.data || []);
-        }
+        setLoading(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -181,10 +192,10 @@ export default function RemindersDashboard() {
 
     const getPriorityColor = (priority: ReminderPriority) => {
         const colors = {
-            [ReminderPriority.LOW]: 'bg-gray-100 text-gray-800 border-gray-300',
-            [ReminderPriority.MEDIUM]: 'bg-blue-100 text-blue-800 border-blue-300',
-            [ReminderPriority.HIGH]: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-            [ReminderPriority.URGENT]: 'bg-red-100 text-red-800 border-red-300',
+            [ReminderPriority.LOW]: 'bg-gray-500/10 text-gray-300 border-gray-500/20',
+            [ReminderPriority.MEDIUM]: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
+            [ReminderPriority.HIGH]: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20',
+            [ReminderPriority.URGENT]: 'bg-red-500/10 text-red-300 border-red-500/20',
         };
         return colors[priority] || colors[ReminderPriority.MEDIUM];
     };
@@ -195,11 +206,11 @@ export default function RemindersDashboard() {
         const diff = reminderDate.getTime() - now.getTime();
         const daysDiff = Math.ceil(diff / (1000 * 60 * 60 * 24));
 
-        if (daysDiff < 0) return { text: 'Overdue', color: 'text-red-600 bg-red-50' };
-        if (daysDiff === 0) return { text: 'Today', color: 'text-orange-600 bg-orange-50' };
-        if (daysDiff === 1) return { text: 'Tomorrow', color: 'text-yellow-600 bg-yellow-50' };
-        if (daysDiff <= 7) return { text: `In ${daysDiff} days`, color: 'text-green-600 bg-green-50' };
-        return { text: `In ${daysDiff} days`, color: 'text-blue-600 bg-blue-50' };
+        if (daysDiff < 0) return { text: 'Overdue', color: 'text-red-300 bg-red-500/10' };
+        if (daysDiff === 0) return { text: 'Today', color: 'text-orange-300 bg-orange-500/10' };
+        if (daysDiff === 1) return { text: 'Tomorrow', color: 'text-yellow-300 bg-yellow-500/10' };
+        if (daysDiff <= 7) return { text: `In ${daysDiff} days`, color: 'text-green-300 bg-green-500/10' };
+        return { text: `In ${daysDiff} days`, color: 'text-blue-300 bg-blue-500/10' };
     };
 
     const filteredReminders = reminders.filter(r => {
@@ -227,10 +238,10 @@ export default function RemindersDashboard() {
         <div className="space-y-6">
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border border-gray-800/50 shadow-sm">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                            <Bell className="w-5 h-5 text-blue-600" />
+                        <div className="p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                            <Bell className="w-5 h-5 text-blue-400" />
                         </div>
                         <div>
                             <p className="text-sm text-gray-400">Total</p>
@@ -238,10 +249,10 @@ export default function RemindersDashboard() {
                         </div>
                     </div>
                 </div>
-                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border border-gray-800/50 shadow-sm">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-orange-100 rounded-lg">
-                            <Clock className="w-5 h-5 text-orange-600" />
+                        <div className="p-2 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                            <Clock className="w-5 h-5 text-orange-400" />
                         </div>
                         <div>
                             <p className="text-sm text-gray-400">Active</p>
@@ -249,10 +260,10 @@ export default function RemindersDashboard() {
                         </div>
                     </div>
                 </div>
-                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border border-gray-800/50 shadow-sm">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-100 rounded-lg">
-                            <CheckCircle2 className="w-5 h-5 text-green-600" />
+                        <div className="p-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                            <CheckCircle2 className="w-5 h-5 text-green-400" />
                         </div>
                         <div>
                             <p className="text-sm text-gray-400">Completed</p>
@@ -260,10 +271,10 @@ export default function RemindersDashboard() {
                         </div>
                     </div>
                 </div>
-                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border shadow-sm">
+                <div className="bg-black/40 backdrop-blur-xl p-6 rounded-lg border border-gray-800/50 shadow-sm">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-red-100 rounded-lg">
-                            <AlertCircle className="w-5 h-5 text-red-600" />
+                        <div className="p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                            <AlertCircle className="w-5 h-5 text-red-400" />
                         </div>
                         <div>
                             <p className="text-sm text-gray-400">Overdue</p>
@@ -274,30 +285,30 @@ export default function RemindersDashboard() {
             </div>
 
             {/* Filters and Actions */}
-            <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-4">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg border border-gray-800/50 shadow-sm p-4">
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                     <div className="flex flex-wrap gap-3 items-center">
-                        <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                        <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm rounded-lg p-1 border border-gray-800/50">
                             <button
-                                onClick={() => setFilter('all')}
+                                onClick={() => handleFilterChange('all')}
                                 className={`px-3 py-1.5 text-sm rounded-md transition ${
-                                    filter === 'all' ? 'bg-black/40 backdrop-blur-xl shadow-sm font-medium' : 'text-gray-600'
+                                    filter === 'all' ? 'bg-white/10 text-white shadow-sm font-medium border border-purple-500/30' : 'text-gray-400 hover:text-white'
                                 }`}
                             >
                                 All
                             </button>
                             <button
-                                onClick={() => setFilter('active')}
+                                onClick={() => handleFilterChange('active')}
                                 className={`px-3 py-1.5 text-sm rounded-md transition ${
-                                    filter === 'active' ? 'bg-black/40 backdrop-blur-xl shadow-sm font-medium' : 'text-gray-600'
+                                    filter === 'active' ? 'bg-white/10 text-white shadow-sm font-medium border border-purple-500/30' : 'text-gray-400 hover:text-white'
                                 }`}
                             >
                                 Active
                             </button>
                             <button
-                                onClick={() => setFilter('completed')}
+                                onClick={() => handleFilterChange('completed')}
                                 className={`px-3 py-1.5 text-sm rounded-md transition ${
-                                    filter === 'completed' ? 'bg-black/40 backdrop-blur-xl shadow-sm font-medium' : 'text-gray-600'
+                                    filter === 'completed' ? 'bg-white/10 text-white shadow-sm font-medium border border-purple-500/30' : 'text-gray-400 hover:text-white'
                                 }`}
                             >
                                 Completed
@@ -306,14 +317,14 @@ export default function RemindersDashboard() {
 
                         <select
                             value={days}
-                            onChange={(e) => setDays(Number(e.target.value))}
-                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                            onChange={(e) => handleDaysChange(Number(e.target.value))}
+                            className="bg-white/5 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors cursor-pointer"
                         >
-                            <option value={7}>Next 7 days</option>
-                            <option value={14}>Next 14 days</option>
-                            <option value={30}>Next 30 days</option>
-                            <option value={60}>Next 60 days</option>
-                            <option value={90}>Next 90 days</option>
+                            <option value={7} className="bg-gray-900">Next 7 days</option>
+                            <option value={14} className="bg-gray-900">Next 14 days</option>
+                            <option value={30} className="bg-gray-900">Next 30 days</option>
+                            <option value={60} className="bg-gray-900">Next 60 days</option>
+                            <option value={90} className="bg-gray-900">Next 90 days</option>
                         </select>
 
                         <div className="relative">
@@ -323,7 +334,7 @@ export default function RemindersDashboard() {
                                 placeholder="Search reminders..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-64"
+                                className="pl-10 pr-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg text-sm w-64 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors"
                             />
                         </div>
                     </div>
@@ -332,7 +343,7 @@ export default function RemindersDashboard() {
                         <button
                             onClick={loadReminders}
                             disabled={loading}
-                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-white/5 flex items-center gap-2 disabled:opacity-50"
+                            className="px-4 py-2 bg-white/5 border border-gray-700 text-gray-300 rounded-lg hover:bg-white/10 hover:border-gray-600 hover:text-white flex items-center gap-2 disabled:opacity-50 transition-all"
                         >
                             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                             Refresh
@@ -343,7 +354,7 @@ export default function RemindersDashboard() {
                                 setEditingId(null);
                                 setFormData(emptyFormData);
                             }}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 border border-purple-500/30 flex items-center gap-2 transition-all"
                         >
                             <Plus className="w-4 h-4" />
                             New Reminder
@@ -353,7 +364,7 @@ export default function RemindersDashboard() {
             </div>
 
             {/* Reminders List */}
-            <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg border border-gray-800/50 shadow-sm">
                 {loading ? (
                     <div className="p-12 text-center">
                         <RefreshCw className="w-8 h-8 mx-auto mb-3 text-gray-400 animate-spin" />
@@ -393,7 +404,7 @@ export default function RemindersDashboard() {
                                                     </span>
                                                 )}
                                                 {reminder.isCompleted && (
-                                                    <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded font-medium flex items-center gap-1">
+                                                    <span className="px-2 py-1 text-xs bg-green-500/10 text-green-300 border border-green-500/20 rounded font-medium flex items-center gap-1">
                                                         <Check className="w-3 h-3" />
                                                         Completed
                                                     </span>
@@ -430,7 +441,7 @@ export default function RemindersDashboard() {
                                                             {reminder.tags.map(tag => (
                                                                 <span
                                                                     key={tag}
-                                                                    className="px-2 py-0.5 bg-gray-100 rounded text-xs"
+                                                                    className="px-2 py-0.5 bg-white/5 border border-gray-700 rounded text-xs text-gray-300"
                                                                 >
                                                                     {tag}
                                                                 </span>
@@ -444,7 +455,7 @@ export default function RemindersDashboard() {
                                             {!reminder.isCompleted && (
                                                 <button
                                                     onClick={() => handleToggleComplete(reminder._id, reminder.isCompleted)}
-                                                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                                                    className="p-2 text-green-400 hover:bg-green-500/10 border border-green-500/20 hover:border-green-500/30 rounded-lg transition"
                                                     title="Mark as completed"
                                                 >
                                                     <Check className="w-4 h-4" />
@@ -452,14 +463,14 @@ export default function RemindersDashboard() {
                                             )}
                                             <button
                                                 onClick={() => handleEdit(reminder)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                className="p-2 text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 hover:border-blue-500/30 rounded-lg transition"
                                                 title="Edit reminder"
                                             >
                                                 <Edit className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(reminder._id)}
-                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                className="p-2 text-red-400 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/30 rounded-lg transition"
                                                 title="Delete reminder"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -475,9 +486,9 @@ export default function RemindersDashboard() {
 
             {/* Create/Edit Form Modal */}
             {showForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-black/40 backdrop-blur-xl rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 border-b">
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+                    <div className="bg-black/40 backdrop-blur-xl rounded-lg border border-gray-800/50 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="p-6 border-b border-gray-800/50">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-semibold text-white">
                                     {editingId ? 'Edit Reminder' : 'Create New Reminder'}
@@ -488,7 +499,7 @@ export default function RemindersDashboard() {
                                         setEditingId(null);
                                         setFormData(emptyFormData);
                                     }}
-                                    className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                                    className="p-2 text-gray-400 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -497,8 +508,8 @@ export default function RemindersDashboard() {
 
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Title <span className="text-red-500">*</span>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">
+                                    Title <span className="text-red-400">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -506,14 +517,14 @@ export default function RemindersDashboard() {
                                     maxLength={200}
                                     value={formData.title}
                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors"
                                     placeholder="e.g., Follow up with client about proposal"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Description <span className="text-red-500">*</span>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">
+                                    Description <span className="text-red-400">*</span>
                                 </label>
                                 <textarea
                                     required
@@ -521,15 +532,15 @@ export default function RemindersDashboard() {
                                     rows={4}
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors"
                                     placeholder="Add details about what needs to be done..."
                                 />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Reminder Date & Time <span className="text-red-500">*</span>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                                        Reminder Date & Time <span className="text-red-400">*</span>
                                     </label>
                                     <input
                                         type="datetime-local"
@@ -537,14 +548,14 @@ export default function RemindersDashboard() {
                                         min={new Date().toISOString().slice(0, 16)}
                                         value={formData.reminderDate}
                                         onChange={(e) => setFormData({ ...formData, reminderDate: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors"
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">Must be a future date and time</p>
+                                    <p className="text-xs text-gray-400 mt-1">Must be a future date and time</p>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Priority <span className="text-red-500">*</span>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                                        Priority <span className="text-red-400">*</span>
                                     </label>
                                     <select
                                         required
@@ -552,51 +563,51 @@ export default function RemindersDashboard() {
                                         onChange={(e) =>
                                             setFormData({ ...formData, priority: e.target.value as ReminderPriority })
                                         }
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors cursor-pointer"
                                     >
-                                        <option value={ReminderPriority.LOW}>Low</option>
-                                        <option value={ReminderPriority.MEDIUM}>Medium</option>
-                                        <option value={ReminderPriority.HIGH}>High</option>
-                                        <option value={ReminderPriority.URGENT}>Urgent</option>
+                                        <option value={ReminderPriority.LOW} className="bg-gray-900">Low</option>
+                                        <option value={ReminderPriority.MEDIUM} className="bg-gray-900">Medium</option>
+                                        <option value={ReminderPriority.HIGH} className="bg-gray-900">High</option>
+                                        <option value={ReminderPriority.URGENT} className="bg-gray-900">Urgent</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Related Client <span className="text-gray-500 text-xs">(Optional)</span>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">
+                                    Related Client <span className="text-gray-400 text-xs">(Optional)</span>
                                 </label>
                                 <select
                                     value={formData.clientId}
                                     onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 bg-white/5 border border-gray-700 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors cursor-pointer"
                                 >
-                                    <option value="">No client (General reminder)</option>
+                                    <option value="" className="bg-gray-900">No client (General reminder)</option>
                                     {clients.map((client) => (
-                                        <option key={client._id} value={client._id}>
+                                        <option key={client._id} value={client._id} className="bg-gray-900">
                                             {client.name} ({client.email})
                                         </option>
                                     ))}
                                 </select>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-gray-400 mt-1">
                                     Link this reminder to a specific client for better context in emails
                                 </p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Tags <span className="text-gray-500 text-xs">(Optional)</span>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">
+                                    Tags <span className="text-gray-400 text-xs">(Optional)</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.tags}
                                     onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors"
                                     placeholder="e.g., urgent, follow-up, proposal (comma-separated)"
                                 />
                             </div>
 
-                            <div className="flex gap-3 pt-4 border-t">
+                            <div className="flex gap-3 pt-4 border-t border-gray-800/50">
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -604,14 +615,14 @@ export default function RemindersDashboard() {
                                         setEditingId(null);
                                         setFormData(emptyFormData);
                                     }}
-                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-white/5"
+                                    className="flex-1 px-4 py-2 bg-white/5 border border-gray-700 text-gray-300 rounded-lg hover:bg-white/10 hover:border-gray-600 hover:text-white transition-all"
                                     disabled={submitting}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 border border-purple-500/30 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
                                     disabled={submitting}
                                 >
                                     {submitting ? (
