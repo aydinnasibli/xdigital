@@ -126,8 +126,8 @@ export default function MessageSection({
     };
 
     return (
-        <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">
                 Messages ({messages.length})
             </h2>
 
@@ -142,7 +142,7 @@ export default function MessageSection({
                                 key={msg._id}
                                 className={`p-4 rounded-lg ${msg.sender === 'admin'
                                     ? 'bg-blue-50 ml-8'
-                                    : 'bg-gray-50 mr-8'
+                                    : 'bg-white/5 mr-8'
                                     }`}
                             >
                                 <div className="flex justify-between items-start mb-2">

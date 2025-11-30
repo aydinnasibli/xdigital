@@ -72,7 +72,7 @@ export default function ResourcesInterface({ initialResources, categories }: { i
     return (
         <div className="space-y-6">
             {/* Search Bar */}
-            <div className="bg-white rounded-lg border shadow-sm p-4">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-4">
                 <div className="flex gap-3">
                     <div className="flex-1 relative">
                         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -87,7 +87,7 @@ export default function ResourcesInterface({ initialResources, categories }: { i
                         {searchTerm && (
                             <button
                                 onClick={handleClearSearch}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-400"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -103,7 +103,7 @@ export default function ResourcesInterface({ initialResources, categories }: { i
                 </div>
 
                 {isSearchMode && (
-                    <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                    <div className="mt-3 flex items-center gap-2 text-sm text-gray-400">
                         <span>Showing search results for "{searchTerm}"</span>
                         <button
                             onClick={handleClearSearch}
@@ -122,7 +122,7 @@ export default function ResourcesInterface({ initialResources, categories }: { i
                     className={`px-4 py-2 rounded-lg text-sm ${
                         selectedCategory === 'all'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-white border hover:bg-gray-50'
+                            : 'bg-black/40 backdrop-blur-xl border hover:bg-gray-50'
                     }`}
                 >
                     All Resources
@@ -134,7 +134,7 @@ export default function ResourcesInterface({ initialResources, categories }: { i
                         className={`px-4 py-2 rounded-lg text-sm capitalize ${
                             selectedCategory === category
                                 ? 'bg-blue-600 text-white'
-                                : 'bg-white border hover:bg-gray-50'
+                                : 'bg-black/40 backdrop-blur-xl border hover:bg-gray-50'
                         }`}
                     >
                         {category.replace('_', ' ')}
@@ -144,7 +144,7 @@ export default function ResourcesInterface({ initialResources, categories }: { i
 
             {/* Featured Resources */}
             {!isSearchMode && featuredResources.length > 0 && (
-                <div className="bg-white rounded-lg border shadow-sm p-6">
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6">
                     <h2 className="text-xl font-semibold mb-4">Featured Resources</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {featuredResources.map((resource) => (
@@ -167,9 +167,9 @@ export default function ResourcesInterface({ initialResources, categories }: { i
                                          resource.type === 'download' ? '⬇️' : '🔗'}
                                     </span>
                                     <div className="flex-1">
-                                        <h3 className="font-semibold text-gray-900">{resource.title}</h3>
+                                        <h3 className="font-semibold text-white">{resource.title}</h3>
                                         {resource.description && (
-                                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                            <p className="text-sm text-gray-400 mt-1 line-clamp-2">
                                                 {resource.description}
                                             </p>
                                         )}
@@ -189,7 +189,7 @@ export default function ResourcesInterface({ initialResources, categories }: { i
             )}
 
             {/* All Resources */}
-            <div className="bg-white rounded-lg border shadow-sm">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm">
                 {filteredResources.length === 0 ? (
                     <div className="p-12 text-center text-gray-500">
                         <div className="text-6xl mb-4">📚</div>
@@ -204,7 +204,7 @@ export default function ResourcesInterface({ initialResources, categories }: { i
                             <Link
                                 key={resource._id}
                                 href={`/dashboard/resources/${resource.slug}`}
-                                className="block p-6 hover:bg-gray-50 transition-colors"
+                                className="block p-6 hover:bg-white/5 transition-colors"
                             >
                                 <div className="flex items-start gap-4">
                                     <span className="text-3xl">
@@ -215,9 +215,9 @@ export default function ResourcesInterface({ initialResources, categories }: { i
                                     <div className="flex-1">
                                         <div className="flex items-start justify-between">
                                             <div>
-                                                <h3 className="font-semibold text-gray-900">{resource.title}</h3>
+                                                <h3 className="font-semibold text-white">{resource.title}</h3>
                                                 {resource.description && (
-                                                    <p className="text-sm text-gray-600 mt-1">
+                                                    <p className="text-sm text-gray-400 mt-1">
                                                         {resource.description}
                                                     </p>
                                                 )}

@@ -33,7 +33,7 @@ function getNotificationColor(type: string) {
         case 'milestone':
             return 'bg-purple-100 text-purple-800 border-purple-200';
         default:
-            return 'bg-gray-100 text-gray-800 border-gray-200';
+            return 'bg-gray-100 text-gray-800 border-gray-800/50';
     }
 }
 
@@ -69,7 +69,7 @@ export default async function NotificationDetailPage({ params }: PageProps) {
             <div className="mb-6">
                 <Link
                     href="/dashboard/notifications"
-                    className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+                    className="inline-flex items-center text-sm text-gray-400 hover:text-white"
                 >
                     <svg
                         className="w-4 h-4 mr-2"
@@ -89,7 +89,7 @@ export default async function NotificationDetailPage({ params }: PageProps) {
             </div>
 
             {/* Notification Card */}
-            <div className="bg-white rounded-lg shadow-lg border">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow-lg border">
                 {/* Header */}
                 <div className="p-6 border-b">
                     <div className="flex items-start gap-4">
@@ -99,7 +99,7 @@ export default async function NotificationDetailPage({ params }: PageProps) {
                         <div className="flex-1">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                                    <h1 className="text-2xl font-bold text-white mb-2">
                                         {notification.title}
                                     </h1>
                                     <div className="flex items-center gap-3">
@@ -123,7 +123,7 @@ export default async function NotificationDetailPage({ params }: PageProps) {
                                     </div>
                                 </div>
                                 {notification.isRead && (
-                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-400 border border-gray-800/50">
                                         Read
                                     </span>
                                 )}
@@ -135,7 +135,7 @@ export default async function NotificationDetailPage({ params }: PageProps) {
                 {/* Content */}
                 <div className="p-6">
                     <div className="prose max-w-none">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-3">
+                        <h2 className="text-lg font-semibold text-white mb-3">
                             Message
                         </h2>
                         <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
@@ -170,8 +170,8 @@ export default async function NotificationDetailPage({ params }: PageProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 bg-gray-50 border-t rounded-b-lg">
-                    <div className="flex items-center justify-between text-sm text-gray-600">
+                <div className="px-6 py-4 bg-white/5 border-t rounded-b-lg">
+                    <div className="flex items-center justify-between text-sm text-gray-400">
                         <span>Notification ID: {notification._id}</span>
                         {notification.readAt && (
                             <span>

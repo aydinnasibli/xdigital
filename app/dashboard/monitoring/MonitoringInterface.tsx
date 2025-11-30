@@ -137,7 +137,7 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
     return (
         <div className="space-y-6">
             {/* Project Selection */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow p-6">
                 <div className="flex gap-4 items-end">
                     <div className="flex-1">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -180,8 +180,8 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
 
             {/* Tabs */}
             {(dashboardData || analyticsData || seoData || performanceData) && (
-                <div className="bg-white rounded-lg shadow">
-                    <div className="border-b border-gray-200">
+                <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow">
+                    <div className="border-b border-gray-800/50">
                         <nav className="flex space-x-8 px-6" aria-label="Tabs">
                             <button
                                 onClick={() => setActiveTab('summary')}
@@ -230,7 +230,7 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
                         {loading && (
                             <div className="py-12 text-center">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                                <p className="text-gray-600">Loading data...</p>
+                                <p className="text-gray-400">Loading data...</p>
                             </div>
                         )}
 
@@ -238,7 +238,7 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
                         {!loading && activeTab === 'summary' && dashboardData && (
                             <div className="space-y-6">
                                 <div className="flex justify-between items-center">
-                                    <h2 className="text-xl font-semibold text-gray-900">Dashboard Summary</h2>
+                                    <h2 className="text-xl font-semibold text-white">Dashboard Summary</h2>
                                     <button
                                         onClick={handleGeneratePDF}
                                         disabled={loading}
@@ -328,7 +328,7 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
                                             )}
                                         </div>
 
-                                        <div className="p-4 bg-gray-50 rounded-lg border text-sm text-gray-700">
+                                        <div className="p-4 bg-white/5 rounded-lg border text-sm text-gray-700">
                                             <p className="font-medium mb-1">Website URL:</p>
                                             <a
                                                 href={dashboardData.websiteUrl}
@@ -347,25 +347,25 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
                         {/* Analytics Tab */}
                         {!loading && activeTab === 'analytics' && analyticsData && (
                             <div className="space-y-6">
-                                <h2 className="text-xl font-semibold text-gray-900">Google Analytics</h2>
+                                <h2 className="text-xl font-semibold text-white">Google Analytics</h2>
                                 {analyticsData.configured ? (
                                     <div className="space-y-4">
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                            <div className="p-4 bg-gray-50 rounded-lg">
-                                                <p className="text-sm text-gray-600">Page Views</p>
-                                                <p className="text-2xl font-bold text-gray-900">{analyticsData.pageViews || 0}</p>
+                                            <div className="p-4 bg-white/5 rounded-lg">
+                                                <p className="text-sm text-gray-400">Page Views</p>
+                                                <p className="text-2xl font-bold text-white">{analyticsData.pageViews || 0}</p>
                                             </div>
-                                            <div className="p-4 bg-gray-50 rounded-lg">
-                                                <p className="text-sm text-gray-600">Visitors</p>
-                                                <p className="text-2xl font-bold text-gray-900">{analyticsData.visitors || 0}</p>
+                                            <div className="p-4 bg-white/5 rounded-lg">
+                                                <p className="text-sm text-gray-400">Visitors</p>
+                                                <p className="text-2xl font-bold text-white">{analyticsData.visitors || 0}</p>
                                             </div>
-                                            <div className="p-4 bg-gray-50 rounded-lg">
-                                                <p className="text-sm text-gray-600">Sessions</p>
-                                                <p className="text-2xl font-bold text-gray-900">{analyticsData.sessions || 0}</p>
+                                            <div className="p-4 bg-white/5 rounded-lg">
+                                                <p className="text-sm text-gray-400">Sessions</p>
+                                                <p className="text-2xl font-bold text-white">{analyticsData.sessions || 0}</p>
                                             </div>
-                                            <div className="p-4 bg-gray-50 rounded-lg">
-                                                <p className="text-sm text-gray-600">Bounce Rate</p>
-                                                <p className="text-2xl font-bold text-gray-900">{analyticsData.bounceRate || 0}%</p>
+                                            <div className="p-4 bg-white/5 rounded-lg">
+                                                <p className="text-sm text-gray-400">Bounce Rate</p>
+                                                <p className="text-2xl font-bold text-white">{analyticsData.bounceRate || 0}%</p>
                                             </div>
                                         </div>
                                     </div>
@@ -383,18 +383,18 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
                         {!loading && activeTab === 'seo' && seoData && (
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-xl font-semibold text-gray-900">SEO Analysis</h2>
+                                    <h2 className="text-xl font-semibold text-white">SEO Analysis</h2>
                                     <div className={`px-4 py-2 rounded-lg ${getScoreBgColor(seoData.overall || 0)}`}>
                                         <span className={`text-2xl font-bold ${getScoreColor(seoData.overall || 0)}`}>
                                             {seoData.overall || 0}
                                         </span>
-                                        <span className="text-sm text-gray-600 ml-2">/ 100</span>
+                                        <span className="text-sm text-gray-400 ml-2">/ 100</span>
                                     </div>
                                 </div>
 
                                 {seoData.issues && seoData.issues.length > 0 && (
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 mb-3">Issues Found</h3>
+                                        <h3 className="font-semibold text-white mb-3">Issues Found</h3>
                                         <div className="space-y-2">
                                             {seoData.issues.map((issue: any, idx: number) => (
                                                 <div
@@ -413,8 +413,8 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
                                                             issue.severity === 'warning' ? 'text-yellow-600' : 'text-blue-600'
                                                         }`} />
                                                         <div>
-                                                            <p className="font-medium text-gray-900">{issue.title}</p>
-                                                            <p className="text-sm text-gray-600 mt-1">{issue.description}</p>
+                                                            <p className="font-medium text-white">{issue.title}</p>
+                                                            <p className="text-sm text-gray-400 mt-1">{issue.description}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -425,7 +425,7 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
 
                                 {seoData.recommendations && seoData.recommendations.length > 0 && (
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 mb-3">Recommendations</h3>
+                                        <h3 className="font-semibold text-white mb-3">Recommendations</h3>
                                         <ul className="space-y-2">
                                             {seoData.recommendations.map((rec: string, idx: number) => (
                                                 <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
@@ -443,34 +443,34 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
                         {!loading && activeTab === 'performance' && performanceData && (
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-xl font-semibold text-gray-900">Performance Metrics</h2>
+                                    <h2 className="text-xl font-semibold text-white">Performance Metrics</h2>
                                     <div className={`px-4 py-2 rounded-lg ${getScoreBgColor(performanceData.overall || 0)}`}>
                                         <span className={`text-2xl font-bold ${getScoreColor(performanceData.overall || 0)}`}>
                                             {performanceData.overall || 0}
                                         </span>
-                                        <span className="text-sm text-gray-600 ml-2">/ 100</span>
+                                        <span className="text-sm text-gray-400 ml-2">/ 100</span>
                                     </div>
                                 </div>
 
                                 {performanceData.coreWebVitals && (
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 mb-3">Core Web Vitals</h3>
+                                        <h3 className="font-semibold text-white mb-3">Core Web Vitals</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <div className="p-4 bg-gray-50 rounded-lg border">
-                                                <p className="text-sm text-gray-600 mb-1">LCP (Largest Contentful Paint)</p>
-                                                <p className="text-xl font-bold text-gray-900">
+                                            <div className="p-4 bg-white/5 rounded-lg border">
+                                                <p className="text-sm text-gray-400 mb-1">LCP (Largest Contentful Paint)</p>
+                                                <p className="text-xl font-bold text-white">
                                                     {performanceData.coreWebVitals.lcp || 'N/A'}
                                                 </p>
                                             </div>
-                                            <div className="p-4 bg-gray-50 rounded-lg border">
-                                                <p className="text-sm text-gray-600 mb-1">FID (First Input Delay)</p>
-                                                <p className="text-xl font-bold text-gray-900">
+                                            <div className="p-4 bg-white/5 rounded-lg border">
+                                                <p className="text-sm text-gray-400 mb-1">FID (First Input Delay)</p>
+                                                <p className="text-xl font-bold text-white">
                                                     {performanceData.coreWebVitals.fid || 'N/A'}
                                                 </p>
                                             </div>
-                                            <div className="p-4 bg-gray-50 rounded-lg border">
-                                                <p className="text-sm text-gray-600 mb-1">CLS (Cumulative Layout Shift)</p>
-                                                <p className="text-xl font-bold text-gray-900">
+                                            <div className="p-4 bg-white/5 rounded-lg border">
+                                                <p className="text-sm text-gray-400 mb-1">CLS (Cumulative Layout Shift)</p>
+                                                <p className="text-xl font-bold text-white">
                                                     {performanceData.coreWebVitals.cls || 'N/A'}
                                                 </p>
                                             </div>
@@ -480,7 +480,7 @@ export default function MonitoringInterface({ projects }: { projects: Project[] 
 
                                 {performanceData.recommendations && performanceData.recommendations.length > 0 && (
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 mb-3">Optimization Recommendations</h3>
+                                        <h3 className="font-semibold text-white mb-3">Optimization Recommendations</h3>
                                         <ul className="space-y-2">
                                             {performanceData.recommendations.map((rec: string, idx: number) => (
                                                 <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">

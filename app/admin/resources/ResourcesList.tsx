@@ -93,7 +93,7 @@ export default function ResourcesList({ resources }: { resources: Resource[] }) 
                     className={`px-4 py-2 rounded-lg text-sm font-medium ${
                         filter === 'all'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-white border hover:bg-gray-50'
+                            : 'bg-black/40 backdrop-blur-xl border hover:bg-gray-50'
                     }`}
                 >
                     All ({resources.length})
@@ -103,7 +103,7 @@ export default function ResourcesList({ resources }: { resources: Resource[] }) 
                     className={`px-4 py-2 rounded-lg text-sm font-medium ${
                         filter === 'published'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-white border hover:bg-gray-50'
+                            : 'bg-black/40 backdrop-blur-xl border hover:bg-gray-50'
                     }`}
                 >
                     Published ({resources.filter((r) => r.isPublished).length})
@@ -113,7 +113,7 @@ export default function ResourcesList({ resources }: { resources: Resource[] }) 
                     className={`px-4 py-2 rounded-lg text-sm font-medium ${
                         filter === 'draft'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-white border hover:bg-gray-50'
+                            : 'bg-black/40 backdrop-blur-xl border hover:bg-gray-50'
                     }`}
                 >
                     Drafts ({resources.filter((r) => !r.isPublished).length})
@@ -121,7 +121,7 @@ export default function ResourcesList({ resources }: { resources: Resource[] }) 
             </div>
 
             {/* Resources List */}
-            <div className="bg-white rounded-lg border shadow-sm">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm">
                 {filteredResources.length === 0 ? (
                     <div className="p-12 text-center text-gray-500">
                         <div className="text-6xl mb-4">📚</div>
@@ -133,7 +133,7 @@ export default function ResourcesList({ resources }: { resources: Resource[] }) 
                         {filteredResources.map((resource) => (
                             <div
                                 key={resource._id}
-                                className="p-6 hover:bg-gray-50 transition-colors"
+                                className="p-6 hover:bg-white/5 transition-colors"
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-start gap-4 flex-1">
@@ -142,14 +142,14 @@ export default function ResourcesList({ resources }: { resources: Resource[] }) 
                                         </span>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <h3 className="font-semibold text-gray-900">
+                                                <h3 className="font-semibold text-white">
                                                     {resource.title}
                                                 </h3>
                                                 {resource.isFeatured && (
                                                     <span className="text-yellow-500">⭐</span>
                                                 )}
                                                 {!resource.isPublished && (
-                                                    <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                                                    <span className="px-2 py-1 text-xs bg-gray-100 text-gray-400 rounded">
                                                         Draft
                                                     </span>
                                                 )}
@@ -160,7 +160,7 @@ export default function ResourcesList({ resources }: { resources: Resource[] }) 
                                                 )}
                                             </div>
                                             {resource.description && (
-                                                <p className="text-sm text-gray-600 mb-3">
+                                                <p className="text-sm text-gray-400 mb-3">
                                                     {resource.description}
                                                 </p>
                                             )}

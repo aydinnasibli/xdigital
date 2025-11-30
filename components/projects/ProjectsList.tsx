@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation';
 import {
     LayoutGrid,
     List,
-    ExternalLink,
     Trash2,
     Edit,
     Clock,
@@ -140,6 +139,8 @@ function ProjectCard({
     onDelete: (id: string) => void;
     isDeleting: boolean;
 }) {
+    const router = useRouter();
+
     const statusConfig = {
         completed: {
             icon: CheckCircle,
@@ -179,7 +180,10 @@ function ProjectCard({
     const StatusIcon = config.icon;
 
     return (
-        <div className="group relative overflow-hidden bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-gray-700 rounded-2xl p-6 transition-all duration-200">
+        <div
+            onClick={() => router.push(`/dashboard/projects/${project._id}`)}
+            className="group relative overflow-hidden bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/30 rounded-2xl p-6 transition-all duration-200 cursor-pointer"
+        >
             {/* Gradient overlay on hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
@@ -225,20 +229,18 @@ function ProjectCard({
                 {/* Actions */}
                 <div className="flex items-center gap-2 pt-2 border-t border-gray-800/50">
                     <Link
-                        href={`/dashboard/projects/${project._id}`}
+                        href={`/dashboard/projects/${project._id}/edit`}
+                        onClick={(e) => e.stopPropagation()}
                         className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-gray-700 rounded-lg transition-all text-sm text-gray-300 hover:text-white"
                     >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        View
-                    </Link>
-                    <Link
-                        href={`/dashboard/projects/${project._id}/edit`}
-                        className="inline-flex items-center justify-center p-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-gray-700 rounded-lg transition-all text-gray-300 hover:text-white"
-                    >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3.5 h-3.5" />
+                        Edit
                     </Link>
                     <button
-                        onClick={() => onDelete(project._id)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(project._id);
+                        }}
                         disabled={isDeleting}
                         className="inline-flex items-center justify-center p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 rounded-lg transition-all text-red-400 hover:text-red-300 disabled:opacity-50"
                     >
@@ -264,6 +266,8 @@ function ProjectListItem({
     onDelete: (id: string) => void;
     isDeleting: boolean;
 }) {
+    const router = useRouter();
+
     const statusConfig = {
         completed: { color: 'text-emerald-400', dot: 'bg-emerald-500', label: 'Completed' },
         in_progress: { color: 'text-blue-400', dot: 'bg-blue-500', label: 'In Progress' },
@@ -274,16 +278,16 @@ function ProjectListItem({
     const config = statusConfig[project.status as keyof typeof statusConfig] || statusConfig.pending;
 
     return (
-        <div className="group bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-gray-700 rounded-xl p-5 transition-all duration-200">
+        <div
+            onClick={() => router.push(`/dashboard/projects/${project._id}`)}
+            className="group bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/30 rounded-xl p-5 transition-all duration-200 cursor-pointer"
+        >
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex-1 min-w-0 space-y-2">
                     <div className="flex items-center gap-3">
-                        <Link
-                            href={`/dashboard/projects/${project._id}`}
-                            className="font-semibold text-lg text-white hover:text-purple-300 transition-colors truncate"
-                        >
+                        <h3 className="font-semibold text-lg text-white group-hover:text-purple-300 transition-colors truncate">
                             {project.projectName}
-                        </Link>
+                        </h3>
                         <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${config.dot} ${project.status === 'in_progress' ? 'animate-pulse' : ''}`} />
                             <span className={`text-sm font-medium ${config.color}`}>{config.label}</span>
@@ -312,20 +316,18 @@ function ProjectListItem({
 
                 <div className="flex items-center gap-2">
                     <Link
-                        href={`/dashboard/projects/${project._id}`}
+                        href={`/dashboard/projects/${project._id}/edit`}
+                        onClick={(e) => e.stopPropagation()}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-gray-700 rounded-lg transition-all text-sm text-gray-300 hover:text-white"
                     >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        View
-                    </Link>
-                    <Link
-                        href={`/dashboard/projects/${project._id}/edit`}
-                        className="inline-flex items-center justify-center p-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-gray-700 rounded-lg transition-all text-gray-300 hover:text-white"
-                    >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3.5 h-3.5" />
+                        Edit
                     </Link>
                     <button
-                        onClick={() => onDelete(project._id)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(project._id);
+                        }}
                         disabled={isDeleting}
                         className="inline-flex items-center justify-center p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 rounded-lg transition-all text-red-400 hover:text-red-300 disabled:opacity-50"
                     >

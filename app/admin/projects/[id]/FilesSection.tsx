@@ -95,9 +95,9 @@ export default function FilesSection({
     };
 
     return (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-black/40 backdrop-blur-xl rounded-lg shadow p-6">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-white">
                     Files & Documents ({files.length})
                 </h2>
                 <p className="text-sm text-gray-500">
@@ -115,14 +115,14 @@ export default function FilesSection({
                         {files.map((file) => (
                             <div
                                 key={file._id}
-                                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                                className="border border-gray-800/50 rounded-lg p-4 hover:shadow-md transition-shadow"
                             >
                                 <div className="flex items-start gap-3">
                                     <span className="text-3xl">
                                         {getFileIcon(file.fileType)}
                                     </span>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-medium text-gray-900 truncate">
+                                        <h4 className="font-medium text-white truncate">
                                             {file.fileName}
                                         </h4>
                                         <div className="text-xs text-gray-500 mt-1 space-y-1">
@@ -157,7 +157,7 @@ export default function FilesSection({
                                             href={file.previewUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="px-3 py-1.5 border text-sm rounded hover:bg-gray-50 flex items-center gap-1"
+                                            className="px-3 py-1.5 border text-sm rounded hover:bg-white/5 flex items-center gap-1"
                                         >
                                             <Eye className="w-3 h-3" />
                                             Preview
@@ -176,7 +176,7 @@ export default function FilesSection({
                                 <div className="mt-3 border-t pt-3">
                                     <button
                                         onClick={() => toggleComments(file._id)}
-                                        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+                                        className="flex items-center gap-2 text-sm text-gray-400 hover:text-white"
                                     >
                                         <MessageSquare className="w-4 h-4" />
                                         <span>
@@ -190,7 +190,7 @@ export default function FilesSection({
                                             {file.comments && file.comments.length > 0 && (
                                                 <div className="space-y-2 max-h-60 overflow-y-auto">
                                                     {file.comments.map((comment, idx) => (
-                                                        <div key={idx} className="bg-gray-50 rounded p-3">
+                                                        <div key={idx} className="bg-white/5 rounded p-3">
                                                             <div className="flex items-start gap-2">
                                                                 {comment.userImageUrl && (
                                                                     <img
@@ -201,7 +201,7 @@ export default function FilesSection({
                                                                 )}
                                                                 <div className="flex-1">
                                                                     <div className="flex items-center gap-2">
-                                                                        <span className="text-sm font-medium text-gray-900">
+                                                                        <span className="text-sm font-medium text-white">
                                                                             {comment.userName}
                                                                         </span>
                                                                         <span className="text-xs text-gray-500">

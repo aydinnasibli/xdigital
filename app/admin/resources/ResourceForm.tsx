@@ -99,7 +99,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg border shadow-sm p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-6">
             {/* Basic Info */}
             <div className="space-y-4">
                 <h2 className="text-lg font-semibold border-b pb-2">Basic Information</h2>

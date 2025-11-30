@@ -38,7 +38,7 @@ export default async function ResourceDetailPage({
                 </Link>
             </div>
 
-            <div className="bg-white rounded-lg border shadow-sm p-8">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-8">
                 {/* Header */}
                 <div className="mb-6">
                     <div className="flex items-start gap-3 mb-4">
@@ -48,9 +48,9 @@ export default async function ResourceDetailPage({
                              resource.type === 'download' ? '⬇️' : '🔗'}
                         </span>
                         <div className="flex-1">
-                            <h1 className="text-3xl font-bold text-gray-900">{resource.title}</h1>
+                            <h1 className="text-3xl font-bold text-white">{resource.title}</h1>
                             {resource.description && (
-                                <p className="text-gray-600 mt-2">{resource.description}</p>
+                                <p className="text-gray-400 mt-2">{resource.description}</p>
                             )}
                         </div>
                     </div>
@@ -134,7 +134,7 @@ export default async function ResourceDetailPage({
                 {/* Tags */}
                 {resource.tags && resource.tags.length > 0 && (
                     <div className="mt-8 pt-6 border-t">
-                        <div className="text-sm text-gray-600 mb-2">Tags:</div>
+                        <div className="text-sm text-gray-400 mb-2">Tags:</div>
                         <div className="flex flex-wrap gap-2">
                             {resource.tags.map((tag: string) => (
                                 <span
@@ -151,7 +151,7 @@ export default async function ResourceDetailPage({
                 {/* Author */}
                 {resource.authorName && (
                     <div className="mt-6 pt-6 border-t text-sm text-gray-500">
-                        Published by <span className="font-medium text-gray-900">{resource.authorName}</span>
+                        Published by <span className="font-medium text-white">{resource.authorName}</span>
                         {resource.publishedAt && (
                             <span> on {new Date(resource.publishedAt).toLocaleDateString()}</span>
                         )}

@@ -52,8 +52,8 @@ export default async function ClientNotesPage({
                     <Link href={`/admin/clients/${clientId}`} className="text-blue-600 hover:underline mb-2 inline-block">
                         ← Back to Client
                     </Link>
-                    <h1 className="text-3xl font-bold text-gray-900">Client Notes</h1>
-                    <p className="text-gray-600 mt-2">Private notes and reminders (not visible to client)</p>
+                    <h1 className="text-3xl font-bold text-white">Client Notes</h1>
+                    <p className="text-gray-400 mt-2">Private notes and reminders (not visible to client)</p>
                 </div>
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     Add New Note
@@ -66,13 +66,13 @@ export default async function ClientNotesPage({
                     <h2 className="font-semibold text-yellow-900 mb-4">📌 Pinned Notes</h2>
                     <div className="space-y-3">
                         {notes.filter((n: any) => n.isPinned).map((note: any) => (
-                            <div key={note._id} className="bg-white p-4 rounded-lg border">
+                            <div key={note._id} className="bg-black/40 backdrop-blur-xl p-4 rounded-lg border">
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-start gap-3 flex-1">
                                         <span className="text-2xl">{getNoteIcon(note.type)}</span>
                                         <div className="flex-1">
                                             {note.title && (
-                                                <h4 className="font-medium text-gray-900">{note.title}</h4>
+                                                <h4 className="font-medium text-white">{note.title}</h4>
                                             )}
                                             <p className="text-gray-700 text-sm mt-1">{note.content}</p>
                                             <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
@@ -94,7 +94,7 @@ export default async function ClientNotesPage({
             )}
 
             {/* All Notes */}
-            <div className="bg-white rounded-lg border shadow-sm">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm">
                 <div className="p-6 border-b">
                     <h2 className="text-xl font-semibold">All Notes ({notes.length})</h2>
                 </div>
@@ -107,14 +107,14 @@ export default async function ClientNotesPage({
                 ) : (
                     <div className="divide-y">
                         {notes.map((note: any) => (
-                            <div key={note._id} className="p-6 hover:bg-gray-50">
+                            <div key={note._id} className="p-6 hover:bg-white/5">
                                 <div className="flex items-start gap-4">
                                     <span className="text-3xl">{getNoteIcon(note.type)}</span>
                                     <div className="flex-1">
                                         <div className="flex items-start justify-between mb-2">
                                             <div>
                                                 {note.title && (
-                                                    <h4 className="font-semibold text-gray-900">{note.title}</h4>
+                                                    <h4 className="font-semibold text-white">{note.title}</h4>
                                                 )}
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <span className={`px-2 py-1 text-xs rounded ${getNoteTypeColor(note.type)}`}>
