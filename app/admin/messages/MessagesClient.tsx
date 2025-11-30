@@ -546,17 +546,17 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
                             {/* Sticky Pinned Message Header (Single Pin) */}
                             {selectedConversation && selectedConversation.messages.some(m => m.isPinned && !m.parentMessageId) && (
-                                <div className="sticky top-0 z-10 bg-gradient-to-r from-yellow-50 to-amber-50 border-b-2 border-yellow-300 shadow-md">
+                                <div className="sticky top-0 z-10 bg-yellow-500/20 backdrop-blur-md border-b-2 border-yellow-500/50 shadow-md">
                                     <div className="p-3">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <Pin className="w-4 h-4 text-yellow-600" />
-                                            <span className="text-sm font-bold text-yellow-800">Pinned Message</span>
+                                            <Pin className="w-4 h-4 text-yellow-400" />
+                                            <span className="text-sm font-bold text-yellow-300">Pinned Message</span>
                                         </div>
                                         {(() => {
                                             const pinnedMsg = selectedConversation.messages.find(m => !m.parentMessageId && m.isPinned);
                                             if (!pinnedMsg) return null;
                                             return (
-                                                <div className="bg-white rounded-lg p-3 border-l-4 border-yellow-400 shadow-sm">
+                                                <div className="bg-yellow-500/10 backdrop-blur-sm rounded-lg p-3 border-l-4 border-yellow-400 shadow-sm">
                                                     <div className="flex items-start justify-between gap-2">
                                                         <button
                                                             onClick={() => {
@@ -565,10 +565,10 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
                                                             }}
                                                             className="flex-1 min-w-0 text-left hover:opacity-80 transition-opacity"
                                                         >
-                                                            <p className="text-xs font-semibold text-gray-600 mb-1">
+                                                            <p className="text-xs font-semibold text-yellow-300 mb-1">
                                                                 {pinnedMsg.sender === 'admin' ? 'xDigital Team' : pinnedMsg.clientName}
                                                             </p>
-                                                            <p className="text-sm text-gray-800 truncate">{pinnedMsg.message}</p>
+                                                            <p className="text-sm text-gray-200 truncate">{pinnedMsg.message}</p>
                                                         </button>
                                                         <button
                                                             onClick={() => handlePin(pinnedMsg._id)}
@@ -716,7 +716,7 @@ export default function MessagesClient({ initialMessages, availableProjects, cur
 
                                                             {/* Emoji Picker */}
                                                             {showEmojiPicker === msg._id && (
-                                                                <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
+                                                                <div className="mt-2 flex gap-1 bg-black/40 backdrop-blur-sm border border-gray-700 p-2 rounded-lg">
                                                                     {COMMON_EMOJIS.map((emoji) => (
                                                                         <button
                                                                             key={emoji}
