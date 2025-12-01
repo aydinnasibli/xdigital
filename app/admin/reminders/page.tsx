@@ -22,7 +22,7 @@ export default async function AdminRemindersPage({
     const [remindersResult, clientsResult] = await Promise.all([
         getAllReminders({
             includeCompleted: filter !== 'active',
-            days: filter === 'all' ? undefined : days,
+            days: filter === 'all' || filter === 'overdue' ? undefined : days,
         }),
         getAllClients(),
     ]);
