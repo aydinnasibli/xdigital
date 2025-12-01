@@ -1,6 +1,6 @@
 // app/admin/templates/[id]/edit/page.tsx
 import { redirect } from 'next/navigation';
-import { auth } from '@clerk/nextjs/server';
+import { isAdmin } from '@/lib/auth/admin';
 import { getTemplate } from '@/app/actions/projectTemplates';
 import EditTemplateForm from './EditTemplateForm';
 
@@ -9,9 +9,9 @@ export default async function EditTemplatePage({
 }: {
     params: Promise<{ id: string }>;
 }) {
-    const { userId } = await auth();
-    if (!userId) {
-        redirect('/sign-in');
+    const admin = await isAdmin();
+    if (!admin) {
+        redirect('/');
     }
 
     const { id } = await params;

@@ -99,26 +99,26 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-black/40 backdrop-blur-xl rounded-lg border border-gray-800/50 shadow-sm p-6 space-y-6">
             {/* Basic Info */}
             <div className="space-y-4">
-                <h2 className="text-lg font-semibold border-b pb-2">Basic Information</h2>
+                <h2 className="text-lg font-semibold text-white border-b border-gray-800/50 pb-2">Basic Information</h2>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                         Title *
                     </label>
                     <input
                         type="text"
                         value={formData.title}
                         onChange={(e) => handleTitleChange(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         required
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                         Slug *
                     </label>
                     <input
@@ -127,7 +127,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                         onChange={(e) =>
                             setFormData({ ...formData, slug: e.target.value })
                         }
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         required
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -136,7 +136,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                         Description
                     </label>
                     <textarea
@@ -144,7 +144,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                         onChange={(e) =>
                             setFormData({ ...formData, description: e.target.value })
                         }
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         rows={3}
                         maxLength={1000}
                     />
@@ -152,7 +152,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
 
                 <div className="grid grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-300 mb-1">
                             Type *
                         </label>
                         <select
@@ -163,7 +163,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                                     type: e.target.value as ResourceType,
                                 })
                             }
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                            className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         >
                             <option value={ResourceType.ARTICLE}>Article</option>
@@ -179,7 +179,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-300 mb-1">
                             Category *
                         </label>
                         <select
@@ -190,7 +190,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                                     category: e.target.value as ResourceCategory,
                                 })
                             }
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                            className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         >
                             <option value={ResourceCategory.WEB_DEVELOPMENT}>
@@ -214,7 +214,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-300 mb-1">
                             Visibility *
                         </label>
                         <select
@@ -225,7 +225,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                                     visibility: e.target.value as ResourceVisibility,
                                 })
                             }
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                            className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         >
                             <option value={ResourceVisibility.PUBLIC}>Public</option>
@@ -240,7 +240,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                     </div>
                 </div>
 
-                <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="space-y-3 p-4 bg-blue-500/10 rounded-lg border border-blue-500/30">
                     <div className="flex items-center gap-3">
                         <input
                             type="checkbox"
@@ -249,9 +249,9 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                             onChange={(e) =>
                                 setFormData({ ...formData, isPublished: e.target.checked })
                             }
-                            className="rounded border-gray-300 w-5 h-5 text-blue-600"
+                            className="rounded border-gray-600 w-5 h-5 text-blue-600"
                         />
-                        <label htmlFor="isPublished" className="text-sm font-semibold text-blue-900 cursor-pointer">
+                        <label htmlFor="isPublished" className="text-sm font-semibold text-blue-300 cursor-pointer">
                             ✓ Publish Resource (make visible to users)
                         </label>
                     </div>
@@ -263,13 +263,13 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                             onChange={(e) =>
                                 setFormData({ ...formData, isFeatured: e.target.checked })
                             }
-                            className="rounded border-gray-300 w-5 h-5 text-blue-600"
+                            className="rounded border-gray-600 w-5 h-5 text-blue-600"
                         />
-                        <label htmlFor="isFeatured" className="text-sm text-gray-700 cursor-pointer">
+                        <label htmlFor="isFeatured" className="text-sm text-gray-300 cursor-pointer">
                             Featured Resource (show at top of list)
                         </label>
                     </div>
-                    <p className="text-xs text-blue-700 mt-2">
+                    <p className="text-xs text-blue-300 mt-2">
                         {formData.isPublished ? '✓ This resource will be visible to users based on visibility settings' : '⚠️ This resource is a draft and will not be visible to users'}
                     </p>
                 </div>
@@ -277,11 +277,11 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
 
             {/* Content */}
             <div className="space-y-4">
-                <h2 className="text-lg font-semibold border-b pb-2">Content</h2>
+                <h2 className="text-lg font-semibold text-white border-b border-gray-800/50 pb-2">Content</h2>
 
                 {formData.type === ResourceType.ARTICLE && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-300 mb-1">
                             Article Content
                         </label>
                         <textarea
@@ -289,7 +289,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                             onChange={(e) =>
                                 setFormData({ ...formData, content: e.target.value })
                             }
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 font-mono text-sm"
+                            className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             rows={15}
                             placeholder="Supports Markdown..."
                         />
@@ -299,7 +299,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                 {formData.type === ResourceType.VIDEO && (
                     <>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-gray-300 mb-1">
                                 Video URL
                             </label>
                             <input
@@ -308,11 +308,11 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                                 onChange={(e) =>
                                     setFormData({ ...formData, videoUrl: e.target.value })
                                 }
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-gray-300 mb-1">
                                 Video Embed Code (optional)
                             </label>
                             <textarea
@@ -323,7 +323,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                                         videoEmbedCode: e.target.value,
                                     })
                                 }
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 rows={3}
                                 placeholder="<iframe ...></iframe>"
                             />
@@ -336,7 +336,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                     formData.type === ResourceType.BRAND_ASSET) && (
                     <>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-gray-300 mb-1">
                                 File URL
                             </label>
                             <input
@@ -345,11 +345,11 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                                 onChange={(e) =>
                                     setFormData({ ...formData, fileUrl: e.target.value })
                                 }
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-gray-300 mb-1">
                                 File Name
                             </label>
                             <input
@@ -358,7 +358,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                                 onChange={(e) =>
                                     setFormData({ ...formData, fileName: e.target.value })
                                 }
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
                     </>
@@ -366,7 +366,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
 
                 {formData.type === ResourceType.LINK && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-300 mb-1">
                             External URL
                         </label>
                         <input
@@ -375,13 +375,13 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                             onChange={(e) =>
                                 setFormData({ ...formData, externalUrl: e.target.value })
                             }
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                            className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
                 )}
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                         Thumbnail URL
                     </label>
                     <input
@@ -390,17 +390,17 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                         onChange={(e) =>
                             setFormData({ ...formData, thumbnailUrl: e.target.value })
                         }
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
             </div>
 
             {/* SEO & Meta */}
             <div className="space-y-4">
-                <h2 className="text-lg font-semibold border-b pb-2">SEO & Metadata</h2>
+                <h2 className="text-lg font-semibold text-white border-b border-gray-800/50 pb-2">SEO & Metadata</h2>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                         Meta Description
                     </label>
                     <textarea
@@ -408,7 +408,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                         onChange={(e) =>
                             setFormData({ ...formData, metaDescription: e.target.value })
                         }
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         rows={2}
                         maxLength={160}
                     />
@@ -418,21 +418,21 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                         Tags (comma-separated)
                     </label>
                     <input
                         type="text"
                         value={tagsInput}
                         onChange={(e) => setTagsInput(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                        className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="web-design, seo, wordpress"
                     />
                 </div>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-4 border-t">
+            <div className="flex gap-2 pt-4 border-t border-gray-800/50">
                 <button
                     type="submit"
                     disabled={loading}
@@ -446,7 +446,7 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                 </button>
                 <Link
                     href="/admin/resources"
-                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                    className="px-6 py-2 bg-gray-800/50 text-gray-300 rounded-lg hover:bg-gray-700/50 border border-gray-700"
                 >
                     Cancel
                 </Link>

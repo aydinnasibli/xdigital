@@ -1,6 +1,6 @@
 // app/admin/templates/page.tsx
 import { redirect } from 'next/navigation';
-import { auth } from '@clerk/nextjs/server';
+import { isAdmin } from '@/lib/auth/admin';
 import Link from 'next/link';
 import { getTemplates } from '@/app/actions/projectTemplates';
 import { ExternalLink, Eye, Trash2, Edit } from 'lucide-react';
@@ -8,9 +8,9 @@ import Image from 'next/image';
 import TemplateActions from './TemplateActions';
 
 export default async function TemplatesPage() {
-    const { userId } = await auth();
-    if (!userId) {
-        redirect('/sign-in');
+    const admin = await isAdmin();
+    if (!admin) {
+        redirect('/');
     }
 
     // Fetch all templates from database
