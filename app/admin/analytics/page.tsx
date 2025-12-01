@@ -1,9 +1,16 @@
 // app/admin/analytics/page.tsx
 import { getAllProjects } from '@/app/actions/admin/projects';
 import { getAdminClientStats } from '@/app/actions/admin/clients';
-import { BarChart3, TrendingUp, Users, FolderKanban } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, FolderKanban, Clock, CheckCircle2, AlertCircle, DollarSign } from 'lucide-react';
+import { isAdmin } from '@/lib/auth/admin';
+import { redirect } from 'next/navigation';
 
 export default async function AdminAnalyticsPage() {
+    const admin = await isAdmin();
+    if (!admin) {
+        redirect('/');
+    }
+
     const [projectsResult, clientsResult] = await Promise.all([
         getAllProjects(),
         getAdminClientStats(),
@@ -13,12 +20,21 @@ export default async function AdminAnalyticsPage() {
     const clientStats = clientsResult.success ? clientsResult.data : null;
 
     // Calculate analytics
+    const now = new Date();
     const thisMonthProjects = projects.filter((p: any) => {
         const createdAt = new Date(p.createdAt);
-        const now = new Date();
         return (
             createdAt.getMonth() === now.getMonth() &&
             createdAt.getFullYear() === now.getFullYear()
+        );
+    }).length;
+
+    const lastMonthProjects = projects.filter((p: any) => {
+        const createdAt = new Date(p.createdAt);
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        return (
+            createdAt.getMonth() === lastMonth.getMonth() &&
+            createdAt.getFullYear() === lastMonth.getFullYear()
         );
     }).length;
 
@@ -37,35 +53,87 @@ export default async function AdminAnalyticsPage() {
     // Monthly project trends (last 6 months)
     const monthlyProjects = getMonthlyData(projects);
 
+    // Calculate completion rate
+    const completedProjects = projectsByStatus.completed || 0;
+    const completionRate = projects.length > 0 ? ((completedProjects / projects.length) * 100).toFixed(1) : 0;
+
+    // Active projects
+    const activeProjects = (projectsByStatus.in_progress || 0) + (projectsByStatus.pending || 0);
+
+    // Client activity
+    const activeClients = new Set(
+        projects
+            .filter((p: any) => p.status === 'in_progress' || p.status === 'pending')
+            .map((p: any) => p.userId)
+    ).size;
+
+    // Calculate growth rates
+    const projectGrowth = lastMonthProjects > 0
+        ? (((thisMonthProjects - lastMonthProjects) / lastMonthProjects) * 100).toFixed(1)
+        : thisMonthProjects > 0 ? '100' : '0';
+
     return (
         <div className="space-y-8 p-6">
             {/* Header */}
             <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
                 <h1 className="text-3xl font-bold text-white">Analytics Dashboard</h1>
-                <p className="text-gray-400 mt-2">Overview of business performance and trends</p>
+                <p className="text-gray-400 mt-2">Comprehensive overview of business performance and trends</p>
             </div>
 
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Key Metrics Row 1 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <MetricCard
                     title="Total Projects"
                     value={projects.length}
                     subtitle="All time"
-                    icon={BarChart3}
+                    icon={FolderKanban}
                     color="purple"
                 />
                 <MetricCard
                     title="This Month"
                     value={thisMonthProjects}
-                    subtitle="New projects"
+                    subtitle={`${projectGrowth}% vs last month`}
                     icon={TrendingUp}
                     color="blue"
+                    trend={Number(projectGrowth)}
                 />
+                <MetricCard
+                    title="Active Projects"
+                    value={activeProjects}
+                    subtitle="In progress or pending"
+                    icon={Clock}
+                    color="orange"
+                />
+                <MetricCard
+                    title="Completion Rate"
+                    value={`${completionRate}%`}
+                    subtitle={`${completedProjects} completed`}
+                    icon={CheckCircle2}
+                    color="green"
+                />
+            </div>
+
+            {/* Key Metrics Row 2 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <MetricCard
                     title="Total Clients"
                     value={clientStats?.totalClients || 0}
                     subtitle={`${clientStats?.newThisMonth || 0} new this month`}
                     icon={Users}
+                    color="purple"
+                />
+                <MetricCard
+                    title="Active Clients"
+                    value={activeClients}
+                    subtitle="With ongoing projects"
+                    icon={Users}
+                    color="blue"
+                />
+                <MetricCard
+                    title="On Hold Projects"
+                    value={projectsByStatus.on_hold || 0}
+                    subtitle="Require attention"
+                    icon={AlertCircle}
                     color="orange"
                 />
             </div>
@@ -74,58 +142,76 @@ export default async function AdminAnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Projects by Status */}
                 <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
-                    <h2 className="text-xl font-semibold text-white mb-4">
-                        Projects by Status
+                    <h2 className="text-xl font-semibold text-white mb-4 flex items-center justify-between">
+                        <span>Projects by Status</span>
+                        <span className="text-sm text-gray-400 font-normal">{projects.length} total</span>
                     </h2>
-                    <div className="space-y-3">
-                        {Object.entries(projectsByStatus).map(([status, count]: [string, any]) => (
-                            <div key={status} className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-3 h-3 rounded-full ${getStatusColor(status)}`} />
-                                    <span className="text-gray-300 capitalize">
-                                        {status.replace('_', ' ')}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-white font-semibold">{count}</span>
-                                    <div className="w-32 bg-gray-700/50 rounded-full h-2">
-                                        <div
-                                            className={`h-2 rounded-full ${getStatusBgColor(status)}`}
-                                            style={{
-                                                width: `${(count / projects.length) * 100}%`,
-                                            }}
-                                        />
+                    <div className="space-y-4">
+                        {Object.entries(projectsByStatus)
+                            .sort(([, a]: any, [, b]: any) => b - a)
+                            .map(([status, count]: [string, any]) => {
+                                const percentage = projects.length > 0 ? ((count / projects.length) * 100).toFixed(1) : 0;
+                                return (
+                                    <div key={status} className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-3 h-3 rounded-full ${getStatusColor(status)}`} />
+                                                <span className="text-gray-300 capitalize text-sm">
+                                                    {status.replace('_', ' ')}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-white font-semibold">{count}</span>
+                                                <span className="text-gray-500 text-sm">({percentage}%)</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-full bg-gray-700/50 rounded-full h-2">
+                                            <div
+                                                className={`h-2 rounded-full transition-all ${getStatusBgColor(status)}`}
+                                                style={{
+                                                    width: `${percentage}%`,
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        ))}
+                                );
+                            })}
                     </div>
                 </div>
 
                 {/* Projects by Service Type */}
                 <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
-                    <h2 className="text-xl font-semibold text-white mb-4">
-                        Projects by Service
+                    <h2 className="text-xl font-semibold text-white mb-4 flex items-center justify-between">
+                        <span>Projects by Service</span>
+                        <span className="text-sm text-gray-400 font-normal">{projects.length} total</span>
                     </h2>
-                    <div className="space-y-3">
-                        {Object.entries(projectsByService).map(([service, count]: [string, any]) => (
-                            <div key={service} className="flex items-center justify-between">
-                                <span className="text-gray-300">
-                                    {formatServiceType(service)}
-                                </span>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-white font-semibold">{count}</span>
-                                    <div className="w-32 bg-gray-700/50 rounded-full h-2">
-                                        <div
-                                            className="bg-blue-500 h-2 rounded-full"
-                                            style={{
-                                                width: `${(count / projects.length) * 100}%`,
-                                            }}
-                                        />
+                    <div className="space-y-4">
+                        {Object.entries(projectsByService)
+                            .sort(([, a]: any, [, b]: any) => b - a)
+                            .map(([service, count]: [string, any]) => {
+                                const percentage = projects.length > 0 ? ((count / projects.length) * 100).toFixed(1) : 0;
+                                return (
+                                    <div key={service} className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-300 text-sm">
+                                                {formatServiceType(service)}
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-white font-semibold">{count}</span>
+                                                <span className="text-gray-500 text-sm">({percentage}%)</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-full bg-gray-700/50 rounded-full h-2">
+                                            <div
+                                                className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all"
+                                                style={{
+                                                    width: `${percentage}%`,
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        ))}
+                                );
+                            })}
                     </div>
                 </div>
             </div>
@@ -168,12 +254,14 @@ function MetricCard({
     subtitle,
     icon: Icon,
     color,
+    trend,
 }: {
     title: string;
     value: string | number;
     subtitle: string;
     icon: any;
     color: string;
+    trend?: number;
 }) {
     const colors = {
         green: { bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', icon: 'text-emerald-400' },
@@ -185,11 +273,19 @@ function MetricCard({
     const colorScheme = colors[color as keyof typeof colors];
 
     return (
-        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
+        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6 hover:border-gray-700/50 transition-all">
             <div className="flex items-center justify-between mb-4">
                 <div className={`p-3 rounded-lg border ${colorScheme.bg} ${colorScheme.border}`}>
                     <Icon className={`w-6 h-6 ${colorScheme.icon}`} />
                 </div>
+                {trend !== undefined && (
+                    <div className={`flex items-center gap-1 text-sm font-medium ${
+                        trend > 0 ? 'text-green-400' : trend < 0 ? 'text-red-400' : 'text-gray-400'
+                    }`}>
+                        {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'}
+                        <span>{Math.abs(trend)}%</span>
+                    </div>
+                )}
             </div>
             <h3 className="text-3xl font-bold text-white">{value}</h3>
             <p className="text-sm text-gray-300 mt-1">{title}</p>
