@@ -10,10 +10,10 @@ export default async function NewResourcePage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900">Create New Resource</h1>
-                <p className="text-gray-600 mt-2">
+        <div className="space-y-6 p-6">
+            <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
+                <h1 className="text-3xl font-bold text-white">Create New Resource</h1>
+                <p className="text-gray-400 mt-2">
                     Add a new guide, tutorial, or document for clients
                 </p>
             </div>
