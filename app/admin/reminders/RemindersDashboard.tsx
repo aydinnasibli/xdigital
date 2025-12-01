@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Bell,
@@ -109,11 +109,11 @@ export default function RemindersDashboard({
     router.push(`/admin/reminders?${params.toString()}`);
   };
 
-  const loadReminders = async () => {
+  const loadReminders = useCallback(async () => {
     setLoading(true);
     const result = await getAllReminders({
       includeCompleted: filter !== "active",
-      days: filter === "all" ? undefined : days,
+      days: filter === "all" || filter === "overdue" ? undefined : days,
     });
     if (result.success) {
       setReminders(result.data || []);
@@ -121,7 +121,12 @@ export default function RemindersDashboard({
       toast.error(result.error || "Failed to load reminders");
     }
     setLoading(false);
-  };
+  }, [filter, days]);
+
+  // Auto-refresh reminders when URL params change
+  useEffect(() => {
+    void loadReminders();
+  }, [loadReminders]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
