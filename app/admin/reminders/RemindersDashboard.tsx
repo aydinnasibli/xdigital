@@ -72,7 +72,7 @@ const emptyFormData: ReminderFormData = {
 interface RemindersDashboardProps {
   initialReminders: Reminder[];
   initialClients: Client[];
-  initialFilter: 'all' | 'active' | 'completed' | 'overdue';
+  initialFilter: "all" | "active" | "completed" | "overdue";
   initialDays: number;
 }
 
@@ -95,15 +95,17 @@ export default function RemindersDashboard({
   const [searchQuery, setSearchQuery] = useState("");
   const days = initialDays;
 
-  const handleFilterChange = (newFilter: 'all' | 'active' | 'completed' | 'overdue') => {
+  const handleFilterChange = (
+    newFilter: "all" | "active" | "completed" | "overdue"
+  ) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('filter', newFilter);
+    params.set("filter", newFilter);
     router.push(`/admin/reminders?${params.toString()}`);
   };
 
   const handleDaysChange = (newDays: number) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('days', newDays.toString());
+    params.set("days", newDays.toString());
     router.push(`/admin/reminders?${params.toString()}`);
   };
 
@@ -356,11 +358,21 @@ export default function RemindersDashboard({
               onChange={(e) => handleDaysChange(Number(e.target.value))}
               className="bg-white/5 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors cursor-pointer"
             >
-              <option value={7} className="bg-gray-900">Next 7 days</option>
-              <option value={14} className="bg-gray-900">Next 14 days</option>
-              <option value={30} className="bg-gray-900">Next 30 days</option>
-              <option value={60} className="bg-gray-900">Next 60 days</option>
-              <option value={90} className="bg-gray-900">Next 90 days</option>
+              <option value={7} className="bg-gray-900">
+                Next 7 days
+              </option>
+              <option value={14} className="bg-gray-900">
+                Next 14 days
+              </option>
+              <option value={30} className="bg-gray-900">
+                Next 30 days
+              </option>
+              <option value={60} className="bg-gray-900">
+                Next 60 days
+              </option>
+              <option value={90} className="bg-gray-900">
+                Next 90 days
+              </option>
             </select>
 
             <div className="relative">
@@ -563,7 +575,7 @@ export default function RemindersDashboard({
               </div>
             </div>
 
-            <form onSubmit={() => void handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Title <span className="text-red-500">*</span>
