@@ -309,11 +309,15 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                                     setFormData({ ...formData, videoUrl: e.target.value })
                                 }
                                 className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="https://example.com/video.mp4"
                             />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Direct link to video file (.mp4, .webm, etc.)
+                            </p>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-1">
-                                Video Embed Code (optional)
+                                Video Embed Code (recommended)
                             </label>
                             <textarea
                                 value={formData.videoEmbedCode}
@@ -323,10 +327,15 @@ export default function ResourceForm({ resource }: { resource?: Resource }) {
                                         videoEmbedCode: e.target.value,
                                     })
                                 }
-                                className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                rows={3}
-                                placeholder="<iframe ...></iframe>"
+                                className="w-full border border-gray-700 bg-gray-900/50 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-xs"
+                                rows={4}
+                                placeholder='<iframe src="https://www.youtube.com/embed/VIDEO_ID" allowfullscreen></iframe>'
                             />
+                            <p className="text-xs text-gray-500 mt-1">
+                                📺 Paste the iframe embed code from YouTube, Vimeo, or other video platforms.
+                                <br />
+                                <span className="text-blue-400">Tip:</span> On YouTube, click "Share" → "Embed" to get the code.
+                            </p>
                         </div>
                     </>
                 )}

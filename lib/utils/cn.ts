@@ -45,14 +45,18 @@ export function sanitizeHtml(dirty: string): string {
         'p', 'br', 'strong', 'em', 'u', 's', 'a', 'ul', 'ol', 'li',
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre',
         'img', 'div', 'span', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
-        'iframe' // For video embeds
+        'iframe', 'video', 'source' // For video embeds
       ],
       ALLOWED_ATTR: [
-        'href', 'target', 'rel', 'src', 'alt', 'title', 'class', 'id',
-        'width', 'height', 'frameborder', 'allowfullscreen', 'allow'
+        'href', 'target', 'rel', 'src', 'alt', 'title', 'class', 'id', 'style',
+        'width', 'height', 'frameborder', 'allowfullscreen', 'allow',
+        'loading', 'referrerpolicy', 'sandbox', 'controls', 'autoplay',
+        'muted', 'loop', 'preload', 'poster', 'type'
       ],
       ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
       ALLOW_DATA_ATTR: false,
+      ADD_TAGS: ['iframe', 'video'],
+      ADD_ATTR: ['allowfullscreen', 'frameborder', 'allow', 'controls'],
     });
   } catch (error) {
     // Fallback: if DOMPurify fails, strip all HTML tags for safety
