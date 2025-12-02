@@ -86,9 +86,26 @@ export default async function ResourceDetailPage({
                 {resource.type === 'video' && resource.videoEmbedCode && (
                     <div className="mb-6 w-full">
                         <div
-                            className="aspect-video w-full rounded-lg overflow-hidden bg-black [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
-                            dangerouslySetInnerHTML={{ __html: resource.videoEmbedCode }}
-                        />
+                            className="relative aspect-video w-full rounded-lg overflow-hidden bg-black"
+                            style={{
+                                position: 'relative',
+                                paddingBottom: '56.25%', /* 16:9 aspect ratio */
+                                height: 0,
+                                overflow: 'hidden'
+                            }}
+                        >
+                            <div
+                                dangerouslySetInnerHTML={{ __html: resource.videoEmbedCode }}
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%'
+                                }}
+                                className="[&>iframe]:absolute [&>iframe]:top-0 [&>iframe]:left-0 [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
+                            />
+                        </div>
                     </div>
                 )}
 

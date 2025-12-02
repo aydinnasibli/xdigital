@@ -51,12 +51,18 @@ export function sanitizeHtml(dirty: string): string {
         'href', 'target', 'rel', 'src', 'alt', 'title', 'class', 'id', 'style',
         'width', 'height', 'frameborder', 'allowfullscreen', 'allow',
         'loading', 'referrerpolicy', 'sandbox', 'controls', 'autoplay',
-        'muted', 'loop', 'preload', 'poster', 'type'
+        'muted', 'loop', 'preload', 'poster', 'type', 'name'
       ],
-      ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+      // Allow YouTube, Vimeo, and other video platforms
+      ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
       ALLOW_DATA_ATTR: false,
-      ADD_TAGS: ['iframe', 'video'],
-      ADD_ATTR: ['allowfullscreen', 'frameborder', 'allow', 'controls'],
+      // Explicitly add iframe and video tags
+      ADD_TAGS: ['iframe', 'video', 'source'],
+      ADD_ATTR: ['allowfullscreen', 'frameborder', 'allow', 'controls', 'target', 'referrerpolicy'],
+      // Keep comments for debugging
+      KEEP_CONTENT: true,
+      // Allow unknown protocols in src (for blob URLs etc)
+      ALLOW_UNKNOWN_PROTOCOLS: false,
     });
   } catch (error) {
     // Fallback: if DOMPurify fails, strip all HTML tags for safety
