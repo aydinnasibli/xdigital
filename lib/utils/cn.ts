@@ -20,13 +20,27 @@ export function escapeRegex(string: string): string {
  */
 export function sanitizeHtml(dirty: string): string {
   // This function should only be used server-side in Next.js server actions
-  // Dynamic import won't work in server actions, so we use a simpler approach
+  if (!dirty || typeof dirty !== 'string') {
+    return '';
+  }
+
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const createDOMPurify = require('isomorphic-dompurify');
-    const DOMPurify = createDOMPurify();
 
-    return DOMPurify.sanitize(dirty, {
+    // isomorphic-dompurify exports a function that creates the DOMPurify instance
+    // Call it without arguments for server-side usage
+    const DOMPurify = createDOMPurify.default ? createDOMPurify.default : createDOMPurify;
+
+    // Get the actual purifier instance
+    const purify = typeof DOMPurify === 'function' ? DOMPurify() : DOMPurify;
+
+    if (!purify || typeof purify.sanitize !== 'function') {
+      console.error('DOMPurify.sanitize is not available, falling back to strip tags');
+      return dirty.replace(/<[^>]*>/g, '');
+    }
+
+    return purify.sanitize(dirty, {
       ALLOWED_TAGS: [
         'p', 'br', 'strong', 'em', 'u', 's', 'a', 'ul', 'ol', 'li',
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre',

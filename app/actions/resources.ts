@@ -95,7 +95,40 @@ export async function getResources(filters?: {
     }
 }
 
-// Get single resource
+// Get single resource by ID (admin only - no publish filter)
+export async function getAdminResource(resourceId: string): Promise<ActionResponse> {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(resourceId)) {
+            return { success: false, error: 'Invalid resource ID' };
+        }
+
+        await dbConnect();
+
+        const resource = await Resource.findById(resourceId)
+            .populate('authorId', 'firstName lastName email imageUrl')
+            .lean();
+
+        if (!resource) {
+            return { success: false, error: 'Resource not found' };
+        }
+
+        type PopulatedUser = { _id: mongoose.Types.ObjectId; firstName?: string; lastName?: string; email: string; imageUrl?: string };
+        const author = resource.authorId as unknown as PopulatedUser | null;
+
+        return {
+            success: true,
+            data: {
+                ...toSerializedObject<Record<string, unknown>>(resource),
+                authorId: author ? toSerializedObject(author) : null,
+            },
+        };
+    } catch (error) {
+        logError(error as Error, { context: 'getAdminResource', resourceId });
+        return { success: false, error: 'Failed to fetch resource' };
+    }
+}
+
+// Get single resource by slug (public - published only)
 export async function getResource(slug: string): Promise<ActionResponse> {
     try {
         await dbConnect();
