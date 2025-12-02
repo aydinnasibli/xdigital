@@ -84,18 +84,31 @@ export default async function ResourceDetailPage({
 
                 {/* Video Embed */}
                 {resource.type === 'video' && resource.videoEmbedCode && (
-                    <div
-                        className="mb-6 aspect-video rounded-lg overflow-hidden"
-                        dangerouslySetInnerHTML={{ __html: resource.videoEmbedCode }}
-                    />
+                    <div className="mb-6 w-full">
+                        <div
+                            className="aspect-video w-full rounded-lg overflow-hidden bg-black [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
+                            dangerouslySetInnerHTML={{ __html: resource.videoEmbedCode }}
+                        />
+                    </div>
                 )}
 
+                {/* Video URL */}
                 {resource.type === 'video' && resource.videoUrl && !resource.videoEmbedCode && (
-                    <video
-                        controls
-                        className="w-full rounded-lg mb-6"
-                        src={resource.videoUrl}
-                    />
+                    <div className="mb-6 w-full">
+                        <video
+                            controls
+                            className="w-full max-w-full rounded-lg shadow-lg"
+                            src={resource.videoUrl}
+                            preload="metadata"
+                        >
+                            <p className="text-gray-400">
+                                Your browser doesn't support HTML5 video.
+                                <a href={resource.videoUrl} className="text-blue-500 hover:underline ml-1">
+                                    Download the video
+                                </a>
+                            </p>
+                        </video>
+                    </div>
                 )}
 
                 {/* Content */}
