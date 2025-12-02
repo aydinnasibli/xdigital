@@ -1,1356 +1,1607 @@
 // components/projects/ProjectDetailClient.tsx
-'use client';
+"use client";
 
-import { useState, useTransition, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { deleteProject } from '@/app/actions/projects';
-import { getMessages, sendMessage, addClientMessageReaction, sendClientTypingIndicator, replyToMessage, editMessage } from '@/app/actions/messages';
-import { getProjectAnalytics } from '@/app/actions/monitoring';
-import dynamic from 'next/dynamic';
-import { usePusherChannel } from '@/lib/hooks/usePusher';
-import { toast } from 'sonner';
-import { logInfo, logWarning } from '@/lib/monitoring/sentry';
-import { Smile, Reply, Edit2, Pin, X } from 'lucide-react';
-import { formatMessageDate, formatMessageTime } from '@/lib/utils/date';
+import { useState, useTransition, useCallback, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { deleteProject } from "@/app/actions/projects";
+import {
+  getMessages,
+  sendMessage,
+  addClientMessageReaction,
+  sendClientTypingIndicator,
+  replyToMessage,
+  editMessage,
+} from "@/app/actions/messages";
+import { getProjectAnalytics } from "@/app/actions/monitoring";
+import dynamic from "next/dynamic";
+import { usePusherChannel } from "@/lib/hooks/usePusher";
+import { toast } from "sonner";
+import { logInfo, logWarning } from "@/lib/monitoring/sentry";
+import { Smile, Reply, Edit2, Pin, X } from "lucide-react";
+import { formatMessageDate, formatMessageTime } from "@/lib/utils/date";
 
 // Dynamically import heavy dashboard components
-const SEODashboard = dynamic(() => import('@/components/dashboard/SEODashboard'), {
-    loading: () => <div className="text-center py-8">Loading SEO Dashboard...</div>,
-});
-const PerformanceDashboard = dynamic(() => import('@/components/dashboard/PerformanceDashboard'), {
-    loading: () => <div className="text-center py-8">Loading Performance Dashboard...</div>,
-});
+const SEODashboard = dynamic(
+  () => import("@/components/dashboard/SEODashboard"),
+  {
+    loading: () => (
+      <div className="text-center py-8">Loading SEO Dashboard...</div>
+    ),
+  }
+);
+const PerformanceDashboard = dynamic(
+  () => import("@/components/dashboard/PerformanceDashboard"),
+  {
+    loading: () => (
+      <div className="text-center py-8">Loading Performance Dashboard...</div>
+    ),
+  }
+);
 
 interface AnalyticsSummary {
-    pageViews: number;
-    visitors: number;
-    conversions: number;
-    engagement: number;
+  pageViews: number;
+  visitors: number;
+  conversions: number;
+  engagement: number;
 }
 
-
 interface Message {
-    _id: string;
-    sender: 'client' | 'admin';
-    message: string;
+  _id: string;
+  sender: "client" | "admin";
+  message: string;
+  createdAt: string;
+  reactions?: Array<{
+    emoji: string;
+    userId: string;
+    userName: string;
     createdAt: string;
-    reactions?: Array<{
-        emoji: string;
-        userId: string;
-        userName: string;
-        createdAt: string;
-    }>;
-    parentMessageId?: string;
-    threadReplies?: string[];
-    isEdited?: boolean;
-    editedAt?: string;
-    editHistory?: Array<{
-        previousMessage: string;
-        editedAt: string;
-    }>;
-    isPinned?: boolean;
-    pinnedAt?: string;
-    pinnedBy?: string;
+  }>;
+  parentMessageId?: string;
+  threadReplies?: string[];
+  isEdited?: boolean;
+  editedAt?: string;
+  editHistory?: Array<{
+    previousMessage: string;
+    editedAt: string;
+  }>;
+  isPinned?: boolean;
+  pinnedAt?: string;
+  pinnedBy?: string;
 }
 
 interface Project {
-    _id: string;
-    projectName: string;
-    projectDescription: string;
-    serviceType: string;
-    package: string;
-    status: string;
-    deploymentUrl?: string;
-    vercelProjectId?: string;
-    googleAnalyticsPropertyId?: string;
-    timeline?: {
-        startDate?: string;
-        estimatedCompletion?: string;
-        completedDate?: string;
-    };
-    milestones?: Array<{
-        title: string;
-        description?: string;
-        dueDate?: string;
-        completed: boolean;
-        completedDate?: string;
-    }>;
-    createdAt: string;
-    updatedAt: string;
+  _id: string;
+  projectName: string;
+  projectDescription: string;
+  serviceType: string;
+  package: string;
+  status: string;
+  deploymentUrl?: string;
+  vercelProjectId?: string;
+  googleAnalyticsPropertyId?: string;
+  timeline?: {
+    startDate?: string;
+    estimatedCompletion?: string;
+    completedDate?: string;
+  };
+  milestones?: Array<{
+    title: string;
+    description?: string;
+    dueDate?: string;
+    completed: boolean;
+    completedDate?: string;
+  }>;
+  createdAt: string;
+  updatedAt: string;
 }
 
 function AnalyticsTab({ projectId }: { projectId: string }) {
-    const [summary, setSummary] = useState<AnalyticsSummary>({
-        pageViews: 0,
-        visitors: 0,
-        conversions: 0,
-        engagement: 0,
-    });
-    const [configured, setConfigured] = useState(true);
-    const [configMessage, setConfigMessage] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [generatingReport, setGeneratingReport] = useState(false);
+  const [summary, setSummary] = useState<AnalyticsSummary>({
+    pageViews: 0,
+    visitors: 0,
+    conversions: 0,
+    engagement: 0,
+  });
+  const [configured, setConfigured] = useState(true);
+  const [configMessage, setConfigMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [generatingReport, setGeneratingReport] = useState(false);
 
-    useEffect(() => {
-        loadAnalytics();
-    }, [projectId]);
+  useEffect(() => {
+    loadAnalytics();
+  }, [projectId]);
 
-    const loadAnalytics = async () => {
-        setLoading(true);
-        try {
-            const result = await getProjectAnalytics(projectId);
-            if (result.success && result.data) {
-                if (result.data.configured === false) {
-                    setConfigured(false);
-                    setConfigMessage(result.data.message || 'Analytics not configured');
-                } else {
-                    setConfigured(true);
-                    setSummary(result.data.summary || result.data);
-                }
-            }
-        } catch (error) {
-            console.error('Error loading analytics:', error);
-            setConfigured(false);
-            setConfigMessage('Failed to load analytics');
-        } finally {
-            setLoading(false);
+  const loadAnalytics = async () => {
+    setLoading(true);
+    try {
+      const result = await getProjectAnalytics(projectId);
+      if (result.success && result.data) {
+        if (result.data.configured === false) {
+          setConfigured(false);
+          setConfigMessage(result.data.message || "Analytics not configured");
+        } else {
+          setConfigured(true);
+          setSummary(result.data.summary || result.data);
         }
-    };
+      }
+    } catch (error) {
+      console.error("Error loading analytics:", error);
+      setConfigured(false);
+      setConfigMessage("Failed to load analytics");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleDownloadReport = async () => {
-        setGeneratingReport(true);
-        try {
-            const { generatePDFReport } = await import('@/app/actions/monitoring');
-            const result = await generatePDFReport(projectId);
+  const handleDownloadReport = async () => {
+    setGeneratingReport(true);
+    try {
+      const { generatePDFReport } = await import("@/app/actions/monitoring");
+      const result = await generatePDFReport(projectId);
 
-            if (result.success && result.data) {
-                toast.success('Report generated successfully!');
-                // Open HTML in new window for now (user can save as PDF)
-                const reportWindow = window.open('', '_blank');
-                if (reportWindow) {
-                    reportWindow.document.write(result.data.html);
-                    reportWindow.document.close();
-                }
-            } else {
-                toast.error(result.error || 'Failed to generate report');
-            }
-        } catch (error) {
-            console.error('Error generating report:', error);
-            toast.error('Failed to generate report');
-        } finally {
-            setGeneratingReport(false);
+      if (result.success && result.data) {
+        toast.success("Report generated successfully!");
+        // Open HTML in new window for now (user can save as PDF)
+        const reportWindow = window.open("", "_blank");
+        if (reportWindow) {
+          reportWindow.document.write(result.data.html);
+          reportWindow.document.close();
         }
-    };
-
-    if (loading) {
-        return <div className="text-center py-8">Loading analytics...</div>;
+      } else {
+        toast.error(result.error || "Failed to generate report");
+      }
+    } catch (error) {
+      console.error("Error generating report:", error);
+      toast.error("Failed to generate report");
+    } finally {
+      setGeneratingReport(false);
     }
+  };
 
-    if (!configured) {
-        return (
-            <div className="space-y-6">
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-8 text-center backdrop-blur-sm">
-                    <div className="text-amber-400 mb-4">
-                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Analytics Not Configured</h3>
-                    <p className="text-gray-400 mb-4">{configMessage}</p>
-                    <p className="text-sm text-gray-500">
-                        Google Analytics will be set up by the admin when your project is deployed.
-                        You'll be able to track traffic, user behavior, and performance metrics once configured.
-                    </p>
-                </div>
-            </div>
-        );
-    }
+  if (loading) {
+    return <div className="text-center py-8">Loading analytics...</div>;
+  }
 
+  if (!configured) {
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
-                    <div className="text-sm text-gray-400">Page Views</div>
-                    <div className="text-3xl font-bold text-white mt-2">{summary.pageViews}</div>
-                    <div className="text-sm text-gray-600 mt-1">Total views</div>
-                </div>
-                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
-                    <div className="text-sm text-gray-400">Visitors</div>
-                    <div className="text-3xl font-bold text-white mt-2">{summary.visitors}</div>
-                    <div className="text-sm text-gray-600 mt-1">Unique visitors</div>
-                </div>
-                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
-                    <div className="text-sm text-gray-400">Conversions</div>
-                    <div className="text-3xl font-bold text-white mt-2">{summary.conversions}</div>
-                    <div className="text-sm text-gray-600 mt-1">Goal completions</div>
-                </div>
-                <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
-                    <div className="text-sm text-gray-400">Engagement</div>
-                    <div className="text-3xl font-bold text-white mt-2">{summary.engagement}</div>
-                    <div className="text-sm text-gray-600 mt-1">Total interactions</div>
-                </div>
-            </div>
-
-            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
-                <h3 className="font-semibold text-white mb-4">Analytics Overview</h3>
-                <p className="text-gray-400 mb-4">
-                    Detailed analytics will be available once your project goes live.
-                    You'll be able to track traffic, user behavior, and performance metrics.
-                </p>
-                <button
-                    onClick={handleDownloadReport}
-                    disabled={generatingReport}
-                    className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                    {generatingReport ? (
-                        <>
-                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                            Generating Report...
-                        </>
-                    ) : (
-                        <>
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Download Monthly Report
-                        </>
-                    )}
-                </button>
-            </div>
+      <div className="space-y-6">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-8 text-center backdrop-blur-sm">
+          <div className="text-amber-400 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+            Analytics Not Configured
+          </h3>
+          <p className="text-gray-400 mb-4">{configMessage}</p>
+          <p className="text-sm text-gray-500">
+            Google Analytics will be set up by the admin when your project is
+            deployed. You'll be able to track traffic, user behavior, and
+            performance metrics once configured.
+          </p>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+          <div className="text-sm text-gray-400">Page Views</div>
+          <div className="text-3xl font-bold text-white mt-2">
+            {summary.pageViews}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">Total views</div>
+        </div>
+        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+          <div className="text-sm text-gray-400">Visitors</div>
+          <div className="text-3xl font-bold text-white mt-2">
+            {summary.visitors}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">Unique visitors</div>
+        </div>
+        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+          <div className="text-sm text-gray-400">Conversions</div>
+          <div className="text-3xl font-bold text-white mt-2">
+            {summary.conversions}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">Goal completions</div>
+        </div>
+        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+          <div className="text-sm text-gray-400">Engagement</div>
+          <div className="text-3xl font-bold text-white mt-2">
+            {summary.engagement}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">Total interactions</div>
+        </div>
+      </div>
+
+      <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+        <h3 className="font-semibold text-white mb-4">Analytics Overview</h3>
+        <p className="text-gray-400 mb-4">
+          Detailed analytics will be available once your project goes live.
+          You'll be able to track traffic, user behavior, and performance
+          metrics.
+        </p>
+        <button
+          onClick={handleDownloadReport}
+          disabled={generatingReport}
+          className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          {generatingReport ? (
+            <>
+              <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+              Generating Report...
+            </>
+          ) : (
+            <>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              Download Monthly Report
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
 }
 
-const COMMON_EMOJIS = ['👍', '❤️', '😊', '🎉', '🔥', '👏', '😂', '😍'];
+const COMMON_EMOJIS = ["👍", "❤️", "😊", "🎉", "🔥", "👏", "😂", "😍"];
 
 // Add this component before the main ProjectDetailClient component
 function MessagesTab({ projectId }: { projectId: string }) {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [newMessage, setNewMessage] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [sending, setSending] = useState(false);
-    const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
-    const [typingIndicators, setTypingIndicators] = useState<Map<string, any>>(new Map());
-    const [replyingTo, setReplyingTo] = useState<Message | null>(null);
-    const [editingMessage, setEditingMessage] = useState<Message | null>(null);
-    const [editText, setEditText] = useState('');
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
+  const [typingIndicators, setTypingIndicators] = useState<Map<string, any>>(
+    new Map()
+  );
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [editText, setEditText] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-    // Normalize message to ensure all required fields exist
-    const normalizeMessage = useCallback((msg: any): Message | null => {
-        // Skip messages without valid ID
-        if (!msg || !msg._id) {
-            logWarning('Message without ID detected, skipping', { msg });
-            return null;
-        }
-
-        return {
-            _id: msg._id,
-            sender: msg.sender || 'client',
-            message: msg.message || '',
-            createdAt: msg.createdAt || new Date().toISOString(),
-            reactions: Array.isArray(msg.reactions) ? msg.reactions : [],
-            threadReplies: Array.isArray(msg.threadReplies) ? msg.threadReplies : [],
-            parentMessageId: msg.parentMessageId,
-            isEdited: msg.isEdited ?? false,
-            editedAt: msg.editedAt,
-            isPinned: msg.isPinned ?? false,
-        };
-    }, []);
-
-    // Helper function to deduplicate messages and ensure unique IDs
-    const deduplicateMessages = useCallback((messageList: any[]): Message[] => {
-        const uniqueMessages = new Map<string, Message>();
-        messageList.forEach(msg => {
-            const normalized = normalizeMessage(msg);
-            if (normalized && !uniqueMessages.has(normalized._id)) {
-                uniqueMessages.set(normalized._id, normalized);
-            }
-        });
-        return Array.from(uniqueMessages.values()).sort(
-            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-    }, [normalizeMessage]);
-
-    // Real-time message listener
-    const handleNewMessage = useCallback((data: any) => {
-        logInfo('New message received via Pusher', {
-            messageId: data._id,
-            sender: data.sender,
-            projectId,
-            type: data.type
-        });
-
-        // Handle reaction updates
-        if (data.type === 'reaction') {
-            setMessages(prev => prev.map(msg =>
-                msg._id === data.messageId
-                    ? { ...msg, reactions: data.reactions }
-                    : msg
-            ));
-            return;
-        }
-
-        // Handle edit updates
-        if (data.type === 'edit') {
-            setMessages(prev => prev.map(msg =>
-                msg._id === data.messageId
-                    ? { ...msg, message: data.message, isEdited: data.isEdited, editedAt: data.editedAt }
-                    : msg
-            ));
-            // Close edit mode if this message was being edited
-            if (editingMessage && editingMessage._id === data.messageId) {
-                setEditingMessage(null);
-                setEditText('');
-            }
-            return;
-        }
-
-        // Handle pin updates
-        if (data.type === 'pin') {
-            setMessages(prev => prev.map(msg =>
-                msg._id === data.messageId
-                    ? { ...msg, isPinned: data.isPinned }
-                    : msg
-            ));
-            return;
-        }
-
-        // Read receipts disabled
-        if (data.type === 'read') {
-            return;
-        }
-
-        // Handle reply messages - update both the new reply and the parent's threadReplies
-        if (data.type === 'reply' && data.parentMessageId) {
-            setMessages(prev => {
-                const exists = prev.some(msg => msg._id === data._id);
-                if (exists) {
-                    logInfo('Duplicate reply detected and prevented', {
-                        messageId: data._id,
-                        projectId
-                    });
-                    return prev;
-                }
-
-                // Add the new reply message and update parent's threadReplies
-                const withNewReply = [...prev, data];
-
-                const withUpdatedParent = withNewReply.map(msg => {
-                    if (msg._id === data.parentMessageId) {
-                        const currentReplies = msg.threadReplies || [];
-                        if (!currentReplies.includes(data._id)) {
-                            return { ...msg, threadReplies: [...currentReplies, data._id] };
-                        }
-                    }
-                    return msg;
-                });
-
-                return deduplicateMessages(withUpdatedParent);
-            });
-            return;
-        }
-
-        setMessages(prev => {
-            const exists = prev.some(msg => msg._id === data._id);
-            if (exists) return prev;
-
-            return deduplicateMessages([...prev, data]);
-        });
-
-        if (data.sender === 'admin') {
-            toast.info('New message from xDigital Team');
-        }
-    }, [deduplicateMessages, projectId, editingMessage]);
-
-    // Real-time typing indicator handler
-    const handleTypingIndicator = useCallback((data: any) => {
-        logInfo('Typing indicator received', data);
-
-        // Don't show own typing indicator
-        if (data.userId === currentUserId) {
-            return;
-        }
-
-        setTypingIndicators(prev => {
-            const newMap = new Map(prev);
-            const key = `${data.projectId}-${data.userId}`;
-
-            if (data.isTyping) {
-                newMap.set(key, {
-                    userName: data.userName,
-                    isTyping: true,
-                });
-            } else {
-                newMap.delete(key);
-            }
-
-            return newMap;
-        });
-    }, [currentUserId]);
-
-    usePusherChannel(`project-${projectId}`, 'new-message', handleNewMessage);
-    usePusherChannel(`project-${projectId}`, 'typing', handleTypingIndicator);
-
-    useEffect(() => {
-        loadMessages();
-    }, [projectId]);
-
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
-
-    const loadMessages = async () => {
-        setLoading(true);
-        try {
-            const result = await getMessages(projectId);
-            if (result.success && result.data) {
-                setMessages(deduplicateMessages(result.data.messages));
-                setCurrentUserId(result.data.currentUserId);
-            }
-        } catch (error) {
-            console.error('Error loading messages:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleTyping = useCallback(() => {
-        if (typingTimeoutRef.current) {
-            clearTimeout(typingTimeoutRef.current);
-        }
-
-        sendClientTypingIndicator(projectId, true).catch(err => {
-            console.error('Error sending typing indicator:', err);
-        });
-
-        typingTimeoutRef.current = setTimeout(() => {
-            sendClientTypingIndicator(projectId, false).catch(err => {
-                console.error('Error sending typing indicator:', err);
-            });
-        }, 3000);
-    }, [projectId]);
-
-    const handleSend = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newMessage.trim()) return;
-
-        setSending(true);
-        sendClientTypingIndicator(projectId, false);
-
-        // Check if replying
-        if (replyingTo) {
-            const result = await replyToMessage(replyingTo._id, projectId, newMessage);
-            if (result.success && result.data) {
-                toast.success('Reply sent');
-                setNewMessage('');
-                setReplyingTo(null);
-            } else {
-                toast.error(result.error || 'Failed to send reply');
-            }
-        } else {
-            const result = await sendMessage(projectId, newMessage);
-            if (result.success && result.data) {
-                setNewMessage('');
-                toast.success('Message sent');
-                // Message will be added via Pusher real-time
-            } else {
-                toast.error(result.error || 'Failed to send message');
-            }
-        }
-        setSending(false);
-    };
-
-    const handleReply = (message: Message) => {
-        setReplyingTo(message);
-        setEditingMessage(null);
-    };
-
-    const handleEdit = (message: Message) => {
-        setEditingMessage(message);
-        setEditText(message.message);
-        setReplyingTo(null);
-    };
-
-    const handleSaveEdit = async () => {
-        if (!editingMessage || !editText.trim()) return;
-
-        const result = await editMessage(editingMessage._id, editText);
-        if (result.success) {
-            toast.success('Message edited');
-            setEditingMessage(null);
-            setEditText('');
-        } else {
-            toast.error(result.error || 'Failed to edit message');
-        }
-    };
-
-    const handleCancelEdit = () => {
-        setEditingMessage(null);
-        setEditText('');
-    };
-
-    const handleReaction = async (messageId: string, emoji: string) => {
-        const result = await addClientMessageReaction(messageId, emoji);
-        if (result.success) {
-            setShowEmojiPicker(null);
-        } else {
-            toast.error('Failed to add reaction');
-        }
-    };
-
-    if (loading) {
-        return <div className="text-center py-8">Loading messages...</div>;
+  // Normalize message to ensure all required fields exist
+  const normalizeMessage = useCallback((msg: any): Message | null => {
+    // Skip messages without valid ID
+    if (!msg || !msg._id) {
+      logWarning("Message without ID detected, skipping", { msg });
+      return null;
     }
 
-    const currentTypingIndicators = Array.from(typingIndicators.values());
+    return {
+      _id: msg._id,
+      sender: msg.sender || "client",
+      message: msg.message || "",
+      createdAt: msg.createdAt || new Date().toISOString(),
+      reactions: Array.isArray(msg.reactions) ? msg.reactions : [],
+      threadReplies: Array.isArray(msg.threadReplies) ? msg.threadReplies : [],
+      parentMessageId: msg.parentMessageId,
+      isEdited: msg.isEdited ?? false,
+      editedAt: msg.editedAt,
+      isPinned: msg.isPinned ?? false,
+    };
+  }, []);
 
-    return (
-        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl flex flex-col h-[600px]">
-            {/* Sticky Pinned Message Header (Single Pin) */}
-            {messages.some(m => m.isPinned && !m.parentMessageId) && (
-                <div className="sticky top-0 z-10 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-b border-amber-500/30 backdrop-blur-sm shadow-md">
-                    <div className="p-3">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Pin className="w-4 h-4 text-amber-400" />
-                            <span className="text-sm font-bold text-amber-300">Pinned Message</span>
-                        </div>
-                        {(() => {
-                            const pinnedMsg = messages.find(m => m._id && !m.parentMessageId && m.isPinned);
-                            if (!pinnedMsg) return null;
-                            return (
-                                <button
-                                    onClick={() => {
-                                        const element = document.getElementById(`message-${pinnedMsg._id}`);
-                                        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    }}
-                                    className="w-full bg-black/30 backdrop-blur-sm rounded-lg p-3 border-l-4 border-amber-400 shadow-sm hover:bg-black/40 transition-all text-left"
-                                >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-semibold text-gray-400 mb-1">
-                                                {pinnedMsg.sender === 'client' ? 'You' : 'xDigital Team'}
-                                            </p>
-                                            <p className="text-sm text-gray-200 truncate">{pinnedMsg.message}</p>
-                                        </div>
-                                        <Pin className="w-4 h-4 text-amber-400 flex-shrink-0 mt-1" />
-                                    </div>
-                                </button>
-                            );
-                        })()}
-                    </div>
-                </div>
-            )}
+  // Helper function to deduplicate messages and ensure unique IDs
+  const deduplicateMessages = useCallback(
+    (messageList: any[]): Message[] => {
+      const uniqueMessages = new Map<string, Message>();
+      messageList.forEach((msg) => {
+        const normalized = normalizeMessage(msg);
+        if (normalized && !uniqueMessages.has(normalized._id)) {
+          uniqueMessages.set(normalized._id, normalized);
+        }
+      });
+      return Array.from(uniqueMessages.values()).sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    },
+    [normalizeMessage]
+  );
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {messages.length === 0 ? (
-                    <p className="text-gray-400 text-center">No messages yet. Start the conversation!</p>
-                ) : (
-                    <div className="space-y-4">
-                        {/* Regular (Non-Pinned) Messages */}
-                        {messages
-                            .filter(m => m._id && !m.parentMessageId && !m.isPinned)
-                            .map((msg) => (
-                            <div key={msg._id} className="space-y-2">
-                                {editingMessage?._id === msg._id ? (
-                                    // Edit Mode
-                                    <div className="flex justify-end">
-                                        <div className="max-w-[70%] bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 backdrop-blur-sm">
-                                            <p className="text-xs font-semibold mb-2 text-blue-300">Editing message</p>
-                                            <textarea
-                                                value={editText}
-                                                onChange={(e) => setEditText(e.target.value)}
-                                                className="w-full bg-black/30 border border-gray-700 text-white rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
-                                                rows={3}
-                                            />
-                                            <div className="flex gap-2 mt-2">
-                                                <button
-                                                    onClick={handleSaveEdit}
-                                                    className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                                                >
-                                                    Save
-                                                </button>
-                                                <button
-                                                    onClick={handleCancelEdit}
-                                                    className="px-3 py-1 bg-white/10 text-gray-300 rounded text-sm hover:bg-white/20"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    // Normal Message Display
-                                    <div
-                                        id={`message-${msg._id}`}
-                                        className={`flex ${msg.sender === 'client' ? 'justify-end' : 'justify-start'} transition-all rounded-lg`}
-                                    >
-                                        <div
-                                            className={`max-w-[70%] rounded-lg p-3 ${
-                                                msg.sender === 'client'
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-white/5 backdrop-blur-sm border border-gray-800/50 text-gray-200'
-                                            }`}
-                                        >
-                                            <div className="flex items-start justify-between gap-2 mb-1">
-                                                <p className={`text-xs font-semibold ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-400'}`}>
-                                                    {msg.sender === 'client' ? 'You' : 'xDigital Team'}
-                                                </p>
-                                            </div>
-                                            <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+  // Real-time message listener
+  const handleNewMessage = useCallback(
+    (data: any) => {
+      logInfo("New message received via Pusher", {
+        messageId: data._id,
+        sender: data.sender,
+        projectId,
+        type: data.type,
+      });
 
-                                            {msg.isEdited && (
-                                                <p className={`text-xs mt-1 ${msg.sender === 'client' ? 'text-blue-200' : 'text-gray-500'}`}>
-                                                    (edited)
-                                                </p>
-                                            )}
+      // Handle reaction updates
+      if (data.type === "reaction") {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === data.messageId
+              ? { ...msg, reactions: data.reactions }
+              : msg
+          )
+        );
+        return;
+      }
 
-                                            {/* Reactions */}
-                                            {msg.reactions && msg.reactions.length > 0 && (
-                                                <div className="flex flex-wrap gap-1 mt-2">
-                                                    {msg.reactions.map((reaction) => {
-                                                        const isMyReaction = reaction.userId === currentUserId;
-                                                        return (
-                                                            <button
-                                                                key={`${msg._id}-${reaction.emoji}-${reaction.userId}`}
-                                                                onClick={() => handleReaction(msg._id, reaction.emoji)}
-                                                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs transition-all ${
-                                                                    isMyReaction
-                                                                        ? 'bg-white bg-opacity-40 ring-1 ring-white ring-opacity-50 scale-110'
-                                                                        : 'bg-white bg-opacity-20 hover:bg-opacity-30'
-                                                                }`}
-                                                                title={`${reaction.userName}${isMyReaction ? ' (click to remove)' : ''}`}
-                                                            >
-                                                                {reaction.emoji}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
+      // Handle edit updates
+      if (data.type === "edit") {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === data.messageId
+              ? {
+                  ...msg,
+                  message: data.message,
+                  isEdited: data.isEdited,
+                  editedAt: data.editedAt,
+                }
+              : msg
+          )
+        );
+        // Close edit mode if this message was being edited
+        if (editingMessage && editingMessage._id === data.messageId) {
+          setEditingMessage(null);
+          setEditText("");
+        }
+        return;
+      }
 
-                                            {/* Action Buttons */}
-                                            <div className={`flex items-center justify-between gap-2 mt-2 ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                <div className="flex items-center gap-1">
-                                                    {/* Only show reaction button for admin messages */}
-                                                    {msg.sender === 'admin' && (
-                                                        <button
-                                                            onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
-                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
-                                                            title="React"
-                                                        >
-                                                            <Smile className="w-3 h-3" />
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => handleReply(msg)}
-                                                        className="opacity-50 hover:opacity-100 transition-opacity p-1"
-                                                        title="Reply"
-                                                    >
-                                                        <Reply className="w-3 h-3" />
-                                                    </button>
-                                                    {msg.sender === 'client' && (
-                                                        <button
-                                                            onClick={() => handleEdit(msg)}
-                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
-                                                            title="Edit"
-                                                        >
-                                                            <Edit2 className="w-3 h-3" />
-                                                        </button>
-                                                    )}
-                                                </div>
+      // Handle pin updates
+      if (data.type === "pin") {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === data.messageId
+              ? { ...msg, isPinned: data.isPinned }
+              : msg
+          )
+        );
+        return;
+      }
 
-                                                <div className="flex items-center gap-1">
-                                                    <p className="text-xs">
-                                                        {formatMessageDate(msg.createdAt)}
-                                                    </p>
-                                                </div>
-                                            </div>
+      // Read receipts disabled
+      if (data.type === "read") {
+        return;
+      }
 
-                                            {/* Emoji Picker */}
-                                            {showEmojiPicker === msg._id && (
-                                                <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
-                                                    {COMMON_EMOJIS.map((emoji, index) => (
-                                                        <button
-                                                            key={`${msg._id}-emoji-${index}`}
-                                                            onClick={() => handleReaction(msg._id, emoji)}
-                                                            className="hover:scale-125 transition-transform text-lg"
-                                                        >
-                                                            {emoji}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
+      // Handle reply messages - update both the new reply and the parent's threadReplies
+      if (data.type === "reply" && data.parentMessageId) {
+        setMessages((prev) => {
+          const exists = prev.some((msg) => msg._id === data._id);
+          if (exists) {
+            logInfo("Duplicate reply detected and prevented", {
+              messageId: data._id,
+              projectId,
+            });
+            return prev;
+          }
 
-                                {/* Thread Replies */}
-                                {msg.threadReplies && msg.threadReplies.length > 0 && (
-                                    <div className="ml-8 pl-4 border-l-4 border-blue-200 space-y-3 pt-2 relative">
-                                        {/* Thread count badge */}
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
-                                                <Reply className="w-3 h-3" />
-                                                <span>{msg.threadReplies.length} {msg.threadReplies.length === 1 ? 'reply' : 'replies'}</span>
-                                            </div>
-                                        </div>
-                                        {messages
-                                            .filter(m => m._id && m.parentMessageId === msg._id)
-                                            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-                                            .map(reply => {
-                                                const parentMsg = msg;
-                                                return (
-                                                    <div
-                                                        key={reply._id}
-                                                        className={`flex ${reply.sender === 'client' ? 'justify-end' : 'justify-start'}`}
-                                                    >
-                                                        <div
-                                                            className={`max-w-[85%] rounded-lg p-3 text-sm shadow-sm ${
-                                                                reply.sender === 'client'
-                                                                    ? 'bg-blue-500 text-white'
-                                                                    : 'bg-white text-gray-900 border-2 border-gray-200'
-                                                            }`}
-                                                        >
-                                                            {/* Replying to preview */}
-                                                            <button
-                                                                onClick={() => {
-                                                                    const element = document.getElementById(`message-${parentMsg._id}`);
-                                                                    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                                    // Highlight effect
-                                                                    element?.classList.add('ring-4', 'ring-blue-400', 'ring-opacity-50');
-                                                                    setTimeout(() => {
-                                                                        element?.classList.remove('ring-4', 'ring-blue-400', 'ring-opacity-50');
-                                                                    }, 2000);
-                                                                }}
-                                                                className={`w-full text-left mb-2 p-2 rounded-md text-xs border-l-2 ${
-                                                                    reply.sender === 'client'
-                                                                        ? 'bg-blue-600 bg-opacity-40 border-blue-300 hover:bg-opacity-60'
-                                                                        : 'bg-gray-100 border-gray-400 hover:bg-gray-200'
-                                                                } transition-all cursor-pointer`}
-                                                            >
-                                                                <div className="flex items-center gap-1 mb-1 font-semibold opacity-90">
-                                                                    <Reply className="w-3 h-3" />
-                                                                    <span>↑ {parentMsg.sender === 'client' ? 'Your message' : 'xDigital Team'}</span>
-                                                                </div>
-                                                                <p className={`${reply.sender === 'client' ? 'opacity-90' : 'opacity-70'} truncate text-xs`}>
-                                                                    {parentMsg.message.length > 60
-                                                                        ? `${parentMsg.message.substring(0, 60)}...`
-                                                                        : parentMsg.message}
-                                                                </p>
-                                                            </button>
-                                                            <p className="text-xs font-semibold mb-2 opacity-75">
-                                                                {reply.sender === 'client' ? 'You' : 'xDigital Team'}
-                                                            </p>
-                                                            <p className="whitespace-pre-wrap break-words">{reply.message}</p>
-                                                            <p className="text-xs opacity-60 mt-1">
-                                                                {new Date(reply.createdAt).toLocaleString('en-US', {
-                                                                    month: 'short',
-                                                                    day: 'numeric',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit'
-                                                                })}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+          // Add the new reply message and update parent's threadReplies
+          const withNewReply = [...prev, data];
 
-                        {/* All Messages (pinned messages shown in sticky header only) */}
-                        {messages
-                            .filter(m => m._id && !m.parentMessageId && !m.isPinned)
-                            .map((msg) => (
-                            <div key={msg._id} className="space-y-2">
-                                {editingMessage?._id === msg._id ? (
-                                    // Edit Mode
-                                    <div className="flex justify-end">
-                                        <div className="max-w-[70%] bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                            <p className="text-xs font-semibold mb-2 text-gray-600">Editing message</p>
-                                            <textarea
-                                                value={editText}
-                                                onChange={(e) => setEditText(e.target.value)}
-                                                className="w-full border rounded px-2 py-1 text-sm"
-                                                rows={3}
-                                            />
-                                            <div className="flex gap-2 mt-2">
-                                                <button
-                                                    onClick={handleSaveEdit}
-                                                    className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                                                >
-                                                    Save
-                                                </button>
-                                                <button
-                                                    onClick={handleCancelEdit}
-                                                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    // Normal Message Display
-                                    <div
-                                        id={`message-${msg._id}`}
-                                        className={`flex ${msg.sender === 'client' ? 'justify-end' : 'justify-start'} transition-all rounded-lg`}
-                                    >
-                                        <div
-                                            className={`max-w-[70%] rounded-lg px-4 py-3 ${
-                                                msg.sender === 'client'
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-gray-100 text-gray-900'
-                                            } ${msg.isPinned ? 'border-2 border-yellow-400' : ''}`}
-                                        >
-                                            {msg.isPinned && (
-                                                <div className="flex items-center justify-end mb-1">
-                                                    <Pin className="w-3 h-3 text-yellow-400" />
-                                                </div>
-                                            )}
-                                            <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+          const withUpdatedParent = withNewReply.map((msg) => {
+            if (msg._id === data.parentMessageId) {
+              const currentReplies = msg.threadReplies || [];
+              if (!currentReplies.includes(data._id)) {
+                return { ...msg, threadReplies: [...currentReplies, data._id] };
+              }
+            }
+            return msg;
+          });
 
-                                            {msg.isEdited && (
-                                                <p className="text-xs opacity-60 mt-1">(edited)</p>
-                                            )}
+          return deduplicateMessages(withUpdatedParent);
+        });
+        return;
+      }
 
-                                            {/* Reactions */}
-                                            {msg.reactions && msg.reactions.length > 0 && (
-                                                <div className="flex flex-wrap gap-1 mt-2">
-                                                    {msg.reactions.map((reaction) => {
-                                                        const isMyReaction = reaction.userId === currentUserId;
-                                                        return (
-                                                            <button
-                                                                key={`${msg._id}-${reaction.emoji}-${reaction.userId}`}
-                                                                onClick={() => handleReaction(msg._id, reaction.emoji)}
-                                                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs transition-all ${
-                                                                    isMyReaction
-                                                                        ? 'bg-white bg-opacity-40 ring-1 ring-white ring-opacity-50 scale-110'
-                                                                        : 'bg-white bg-opacity-20 hover:bg-opacity-30'
-                                                                }`}
-                                                                title={`${reaction.userName}${isMyReaction ? ' (click to remove)' : ''}`}
-                                                            >
-                                                                {reaction.emoji}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
+      setMessages((prev) => {
+        const exists = prev.some((msg) => msg._id === data._id);
+        if (exists) return prev;
 
-                                            {/* Action Buttons */}
-                                            <div className={`flex items-center justify-between gap-2 mt-2 ${msg.sender === 'client' ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                <div className="flex items-center gap-1">
-                                                    {/* Only show reaction button for admin messages */}
-                                                    {msg.sender === 'admin' && (
-                                                        <button
-                                                            onClick={() => setShowEmojiPicker(showEmojiPicker === msg._id ? null : msg._id)}
-                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
-                                                            title="React"
-                                                        >
-                                                            <Smile className="w-3 h-3" />
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => handleReply(msg)}
-                                                        className="opacity-50 hover:opacity-100 transition-opacity p-1"
-                                                        title="Reply"
-                                                    >
-                                                        <Reply className="w-3 h-3" />
-                                                    </button>
-                                                    {msg.sender === 'client' && (
-                                                        <button
-                                                            onClick={() => handleEdit(msg)}
-                                                            className="opacity-50 hover:opacity-100 transition-opacity p-1"
-                                                            title="Edit"
-                                                        >
-                                                            <Edit2 className="w-3 h-3" />
-                                                        </button>
-                                                    )}
-                                                </div>
+        return deduplicateMessages([...prev, data]);
+      });
 
-                                                <div className="flex items-center gap-1">
-                                                    <p className="text-xs">
-                                                        {formatMessageDate(msg.createdAt)}
-                                                    </p>
-                                                </div>
-                                            </div>
+      if (data.sender === "admin") {
+        toast.info("New message from xDigital Team");
+      }
+    },
+    [deduplicateMessages, projectId, editingMessage]
+  );
 
-                                            {/* Emoji Picker */}
-                                            {showEmojiPicker === msg._id && (
-                                                <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
-                                                    {COMMON_EMOJIS.map((emoji, index) => (
-                                                        <button
-                                                            key={`${msg._id}-emoji-${index}`}
-                                                            onClick={() => handleReaction(msg._id, emoji)}
-                                                            className="hover:scale-125 transition-transform text-lg"
-                                                        >
-                                                            {emoji}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
+  // Real-time typing indicator handler
+  const handleTypingIndicator = useCallback(
+    (data: any) => {
+      logInfo("Typing indicator received", data);
 
-                                {/* Thread Replies */}
-                                {msg.threadReplies && msg.threadReplies.length > 0 && (
-                                    <div className="ml-8 pl-4 border-l-2 border-gray-300 space-y-2 pt-2">
-                                        <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
-                                            <Reply className="w-3 h-3" />
-                                            <span>{msg.threadReplies.length} {msg.threadReplies.length === 1 ? 'reply' : 'replies'}</span>
-                                        </div>
-                                        {messages
-                                            .filter(m => m._id && m.parentMessageId === msg._id)
-                                            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-                                            .map(reply => {
-                                                const parentMsg = msg;
-                                                return (
-                                                    <div
-                                                        key={reply._id}
-                                                        className={`flex ${reply.sender === 'client' ? 'justify-end' : 'justify-start'}`}
-                                                    >
-                                                        <div
-                                                            className={`max-w-[70%] rounded-lg p-2 text-sm ${
-                                                                reply.sender === 'client'
-                                                                    ? 'bg-blue-500 text-white'
-                                                                    : 'bg-gray-50 text-gray-900 border border-gray-200'
-                                                            }`}
-                                                        >
-                                                            {/* Replying to preview */}
-                                                            <button
-                                                                onClick={() => {
-                                                                    const element = document.getElementById(`message-${parentMsg._id}`);
-                                                                    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                                    // Highlight effect
-                                                                    element?.classList.add('ring-2', 'ring-blue-400');
-                                                                    setTimeout(() => {
-                                                                        element?.classList.remove('ring-2', 'ring-blue-400');
-                                                                    }, 2000);
-                                                                }}
-                                                                className={`w-full text-left mb-2 p-2 rounded text-xs ${
-                                                                    reply.sender === 'client'
-                                                                        ? 'bg-blue-600 bg-opacity-50 hover:bg-opacity-70'
-                                                                        : 'bg-gray-200 hover:bg-gray-300'
-                                                                } transition-colors cursor-pointer`}
-                                                            >
-                                                                <div className="flex items-center gap-1 mb-1 font-semibold opacity-75">
-                                                                    <Reply className="w-3 h-3" />
-                                                                    <span>Replying to {parentMsg.sender === 'client' ? 'You' : 'xDigital Team'}</span>
-                                                                </div>
-                                                                <p className="opacity-70 truncate">
-                                                                    {parentMsg.message.length > 50
-                                                                        ? `${parentMsg.message.substring(0, 50)}...`
-                                                                        : parentMsg.message}
-                                                                </p>
-                                                            </button>
+      // Don't show own typing indicator
+      if (data.userId === currentUserId) {
+        return;
+      }
 
-                                                            <p className="text-xs font-semibold mb-1 opacity-75">
-                                                                {reply.sender === 'client' ? 'You' : 'xDigital Team'}
-                                                            </p>
-                                                            <p className="whitespace-pre-wrap break-words">{reply.message}</p>
-                                                            <p className="text-xs opacity-60 mt-1">
-                                                                {formatMessageTime(reply.createdAt)}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                )}
+      setTypingIndicators((prev) => {
+        const newMap = new Map(prev);
+        const key = `${data.projectId}-${data.userId}`;
 
-                {/* Typing Indicators */}
-                {currentTypingIndicators.length > 0 && (
-                    <div className="flex justify-start">
-                        <div className="bg-white/5 backdrop-blur-sm border border-gray-800/50 rounded-lg px-4 py-2 text-sm text-gray-400">
-                            {currentTypingIndicators[0].userName} is typing
-                            <span className="animate-pulse">...</span>
-                        </div>
-                    </div>
-                )}
+        if (data.isTyping) {
+          newMap.set(key, {
+            userName: data.userName,
+            isTyping: true,
+          });
+        } else {
+          newMap.delete(key);
+        }
 
-                <div ref={messagesEndRef} />
+        return newMap;
+      });
+    },
+    [currentUserId]
+  );
+
+  usePusherChannel(`project-${projectId}`, "new-message", handleNewMessage);
+  usePusherChannel(`project-${projectId}`, "typing", handleTypingIndicator);
+
+  useEffect(() => {
+    loadMessages();
+  }, [projectId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const loadMessages = async () => {
+    setLoading(true);
+    try {
+      const result = await getMessages(projectId);
+      if (result.success && result.data) {
+        setMessages(deduplicateMessages(result.data.messages));
+        setCurrentUserId(result.data.currentUserId);
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTyping = useCallback(() => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    sendClientTypingIndicator(projectId, true).catch((err) => {
+      console.error("Error sending typing indicator:", err);
+    });
+
+    typingTimeoutRef.current = setTimeout(() => {
+      sendClientTypingIndicator(projectId, false).catch((err) => {
+        console.error("Error sending typing indicator:", err);
+      });
+    }, 3000);
+  }, [projectId]);
+
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    setSending(true);
+    sendClientTypingIndicator(projectId, false);
+
+    // Check if replying
+    if (replyingTo) {
+      const result = await replyToMessage(
+        replyingTo._id,
+        projectId,
+        newMessage
+      );
+      if (result.success && result.data) {
+        toast.success("Reply sent");
+        setNewMessage("");
+        setReplyingTo(null);
+      } else {
+        toast.error(result.error || "Failed to send reply");
+      }
+    } else {
+      const result = await sendMessage(projectId, newMessage);
+      if (result.success && result.data) {
+        setNewMessage("");
+        toast.success("Message sent");
+        // Message will be added via Pusher real-time
+      } else {
+        toast.error(result.error || "Failed to send message");
+      }
+    }
+    setSending(false);
+  };
+
+  const handleReply = (message: Message) => {
+    setReplyingTo(message);
+    setEditingMessage(null);
+  };
+
+  const handleEdit = (message: Message) => {
+    setEditingMessage(message);
+    setEditText(message.message);
+    setReplyingTo(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingMessage || !editText.trim()) return;
+
+    const result = await editMessage(editingMessage._id, editText);
+    if (result.success) {
+      toast.success("Message edited");
+      setEditingMessage(null);
+      setEditText("");
+    } else {
+      toast.error(result.error || "Failed to edit message");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
+    setEditText("");
+  };
+
+  const handleReaction = async (messageId: string, emoji: string) => {
+    const result = await addClientMessageReaction(messageId, emoji);
+    if (result.success) {
+      setShowEmojiPicker(null);
+    } else {
+      toast.error("Failed to add reaction");
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Loading messages...</div>;
+  }
+
+  const currentTypingIndicators = Array.from(typingIndicators.values());
+
+  return (
+    <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl flex flex-col h-[600px]">
+      {/* Sticky Pinned Message Header (Single Pin) */}
+      {messages.some((m) => m.isPinned && !m.parentMessageId) && (
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-b border-amber-500/30 backdrop-blur-sm shadow-md">
+          <div className="p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Pin className="w-4 h-4 text-amber-400" />
+              <span className="text-sm font-bold text-amber-300">
+                Pinned Message
+              </span>
             </div>
-
-            <form onSubmit={handleSend} className="border-t border-gray-800/50 p-4 bg-black/20 backdrop-blur-sm">
-                {/* Reply Context */}
-                {replyingTo && (
-                    <div className="mb-3 p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-start justify-between backdrop-blur-sm">
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                                <Reply className="w-3 h-3 text-blue-400" />
-                                <span className="text-xs font-semibold text-blue-300">
-                                    Replying to {replyingTo.sender === 'client' ? 'yourself' : 'xDigital Team'}
-                                </span>
-                            </div>
-                            <p className="text-sm text-gray-300 truncate">{replyingTo.message}</p>
-                        </div>
-                        <button
-                            onClick={() => setReplyingTo(null)}
-                            className="text-gray-400 hover:text-gray-200 p-1"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
+            {(() => {
+              const pinnedMsg = messages.find(
+                (m) => m._id && !m.parentMessageId && m.isPinned
+              );
+              if (!pinnedMsg) return null;
+              return (
+                <button
+                  onClick={() => {
+                    const element = document.getElementById(
+                      `message-${pinnedMsg._id}`
+                    );
+                    element?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                  }}
+                  className="w-full bg-black/30 backdrop-blur-sm rounded-lg p-3 border-l-4 border-amber-400 shadow-sm hover:bg-black/40 transition-all text-left"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-400 mb-1">
+                        {pinnedMsg.sender === "client"
+                          ? "You"
+                          : "xDigital Team"}
+                      </p>
+                      <p className="text-sm text-gray-200 truncate">
+                        {pinnedMsg.message}
+                      </p>
                     </div>
-                )}
-
-                <div className="flex gap-2">
-                    <textarea
-                        value={newMessage}
-                        onChange={(e) => {
-                            setNewMessage(e.target.value);
-                            handleTyping();
-                        }}
-                        placeholder={replyingTo ? "Type your reply..." : "Type your message..."}
-                        rows={2}
-                        className="flex-1 px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
-                        disabled={sending}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSend(e);
-                            }
-                        }}
-                    />
-                    <button
-                        type="submit"
-                        disabled={sending || !newMessage.trim()}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        {sending ? 'Sending...' : replyingTo ? 'Reply' : 'Send'}
-                    </button>
-                </div>
-            </form>
+                    <Pin className="w-4 h-4 text-amber-400 flex-shrink-0 mt-1" />
+                  </div>
+                </button>
+              );
+            })()}
+          </div>
         </div>
-    );
+      )}
+
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        {messages.length === 0 ? (
+          <p className="text-gray-400 text-center">
+            No messages yet. Start the conversation!
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {/* Regular (Non-Pinned) Messages */}
+            {messages
+              .filter((m) => m._id && !m.parentMessageId && !m.isPinned)
+              .map((msg) => (
+                <div key={msg._id} className="space-y-2">
+                  {editingMessage?._id === msg._id ? (
+                    // Edit Mode
+                    <div className="flex justify-end">
+                      <div className="max-w-[70%] bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 backdrop-blur-sm">
+                        <p className="text-xs font-semibold mb-2 text-blue-300">
+                          Editing message
+                        </p>
+                        <textarea
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          className="w-full bg-black/30 border border-gray-700 text-white rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+                          rows={3}
+                        />
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={handleSaveEdit}
+                            className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="px-3 py-1 bg-white/10 text-gray-300 rounded text-sm hover:bg-white/20"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Normal Message Display
+                    <div
+                      id={`message-${msg._id}`}
+                      className={`flex ${msg.sender === "client" ? "justify-end" : "justify-start"} transition-all rounded-lg`}
+                    >
+                      <div
+                        className={`max-w-[70%] rounded-lg p-3 ${
+                          msg.sender === "client"
+                            ? "bg-blue-600 text-white"
+                            : "bg-white/5 backdrop-blur-sm border border-gray-800/50 text-gray-200"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p
+                            className={`text-xs font-semibold ${msg.sender === "client" ? "text-blue-100" : "text-gray-400"}`}
+                          >
+                            {msg.sender === "client" ? "You" : "xDigital Team"}
+                          </p>
+                        </div>
+                        <p className="whitespace-pre-wrap break-words">
+                          {msg.message}
+                        </p>
+
+                        {msg.isEdited && (
+                          <p
+                            className={`text-xs mt-1 ${msg.sender === "client" ? "text-blue-200" : "text-gray-500"}`}
+                          >
+                            (edited)
+                          </p>
+                        )}
+
+                        {/* Reactions */}
+                        {msg.reactions && msg.reactions.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {msg.reactions.map((reaction) => {
+                              const isMyReaction =
+                                reaction.userId === currentUserId;
+                              return (
+                                <button
+                                  key={`${msg._id}-${reaction.emoji}-${reaction.userId}`}
+                                  onClick={() =>
+                                    handleReaction(msg._id, reaction.emoji)
+                                  }
+                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs transition-all ${
+                                    isMyReaction
+                                      ? "bg-white bg-opacity-40 ring-1 ring-white ring-opacity-50 scale-110"
+                                      : "bg-white bg-opacity-20 hover:bg-opacity-30"
+                                  }`}
+                                  title={`${reaction.userName}${isMyReaction ? " (click to remove)" : ""}`}
+                                >
+                                  {reaction.emoji}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div
+                          className={`flex items-center justify-between gap-2 mt-2 ${msg.sender === "client" ? "text-blue-100" : "text-gray-500"}`}
+                        >
+                          <div className="flex items-center gap-1">
+                            {/* Only show reaction button for admin messages */}
+                            {msg.sender === "admin" && (
+                              <button
+                                onClick={() =>
+                                  setShowEmojiPicker(
+                                    showEmojiPicker === msg._id ? null : msg._id
+                                  )
+                                }
+                                className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                title="React"
+                              >
+                                <Smile className="w-3 h-3" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleReply(msg)}
+                              className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                              title="Reply"
+                            >
+                              <Reply className="w-3 h-3" />
+                            </button>
+                            {msg.sender === "client" && (
+                              <button
+                                onClick={() => handleEdit(msg)}
+                                className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                title="Edit"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            <p className="text-xs">
+                              {formatMessageDate(msg.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Emoji Picker */}
+                        {showEmojiPicker === msg._id && (
+                          <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
+                            {COMMON_EMOJIS.map((emoji, index) => (
+                              <button
+                                key={`${msg._id}-emoji-${index}`}
+                                onClick={() => handleReaction(msg._id, emoji)}
+                                className="hover:scale-125 transition-transform text-lg"
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Thread Replies */}
+                  {msg.threadReplies && msg.threadReplies.length > 0 && (
+                    <div className="ml-8 pl-4 border-l-4 border-blue-200 space-y-3 pt-2 relative">
+                      {/* Thread count badge */}
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+                          <Reply className="w-3 h-3" />
+                          <span>
+                            {msg.threadReplies.length}{" "}
+                            {msg.threadReplies.length === 1
+                              ? "reply"
+                              : "replies"}
+                          </span>
+                        </div>
+                      </div>
+                      {messages
+                        .filter((m) => m._id && m.parentMessageId === msg._id)
+                        .sort(
+                          (a, b) =>
+                            new Date(a.createdAt).getTime() -
+                            new Date(b.createdAt).getTime()
+                        )
+                        .map((reply) => {
+                          const parentMsg = msg;
+                          return (
+                            <div
+                              key={reply._id}
+                              className={`flex ${reply.sender === "client" ? "justify-end" : "justify-start"}`}
+                            >
+                              <div
+                                className={`max-w-[85%] rounded-lg p-3 text-sm shadow-sm ${
+                                  reply.sender === "client"
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-white text-gray-900 border-2 border-gray-200"
+                                }`}
+                              >
+                                {/* Replying to preview */}
+                                <button
+                                  onClick={() => {
+                                    const element = document.getElementById(
+                                      `message-${parentMsg._id}`
+                                    );
+                                    element?.scrollIntoView({
+                                      behavior: "smooth",
+                                      block: "center",
+                                    });
+                                    // Highlight effect
+                                    element?.classList.add(
+                                      "ring-4",
+                                      "ring-blue-400",
+                                      "ring-opacity-50"
+                                    );
+                                    setTimeout(() => {
+                                      element?.classList.remove(
+                                        "ring-4",
+                                        "ring-blue-400",
+                                        "ring-opacity-50"
+                                      );
+                                    }, 2000);
+                                  }}
+                                  className={`w-full text-left mb-2 p-2 rounded-md text-xs border-l-2 ${
+                                    reply.sender === "client"
+                                      ? "bg-blue-600 bg-opacity-40 border-blue-300 hover:bg-opacity-60"
+                                      : "bg-gray-100 border-gray-400 hover:bg-gray-200"
+                                  } transition-all cursor-pointer`}
+                                >
+                                  <div className="flex items-center gap-1 mb-1 font-semibold opacity-90">
+                                    <Reply className="w-3 h-3" />
+                                    <span>
+                                      ↑{" "}
+                                      {parentMsg.sender === "client"
+                                        ? "Your message"
+                                        : "xDigital Team"}
+                                    </span>
+                                  </div>
+                                  <p
+                                    className={`${reply.sender === "client" ? "opacity-90" : "opacity-70"} truncate text-xs`}
+                                  >
+                                    {parentMsg.message.length > 60
+                                      ? `${parentMsg.message.substring(0, 60)}...`
+                                      : parentMsg.message}
+                                  </p>
+                                </button>
+                                <p className="text-xs font-semibold mb-2 opacity-75">
+                                  {reply.sender === "client"
+                                    ? "You"
+                                    : "xDigital Team"}
+                                </p>
+                                <p className="whitespace-pre-wrap break-words">
+                                  {reply.message}
+                                </p>
+                                <p className="text-xs opacity-60 mt-1">
+                                  {new Date(reply.createdAt).toLocaleString(
+                                    "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    }
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+            {/* All Messages (pinned messages shown in sticky header only) */}
+            {messages
+              .filter((m) => m._id && !m.parentMessageId && !m.isPinned)
+              .map((msg) => (
+                <div key={msg._id} className="space-y-2">
+                  {editingMessage?._id === msg._id ? (
+                    // Edit Mode
+                    <div className="flex justify-end">
+                      <div className="max-w-[70%] bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p className="text-xs font-semibold mb-2 text-gray-600">
+                          Editing message
+                        </p>
+                        <textarea
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          className="w-full border rounded px-2 py-1 text-sm"
+                          rows={3}
+                        />
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={handleSaveEdit}
+                            className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Normal Message Display
+                    <div
+                      id={`message-${msg._id}`}
+                      className={`flex ${msg.sender === "client" ? "justify-end" : "justify-start"} transition-all rounded-lg`}
+                    >
+                      <div
+                        className={`max-w-[70%] rounded-lg px-4 py-3 ${
+                          msg.sender === "client"
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 text-gray-900"
+                        } ${msg.isPinned ? "border-2 border-yellow-400" : ""}`}
+                      >
+                        {msg.isPinned && (
+                          <div className="flex items-center justify-end mb-1">
+                            <Pin className="w-3 h-3 text-yellow-400" />
+                          </div>
+                        )}
+                        <p className="text-sm whitespace-pre-wrap break-words">
+                          {msg.message}
+                        </p>
+
+                        {msg.isEdited && (
+                          <p className="text-xs opacity-60 mt-1">(edited)</p>
+                        )}
+
+                        {/* Reactions */}
+                        {msg.reactions && msg.reactions.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {msg.reactions.map((reaction) => {
+                              const isMyReaction =
+                                reaction.userId === currentUserId;
+                              return (
+                                <button
+                                  key={`${msg._id}-${reaction.emoji}-${reaction.userId}`}
+                                  onClick={() =>
+                                    handleReaction(msg._id, reaction.emoji)
+                                  }
+                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs transition-all ${
+                                    isMyReaction
+                                      ? "bg-white bg-opacity-40 ring-1 ring-white ring-opacity-50 scale-110"
+                                      : "bg-white bg-opacity-20 hover:bg-opacity-30"
+                                  }`}
+                                  title={`${reaction.userName}${isMyReaction ? " (click to remove)" : ""}`}
+                                >
+                                  {reaction.emoji}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div
+                          className={`flex items-center justify-between gap-2 mt-2 ${msg.sender === "client" ? "text-blue-100" : "text-gray-500"}`}
+                        >
+                          <div className="flex items-center gap-1">
+                            {/* Only show reaction button for admin messages */}
+                            {msg.sender === "admin" && (
+                              <button
+                                onClick={() =>
+                                  setShowEmojiPicker(
+                                    showEmojiPicker === msg._id ? null : msg._id
+                                  )
+                                }
+                                className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                title="React"
+                              >
+                                <Smile className="w-3 h-3" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleReply(msg)}
+                              className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                              title="Reply"
+                            >
+                              <Reply className="w-3 h-3" />
+                            </button>
+                            {msg.sender === "client" && (
+                              <button
+                                onClick={() => handleEdit(msg)}
+                                className="opacity-50 hover:opacity-100 transition-opacity p-1"
+                                title="Edit"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            <p className="text-xs">
+                              {formatMessageDate(msg.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Emoji Picker */}
+                        {showEmojiPicker === msg._id && (
+                          <div className="mt-2 flex gap-1 bg-white bg-opacity-20 p-2 rounded">
+                            {COMMON_EMOJIS.map((emoji, index) => (
+                              <button
+                                key={`${msg._id}-emoji-${index}`}
+                                onClick={() => handleReaction(msg._id, emoji)}
+                                className="hover:scale-125 transition-transform text-lg"
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Thread Replies */}
+                  {msg.threadReplies && msg.threadReplies.length > 0 && (
+                    <div className="ml-8 pl-4 border-l-2 border-gray-300 space-y-2 pt-2">
+                      <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
+                        <Reply className="w-3 h-3" />
+                        <span>
+                          {msg.threadReplies.length}{" "}
+                          {msg.threadReplies.length === 1 ? "reply" : "replies"}
+                        </span>
+                      </div>
+                      {messages
+                        .filter((m) => m._id && m.parentMessageId === msg._id)
+                        .sort(
+                          (a, b) =>
+                            new Date(a.createdAt).getTime() -
+                            new Date(b.createdAt).getTime()
+                        )
+                        .map((reply) => {
+                          const parentMsg = msg;
+                          return (
+                            <div
+                              key={reply._id}
+                              className={`flex ${reply.sender === "client" ? "justify-end" : "justify-start"}`}
+                            >
+                              <div
+                                className={`max-w-[70%] rounded-lg p-2 text-sm ${
+                                  reply.sender === "client"
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-50 text-gray-900 border border-gray-200"
+                                }`}
+                              >
+                                {/* Replying to preview */}
+                                <button
+                                  onClick={() => {
+                                    const element = document.getElementById(
+                                      `message-${parentMsg._id}`
+                                    );
+                                    element?.scrollIntoView({
+                                      behavior: "smooth",
+                                      block: "center",
+                                    });
+                                    // Highlight effect
+                                    element?.classList.add(
+                                      "ring-2",
+                                      "ring-blue-400"
+                                    );
+                                    setTimeout(() => {
+                                      element?.classList.remove(
+                                        "ring-2",
+                                        "ring-blue-400"
+                                      );
+                                    }, 2000);
+                                  }}
+                                  className={`w-full text-left mb-2 p-2 rounded text-xs ${
+                                    reply.sender === "client"
+                                      ? "bg-blue-600 bg-opacity-50 hover:bg-opacity-70"
+                                      : "bg-gray-200 hover:bg-gray-300"
+                                  } transition-colors cursor-pointer`}
+                                >
+                                  <div className="flex items-center gap-1 mb-1 font-semibold opacity-75">
+                                    <Reply className="w-3 h-3" />
+                                    <span>
+                                      Replying to{" "}
+                                      {parentMsg.sender === "client"
+                                        ? "You"
+                                        : "xDigital Team"}
+                                    </span>
+                                  </div>
+                                  <p className="opacity-70 truncate">
+                                    {parentMsg.message.length > 50
+                                      ? `${parentMsg.message.substring(0, 50)}...`
+                                      : parentMsg.message}
+                                  </p>
+                                </button>
+
+                                <p className="text-xs font-semibold mb-1 opacity-75">
+                                  {reply.sender === "client"
+                                    ? "You"
+                                    : "xDigital Team"}
+                                </p>
+                                <p className="whitespace-pre-wrap break-words">
+                                  {reply.message}
+                                </p>
+                                <p className="text-xs opacity-60 mt-1">
+                                  {formatMessageTime(reply.createdAt)}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              ))}
+          </div>
+        )}
+
+        {/* Typing Indicators */}
+        {currentTypingIndicators.length > 0 && (
+          <div className="flex justify-start">
+            <div className="bg-white/5 backdrop-blur-sm border border-gray-800/50 rounded-lg px-4 py-2 text-sm text-gray-400">
+              {currentTypingIndicators[0].userName} is typing
+              <span className="animate-pulse">...</span>
+            </div>
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      <form
+        onSubmit={handleSend}
+        className="border-t border-gray-800/50 p-4 bg-black/20 backdrop-blur-sm"
+      >
+        {/* Reply Context */}
+        {replyingTo && (
+          <div className="mb-3 p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-start justify-between backdrop-blur-sm">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Reply className="w-3 h-3 text-blue-400" />
+                <span className="text-xs font-semibold text-blue-300">
+                  Replying to{" "}
+                  {replyingTo.sender === "client"
+                    ? "yourself"
+                    : "xDigital Team"}
+                </span>
+              </div>
+              <p className="text-sm text-gray-300 truncate">
+                {replyingTo.message}
+              </p>
+            </div>
+            <button
+              onClick={() => setReplyingTo(null)}
+              className="text-gray-400 hover:text-gray-200 p-1"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <textarea
+            value={newMessage}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
+              handleTyping();
+            }}
+            placeholder={
+              replyingTo ? "Type your reply..." : "Type your message..."
+            }
+            rows={2}
+            className="flex-1 px-4 py-2 bg-white/5 border border-gray-700 text-white placeholder-gray-500 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+            disabled={sending}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend(e);
+              }
+            }}
+          />
+          <button
+            type="submit"
+            disabled={sending || !newMessage.trim()}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {sending ? "Sending..." : replyingTo ? "Reply" : "Send"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 }
 
-
 export default function ProjectDetailClient({ project }: { project: Project }) {
-    const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'milestones' | 'messages' | 'analytics' | 'seo' | 'performance'>(
-        'overview'
-    );
-    const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "milestones" | "messages" | "analytics" | "seo" | "performance"
+  >("overview");
+  const [isPending, startTransition] = useTransition();
 
-    const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this project?')) return;
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this project?")) return;
 
-        startTransition(async () => {
-            const result = await deleteProject(project._id);
+    startTransition(async () => {
+      const result = await deleteProject(project._id);
 
-            if (result.success) {
-                toast.success('Project deleted successfully');
-                router.push('/dashboard/projects');
-                router.refresh();
-            } else {
-                toast.error(result.error || 'Failed to delete project');
-            }
-        });
-    };
+      if (result.success) {
+        toast.success("Project deleted successfully");
+        router.push("/dashboard/projects");
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to delete project");
+      }
+    });
+  };
 
-    return (
-        <div className="space-y-6 p-6">
-            {/* Header - Dark Glass */}
-            <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
-                <Link
-                    href="/dashboard/projects"
-                    className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 mb-4 transition-colors"
-                >
-                    ← Back to Projects
-                </Link>
+  return (
+    <div className="space-y-6 p-6">
+      {/* Header - Dark Glass */}
+      <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
+        <Link
+          href="/dashboard/projects"
+          className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 mb-4 transition-colors"
+        >
+          ← Back to Projects
+        </Link>
 
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div className="flex-1">
-                        <h1 className="text-3xl font-bold text-white mb-3">{project.projectName}</h1>
-                        <div className="flex flex-wrap gap-2">
-                            <span
-                                className={`px-3 py-1.5 text-sm font-medium rounded-full ${project.status === 'completed'
-                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                    : project.status === 'in_progress'
-                                        ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                                        : project.status === 'pending'
-                                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                            : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                                    }`}
-                            >
-                                {project.status.replace('_', ' ').toUpperCase()}
-                            </span>
-                            <span className="px-3 py-1.5 text-sm font-medium bg-white/5 text-gray-300 border border-gray-800/50 rounded-full">
-                                {project.serviceType.replace('_', ' ')}
-                            </span>
-                            <span className="px-3 py-1.5 text-sm font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded-full">
-                                {project.package} Package
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <Link
-                            href={`/dashboard/projects/${project._id}/edit`}
-                            className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-gray-700 rounded-lg text-gray-300 hover:text-white transition-all"
-                        >
-                            Edit
-                        </Link>
-                        <button
-                            onClick={handleDelete}
-                            disabled={isPending}
-                            className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 rounded-lg text-red-400 hover:text-red-300 transition-all disabled:opacity-50"
-                        >
-                            Delete
-                        </button>
-                    </div>
-                </div>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-white mb-3">
+              {project.projectName}
+            </h1>
+            <div className="flex flex-wrap gap-2">
+              <span
+                className={`px-3 py-1.5 text-sm font-medium rounded-full ${
+                  project.status === "completed"
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    : project.status === "in_progress"
+                      ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                      : project.status === "pending"
+                        ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        : "bg-gray-500/10 text-gray-400 border border-gray-500/20"
+                }`}
+              >
+                {project.status.replace("_", " ").toUpperCase()}
+              </span>
+              <span className="px-3 py-1.5 text-sm font-medium bg-white/5 text-gray-300 border border-gray-800/50 rounded-full">
+                {project.serviceType.replace("_", " ")}
+              </span>
+              <span className="px-3 py-1.5 text-sm font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 rounded-full">
+                {project.package} Package
+              </span>
             </div>
-
-            {/* Tabs - Dark Theme */}
-            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-1">
-                <div className="flex flex-wrap gap-1">
-                    <button
-                        onClick={() => setActiveTab('overview')}
-                        className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'overview'
-                            ? 'bg-white/10 text-white border border-purple-500/30'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                            }`}
-                    >
-                        Overview
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('milestones')}
-                        className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'milestones'
-                            ? 'bg-white/10 text-white border border-purple-500/30'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                            }`}
-                    >
-                        Milestones
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('messages')}
-                        className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'messages'
-                            ? 'bg-white/10 text-white border border-purple-500/30'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                            }`}
-                    >
-                        Messages
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('analytics')}
-                        className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'analytics'
-                            ? 'bg-white/10 text-white border border-purple-500/30'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                            }`}
-                    >
-                        Analytics
-                    </button>
-
-                    {project.deploymentUrl && (
-                        <>
-                            <button
-                                onClick={() => setActiveTab('seo')}
-                                className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'seo'
-                                    ? 'bg-white/10 text-white border border-purple-500/30'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                SEO
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('performance')}
-                                className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'performance'
-                                    ? 'bg-white/10 text-white border border-purple-500/30'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                Performance
-                            </button>
-                        </>
-                    )}
-                </div>
-            </div>
-
-            {/* Tab Content */}
-            {activeTab === 'overview' && (
-                <div className="space-y-6">
-                    {/* Quick Access Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <Link
-                            href={`/dashboard/projects/${project._id}/tasks`}
-                            className="bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/30 p-6 rounded-xl transition-all group"
-                        >
-                            <div className="text-3xl mb-3">✅</div>
-                            <h3 className="font-semibold text-white group-hover:text-purple-300">Tasks & Kanban</h3>
-                            <p className="text-sm text-gray-400 mt-1">Manage project tasks</p>
-                        </Link>
-                        <Link
-                            href={`/dashboard/projects/${project._id}/files`}
-                            className="bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/30 p-6 rounded-xl transition-all group"
-                        >
-                            <div className="text-3xl mb-3">📁</div>
-                            <h3 className="font-semibold text-white group-hover:text-purple-300">Files & Documents</h3>
-                            <p className="text-sm text-gray-400 mt-1">View and upload files</p>
-                        </Link>
-                    </div>
-
-                    {/* Live Website */}
-                    {project.deploymentUrl && (
-                        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 to-blue-500/10 backdrop-blur-xl border border-emerald-500/20 p-6 rounded-2xl">
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)]"></div>
-                            <div className="relative flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-xl font-semibold mb-2 flex items-center gap-2 text-white">
-                                        <span className="text-2xl">🌐</span>
-                                        Your Website is Live!
-                                    </h2>
-                                    <p className="text-gray-300 mb-4">
-                                        Your website has been successfully deployed and is now accessible online.
-                                    </p>
-                                    <a
-                                        href={project.deploymentUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 hover:border-emerald-500/50 text-white rounded-xl transition-all"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                        </svg>
-                                        Visit Your Website
-                                    </a>
-                                </div>
-                                <div className="hidden md:block text-6xl">🚀</div>
-                            </div>
-                            <div className="relative mt-4 p-3 bg-black/30 backdrop-blur-sm rounded-lg border border-gray-800/50">
-                                <p className="text-xs text-gray-400 mb-1">Website URL:</p>
-                                <p className="text-sm font-mono text-emerald-400 break-all">{project.deploymentUrl}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
-                        <h2 className="text-xl font-semibold mb-4 text-white">Project Description</h2>
-                        <p className="text-gray-300">{project.projectDescription}</p>
-                    </div>
-
-                    <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
-                        <h2 className="text-xl font-semibold mb-4 text-white">Project Details</h2>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <div className="text-sm text-gray-400">Created</div>
-                                <div className="font-medium text-white">
-                                    {new Date(project.createdAt).toLocaleDateString()}
-                                </div>
-                            </div>
-                            <div>
-                                <div className="text-sm text-gray-400">Last Updated</div>
-                                <div className="font-medium text-white">
-                                    {new Date(project.updatedAt).toLocaleDateString()}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'milestones' && (
-                <div className="space-y-6">
-                    {/* Timeline */}
-                    <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
-                        <h2 className="text-xl font-semibold mb-4 text-white">Project Timeline</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <div className="text-sm text-gray-400">Start Date</div>
-                                <div className="font-medium text-lg text-white">
-                                    {project.timeline?.startDate
-                                        ? new Date(project.timeline.startDate).toLocaleDateString()
-                                        : 'Not set by admin yet'}
-                                </div>
-                            </div>
-                            <div>
-                                <div className="text-sm text-gray-400">Estimated Completion</div>
-                                <div className="font-medium text-lg text-white">
-                                    {project.timeline?.estimatedCompletion
-                                        ? new Date(project.timeline.estimatedCompletion).toLocaleDateString()
-                                        : 'Not set by admin yet'}
-                                </div>
-                            </div>
-                            {project.timeline?.completedDate && (
-                                <div>
-                                    <div className="text-sm text-gray-400">Completed Date</div>
-                                    <div className="font-medium text-lg text-emerald-400">
-                                        {new Date(project.timeline.completedDate).toLocaleDateString()}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Milestones */}
-                    {project.milestones && project.milestones.length > 0 ? (
-                        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
-                            <h2 className="text-xl font-semibold mb-4 text-white">Project Milestones</h2>
-                            <div className="space-y-4">
-                                {project.milestones.map((milestone, index) => (
-                                    <div
-                                        key={index}
-                                        className={`flex items-start gap-4 p-4 border rounded-lg ${
-                                            milestone.completed
-                                                ? 'bg-emerald-500/10 border-emerald-500/30'
-                                                : 'bg-white/5 border-gray-800/50'
-                                        }`}
-                                    >
-                                        <div
-                                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                                milestone.completed
-                                                    ? 'bg-emerald-500/20 border border-emerald-500/30'
-                                                    : 'bg-gray-700/50 border border-gray-600'
-                                            }`}
-                                        >
-                                            {milestone.completed && <span className="text-emerald-400 text-lg">✓</span>}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="font-semibold text-lg text-white">{milestone.title}</h3>
-                                            {milestone.description && (
-                                                <p className="text-gray-400 mt-1">{milestone.description}</p>
-                                            )}
-                                            <div className="flex gap-4 mt-2 text-sm">
-                                                {milestone.dueDate && (
-                                                    <div className="text-gray-500">
-                                                        📅 Due: {new Date(milestone.dueDate).toLocaleDateString()}
-                                                    </div>
-                                                )}
-                                                {milestone.completed && milestone.completedDate && (
-                                                    <div className="text-emerald-400">
-                                                        ✓ Completed: {new Date(milestone.completedDate).toLocaleDateString()}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-12 rounded-xl text-center">
-                            <div className="text-6xl mb-4">🎯</div>
-                            <h3 className="text-xl font-semibold text-white mb-2">No Milestones Yet</h3>
-                            <p className="text-gray-400">
-                                Milestones will be added by the admin as your project progresses.
-                            </p>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {activeTab === 'messages' && <MessagesTab projectId={project._id} />}
-            {activeTab === 'analytics' && <AnalyticsTab projectId={project._id} />}
-            {activeTab === 'seo' && project.deploymentUrl && <SEODashboard projectId={project._id} />}
-            {activeTab === 'performance' && project.deploymentUrl && <PerformanceDashboard projectId={project._id} />}
+          </div>
+          <div className="flex gap-2">
+            <Link
+              href={`/dashboard/projects/${project._id}/edit`}
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-800/50 hover:border-gray-700 rounded-lg text-gray-300 hover:text-white transition-all"
+            >
+              Edit
+            </Link>
+            <button
+              onClick={handleDelete}
+              disabled={isPending}
+              className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 rounded-lg text-red-400 hover:text-red-300 transition-all disabled:opacity-50"
+            >
+              Delete
+            </button>
+          </div>
         </div>
-    );
+      </div>
+
+      {/* Tabs - Dark Theme */}
+      <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-1">
+        <div className="flex flex-wrap gap-1">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              activeTab === "overview"
+                ? "bg-white/10 text-white border border-purple-500/30"
+                : "text-gray-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab("milestones")}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              activeTab === "milestones"
+                ? "bg-white/10 text-white border border-purple-500/30"
+                : "text-gray-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            Milestones
+          </button>
+          <button
+            onClick={() => setActiveTab("messages")}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              activeTab === "messages"
+                ? "bg-white/10 text-white border border-purple-500/30"
+                : "text-gray-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            Messages
+          </button>
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              activeTab === "analytics"
+                ? "bg-white/10 text-white border border-purple-500/30"
+                : "text-gray-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            Analytics
+          </button>
+
+          {project.deploymentUrl && (
+            <>
+              <button
+                onClick={() => setActiveTab("seo")}
+                className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === "seo"
+                    ? "bg-white/10 text-white border border-purple-500/30"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                SEO
+              </button>
+              <button
+                onClick={() => setActiveTab("performance")}
+                className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === "performance"
+                    ? "bg-white/10 text-white border border-purple-500/30"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                Performance
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === "overview" && (
+        <div className="space-y-6">
+          {/* Quick Access Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link
+              href={`/dashboard/projects/${project._id}/tasks`}
+              className="bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/30 p-6 rounded-xl transition-all group"
+            >
+              <div className="text-3xl mb-3">✅</div>
+              <h3 className="font-semibold text-white group-hover:text-purple-300">
+                Tasks & Kanban
+              </h3>
+              <p className="text-sm text-gray-400 mt-1">Manage project tasks</p>
+            </Link>
+            <Link
+              href={`/dashboard/projects/${project._id}/files`}
+              className="bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/30 p-6 rounded-xl transition-all group"
+            >
+              <div className="text-3xl mb-3">📁</div>
+              <h3 className="font-semibold text-white group-hover:text-purple-300">
+                Files & Documents
+              </h3>
+              <p className="text-sm text-gray-400 mt-1">
+                View and upload files
+              </p>
+            </Link>
+          </div>
+
+          {/* Live Website */}
+          {project.deploymentUrl && (
+            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 to-blue-500/10 backdrop-blur-xl border border-emerald-500/20 p-6 rounded-2xl">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)]"></div>
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold mb-2 flex items-center gap-2 text-white">
+                    <span className="text-2xl">🌐</span>
+                    Your Website is Live!
+                  </h2>
+                  <p className="text-gray-300 mb-4">
+                    Your website has been successfully deployed and is now
+                    accessible online.
+                  </p>
+                  <a
+                    href={project.deploymentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 hover:border-emerald-500/50 text-white rounded-xl transition-all"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                    Visit Your Website
+                  </a>
+                </div>
+                <div className="hidden md:block text-6xl">🚀</div>
+              </div>
+              <div className="relative mt-4 p-3 bg-black/30 backdrop-blur-sm rounded-lg border border-gray-800/50">
+                <p className="text-xs text-gray-400 mb-1">Website URL:</p>
+                <p className="text-sm font-mono text-emerald-400 break-all">
+                  {project.deploymentUrl}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">
+              Project Description
+            </h2>
+            <p className="text-gray-300">{project.projectDescription}</p>
+          </div>
+
+          <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">
+              Project Details
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-gray-400">Created</div>
+                <div className="font-medium text-white">
+                  {new Date(project.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-400">Last Updated</div>
+                <div className="font-medium text-white">
+                  {new Date(project.updatedAt).toLocaleDateString()}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "milestones" && (
+        <div className="space-y-6">
+          {/* Timeline */}
+          <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">
+              Project Timeline
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <div className="text-sm text-gray-400">Start Date</div>
+                <div className="font-medium text-lg text-white">
+                  {project.timeline?.startDate
+                    ? new Date(project.timeline.startDate).toLocaleDateString()
+                    : "Not set by admin yet"}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-400">
+                  Estimated Completion
+                </div>
+                <div className="font-medium text-lg text-white">
+                  {project.timeline?.estimatedCompletion
+                    ? new Date(
+                        project.timeline.estimatedCompletion
+                      ).toLocaleDateString()
+                    : "Not set by admin yet"}
+                </div>
+              </div>
+              {project.timeline?.completedDate && (
+                <div>
+                  <div className="text-sm text-gray-400">Completed Date</div>
+                  <div className="font-medium text-lg text-emerald-400">
+                    {new Date(
+                      project.timeline.completedDate
+                    ).toLocaleDateString()}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Milestones */}
+          {project.milestones && project.milestones.length > 0 ? (
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-6 rounded-xl">
+              <h2 className="text-xl font-semibold mb-4 text-white">
+                Project Milestones
+              </h2>
+              <div className="space-y-4">
+                {project.milestones.map((milestone, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-start gap-4 p-4 border rounded-lg ${
+                      milestone.completed
+                        ? "bg-emerald-500/10 border-emerald-500/30"
+                        : "bg-white/5 border-gray-800/50"
+                    }`}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        milestone.completed
+                          ? "bg-emerald-500/20 border border-emerald-500/30"
+                          : "bg-gray-700/50 border border-gray-600"
+                      }`}
+                    >
+                      {milestone.completed && (
+                        <span className="text-emerald-400 text-lg">✓</span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg text-white">
+                        {milestone.title}
+                      </h3>
+                      {milestone.description && (
+                        <p className="text-gray-400 mt-1">
+                          {milestone.description}
+                        </p>
+                      )}
+                      <div className="flex gap-4 mt-2 text-sm">
+                        {milestone.dueDate && (
+                          <div className="text-gray-500">
+                            📅 Due:{" "}
+                            {new Date(milestone.dueDate).toLocaleDateString()}
+                          </div>
+                        )}
+                        {milestone.completed && milestone.completedDate && (
+                          <div className="text-emerald-400">
+                            ✓ Completed:{" "}
+                            {new Date(
+                              milestone.completedDate
+                            ).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 p-12 rounded-xl text-center">
+              <div className="text-6xl mb-4">🎯</div>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                No Milestones Yet
+              </h3>
+              <p className="text-gray-400">
+                Milestones will be added by the admin as your project
+                progresses.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "messages" && <MessagesTab projectId={project._id} />}
+      {activeTab === "analytics" && <AnalyticsTab projectId={project._id} />}
+      {activeTab === "seo" && project.deploymentUrl && (
+        <SEODashboard projectId={project._id} />
+      )}
+      {activeTab === "performance" && project.deploymentUrl && (
+        <PerformanceDashboard projectId={project._id} />
+      )}
+    </div>
+  );
 }
