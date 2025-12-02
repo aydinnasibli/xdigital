@@ -202,10 +202,12 @@ export async function createResource(data: {
         }
 
         // Sanitize HTML content to prevent XSS attacks
+        // Note: videoEmbedCode from admin is trusted, only sanitize article content
         const sanitizedData = {
             ...data,
             content: data.content ? sanitizeHtml(data.content) : undefined,
-            videoEmbedCode: data.videoEmbedCode ? sanitizeHtml(data.videoEmbedCode) : undefined,
+            // videoEmbedCode is from trusted admin source, keep it as-is
+            videoEmbedCode: data.videoEmbedCode,
         };
 
         const resource = await Resource.create({
@@ -270,10 +272,12 @@ export async function updateResource(resourceId: string, data: Partial<{
         }
 
         // Sanitize HTML content to prevent XSS attacks
+        // Note: videoEmbedCode from admin is trusted, only sanitize article content
         const sanitizedData = {
             ...data,
             content: data.content ? sanitizeHtml(data.content) : data.content,
-            videoEmbedCode: data.videoEmbedCode ? sanitizeHtml(data.videoEmbedCode) : data.videoEmbedCode,
+            // videoEmbedCode is from trusted admin source, keep it as-is
+            videoEmbedCode: data.videoEmbedCode,
         };
 
         const resource = await Resource.findByIdAndUpdate(
