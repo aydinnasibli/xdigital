@@ -38,7 +38,7 @@ export default async function ResourceDetailPage({
                 </Link>
             </div>
 
-            <div className="bg-black/40 backdrop-blur-xl rounded-lg border shadow-sm p-8">
+            <div className="bg-black/40 backdrop-blur-xl rounded-lg border border-gray-800/50 shadow-sm p-8">
                 {/* Header */}
                 <div className="mb-6">
                     <div className="flex items-start gap-3 mb-4">
@@ -55,19 +55,19 @@ export default async function ResourceDetailPage({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 text-sm text-gray-500">
-                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded capitalize">
-                            {resource.category}
+                    <div className="flex items-center gap-3 text-sm text-gray-400">
+                        <span className="px-3 py-1 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded capitalize">
+                            {resource.category.replace(/_/g, ' ')}
                         </span>
-                        <span className="px-3 py-1 bg-gray-100 rounded capitalize">
-                            {resource.type}
+                        <span className="px-3 py-1 bg-gray-700/50 text-gray-300 border border-gray-600 rounded capitalize">
+                            {resource.type.replace(/_/g, ' ')}
                         </span>
                         <span>•</span>
-                        <span>{resource.viewCount || 0} views</span>
+                        <span className="text-gray-400">{resource.viewCount || 0} views</span>
                         {resource.downloadCount > 0 && (
                             <>
                                 <span>•</span>
-                                <span>{resource.downloadCount} downloads</span>
+                                <span className="text-gray-400">{resource.downloadCount} downloads</span>
                             </>
                         )}
                     </div>
@@ -128,15 +128,15 @@ export default async function ResourceDetailPage({
                     </div>
                 )}
 
-                {/* Content */}
-                {resource.content && (
-                    <div className="prose prose-sm max-w-none mb-6">
+                {/* Content - Only show for articles and tutorials */}
+                {resource.content && (resource.type === 'article' || resource.type === 'tutorial' || resource.type === 'faq') && (
+                    <div className="prose prose-invert prose-sm max-w-none mb-6 text-gray-300">
                         <div dangerouslySetInnerHTML={{ __html: resource.content }} />
                     </div>
                 )}
 
-                {/* Download Button */}
-                {resource.type === 'download' && resource.fileUrl && (
+                {/* Download Button for Documents, Templates, Brand Assets */}
+                {(resource.type === 'document' || resource.type === 'template' || resource.type === 'brand_asset') && resource.fileUrl && (
                     <a
                         href={resource.fileUrl}
                         download={resource.fileName}
@@ -148,7 +148,7 @@ export default async function ResourceDetailPage({
                 )}
 
                 {/* External Link */}
-                {resource.type === 'external' && resource.externalUrl && (
+                {resource.type === 'link' && resource.externalUrl && (
                     <a
                         href={resource.externalUrl}
                         target="_blank"
@@ -163,13 +163,13 @@ export default async function ResourceDetailPage({
 
                 {/* Tags */}
                 {resource.tags && resource.tags.length > 0 && (
-                    <div className="mt-8 pt-6 border-t">
+                    <div className="mt-8 pt-6 border-t border-gray-800/50">
                         <div className="text-sm text-gray-400 mb-2">Tags:</div>
                         <div className="flex flex-wrap gap-2">
                             {resource.tags.map((tag: string) => (
                                 <span
                                     key={tag}
-                                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                                    className="px-3 py-1 bg-gray-700/50 text-gray-300 border border-gray-600 rounded-full text-sm"
                                 >
                                     {tag}
                                 </span>
@@ -180,7 +180,7 @@ export default async function ResourceDetailPage({
 
                 {/* Author */}
                 {resource.authorName && (
-                    <div className="mt-6 pt-6 border-t text-sm text-gray-500">
+                    <div className="mt-6 pt-6 border-t border-gray-800/50 text-sm text-gray-400">
                         Published by <span className="font-medium text-white">{resource.authorName}</span>
                         {resource.publishedAt && (
                             <span> on {new Date(resource.publishedAt).toLocaleDateString()}</span>
