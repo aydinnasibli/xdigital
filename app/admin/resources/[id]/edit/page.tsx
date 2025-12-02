@@ -1,7 +1,7 @@
 // app/admin/resources/[id]/edit/page.tsx
 import { redirect } from 'next/navigation';
 import { isAdmin } from '@/lib/auth/admin';
-import { getResource } from '@/app/actions/resources';
+import { getAdminResource } from '@/app/actions/resources';
 import ResourceForm from '../../ResourceForm';
 
 export default async function EditResourcePage({
@@ -15,7 +15,7 @@ export default async function EditResourcePage({
     }
 
     const { id } = await params;
-    const result = await getResource(id);
+    const result = await getAdminResource(id);
 
     if (!result.success || !result.data) {
         return (
