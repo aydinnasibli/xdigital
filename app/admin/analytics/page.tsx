@@ -1,7 +1,8 @@
 // app/admin/analytics/page.tsx
 import { getAllProjects } from '@/app/actions/admin/projects';
 import { getAdminClientStats } from '@/app/actions/admin/clients';
-import { BarChart3, TrendingUp, Users, FolderKanban, Clock, CheckCircle2, AlertCircle, DollarSign } from 'lucide-react';
+import { getWebsiteAnalytics } from '@/app/actions/googleAnalytics';
+import { BarChart3, TrendingUp, Users, FolderKanban, Clock, CheckCircle2, AlertCircle, DollarSign, Eye, MousePointer, Globe } from 'lucide-react';
 import { isAdmin } from '@/lib/auth/admin';
 import { redirect } from 'next/navigation';
 
@@ -11,13 +12,15 @@ export default async function AdminAnalyticsPage() {
         redirect('/');
     }
 
-    const [projectsResult, clientsResult] = await Promise.all([
+    const [projectsResult, clientsResult, gaResult] = await Promise.all([
         getAllProjects(),
         getAdminClientStats(),
+        getWebsiteAnalytics(30),
     ]);
 
     const projects = projectsResult.success ? projectsResult.data : [];
     const clientStats = clientsResult.success ? clientsResult.data : null;
+    const websiteAnalytics = gaResult.success ? gaResult.data : null;
 
     // Calculate analytics
     const now = new Date();
@@ -137,6 +140,133 @@ export default async function AdminAnalyticsPage() {
                     color="orange"
                 />
             </div>
+
+            {/* Website Analytics Section */}
+            {websiteAnalytics && (
+                <>
+                    <div className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-6">
+                        <h2 className="text-2xl font-bold text-white mb-2">Website Analytics</h2>
+                        <p className="text-gray-400">Last 30 days of website traffic and user engagement</p>
+                    </div>
+
+                    {/* Website Metrics Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <MetricCard
+                            title="Page Views"
+                            value={websiteAnalytics.pageViews.toLocaleString()}
+                            subtitle="Total views"
+                            icon={Eye}
+                            color="blue"
+                        />
+                        <MetricCard
+                            title="Visitors"
+                            value={websiteAnalytics.visitors.toLocaleString()}
+                            subtitle="Unique visitors"
+                            icon={Users}
+                            color="purple"
+                        />
+                        <MetricCard
+                            title="Sessions"
+                            value={websiteAnalytics.sessions.toLocaleString()}
+                            subtitle="Total sessions"
+                            icon={MousePointer}
+                            color="green"
+                        />
+                        <MetricCard
+                            title="Bounce Rate"
+                            value={`${(websiteAnalytics.bounceRate * 100).toFixed(1)}%`}
+                            subtitle="Visitor engagement"
+                            icon={TrendingUp}
+                            color="orange"
+                        />
+                    </div>
+
+                    {/* Website Analytics Charts */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Top Pages */}
+                        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
+                            <h2 className="text-xl font-semibold text-white mb-4 flex items-center justify-between">
+                                <span>Top Pages</span>
+                                <Eye className="w-5 h-5 text-gray-400" />
+                            </h2>
+                            <div className="space-y-3">
+                                {websiteAnalytics.topPages.slice(0, 5).map((page: any, idx: number) => (
+                                    <div key={idx} className="flex items-center justify-between">
+                                        <span className="text-gray-300 text-sm truncate flex-1">{page.page}</span>
+                                        <span className="text-white font-semibold ml-3">{page.views.toLocaleString()}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Traffic Sources */}
+                        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
+                            <h2 className="text-xl font-semibold text-white mb-4 flex items-center justify-between">
+                                <span>Traffic Sources</span>
+                                <Globe className="w-5 h-5 text-gray-400" />
+                            </h2>
+                            <div className="space-y-3">
+                                {websiteAnalytics.trafficSources.slice(0, 5).map((source: any, idx: number) => (
+                                    <div key={idx} className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-300 text-sm capitalize">{source.source}</span>
+                                            <span className="text-white font-semibold">{source.sessions.toLocaleString()}</span>
+                                        </div>
+                                        <div className="w-full bg-gray-700/50 rounded-full h-1.5">
+                                            <div
+                                                className="bg-gradient-to-r from-purple-500 to-blue-500 h-1.5 rounded-full"
+                                                style={{
+                                                    width: `${(source.sessions / websiteAnalytics.sessions) * 100}%`,
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Device Breakdown */}
+                        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
+                            <h2 className="text-xl font-semibold text-white mb-4">Device Breakdown</h2>
+                            <div className="space-y-3">
+                                {websiteAnalytics.deviceBreakdown.map((device: any, idx: number) => {
+                                    const percentage = ((device.sessions / websiteAnalytics.sessions) * 100).toFixed(1);
+                                    return (
+                                        <div key={idx} className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-300 text-sm capitalize">{device.device}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-white font-semibold">{device.sessions.toLocaleString()}</span>
+                                                    <span className="text-gray-500 text-sm">({percentage}%)</span>
+                                                </div>
+                                            </div>
+                                            <div className="w-full bg-gray-700/50 rounded-full h-2">
+                                                <div
+                                                    className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full"
+                                                    style={{ width: `${percentage}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Geographic Data */}
+                        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-6">
+                            <h2 className="text-xl font-semibold text-white mb-4">Top Countries</h2>
+                            <div className="space-y-3">
+                                {websiteAnalytics.geographicData.slice(0, 5).map((geo: any, idx: number) => (
+                                    <div key={idx} className="flex items-center justify-between">
+                                        <span className="text-gray-300 text-sm">{geo.country}</span>
+                                        <span className="text-white font-semibold">{geo.sessions.toLocaleString()}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
