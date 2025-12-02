@@ -1252,7 +1252,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
   return (
     <div className="space-y-6 p-6">
       {/* Header - Dark Glass */}
-      <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6">
+      <div className="   rounded-2xl p-6">
         <Link
           href="/dashboard/projects"
           className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 mb-4 transition-colors"
@@ -1306,11 +1306,11 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
       </div>
 
       {/* Tabs - Dark Theme */}
-      <div className="bg-black/40 backdrop-blur-xl border border-gray-800/50 rounded-xl p-1">
+      <div className=" rounded-xl p-1">
         <div className="flex flex-wrap gap-1">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2.5 hover:cursor-pointer rounded-lg text-sm font-medium transition-all ${
               activeTab === "overview"
                 ? "bg-white/10 text-white border border-purple-500/30"
                 : "text-gray-400 hover:text-white hover:bg-white/5"
@@ -1320,7 +1320,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
           </button>
           <button
             onClick={() => setActiveTab("milestones")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2.5 hover:cursor-pointer rounded-lg text-sm font-medium transition-all ${
               activeTab === "milestones"
                 ? "bg-white/10 text-white border border-purple-500/30"
                 : "text-gray-400 hover:text-white hover:bg-white/5"
@@ -1330,7 +1330,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
           </button>
           <button
             onClick={() => setActiveTab("messages")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2.5 hover:cursor-pointer rounded-lg text-sm font-medium transition-all ${
               activeTab === "messages"
                 ? "bg-white/10 text-white border border-purple-500/30"
                 : "text-gray-400 hover:text-white hover:bg-white/5"
@@ -1340,7 +1340,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
           </button>
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2.5 hover:cursor-pointer rounded-lg text-sm font-medium transition-all ${
               activeTab === "analytics"
                 ? "bg-white/10 text-white border border-purple-500/30"
                 : "text-gray-400 hover:text-white hover:bg-white/5"
@@ -1385,7 +1385,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
               href={`/dashboard/projects/${project._id}/tasks`}
               className="bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/30 p-6 rounded-xl transition-all group"
             >
-              <div className="text-3xl mb-3">✅</div>
               <h3 className="font-semibold text-white group-hover:text-purple-300">
                 Tasks & Kanban
               </h3>
@@ -1395,7 +1394,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
               href={`/dashboard/projects/${project._id}/files`}
               className="bg-black/40 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/30 p-6 rounded-xl transition-all group"
             >
-              <div className="text-3xl mb-3">📁</div>
               <h3 className="font-semibold text-white group-hover:text-purple-300">
                 Files & Documents
               </h3>
